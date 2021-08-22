@@ -30,7 +30,6 @@ func (game *Game) IsValidPCName(name string) bool {
 	}
 
 	/* TODO: entity checking; does a persistent player share this valid name? */
-
 	return true
 }
 

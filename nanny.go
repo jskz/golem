@@ -17,13 +17,15 @@ func (game *Game) nanny(client *Client, message string) {
 	case ConnectionStateName:
 		log.Printf("Guest attempting to login with name: %s\r\n", message)
 
-		if !game.IsValidPCName(message) {
+		name := strings.Title(strings.ToLower(message))
+
+		if !game.IsValidPCName(name) {
 			output.WriteString("Invalid name, please try another.\r\n\r\nBy what name do you wish to be known? ")
 			break
 		}
 
 		client.character = NewCharacter()
-		client.character.name = message
+		client.character.name = name
 		client.connectionState = ConnectionStateConfirmName
 
 		output.WriteString(fmt.Sprintf("No adventurer with that name exists.  Create %s? [y/N] ", client.character.name))
