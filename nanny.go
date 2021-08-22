@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+/* Bust a prompt! */
+func (client *Client) displayPrompt() {
+	client.send <- []byte("\r\n> ")
+}
+
 func (game *Game) nanny(client *Client, message string) {
 	var output bytes.Buffer
 
@@ -16,6 +21,7 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStatePlaying:
 		client.character.Interpret(message)
+		client.displayPrompt()
 
 	case ConnectionStateName:
 		log.Printf("Guest attempting to login with name: %s\r\n", message)
@@ -35,7 +41,7 @@ func (game *Game) nanny(client *Client, message string) {
 		output.WriteString(fmt.Sprintf("No adventurer with that name exists.  Create %s? [y/N] ", client.character.name))
 
 	case ConnectionStateConfirmName:
-		if strings.HasPrefix(strings.ToLower(message), "n") {
+		if !strings.HasPrefix(strings.ToLower(message), "y") {
 			client.connectionState = ConnectionStateName
 			output.WriteString("\r\nBy what name do you wish to be known? ")
 			break
@@ -50,12 +56,12 @@ func (game *Game) nanny(client *Client, message string) {
 		client.connectionState = ConnectionStateMessageOfTheDay
 
 		output.WriteString("Bypassing password and character creation for very early development.\r\n")
-		output.WriteString("[ PRESS RETURN TO JOIN ]\r\n")
+		output.WriteString("[ PRESS RETURN TO JOIN ]")
 
 	case ConnectionStateMessageOfTheDay:
 		client.connectionState = ConnectionStatePlaying
 
-		output.WriteString("Welcome to Golem.\r\n")
+		client.displayPrompt()
 	}
 
 	client.send <- output.Bytes()
