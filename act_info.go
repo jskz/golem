@@ -36,6 +36,14 @@ func do_who(ch *Character, arguments string) {
 	var buf strings.Builder
 
 	buf.WriteString("The following players are online:\r\n")
+
+	for client := range ch.client.game.clients {
+		/* If the client is "at least" playing, then we will display them in the WHO list */
+		if client.connectionState >= ConnectionStatePlaying && client.character != nil {
+			buf.WriteString(fmt.Sprintf("[%-7s] %s\r\n", "status", client.character.name))
+		}
+	}
+
 	output := buf.String()
 	ch.send(output)
 }

@@ -21,6 +21,11 @@ func (client *Client) displayPrompt() {
 func (game *Game) nanny(client *Client, message string) {
 	var output bytes.Buffer
 
+	/*
+	 * The "nanny" handles line-based input from the client according to its connection state.
+	 *
+	 *
+	 */
 	switch client.connectionState {
 	default:
 		log.Printf("Client is trying to send a message from an invalid or unhandled connection state.\r\n")
@@ -67,5 +72,7 @@ func (game *Game) nanny(client *Client, message string) {
 		client.connectionState = ConnectionStatePlaying
 	}
 
-	client.send <- output.Bytes()
+	if client.connectionState != ConnectionStatePlaying && output.Len() > 0 {
+		client.send <- output.Bytes()
+	}
 }

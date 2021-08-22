@@ -2,6 +2,8 @@ package main
 
 import "log"
 
+const UnauthenticatedUsername = "unnamed"
+
 /*
  * This character structure is shared by both player-characters (human beings
  * connected through a session instance available via the client pointer.)
@@ -45,7 +47,7 @@ func (ch *Character) Write(data []byte) (n int, err error) {
  */
 func (game *Game) IsValidPCName(name string) bool {
 	/* Length bounds */
-	if len(name) < 3 || len(name) > 14 {
+	if len(name) < 3 || len(name) > 14 || name == UnauthenticatedUsername {
 		return false
 	}
 
@@ -83,7 +85,7 @@ func NewCharacter() *Character {
 	character.pages[0] = make([]byte, character.pageSize)
 	character.pageCursor = 0
 
-	character.name = "formless protoplasm"
+	character.name = UnauthenticatedUsername
 	character.client = nil
 	character.level = 0
 
