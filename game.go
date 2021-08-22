@@ -37,7 +37,7 @@ func (game *Game) Run() {
 
 			log.Printf("New connection from %s.\r\n", client.conn.RemoteAddr().String())
 
-		case client := <-game.register:
+		case client := <-game.unregister:
 			delete(game.clients, client)
 
 			log.Printf("Lost connection with %s.\r\n", client.conn.RemoteAddr().String())

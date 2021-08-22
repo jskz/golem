@@ -56,6 +56,8 @@ type ClientTextMessage struct {
 func (client *Client) readPump() {
 	defer func() {
 		client.conn.Close()
+
+		client.game.unregister <- client
 	}()
 
 	reader := bufio.NewReader(client.conn)
