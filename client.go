@@ -58,6 +58,7 @@ const (
 type Client struct {
 	game            *Game
 	conn            net.Conn
+	ansiEnabled     bool
 	send            chan []byte
 	character       *Character
 	connectionState uint

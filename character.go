@@ -18,7 +18,8 @@ const UnauthenticatedUsername = "unnamed"
  * connected through a session instance available via the client pointer.)
  */
 type Character struct {
-	client     *Client
+	client *Client
+
 	pages      [][]byte
 	pageSize   int
 	pageCursor int
@@ -85,13 +86,19 @@ func (game *Game) IsValidPCName(name string) bool {
 }
 
 func (ch *Character) send(text string) {
+	var output string = string(text)
+
+	if ch.client != nil && ch.client.ansiEnabled == true {
+		output = TranslateColourCodes(output)
+	}
+
 	/*
 	 * Mock implementation:
 	 *
 	 * We'll want to implement paging and allow the telnet protocol to negotiate
 	 * the window size, or else make this configurable within the game settings.
 	 */
-	n, err := ch.Write([]byte(text))
+	n, err := ch.Write([]byte(output))
 	if err != nil {
 		log.Printf("Failed to write to character: %v.\r\n", err)
 		return
