@@ -22,6 +22,7 @@ func init() {
 	CommandTable["ooc"] = Command{Name: "ooc", CmdFunc: do_ooc}
 
 	/* act_info.go */
+	CommandTable["help"] = Command{Name: "help", CmdFunc: do_help}
 	CommandTable["look"] = Command{Name: "look", CmdFunc: do_look}
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
 	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}

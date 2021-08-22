@@ -5,6 +5,22 @@ import (
 	"strings"
 )
 
+func do_help(ch *Character, arguments string) {
+	var buf strings.Builder
+	var index int = 0
+
+	for _, command := range CommandTable {
+		buf.WriteString(fmt.Sprintf("%-14s ", command.Name))
+		index++
+
+		if index%7 == 0 {
+			buf.WriteString("\r\n")
+		}
+	}
+
+	ch.send(buf.String())
+}
+
 func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
