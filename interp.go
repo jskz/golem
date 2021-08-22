@@ -12,3 +12,7 @@ func InitCommandTable() {
 
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
 }
+
+func (ch *Character) Interpret(input string) {
+
+}

@@ -14,6 +14,9 @@ func (game *Game) nanny(client *Client, message string) {
 	default:
 		log.Printf("Client is trying to send a message from an invalid or unhandled connection state.\r\n")
 
+	case ConnectionStatePlaying:
+		client.character.Interpret(message)
+
 	case ConnectionStateName:
 		log.Printf("Guest attempting to login with name: %s\r\n", message)
 
@@ -41,6 +44,17 @@ func (game *Game) nanny(client *Client, message string) {
 
 		output.WriteString(fmt.Sprintf("Creating new character %s.\r\n", client.character.name))
 		output.WriteString("Please choose a password: ")
+
+	case ConnectionStateNewPassword:
+		client.connectionState = ConnectionStateMessageOfTheDay
+
+		output.WriteString("Bypassing password and character creation for very early development.\r\n")
+		output.WriteString("[ PRESS RETURN TO JOIN ]\r\n")
+
+	case ConnectionStateMessageOfTheDay:
+		client.connectionState = ConnectionStatePlaying
+
+		output.WriteString("Welcome to Golem.\r\n")
 	}
 
 	client.send <- output.Bytes()
