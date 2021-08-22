@@ -58,6 +58,13 @@ func (game *Game) IsValidPCName(name string) bool {
 		}
 	}
 
+	/* Does any connected player possibly not yet saved share this name? */
+	for client := range game.clients {
+		if client.character != nil && client.character.name == name {
+			return false
+		}
+	}
+
 	/* TODO: entity checking; does a persistent player share this valid name? */
 	return true
 }

@@ -48,6 +48,7 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character = NewCharacter()
 		client.character.client = client
 		client.character.name = name
+		client.character.level = 1
 		client.connectionState = ConnectionStateConfirmName
 
 		output.WriteString(fmt.Sprintf("No adventurer with that name exists.  Create %s? [y/N] ", client.character.name))
