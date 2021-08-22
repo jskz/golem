@@ -9,7 +9,13 @@ import (
 
 /* Bust a prompt! */
 func (client *Client) displayPrompt() {
-	client.send <- []byte("\r\n> ")
+	if client.character == nil {
+		/* Something weird is going on: give a simple debug prompt */
+		client.send <- []byte("\r\n> ")
+		return
+	}
+
+	client.character.Write([]byte("\r\n> "))
 }
 
 func (game *Game) nanny(client *Client, message string) {

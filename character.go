@@ -7,7 +7,10 @@ import "log"
  * connected through a session instance available via the client pointer.)
  */
 type Character struct {
-	client *Client
+	client     *Client
+	pages      [][]byte
+	pageSize   int
+	pageCursor int
 
 	name             string
 	level            int
@@ -15,8 +18,24 @@ type Character struct {
 	longDescription  string
 }
 
+func (ch *Character) flushOutput() {
+	for _, page := range ch.pages {
+		ch.client.send <- page
+	}
+
+	ch.pages = make([][]byte, 1)
+	ch.pages[0] = make([]byte, ch.pageSize)
+	ch.pageCursor = 0
+}
+
 func (ch *Character) Write(data []byte) (n int, err error) {
-	ch.client.send <- data
+	if ch.client == nil {
+		/* If there is no client, succeed silently. */
+		return len(data), nil
+	}
+
+	copy(ch.pages[ch.pageCursor/ch.pageSize][ch.pageCursor:ch.pageCursor+len(data)], data[:])
+	ch.pageCursor = ch.pageCursor + len(data)
 
 	return len(data), nil
 }
@@ -59,6 +78,10 @@ func (ch *Character) send(text string) {
 
 func NewCharacter() *Character {
 	character := &Character{}
+	character.pageSize = 1024
+	character.pages = make([][]byte, 1)
+	character.pages[0] = make([]byte, character.pageSize)
+	character.pageCursor = 0
 
 	character.name = "formless protoplasm"
 	character.client = nil

@@ -1,6 +1,9 @@
 package main
 
-import "log"
+import (
+	"log"
+	"time"
+)
 
 type Game struct {
 	clients map[*Client]bool
@@ -23,8 +26,17 @@ func NewGame() *Game {
 
 /* Game loop */
 func (game *Game) Run() {
+	processOutputTicker := time.NewTicker(50 * time.Millisecond)
+
 	for {
 		select {
+		case _ = <-processOutputTicker.C:
+			for client := range game.clients {
+				if client.character != nil {
+					client.character.flushOutput()
+				}
+			}
+
 		case clientMessage := <-game.clientMessage:
 			log.Printf("Received client message from %s: %s\r\n",
 				clientMessage.client.conn.RemoteAddr().String(),
