@@ -1,3 +1,10 @@
+/*
+ * Copyright (c) 2021 James Skarzinskas.
+ * All rights reserved.
+ * See LICENSE.txt in project root for license information.
+ * Authors:
+ *     James Skarzinskas <james@jskarzin.org>
+ */
 package main
 
 import (
@@ -27,7 +34,9 @@ func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
 	buf.WriteString("Character information:\r\n")
+
 	buf.WriteString(fmt.Sprintf("Name: %s\r\n", ch.name))
+	buf.WriteString(fmt.Sprintf("Job: %s\r\n", JobsTable[ch.job].DisplayName))
 	buf.WriteString(fmt.Sprintf("Level: %d\r\n", ch.level))
 
 	output := buf.String()
@@ -45,7 +54,7 @@ func do_who(ch *Character, arguments string) {
 
 		/* If the client is "at least" playing, then we will display them in the WHO list */
 		if client.connectionState >= ConnectionStatePlaying && client.character != nil {
-			buf.WriteString(fmt.Sprintf("%s\r\n", client.character.name))
+			buf.WriteString(fmt.Sprintf("[%-10s] %s\r\n", JobsTable[client.character.job].DisplayName, client.character.name))
 		}
 	}
 

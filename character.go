@@ -1,6 +1,15 @@
+/*
+ * Copyright (c) 2021 James Skarzinskas.
+ * All rights reserved.
+ * See LICENSE.txt in project root for license information.
+ * Authors:
+ *     James Skarzinskas <james@jskarzin.org>
+ */
 package main
 
-import "log"
+import (
+	"log"
+)
 
 const UnauthenticatedUsername = "unnamed"
 
@@ -15,6 +24,7 @@ type Character struct {
 	pageCursor int
 
 	name             string
+	job              string
 	level            int
 	shortDescription string
 	longDescription  string
@@ -36,6 +46,10 @@ func (ch *Character) Write(data []byte) (n int, err error) {
 		return len(data), nil
 	}
 
+	/*
+	 * This will need to be rewritten; we need to divide the data length by the page size, then
+	 * drain the data by chunks.  This is currently only "coincidentally working."
+	 */
 	copy(ch.pages[ch.pageCursor/ch.pageSize][ch.pageCursor:ch.pageCursor+len(data)], data[:])
 	ch.pageCursor = ch.pageCursor + len(data)
 
@@ -87,6 +101,8 @@ func (ch *Character) send(text string) {
 
 func NewCharacter() *Character {
 	character := &Character{}
+
+	character.job = "none"
 	character.pageSize = 1024
 	character.pages = make([][]byte, 1)
 	character.pages[0] = make([]byte, character.pageSize)
