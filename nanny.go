@@ -55,8 +55,8 @@ func (game *Game) nanny(client *Client, message string) {
 	case ConnectionStateNewPassword:
 		client.connectionState = ConnectionStateMessageOfTheDay
 
-		output.WriteString("Bypassing password and character creation for very early development.\r\n")
-		output.WriteString("[ PRESS RETURN TO JOIN ]")
+		output.WriteString("Bypassing password and character creation for very early development.\r\n\r\n")
+		output.WriteString("[ Press return to join ]")
 
 	case ConnectionStateMessageOfTheDay:
 		client.connectionState = ConnectionStatePlaying
