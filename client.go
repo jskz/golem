@@ -33,10 +33,14 @@ type TelnetCommand struct {
 
 /* App-level connection state */
 const (
-	ConnectionStateNone     = 0
-	ConnectionStateName     = 1
-	ConnectionStatePassword = 2
-	ConnectionStatePlaying  = 24
+	ConnectionStateNone            = 0
+	ConnectionStateName            = 1
+	ConnectionStateConfirmName     = 2
+	ConnectionStatePassword        = 3
+	ConnectionStateNewPassword     = 4
+	ConnectionStateConfirmPassword = 5
+	ConnectionStateMessageOfTheDay = 23
+	ConnectionStatePlaying         = 24
 )
 
 /* Instance of a client connection */

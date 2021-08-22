@@ -16,7 +16,7 @@ type Character struct {
 /*
  * TODO: implement validation logic restricting silly/invalid/breaking names.
  */
-func IsValidPCName(name string) bool {
+func (game *Game) IsValidPCName(name string) bool {
 	/* Length bounds */
 	if len(name) < 3 || len(name) > 14 {
 		return false
@@ -28,6 +28,8 @@ func IsValidPCName(name string) bool {
 			return false
 		}
 	}
+
+	/* TODO: entity checking; does a persistent player share this valid name? */
 
 	return true
 }
