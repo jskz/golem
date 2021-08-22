@@ -7,6 +7,9 @@ func (game *Game) nanny(client *Client, message string) {
 	default:
 		log.Printf("Client is trying to send a message from an invalid connection state.\r\n")
 
+	case ConnectionStateName:
+		log.Printf("Socket trying name: %s\r\n", message)
+
 	case ConnectionStatePlaying:
 		log.Printf("Received gameplay input: %s.\r\n", message)
 	}
