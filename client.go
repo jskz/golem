@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+/*
+ * Telnet reference used: http://pcmicro.com/netfoss/telnet.html
+ */
+
 /* OOB telnet messaging */
 const (
 	TelnetECHO                 = 1
@@ -157,6 +161,11 @@ func (client *Client) readPump() {
 			}
 		}
 
+		/*
+		 * For every WILL/DO message the client has sent via telnet, we're going to respond
+		 * with the appropriate "not supported, disable it" message until we incrementally
+		 * add those protocol features.
+		 */
 		var telnetResponse bytes.Buffer
 
 		for _, will := range clientWill {
@@ -175,6 +184,7 @@ func (client *Client) readPump() {
 			})
 		}
 
+		/* Only send this if necessary! */
 		if telnetResponse.Len() > 0 {
 			responseBytes := telnetResponse.Bytes()
 
@@ -206,6 +216,7 @@ func (game *Game) handleConnection(conn net.Conn) {
 	client.character = nil
 	client.connectionState = ConnectionStateNone
 
+	/* Spawn two goroutines to handle client I/O */
 	go client.readPump()
 	go client.writePump()
 
