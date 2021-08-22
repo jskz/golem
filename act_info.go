@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+/* List all commands available to the player in rows of 7 items. */
 func do_help(ch *Character, arguments string) {
 	var buf strings.Builder
 	var index int = 0
@@ -21,6 +22,7 @@ func do_help(ch *Character, arguments string) {
 	ch.send(buf.String())
 }
 
+/* Display relevant game information about the player's character. */
 func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
@@ -32,15 +34,18 @@ func do_score(ch *Character, arguments string) {
 	ch.send(output)
 }
 
+/* Display a list of players online (and visible to the current player character!) */
 func do_who(ch *Character, arguments string) {
 	var buf strings.Builder
 
 	buf.WriteString("The following players are online:\r\n")
 
 	for client := range ch.client.game.clients {
+		/* Conditionally render an admin view */
+
 		/* If the client is "at least" playing, then we will display them in the WHO list */
 		if client.connectionState >= ConnectionStatePlaying && client.character != nil {
-			buf.WriteString(fmt.Sprintf("[%-7s] %s\r\n", "status", client.character.name))
+			buf.WriteString(fmt.Sprintf("%s\r\n", client.character.name))
 		}
 	}
 

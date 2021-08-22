@@ -26,10 +26,23 @@ func NewGame() *Game {
 
 /* Game loop */
 func (game *Game) Run() {
+	// processCombatTicker := time.NewTicker(2 * time.Second)
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)
 
 	for {
 		select {
+		/*
+			case _ = <-processCombatTicker.C:
+
+				- Iterate over active combat "instances" and calculate outcomes per-instance
+
+				for client := range game.clients {
+					if client.character != nil && client.connectionState >= ConnectionStatePlaying {
+						client.character.send("Combat loop action here!\r\n")
+					}
+				}
+		*/
+
 		case _ = <-processOutputTicker.C:
 			for client := range game.clients {
 				if client.character != nil {

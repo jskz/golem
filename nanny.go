@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const JoinedGameFlavourText = "You have entered into the world of Golem."
+
 /* Bust a prompt! */
 func (client *Client) displayPrompt() {
 	if client.character == nil {
@@ -66,10 +68,12 @@ func (game *Game) nanny(client *Client, message string) {
 		client.connectionState = ConnectionStateMessageOfTheDay
 
 		output.WriteString("Bypassing password and character creation for very early development.\r\n\r\n")
-		output.WriteString("[ Press return to join ]")
+		output.WriteString("[ Press any key to continue ]")
 
 	case ConnectionStateMessageOfTheDay:
 		client.connectionState = ConnectionStatePlaying
+
+		client.character.send(fmt.Sprintf("%s\r\n", JoinedGameFlavourText))
 	}
 
 	if client.connectionState != ConnectionStatePlaying && output.Len() > 0 {
