@@ -24,6 +24,7 @@ func init() {
 	/* act_info.go */
 	CommandTable["look"] = Command{Name: "look", CmdFunc: do_look}
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
+	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}
 }
 
 func (ch *Character) Interpret(input string) bool {
