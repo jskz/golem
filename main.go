@@ -17,8 +17,7 @@ func main() {
 	/* Game instance will encapsulate both the world and player session management */
 	game := NewGame()
 
-	/* TODO: make port configurable :) */
-	app, err := net.Listen("tcp", ":4000")
+	app, err := net.Listen("tcp", fmt.Sprintf(":%d", Config.Port))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -26,7 +25,7 @@ func main() {
 
 	/* Start the game loop */
 	go game.Run()
-	log.Printf("Golem is ready to rock and roll on port 4000.\r\n")
+	log.Printf("Golem is ready to rock and roll on port %d.\r\n", Config.Port)
 
 	/* Spawn a new goroutine for each new client. */
 	for {
