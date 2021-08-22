@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-const JoinedGameFlavourText = "You have entered into the world of Golem."
+const JoinedGameFlavourText = "You have entered the world of Golem."
 
 /* Bust a prompt! */
 func (client *Client) displayPrompt() {
@@ -73,9 +73,14 @@ func (game *Game) nanny(client *Client, message string) {
 		output.WriteString("Please choose a password: ")
 
 	case ConnectionStateNewPassword:
+		client.connectionState = ConnectionStateConfirmPassword
+
+		output.WriteString("Please confirm your password: ")
+
+	case ConnectionStateConfirmPassword:
 		client.connectionState = ConnectionStateMessageOfTheDay
 
-		output.WriteString("Bypassing password and character creation for very early development.\r\n\r\n")
+		output.WriteString("Bypassing bulk of character creation for very early development.\r\n\r\n")
 		output.WriteString("[ Press any key to continue ]")
 
 	case ConnectionStateMessageOfTheDay:
