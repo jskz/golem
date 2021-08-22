@@ -2,7 +2,7 @@
 
 ## Overview
 
-Golem is a fresh attempt at a faithful Diku-like MUD implemented with Golang in 2021.  Entirely for tinker-fun.
+Golem is a from-scratch attempt at a Diku-like MUD implemented with Golang in 2021.  Entirely for tinker-fun.
 
 ## Installation
 
@@ -17,3 +17,5 @@ go build
 ```
 ./golem
 ```
+
+![Not much happening yet!](images/early-paging-telnet-server.png)
