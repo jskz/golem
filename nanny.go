@@ -27,7 +27,6 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStatePlaying:
 		client.character.Interpret(message)
-		client.displayPrompt()
 
 	case ConnectionStateName:
 		log.Printf("Guest attempting to login with name: %s\r\n", message)
@@ -66,8 +65,6 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStateMessageOfTheDay:
 		client.connectionState = ConnectionStatePlaying
-
-		client.displayPrompt()
 	}
 
 	client.send <- output.Bytes()

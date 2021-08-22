@@ -33,6 +33,10 @@ func (game *Game) Run() {
 		case _ = <-processOutputTicker.C:
 			for client := range game.clients {
 				if client.character != nil {
+					if client.character.pageCursor != 0 {
+						client.displayPrompt()
+					}
+
 					client.character.flushOutput()
 				}
 			}

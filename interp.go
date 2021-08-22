@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -15,6 +16,12 @@ var CommandTable map[string]Command
 func init() {
 	CommandTable = make(map[string]Command)
 
+	/* Commands table entries which are manually initialized, grouped by file */
+
+	/* act_comm.go */
+	CommandTable["ooc"] = Command{Name: "ooc", CmdFunc: do_ooc}
+
+	/* act_info.go */
 	CommandTable["look"] = Command{Name: "look", CmdFunc: do_look}
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
 }
@@ -30,6 +37,7 @@ func (ch *Character) Interpret(input string) bool {
 	val, ok := CommandTable[command]
 	if !ok {
 		/* No such command */
+		ch.send(fmt.Sprintf("Alas, there is no such command: %s.\r\n", command))
 		return false
 	}
 
