@@ -25,6 +25,7 @@ type Character struct {
 
 	name             string
 	job              string
+	race             string
 	level            int
 	shortDescription string
 	longDescription  string
@@ -103,6 +104,7 @@ func NewCharacter() *Character {
 	character := &Character{}
 
 	character.job = "none"
+	character.race = "human"
 	character.pageSize = 1024
 	character.pages = make([][]byte, 1)
 	character.pages[0] = make([]byte, character.pageSize)

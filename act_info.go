@@ -36,8 +36,9 @@ func do_score(ch *Character, arguments string) {
 	buf.WriteString("Character information:\r\n")
 
 	buf.WriteString(fmt.Sprintf("Name: %s\r\n", ch.name))
-	buf.WriteString(fmt.Sprintf("Job: %s\r\n", JobsTable[ch.job].DisplayName))
 	buf.WriteString(fmt.Sprintf("Level: %d\r\n", ch.level))
+	buf.WriteString(fmt.Sprintf("Race: %s\r\n", RaceTable[ch.race].DisplayName))
+	buf.WriteString(fmt.Sprintf("Job: %s\r\n", JobsTable[ch.job].DisplayName))
 
 	output := buf.String()
 	ch.send(output)
@@ -54,7 +55,10 @@ func do_who(ch *Character, arguments string) {
 
 		/* If the client is "at least" playing, then we will display them in the WHO list */
 		if client.connectionState >= ConnectionStatePlaying && client.character != nil {
-			buf.WriteString(fmt.Sprintf("[%-10s] %s\r\n", JobsTable[client.character.job].DisplayName, client.character.name))
+			buf.WriteString(fmt.Sprintf("[%-10s] %s (%s)\r\n",
+				JobsTable[client.character.job].DisplayName,
+				client.character.name,
+				RaceTable[client.character.race].DisplayName))
 		}
 	}
 

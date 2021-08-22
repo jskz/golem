@@ -130,6 +130,11 @@ func (client *Client) readPump() {
 				}
 
 				clientRequests = append(clientWill, requestOption[2])
+
+			/*
+			 * To fix: I believe we are now only grabbing the first IAC command each time now - it still seems
+			 * to passively work out, but should instead recursively peek ahead here for all commands at once.
+			 */
 			case TelnetIAC:
 				break
 			default:
