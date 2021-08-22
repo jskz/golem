@@ -45,8 +45,13 @@ func (ch *Character) Interpret(input string) bool {
 	command, words := strings.ToLower(words[0]), words[1:]
 	val, ok := CommandTable[command]
 	if !ok {
-		/* No such command */
-		ch.send(fmt.Sprintf("Alas, there is no such command: %s.\r\n", command))
+		/* Send a no such command if there was any command text */
+		if len(command) > 0 {
+			ch.send(fmt.Sprintf("Alas, there is no such command: %s.\r\n", command))
+		} else {
+			/* We'll still want a prompt on no input */
+			ch.send("\r\n")
+		}
 		return false
 	}
 
