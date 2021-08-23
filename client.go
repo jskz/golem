@@ -106,7 +106,6 @@ func (client *Client) readPump() {
 			switch nextByte[0] {
 			case TelnetDONT:
 				length = 3
-
 				requestOption, err := reader.Peek(3)
 				if err != nil {
 					log.Printf("Unable to peek next 2 bytes for IAC DONT: %v.\r\n", err)

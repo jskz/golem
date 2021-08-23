@@ -13,6 +13,7 @@ import (
 	"log"
 )
 
+const SystemDefaultConfigPath = "/etc/golem/config.json"
 const ConfigPath = "etc/config.json"
 
 var Config *AppConfiguration
@@ -44,15 +45,25 @@ func init() {
 		},
 	}
 
-	/* Attempt read of config JSON file */
-	configBytes, err := ioutil.ReadFile(ConfigPath)
+	/* Attempt read of system default JSON file */
+	configBytes, err := ioutil.ReadFile(SystemDefaultConfigPath)
 	if err != nil {
-		log.Printf("Warning: failed to read config file: %v.\r\n", err)
-		return
+		log.Printf("Warning: failed to read system config file: %v.\r\n", err)
+	} else {
+		err = json.Unmarshal(configBytes, Config)
+		if err != nil {
+			panic("Malformed config file.")
+		}
 	}
 
-	err = json.Unmarshal(configBytes, Config)
+	/* Attempt read of config JSON file */
+	configBytes, err = ioutil.ReadFile(ConfigPath)
 	if err != nil {
-		panic("Malformed config file.")
+		log.Printf("Warning: failed to read local config file: %v.\r\n", err)
+	} else {
+		err = json.Unmarshal(configBytes, Config)
+		if err != nil {
+			panic("Malformed config file.")
+		}
 	}
 }
