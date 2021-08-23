@@ -2,5 +2,7 @@
 !.gitignore
 !.gitattributes
 
+etc/config.json
+
 /golem.exe
 /golem
