@@ -19,4 +19,4 @@ go build
 ./golem
 ```
 
-![Not much happening yet!](images/early-paging-telnet-server.png)
+![Early socket server code demonstrated on a Windows desktop](img/early-paging-telnet-server.png)

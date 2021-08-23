@@ -36,6 +36,12 @@ func init() {
 	/* Defaults */
 	Config = &AppConfiguration{
 		Port: 4000,
+		MySQLConfiguration: AppMySQLConfiguration{
+			Host:     "localhost",
+			Port:     3306,
+			User:     "golem",
+			Password: "",
+		},
 	}
 
 	/* Attempt read of config JSON file */
