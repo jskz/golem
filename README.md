@@ -8,6 +8,7 @@ Golem is a from-scratch attempt at a Diku-like MUD implemented with Golang in 20
 
 ```
 git clone git@github.com:jskz/golem.git
+cd golem
 go get
 go build
 ```
