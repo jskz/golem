@@ -10,7 +10,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"fmt"
 	"log"
 	"net"
 	"strings"
@@ -219,7 +218,7 @@ func (client *Client) writePump() {
 		outgoing := <-client.send
 		_, err := client.conn.Write(outgoing)
 		if err != nil {
-			fmt.Printf("Error writing to socket: %v\r\n", err)
+			log.Printf("Error writing to socket: %v\r\n", err)
 			break
 		}
 	}

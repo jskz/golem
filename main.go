@@ -15,11 +15,15 @@ import (
 
 func main() {
 	/* Game instance will encapsulate both the world and player session management */
-	game := NewGame()
+	game, err := NewGame()
+	if err != nil {
+		log.Printf("Unable to initialize new game session: %v.\r\n", err)
+		return
+	}
 
 	app, err := net.Listen("tcp", fmt.Sprintf(":%d", Config.Port))
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return
 	}
 
@@ -31,7 +35,7 @@ func main() {
 	for {
 		conn, err := app.Accept()
 		if err != nil {
-			fmt.Printf("Failed to accept connection: %v\r\n", err)
+			log.Printf("Failed to accept connection: %v\r\n", err)
 			continue
 		}
 
