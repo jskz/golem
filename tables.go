@@ -7,6 +7,8 @@
  */
 package main
 
+import "strings"
+
 type Job struct {
 	Id          uint   `json:"id"`
 	Name        string `json:"name"`
@@ -53,4 +55,25 @@ func initRaceTable() {
 func init() {
 	initJobsTable()
 	initRaceTable()
+}
+
+/* Utility lookup methods */
+func FindJobByName(name string) *Job {
+	for _, job := range JobsTable {
+		if strings.Compare(name, job.Name) == 0 {
+			return job
+		}
+	}
+
+	return nil
+}
+
+func FindRaceByName(name string) *Race {
+	for _, race := range RaceTable {
+		if strings.Compare(name, race.Name) == 0 {
+			return race
+		}
+	}
+
+	return nil
 }

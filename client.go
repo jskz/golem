@@ -50,6 +50,10 @@ const (
 	ConnectionStatePassword        = 3
 	ConnectionStateNewPassword     = 4
 	ConnectionStateConfirmPassword = 5
+	ConnectionStateChooseRace      = 6
+	ConnectionStateConfirmRace     = 7
+	ConnectionStateChooseClass     = 8
+	ConnectionStateConfirmClass    = 9
 	ConnectionStateMessageOfTheDay = 23
 	ConnectionStatePlaying         = 24
 )

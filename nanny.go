@@ -63,6 +63,7 @@ func (game *Game) nanny(client *Client, message string) {
 	case ConnectionStateConfirmName:
 		if !strings.HasPrefix(strings.ToLower(message), "y") {
 			client.connectionState = ConnectionStateName
+			client.character.name = UnauthenticatedUsername
 			output.WriteString("\r\nBy what name do you wish to be known? ")
 			break
 		}
@@ -78,9 +79,110 @@ func (game *Game) nanny(client *Client, message string) {
 		output.WriteString("Please confirm your password: ")
 
 	case ConnectionStateConfirmPassword:
-		client.connectionState = ConnectionStateMessageOfTheDay
+		client.connectionState = ConnectionStateChooseRace
 
-		output.WriteString("Bypassing bulk of character creation for very early development.\r\n\r\n")
+		output.WriteString("Please choose a race from the following options:\r\n")
+
+		/* Counter value for periodically line-breaking */
+		index := 0
+
+		for _, race := range RaceTable {
+			output.WriteString(fmt.Sprintf("%-12s ", race.Name))
+
+			index++
+
+			if index%7 == 0 {
+				output.WriteString("\r\n")
+			}
+		}
+
+		output.WriteString("\r\nChoice: ")
+
+	case ConnectionStateChooseRace:
+		race := FindRaceByName(message)
+		if race == nil {
+			output.WriteString("\r\nInvalid choice for race, please choose another: ")
+			break
+		}
+
+		client.character.race = race.Name
+		client.connectionState = ConnectionStateConfirmRace
+		output.WriteString(fmt.Sprintf("\r\nAre you sure you want to be a %s? [y/N] ", race.Name))
+
+	case ConnectionStateConfirmRace:
+		if !strings.HasPrefix(strings.ToLower(message), "y") {
+			client.connectionState = ConnectionStateChooseRace
+			output.WriteString("Please choose a race from the following options:\r\n")
+
+			/* Counter value for periodically line-breaking */
+			index := 0
+
+			for _, race := range RaceTable {
+				output.WriteString(fmt.Sprintf("%-12s ", race.Name))
+
+				index++
+
+				if index%7 == 0 {
+					output.WriteString("\r\n")
+				}
+			}
+
+			output.WriteString("\r\nChoice: ")
+			break
+		}
+
+		client.connectionState = ConnectionStateChooseClass
+		output.WriteString("\r\nPlease choose a job from the following options:\r\n")
+
+		/* Counter value for periodically line-breaking */
+		index := 0
+
+		for _, job := range JobsTable {
+			output.WriteString(fmt.Sprintf("%-12s ", job.Name))
+
+			index++
+
+			if index%7 == 0 {
+				output.WriteString("\r\n")
+			}
+		}
+
+		output.WriteString("\r\nChoice: ")
+
+	case ConnectionStateChooseClass:
+		job := FindJobByName(message)
+		if job == nil {
+			output.WriteString("\r\nInvalid choice for job, please choose another: ")
+			break
+		}
+
+		client.character.job = job.Name
+		client.connectionState = ConnectionStateConfirmClass
+		output.WriteString(fmt.Sprintf("\r\nAre you sure you want to be a %s? [y/N] ", job.Name))
+
+	case ConnectionStateConfirmClass:
+		if !strings.HasPrefix(strings.ToLower(message), "y") {
+			client.connectionState = ConnectionStateChooseClass
+			output.WriteString("Please choose a job from the following options:\r\n")
+
+			/* Counter value for periodically line-breaking */
+			index := 0
+
+			for _, job := range JobsTable {
+				output.WriteString(fmt.Sprintf("%-12s ", job.Name))
+
+				index++
+
+				if index%7 == 0 {
+					output.WriteString("\r\n")
+				}
+			}
+
+			output.WriteString("\r\nChoice: ")
+			break
+		}
+
+		client.connectionState = ConnectionStateMessageOfTheDay
 		output.WriteString("[ Press any key to continue ]")
 
 	case ConnectionStateMessageOfTheDay:
