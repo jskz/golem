@@ -18,8 +18,17 @@ const ConfigPath = "etc/config.json"
 var Config *AppConfiguration
 
 /* Structure corresponding to JSON configuration file */
+type AppMySQLConfiguration struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Database string `json:"database"`
+}
+
 type AppConfiguration struct {
-	Port int `json:"port"`
+	Port               int                   `json:"port"`
+	MySQLConfiguration AppMySQLConfiguration `json:"mysql"`
 }
 
 /* Magic method is automatically called before main */
