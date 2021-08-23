@@ -88,7 +88,7 @@ func (game *Game) IsValidPCName(name string) bool {
 func (ch *Character) send(text string) {
 	var output string = string(text)
 
-	if ch.client != nil && ch.client.ansiEnabled == true {
+	if ch.client != nil {
 		output = TranslateColourCodes(output)
 	}
 

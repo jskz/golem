@@ -228,6 +228,7 @@ func (game *Game) handleConnection(conn net.Conn) {
 	client.send = make(chan []byte)
 	client.character = nil
 	client.connectionState = ConnectionStateNone
+	client.ansiEnabled = true
 
 	/* Spawn two goroutines to handle client I/O */
 	go client.readPump()
