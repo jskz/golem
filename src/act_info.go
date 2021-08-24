@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -17,13 +18,25 @@ func do_help(ch *Character, arguments string) {
 	var buf strings.Builder
 	var index int = 0
 
+	var commands []string = []string{}
+
 	for _, command := range CommandTable {
-		buf.WriteString(fmt.Sprintf("%-14s ", command.Name))
+		commands = append(commands, command.Name)
+	}
+
+	sort.Strings(commands)
+
+	for _, command := range commands {
+		buf.WriteString(fmt.Sprintf("%-10s ", command))
 		index++
 
 		if index%7 == 0 {
 			buf.WriteString("\r\n")
 		}
+	}
+
+	if index%7 != 0 {
+		buf.WriteString("\r\n")
 	}
 
 	ch.send(buf.String())
@@ -48,7 +61,7 @@ func do_score(ch *Character, arguments string) {
 	ch.send(output)
 }
 
-/* Display a list of players online (and visible to the current player character!) */
+/* Display a list of players online (ad visible to the current player character!) */
 func do_who(ch *Character, arguments string) {
 	var buf strings.Builder
 

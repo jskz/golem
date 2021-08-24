@@ -50,3 +50,8 @@ func do_ooc(ch *Character, arguments string) {
 		}
 	}
 }
+
+func do_quit(ch *Character, arguments string) {
+	ch.send("Pulling the plug.  Have a great day!\r\n")
+	ch.client.conn.Close()
+}
