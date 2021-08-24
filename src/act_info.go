@@ -61,7 +61,7 @@ func do_score(ch *Character, arguments string) {
 	ch.send(output)
 }
 
-/* Display a list of players online (ad visible to the current player character!) */
+/* Display a list of players online (and visible to the current player character!) */
 func do_who(ch *Character, arguments string) {
 	var buf strings.Builder
 
