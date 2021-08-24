@@ -7,7 +7,7 @@ COPY go.sum ./
 
 RUN go mod download
 
-COPY *.go ./
+COPY src/*.go ./
 
 RUN go build -o /golem
 
