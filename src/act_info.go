@@ -33,15 +33,16 @@ func do_help(ch *Character, arguments string) {
 func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	buf.WriteString("Character information:\r\n")
+	buf.WriteString("{D┌─ {WCharacter Information {D────────┐{x\r\n")
 
-	buf.WriteString(fmt.Sprintf("Name: %s\r\n", ch.name))
-	buf.WriteString(fmt.Sprintf("Level: %d\r\n", ch.level))
-	buf.WriteString(fmt.Sprintf("Race: %s\r\n", RaceTable[ch.race].DisplayName))
-	buf.WriteString(fmt.Sprintf("Job: %s\r\n", JobsTable[ch.job].DisplayName))
-	buf.WriteString(fmt.Sprintf("Health: %d/%d\r\n", ch.health, ch.maxHealth))
-	buf.WriteString(fmt.Sprintf("Mana: %d/%d\r\n", ch.mana, ch.maxMana))
-	buf.WriteString(fmt.Sprintf("Stamina: %d/%d\r\n", ch.stamina, ch.maxStamina))
+	buf.WriteString(fmt.Sprintf("{D│ {wName: %-16s         {D│\r\n", ch.name))
+	buf.WriteString(fmt.Sprintf("{D│ {wLevel: %-3d                     {D│\r\n", ch.level))
+	buf.WriteString(fmt.Sprintf("{D│ {wRace: %-17s        {D│\r\n", RaceTable[ch.race].DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {wJob: %-17s         {D│\r\n", JobsTable[ch.job].DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {wHealth: %-11s            {D│\r\n", fmt.Sprintf("%d/%d", ch.health, ch.maxHealth)))
+	buf.WriteString(fmt.Sprintf("{D│ {wMana: %-11s              {D│\r\n", fmt.Sprintf("%d/%d", ch.mana, ch.maxMana)))
+	buf.WriteString(fmt.Sprintf("{D│ {wStamina: %-11s           {D│\r\n", fmt.Sprintf("%d/%d", ch.stamina, ch.maxStamina)))
+	buf.WriteString("{D└────────────────────────────────┘{x\r\n")
 
 	output := buf.String()
 	ch.send(output)
