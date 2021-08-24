@@ -24,10 +24,18 @@ type Character struct {
 	pageSize   int
 	pageCursor int
 
-	name             string
-	job              string
-	race             string
-	level            int
+	name  string
+	job   string
+	race  string
+	level uint
+
+	health     uint
+	maxHealth  uint
+	mana       uint
+	maxMana    uint
+	stamina    uint
+	maxStamina uint
+
 	shortDescription string
 	longDescription  string
 }

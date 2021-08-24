@@ -39,6 +39,9 @@ func do_score(ch *Character, arguments string) {
 	buf.WriteString(fmt.Sprintf("Level: %d\r\n", ch.level))
 	buf.WriteString(fmt.Sprintf("Race: %s\r\n", RaceTable[ch.race].DisplayName))
 	buf.WriteString(fmt.Sprintf("Job: %s\r\n", JobsTable[ch.job].DisplayName))
+	buf.WriteString(fmt.Sprintf("Health: %d/%d\r\n", ch.health, ch.maxHealth))
+	buf.WriteString(fmt.Sprintf("Mana: %d/%d\r\n", ch.mana, ch.maxMana))
+	buf.WriteString(fmt.Sprintf("Stamina: %d/%d\r\n", ch.stamina, ch.maxStamina))
 
 	output := buf.String()
 	ch.send(output)
@@ -48,11 +51,9 @@ func do_score(ch *Character, arguments string) {
 func do_who(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	buf.WriteString("The following players are online:\r\n")
+	buf.WriteString("{CThe following players are online:{x\r\n")
 
 	for client := range ch.client.game.clients {
-		/* Conditionally render an admin view */
-
 		/* If the client is "at least" playing, then we will display them in the WHO list */
 		if client.connectionState >= ConnectionStatePlaying && client.character != nil {
 			buf.WriteString(fmt.Sprintf("[%-10s] %s (%s)\r\n",

@@ -24,7 +24,19 @@ func (client *Client) displayPrompt() {
 		return
 	}
 
-	client.character.Write([]byte("\r\n> "))
+	var prompt bytes.Buffer
+
+	/*
+	 * TODO: if the character's paging cursor is in a page less than the top page, instead display pager info.
+	 */
+	prompt.WriteString(fmt.Sprintf("\r\n[%d/%dhp %d/%dm %d/%dst] ",
+		client.character.health,
+		client.character.maxHealth,
+		client.character.mana,
+		client.character.maxMana,
+		client.character.stamina,
+		client.character.maxStamina))
+	client.character.Write(prompt.Bytes())
 }
 
 func (game *Game) nanny(client *Client, message string) {
@@ -57,6 +69,15 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character.name = name
 		client.character.level = 1
 		client.connectionState = ConnectionStateConfirmName
+
+		client.character.health = 20
+		client.character.maxHealth = 20
+
+		client.character.mana = 100
+		client.character.maxMana = 100
+
+		client.character.stamina = 100
+		client.character.maxStamina = 100
 
 		output.WriteString(fmt.Sprintf("No adventurer with that name exists.  Create %s? [y/N] ", client.character.name))
 
