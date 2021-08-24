@@ -38,10 +38,10 @@ func init() {
 	Config = &AppConfiguration{
 		Port: 4000,
 		MySQLConfiguration: AppMySQLConfiguration{
-			Host:     "localhost",
+			Host:     "mysql",
 			Port:     3306,
-			User:     "golem",
-			Password: "",
+			User:     "username",
+			Password: "password",
 		},
 	}
 
