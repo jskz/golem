@@ -16,12 +16,12 @@ services:
   game:
     depends_on:
       - mysql
+    restart: on-failure
     image: golem:latest
     networks:
       - overlay
     ports:
       - "4000:4000"
-    restart: "always"
     volumes:
       - ./etc:/etc/golem
 

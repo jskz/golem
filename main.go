@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"os"
 )
 
 func main() {
@@ -18,13 +19,13 @@ func main() {
 	game, err := NewGame()
 	if err != nil {
 		log.Printf("Unable to initialize new game session: %v.\r\n", err)
-		return
+		os.Exit(1)
 	}
 
 	app, err := net.Listen("tcp", fmt.Sprintf(":%d", Config.Port))
 	if err != nil {
 		log.Println(err)
-		return
+		os.Exit(1)
 	}
 
 	/* Start the game loop */
