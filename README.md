@@ -15,3 +15,5 @@ cd golem
 docker build --tag golem:latest .
 docker-compose up
 ```
+
+The MUD is exposed on the host's TCP port 4000 by default.
