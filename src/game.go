@@ -23,6 +23,7 @@ type Game struct {
 
 	register      chan *Client
 	unregister    chan *Client
+	quitRequest   chan *Client
 	clientMessage chan ClientTextMessage
 }
 
@@ -35,6 +36,7 @@ func NewGame() (*Game, error) {
 	game.clients = make(map[*Client]bool)
 	game.register = make(chan *Client)
 	game.unregister = make(chan *Client)
+	game.quitRequest = make(chan *Client)
 	game.clientMessage = make(chan ClientTextMessage)
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
@@ -98,6 +100,13 @@ func (game *Game) Run() {
 			delete(game.clients, client)
 
 			log.Printf("Lost connection with %s.\r\n", client.conn.RemoteAddr().String())
+
+		case quit := <-game.quitRequest:
+			if quit.character != nil {
+				quit.character.flushOutput()
+			}
+
+			quit.conn.Close()
 		}
 	}
 }

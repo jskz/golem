@@ -13,6 +13,7 @@ import (
 	"log"
 	"net"
 	"strings"
+	"time"
 )
 
 /*
@@ -59,12 +60,13 @@ const (
 
 /* Instance of a client connection */
 type Client struct {
-	game            *Game
-	conn            net.Conn
-	ansiEnabled     bool
-	send            chan []byte
-	character       *Character
-	connectionState uint
+	sessionStartedAt time.Time
+	game             *Game
+	conn             net.Conn
+	ansiEnabled      bool
+	send             chan []byte
+	character        *Character
+	connectionState  uint
 }
 
 type ClientTextMessage struct {
@@ -224,7 +226,7 @@ func (client *Client) writePump() {
 }
 
 func (game *Game) handleConnection(conn net.Conn) {
-	client := &Client{}
+	client := &Client{sessionStartedAt: time.Now()}
 	client.game = game
 	client.conn = conn
 	client.send = make(chan []byte)

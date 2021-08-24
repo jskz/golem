@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 )
 
 /* say will be room-specific */
@@ -52,6 +53,14 @@ func do_ooc(ch *Character, arguments string) {
 }
 
 func do_quit(ch *Character, arguments string) {
-	ch.send("Pulling the plug.  Have a great day!\r\n")
+	var output strings.Builder
+
+	sessionDuration := time.Since(ch.client.sessionStartedAt)
+	seconds := int(sessionDuration.Seconds())
+
+	output.WriteString("\r\n{RYou are leaving the game world.\r\n")
+	output.WriteString(fmt.Sprintf("You were connected for %d seconds.{x\r\n", seconds))
+
+	ch.send(output.String())
 	ch.client.conn.Close()
 }
