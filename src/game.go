@@ -40,7 +40,7 @@ func NewGame() (*Game, error) {
 	game.clientMessage = make(chan ClientTextMessage)
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
-	game.db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s",
+	game.db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true&parseTime=true",
 		Config.MySQLConfiguration.User,
 		Config.MySQLConfiguration.Password,
 		Config.MySQLConfiguration.Host,
