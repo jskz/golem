@@ -13,8 +13,19 @@ services:
       MYSQL_DATABASE: database
       MYSQL_USER: username
       MYSQL_PASSWORD: password
+  pma:
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - mysql
+    networks:
+      - overlay
     ports:
-      - "33060:3060"
+      - 8000:80
+    environment:
+      - 'PMA_HOST=mysql'
+      - 'PMA_USER=username'
+      - 'PMA_PASSWORD=password'
+      - 'PMA_PORT=3306'
   game:
     depends_on:
       - mysql
