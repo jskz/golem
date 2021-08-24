@@ -87,6 +87,10 @@ func (game *Game) nanny(client *Client, message string) {
 		index := 0
 
 		for _, race := range RaceTable {
+			if !race.Playable {
+				continue
+			}
+
 			output.WriteString(fmt.Sprintf("%-12s ", race.Name))
 
 			index++
@@ -100,7 +104,7 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStateChooseRace:
 		race := FindRaceByName(message)
-		if race == nil {
+		if race == nil || !race.Playable {
 			output.WriteString("\r\nInvalid choice for race, please choose another: ")
 			break
 		}
@@ -118,6 +122,10 @@ func (game *Game) nanny(client *Client, message string) {
 			index := 0
 
 			for _, race := range RaceTable {
+				if !race.Playable {
+					continue
+				}
+
 				output.WriteString(fmt.Sprintf("%-12s ", race.Name))
 
 				index++
@@ -138,6 +146,10 @@ func (game *Game) nanny(client *Client, message string) {
 		index := 0
 
 		for _, job := range JobsTable {
+			if !job.Playable {
+				continue
+			}
+
 			output.WriteString(fmt.Sprintf("%-12s ", job.Name))
 
 			index++
@@ -151,7 +163,7 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStateChooseClass:
 		job := FindJobByName(message)
-		if job == nil {
+		if job == nil || !job.Playable {
 			output.WriteString("\r\nInvalid choice for job, please choose another: ")
 			break
 		}
@@ -169,8 +181,11 @@ func (game *Game) nanny(client *Client, message string) {
 			index := 0
 
 			for _, job := range JobsTable {
-				output.WriteString(fmt.Sprintf("%-12s ", job.Name))
+				if !job.Playable {
+					continue
+				}
 
+				output.WriteString(fmt.Sprintf("%-12s ", job.Name))
 				index++
 
 				if index%7 == 0 {

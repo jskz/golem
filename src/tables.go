@@ -13,12 +13,14 @@ type Job struct {
 	Id          uint   `json:"id"`
 	Name        string `json:"name"`
 	DisplayName string `json:"display_name"`
+	Playable    bool   `json:"playable"`
 }
 
 type Race struct {
 	Id          uint   `json:"id"`
 	Name        string `json:"race"`
 	DisplayName string `json:"display_name"`
+	Playable    bool   `json:"playable"`
 }
 
 var JobsTable map[string]*Job
@@ -32,11 +34,31 @@ func initJobsTable() {
 		Id:          0,
 		Name:        "none",
 		DisplayName: "Tourist",
+		Playable:    false,
 	}
 	JobsTable["warrior"] = &Job{
 		Id:          1,
 		Name:        "warrior",
 		DisplayName: "Warrior",
+		Playable:    true,
+	}
+	JobsTable["thief"] = &Job{
+		Id:          2,
+		Name:        "thief",
+		DisplayName: "Thief",
+		Playable:    true,
+	}
+	JobsTable["mage"] = &Job{
+		Id:          3,
+		Name:        "mage",
+		DisplayName: "Mage",
+		Playable:    true,
+	}
+	JobsTable["cleric"] = &Job{
+		Id:          4,
+		Name:        "cleric",
+		DisplayName: "Cleric",
+		Playable:    true,
 	}
 }
 
@@ -48,6 +70,7 @@ func initRaceTable() {
 		Id:          0,
 		Name:        "human",
 		DisplayName: "Human",
+		Playable:    true,
 	}
 }
 
