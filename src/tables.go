@@ -72,6 +72,24 @@ func initRaceTable() {
 		DisplayName: "Human",
 		Playable:    true,
 	}
+	RaceTable["elf"] = &Race{
+		Id:          1,
+		Name:        "elf",
+		DisplayName: "Elf",
+		Playable:    true,
+	}
+	RaceTable["dwarf"] = &Race{
+		Id:          2,
+		Name:        "dwarf",
+		DisplayName: "Dwarf",
+		Playable:    true,
+	}
+	RaceTable["ogre"] = &Race{
+		Id:          3,
+		Name:        "ogre",
+		DisplayName: "Ogre",
+		Playable:    true,
+	}
 }
 
 /* Magic method to initialize constant tables */
