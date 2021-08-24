@@ -23,8 +23,8 @@ services:
       - 8000:80
     environment:
       - 'PMA_HOST=mysql'
-      - 'PMA_USER=username'
-      - 'PMA_PASSWORD=password'
+      - 'PMA_USER=root'
+      - 'PMA_PASSWORD=rootpassword'
       - 'PMA_PORT=3306'
   game:
     depends_on:

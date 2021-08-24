@@ -5,6 +5,9 @@ CREATE TABLE player_characters (
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
+    
+    `deleted_at` DATETIME NULL,
+    `deleted_by` BIGINT NULL,
 
     PRIMARY KEY (id)
 );
