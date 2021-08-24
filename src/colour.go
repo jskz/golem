@@ -105,13 +105,19 @@ func init() {
 	}
 }
 
-func TranslateColourCodes(s string) string {
+func (client *Client) TranslateColourCodes(s string) string {
 	input := string(s)
 
 	for colour := range AnsiColourCodeTable {
-		input = AnsiColourCodeTable[colour].regularExpression.ReplaceAllString(
-			input,
-			AnsiColourCodeTable[colour].ansiEscapeSequence)
+		if client.ansiEnabled {
+			input = AnsiColourCodeTable[colour].regularExpression.ReplaceAllString(
+				input,
+				AnsiColourCodeTable[colour].ansiEscapeSequence)
+		} else {
+			input = AnsiColourCodeTable[colour].regularExpression.ReplaceAllString(
+				input,
+				"")
+		}
 	}
 
 	return input
