@@ -8,6 +8,7 @@
 package main
 
 import (
+	"database/sql"
 	"log"
 )
 
@@ -24,6 +25,7 @@ type Character struct {
 	pageSize   int
 	pageCursor int
 
+	id    int
 	name  string
 	job   string
 	race  string
@@ -38,6 +40,45 @@ type Character struct {
 
 	shortDescription string
 	longDescription  string
+}
+
+/*
+ * FindPlayerByName returns a reference to the named PC, if such an account
+ * exists.  Character returned may or may not have a nullable client property.
+ *
+ * If the character was not already online in an active session, then attempt
+ * a lookup against the database.
+ */
+func (game *Game) FindPlayerByName(name string) (*Character, error) {
+	for client := range game.clients {
+		if client.character != nil && client.character.name == name {
+			return client.character, nil
+		}
+	}
+
+	/* There was no online player with this name, search the database. */
+	row := game.db.QueryRow(`
+		SELECT
+			id,
+			username
+		FROM
+			player_characters
+		WHERE
+			deleted_at IS NOT NULL
+	`)
+
+	ch := NewCharacter()
+	err := row.Scan(&ch.id, &ch.name)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return ch, nil
 }
 
 func (ch *Character) flushOutput() {
