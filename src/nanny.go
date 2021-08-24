@@ -54,6 +54,10 @@ func (game *Game) nanny(client *Client, message string) {
 	case ConnectionStatePlaying:
 		client.character.Interpret(message)
 
+	case ConnectionStatePassword:
+		output.WriteString("...\r\n")
+		break
+
 	case ConnectionStateName:
 		log.Printf("Guest attempting to login with name: %s\r\n", message)
 
@@ -61,6 +65,17 @@ func (game *Game) nanny(client *Client, message string) {
 
 		if !game.IsValidPCName(name) {
 			output.WriteString("Invalid name, please try another.\r\n\r\nBy what name do you wish to be known? ")
+			break
+		}
+
+		character, err := game.FindPlayerByName(name)
+		if err != nil {
+			panic(err)
+		}
+
+		if character != nil {
+			output.WriteString("Password: ")
+			client.connectionState = ConnectionStatePassword
 			break
 		}
 

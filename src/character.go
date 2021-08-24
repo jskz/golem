@@ -64,8 +64,10 @@ func (game *Game) FindPlayerByName(name string) (*Character, error) {
 		FROM
 			player_characters
 		WHERE
-			deleted_at IS NOT NULL
-	`)
+			username = ?
+		AND
+			deleted_at IS NULL
+	`, name)
 
 	ch := NewCharacter()
 	err := row.Scan(&ch.id, &ch.name)
@@ -123,12 +125,7 @@ func (game *Game) IsValidPCName(name string) bool {
 		}
 	}
 
-	character, err := game.FindPlayerByName(name)
-	if err != nil {
-		panic(err)
-	}
-
-	return character == nil
+	return true
 }
 
 func (ch *Character) send(text string) {
@@ -138,13 +135,11 @@ func (ch *Character) send(text string) {
 		output = ch.client.TranslateColourCodes(output)
 	}
 
-	n, err := ch.Write([]byte(output))
+	_, err := ch.Write([]byte(output))
 	if err != nil {
 		log.Printf("Failed to write to character: %v.\r\n", err)
 		return
 	}
-
-	log.Printf("Successfully wrote %d to character buffer.\r\n", n)
 }
 
 func NewCharacter() *Character {
