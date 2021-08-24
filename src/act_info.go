@@ -84,7 +84,7 @@ func do_who(ch *Character, arguments string) {
 func do_look(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	buf.WriteString("You look around into the void.\r\n")
+	buf.WriteString("{DYou look around into the void.  There's nothing here, yet!{x\r\n")
 	output := buf.String()
 	ch.send(output)
 }

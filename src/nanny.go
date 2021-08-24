@@ -14,7 +14,7 @@ import (
 	"strings"
 )
 
-const JoinedGameFlavourText = "You have entered the world of Golem."
+const JoinedGameFlavourText = "{WYou have entered the world of Golem.{x"
 
 /* Bust a prompt! */
 func (client *Client) displayPrompt() {

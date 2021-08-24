@@ -17,3 +17,5 @@ docker-compose up
 ```
 
 The MUD is exposed on the host's TCP port 4000 by default.
+
+![Some feedback commands and use of ANSI on second day of development](img/2021-08-23.png)

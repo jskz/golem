@@ -49,7 +49,7 @@ func (ch *Character) Interpret(input string) bool {
 	if !ok {
 		/* Send a no such command if there was any command text */
 		if len(command) > 0 {
-			ch.send(fmt.Sprintf("Alas, there is no such command: %s.\r\n", command))
+			ch.send(fmt.Sprintf("{RAlas, there is no such command: %s{x\r\n", command))
 		} else {
 			/* We'll still want a prompt on no input */
 			ch.send("\r\n")
