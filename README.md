@@ -15,11 +15,3 @@ cd golem
 docker build --tag golem:latest .
 docker-compose up
 ```
-
-## Running
-
-```
-./golem
-```
-
-![Early socket server code demonstrated on a Windows desktop](img/early-paging-telnet-server.png)
