@@ -13,6 +13,8 @@ services:
       MYSQL_DATABASE: database
       MYSQL_USER: username
       MYSQL_PASSWORD: password
+    ports:
+      - "33060:3060"
   game:
     depends_on:
       - mysql
