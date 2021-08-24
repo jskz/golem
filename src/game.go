@@ -14,6 +14,10 @@ import (
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
+
+	"github.com/golang-migrate/migrate"
+	"github.com/golang-migrate/migrate/database/mysql"
+	_ "github.com/golang-migrate/migrate/source/file"
 )
 
 type Game struct {
@@ -59,6 +63,23 @@ func NewGame() (*Game, error) {
 	game.db.SetConnMaxLifetime(time.Second * 30)
 	game.db.SetMaxOpenConns(10)
 	game.db.SetMaxIdleConns(10)
+
+	/* Attempt new migrations at startup */
+	driver, _ := mysql.WithInstance(game.db, &mysql.Config{})
+	m, err := migrate.NewWithDatabaseInstance(
+		"file:///migrations",
+		"mysql",
+		driver,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	err = m.Up()
+	if err != nil {
+		return nil, err
+	}
 
 	return game, nil
 }

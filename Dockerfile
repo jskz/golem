@@ -7,6 +7,7 @@ COPY go.sum ./
 
 RUN go mod download
 
+COPY migrations /migrations
 COPY src/*.go ./
 
 RUN go build -o /golem
