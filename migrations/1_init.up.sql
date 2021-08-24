@@ -4,10 +4,10 @@ CREATE TABLE player_characters (
     `password_hash` VARCHAR(60) NOT NULL,
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME NULL ON UPDATE CURRENT_TIMESTAMP,
-    
-    `deleted_at` DATETIME NULL,
-    `deleted_by` BIGINT NULL,
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
 
     PRIMARY KEY (id)
 );
