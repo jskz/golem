@@ -7,7 +7,7 @@ Golem is a from-scratch attempt at a Diku-like MUD implemented with Golang in 20
 ## Requirements
 
 Docker
-## Installation
+## Retrieve, Build, Start
 
 ```
 git clone git@github.com:jskz/golem.git
