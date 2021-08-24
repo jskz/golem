@@ -11,3 +11,5 @@ CREATE TABLE player_characters (
 
     PRIMARY KEY (id)
 );
+
+CREATE INDEX index_pc_username ON player_characters(username);
