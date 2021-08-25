@@ -107,10 +107,11 @@ func (game *Game) Run() {
 			}
 
 		case clientMessage := <-game.clientMessage:
-			log.Printf("Received client message from %s: %s\r\n",
-				clientMessage.client.conn.RemoteAddr().String(),
-				clientMessage.message)
-
+			/*
+				log.Printf("Received client message from %s: %s\r\n",
+					clientMessage.client.conn.RemoteAddr().String(),
+					clientMessage.message)
+			*/
 			game.nanny(clientMessage.client, clientMessage.message)
 
 		case client := <-game.register:

@@ -5,6 +5,12 @@ CREATE TABLE races (
     `display_name` VARCHAR(64) NOT NULL,
     `playable` BOOLEAN NOT NULL,
 
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
+
     PRIMARY KEY (id)
 );
 
@@ -14,6 +20,12 @@ CREATE TABLE jobs (
     `name` VARCHAR(64) NOT NULL,
     `display_name` VARCHAR(64) NOT NULL,
     `playable` BOOLEAN NOT NULL,
+
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
     
     PRIMARY KEY (id)
 );
@@ -41,7 +53,7 @@ CREATE TABLE player_characters (
 
     /* Timestamps & soft deletion */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,

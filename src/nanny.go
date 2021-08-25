@@ -12,6 +12,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 const JoinedGameFlavourText = "{WYou have entered the world of Golem.{x"
@@ -120,12 +122,23 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStateNewPassword:
 		client.connectionState = ConnectionStateConfirmPassword
+		ciphertext, err := bcrypt.GenerateFromPassword([]byte(message), 8)
+		if err != nil {
+			log.Println("Failed to bcrypt user password: ", err)
+			return
+		}
 
+		client.character.temporaryHash = string(ciphertext)
 		output.WriteString("Please confirm your password: ")
 
 	case ConnectionStateConfirmPassword:
-		client.connectionState = ConnectionStateChooseRace
+		if bcrypt.CompareHashAndPassword([]byte(client.character.temporaryHash), []byte(message)) != nil {
 
+			client.connectionState = ConnectionStateNewPassword
+			output.WriteString("Passwords didn't match.\r\nPlease choose a password: ")
+		}
+
+		client.connectionState = ConnectionStateChooseRace
 		output.WriteString("Please choose a race from the following options:\r\n")
 
 		/* Counter value for periodically line-breaking */
@@ -239,6 +252,12 @@ func (game *Game) nanny(client *Client, message string) {
 			}
 
 			output.WriteString("\r\nChoice: ")
+			break
+		}
+
+		if !client.character.Finalize() {
+			log.Printf("Unable to create new character %v, dropping connection.\r\n", client.character)
+			client.conn.Close()
 			break
 		}
 

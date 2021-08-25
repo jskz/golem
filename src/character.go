@@ -53,6 +53,8 @@ type Character struct {
 	maxMana    uint
 	stamina    uint
 	maxStamina uint
+
+	temporaryHash string
 }
 
 /*
@@ -82,6 +84,71 @@ func (game *Game) AttemptLogin(username string, password string) bool {
 	}
 
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
+}
+
+func (ch *Character) Finalize() bool {
+	if ch.client == nil || ch.client.game == nil {
+		/* If somehow an NPC were to try to save, do not allow it. */
+		return false
+	}
+
+	result, err := ch.client.game.db.Exec(`
+		INSERT INTO
+			player_characters(username, password_hash, race_id, job_id, level, health, max_health, mana, max_mana, stamina, max_stamina)
+		VALUES
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, ch.name, ch.temporaryHash, ch.race.Id, ch.job.Id, ch.level, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina)
+	ch.temporaryHash = ""
+	if err != nil {
+		log.Printf("Failed to finalize new character: %v.\r\n", err)
+		return false
+	}
+
+	userId, err := result.LastInsertId()
+	if err != nil {
+		log.Printf("Failed to retrieve insert id: %v.\r\n", err)
+		return false
+	}
+
+	ch.id = int(userId)
+	return true
+}
+
+func (ch *Character) Save() bool {
+	if ch.client == nil || ch.client.game == nil {
+		/* If somehow an NPC were to try to save, do not allow it. */
+		return false
+	}
+
+	result, err := ch.client.game.db.Exec(`
+		UPDATE
+			player_characters
+		SET
+			race_id = ?,
+			job_id = ?,
+			level = ?,
+			health = ?,
+			max_health = ?,
+			mana = ?,
+			max_mana = ?,
+			stamina = ?,
+			max_stamina = ?,
+			updated_at = NOW()
+		WHERE
+			id = ?
+	`, ch.race.Id, ch.job.Id, ch.level, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.id)
+	if err != nil {
+		log.Printf("Failed to save character: %v.\r\n", err)
+		return false
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Printf("Failed to retrieve number of rows affected: %v.\r\n", err)
+		return false
+	}
+
+	return rowsAffected == 1
 }
 
 /*

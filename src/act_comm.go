@@ -52,6 +52,12 @@ func do_ooc(ch *Character, arguments string) {
 	}
 }
 
+func do_save(ch *Character, arguments string) {
+	ch.Save()
+
+	ch.send("Saved.\r\n")
+}
+
 func do_quit(ch *Character, arguments string) {
 	var output strings.Builder
 
