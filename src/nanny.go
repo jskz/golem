@@ -55,8 +55,14 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character.Interpret(message)
 
 	case ConnectionStatePassword:
-		output.WriteString("...\r\n")
-		break
+		if !game.AttemptLogin(client.character.name, message) {
+			client.connectionState = ConnectionStateName
+			output.WriteString("Wrong password.\r\n\r\nBy what name do you wish to be known? ")
+			break
+		}
+
+		client.connectionState = ConnectionStateMessageOfTheDay
+		output.WriteString("[ Press any key to continue ]")
 
 	case ConnectionStateName:
 		log.Printf("Guest attempting to login with name: %s\r\n", message)
@@ -74,6 +80,9 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		if character != nil {
+			client.character = character
+			client.character.client = client
+
 			output.WriteString("Password: ")
 			client.connectionState = ConnectionStatePassword
 			break
@@ -145,7 +154,7 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		client.character.race = race.Name
+		client.character.race = race
 		client.connectionState = ConnectionStateConfirmRace
 		output.WriteString(fmt.Sprintf("\r\nAre you sure you want to be a %s? [y/N] ", race.Name))
 
@@ -181,7 +190,7 @@ func (game *Game) nanny(client *Client, message string) {
 		/* Counter value for periodically line-breaking */
 		index := 0
 
-		for _, job := range JobsTable {
+		for _, job := range JobTable {
 			if !job.Playable {
 				continue
 			}
@@ -204,7 +213,7 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		client.character.job = job.Name
+		client.character.job = job
 		client.connectionState = ConnectionStateConfirmClass
 		output.WriteString(fmt.Sprintf("\r\nAre you sure you want to be a %s? [y/N] ", job.Name))
 
@@ -216,7 +225,7 @@ func (game *Game) nanny(client *Client, message string) {
 			/* Counter value for periodically line-breaking */
 			index := 0
 
-			for _, job := range JobsTable {
+			for _, job := range JobTable {
 				if !job.Playable {
 					continue
 				}

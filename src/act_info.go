@@ -47,11 +47,10 @@ func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
 	buf.WriteString("{D┌─ {WCharacter Information {D────────┐{x\r\n")
-
 	buf.WriteString(fmt.Sprintf("{D│ {wName: %-16s         {D│\r\n", ch.name))
 	buf.WriteString(fmt.Sprintf("{D│ {wLevel: %-3d                     {D│\r\n", ch.level))
-	buf.WriteString(fmt.Sprintf("{D│ {wRace: %-17s        {D│\r\n", RaceTable[ch.race].DisplayName))
-	buf.WriteString(fmt.Sprintf("{D│ {wJob: %-17s         {D│\r\n", JobsTable[ch.job].DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {wRace: %-17s        {D│\r\n", ch.race.DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {wJob: %-17s         {D│\r\n", ch.job.DisplayName))
 	buf.WriteString(fmt.Sprintf("{D│ {wHealth: %-11s            {D│\r\n", fmt.Sprintf("%d/%d", ch.health, ch.maxHealth)))
 	buf.WriteString(fmt.Sprintf("{D│ {wMana: %-11s              {D│\r\n", fmt.Sprintf("%d/%d", ch.mana, ch.maxMana)))
 	buf.WriteString(fmt.Sprintf("{D│ {wStamina: %-11s           {D│\r\n", fmt.Sprintf("%d/%d", ch.stamina, ch.maxStamina)))
@@ -71,9 +70,9 @@ func do_who(ch *Character, arguments string) {
 		/* If the client is "at least" playing, then we will display them in the WHO list */
 		if client.connectionState >= ConnectionStatePlaying && client.character != nil {
 			buf.WriteString(fmt.Sprintf("[%-10s] %s (%s)\r\n",
-				JobsTable[client.character.job].DisplayName,
+				client.character.job.DisplayName,
 				client.character.name,
-				RaceTable[client.character.race].DisplayName))
+				client.character.race.DisplayName))
 		}
 	}
 

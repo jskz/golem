@@ -10,9 +10,25 @@ package main
 import (
 	"database/sql"
 	"log"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 const UnauthenticatedUsername = "unnamed"
+
+type Job struct {
+	Id          uint   `json:"id"`
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Playable    bool   `json:"playable"`
+}
+
+type Race struct {
+	Id          uint   `json:"id"`
+	Name        string `json:"race"`
+	DisplayName string `json:"display_name"`
+	Playable    bool   `json:"playable"`
+}
 
 /*
  * This character structure is shared by both player-characters (human beings
@@ -27,8 +43,8 @@ type Character struct {
 
 	id    int
 	name  string
-	job   string
-	race  string
+	job   *Job
+	race  *Race
 	level uint
 
 	health     uint
@@ -37,9 +53,6 @@ type Character struct {
 	maxMana    uint
 	stamina    uint
 	maxStamina uint
-
-	shortDescription string
-	longDescription  string
 }
 
 /*
@@ -49,9 +62,38 @@ type Character struct {
  * If the character was not already online in an active session, then attempt
  * a lookup against the database.
  */
-func (game *Game) FindPlayerByName(name string) (*Character, error) {
+func (game *Game) AttemptLogin(username string, password string) bool {
+	var hash string
+
+	row := game.db.QueryRow(`
+		SELECT
+			password_hash
+		FROM
+			player_characters
+		WHERE
+			username = ?
+		AND
+			deleted_at IS NULL
+	`, username)
+
+	err := row.Scan(&hash)
+	if err != nil {
+		return false
+	}
+
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
+}
+
+/*
+ * FindPlayerByName returns a reference to the named PC, if such an account
+ * exists.  Character returned may or may not have a nullable client property.
+ *
+ * If the character was not already online in an active session, then attempt
+ * a lookup against the database.
+ */
+func (game *Game) FindPlayerByName(username string) (*Character, error) {
 	for client := range game.clients {
-		if client.character != nil && client.character.name == name {
+		if client.character != nil && client.character.name == username {
 			return client.character, nil
 		}
 	}
@@ -67,7 +109,7 @@ func (game *Game) FindPlayerByName(name string) (*Character, error) {
 			username = ?
 		AND
 			deleted_at IS NULL
-	`, name)
+	`, username)
 
 	ch := NewCharacter()
 	err := row.Scan(&ch.id, &ch.name)
@@ -145,8 +187,9 @@ func (ch *Character) send(text string) {
 func NewCharacter() *Character {
 	character := &Character{}
 
-	character.job = "none"
-	character.race = "human"
+	character.id = -1
+	character.job = nil
+	character.race = nil
 	character.pageSize = 1024
 	character.pages = make([][]byte, 1)
 	character.pages[0] = make([]byte, character.pageSize)

@@ -71,15 +71,19 @@ func NewGame() (*Game, error) {
 		"mysql",
 		driver,
 	)
-
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("Running pending migrations.\r\n")
 
 	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
 		return nil, err
 	}
+
+	game.LoadRaceTable()
+	game.LoadJobTable()
 
 	return game, nil
 }
