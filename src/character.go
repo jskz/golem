@@ -102,7 +102,16 @@ func (game *Game) FindPlayerByName(username string) (*Character, error) {
 	row := game.db.QueryRow(`
 		SELECT
 			id,
-			username
+			username,
+			race_id,
+			job_id,
+			level,
+			health,
+			max_health,
+			mana,
+			max_mana,
+			stamina,
+			max_stamina
 		FROM
 			player_characters
 		WHERE
@@ -112,7 +121,25 @@ func (game *Game) FindPlayerByName(username string) (*Character, error) {
 	`, username)
 
 	ch := NewCharacter()
-	err := row.Scan(&ch.id, &ch.name)
+
+	var raceId uint
+	var jobId uint
+
+	err := row.Scan(&ch.id, &ch.name, &raceId, &jobId, &ch.level, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina)
+
+	/* Sanity check for pointers by race and job id before continuing */
+	_, ok := RaceTable[raceId]
+	if !ok {
+		return nil, nil
+	}
+
+	_, ok = JobTable[jobId]
+	if !ok {
+		return nil, nil
+	}
+
+	ch.race = RaceTable[raceId]
+	ch.job = JobTable[jobId]
 
 	if err != nil {
 		if err == sql.ErrNoRows {

@@ -28,6 +28,8 @@ CREATE TABLE player_characters (
     `race_id` BIGINT NOT NULL,
     `job_id` BIGINT NOT NULL,
 
+    `level` INT NOT NULL,
+
     `health` INT NOT NULL,
     `max_health` INT NOT NULL,
 
