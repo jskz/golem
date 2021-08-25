@@ -133,9 +133,9 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStateConfirmPassword:
 		if bcrypt.CompareHashAndPassword([]byte(client.character.temporaryHash), []byte(message)) != nil {
-
 			client.connectionState = ConnectionStateNewPassword
 			output.WriteString("Passwords didn't match.\r\nPlease choose a password: ")
+			break
 		}
 
 		client.connectionState = ConnectionStateChooseRace
