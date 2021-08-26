@@ -24,6 +24,8 @@ type Game struct {
 	db *sql.DB
 
 	clients map[*Client]bool
+	zones   map[*Zone]bool
+	world   map[uint]*Room
 
 	register        chan *Client
 	unregister      chan *Client
@@ -84,10 +86,10 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
-	World = make(map[uint]*Room)
-
 	game.LoadRaceTable()
 	game.LoadJobTable()
+
+	game.world = make(map[uint]*Room)
 
 	err = game.LoadZones()
 	if err != nil {

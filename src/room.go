@@ -17,10 +17,8 @@ type Room struct {
 	exit       map[uint]*Exit
 }
 
-var World map[uint]*Room
-
 func (game *Game) LoadRoomIndex(index uint) *Room {
-	room, ok := World[index]
+	room, ok := game.world[index]
 	if ok {
 		return room
 	}
