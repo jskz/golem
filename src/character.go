@@ -44,6 +44,8 @@ type Character struct {
 	pageSize   int
 	pageCursor int
 
+	room *Room
+
 	id     int
 	name   string
 	wizard bool
@@ -291,6 +293,7 @@ func NewCharacter() *Character {
 	character.wizard = false
 	character.job = nil
 	character.race = nil
+	character.room = nil
 	character.pageSize = 1024
 	character.pages = make([][]byte, 1)
 	character.pages[0] = make([]byte, character.pageSize)

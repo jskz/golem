@@ -13,12 +13,13 @@ type Room struct {
 	name        string
 	description string
 
-	exit map[uint]*Exit
+	characters map[*Character]bool
+	exit       map[uint]*Exit
 }
 
 var World map[uint]*Room
 
-func LoadRoomIndex(index uint) *Room {
+func (game *Game) LoadRoomIndex(index uint) *Room {
 	room, ok := World[index]
 	if ok {
 		return room

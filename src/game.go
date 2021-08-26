@@ -89,6 +89,11 @@ func NewGame() (*Game, error) {
 	game.LoadRaceTable()
 	game.LoadJobTable()
 
+	err = game.LoadZones()
+	if err != nil {
+		return nil, err
+	}
+
 	return game, nil
 }
 

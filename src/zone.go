@@ -16,3 +16,7 @@ type Zone struct {
 	low  uint
 	high uint
 }
+
+func (game *Game) LoadZones() error {
+	return nil
+}

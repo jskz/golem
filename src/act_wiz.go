@@ -7,8 +7,24 @@
  */
 package main
 
+import "strconv"
+
 func do_shutdown(ch *Character, arguments string) {
 	if ch.client != nil {
 		ch.client.game.shutdownRequest <- true
+	}
+}
+
+func do_goto(ch *Character, arguments string) {
+	id, err := strconv.Atoi(arguments)
+	if err != nil || id <= 0 {
+		ch.send("Goto which room ID?\r\n")
+		return
+	}
+
+	room := ch.client.game.LoadRoomIndex(uint(id))
+	if room == nil {
+		ch.send("No such room.\r\n")
+		return
 	}
 }
