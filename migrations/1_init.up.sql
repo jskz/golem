@@ -18,7 +18,7 @@ CREATE TABLE exits (
     `id` BIGINT NOT NULL,
 
     `room_id` BIGINT NOT NULL,
-    `direction` ENUM('north', 'east', 'south', 'west'),
+    `direction` ENUM('north', 'east', 'south', 'west', 'up', 'down'),
     `to_room_id` BIGINT NULL,
 
     PRIMARY KEY (id),
@@ -111,6 +111,12 @@ VALUES
     (2, 'thief', 'Thief', 1),
     (3, 'mage', 'Mage', 1),
     (4, 'cleric', 'Cleric', 1);
+
+/* Insert an admin character with name password */
+INSERT INTO
+    player_characters(id, username, password_hash, wizard, race_id, job_id, level, health, max_health, mana, max_mana, stamina, max_stamina)
+VALUES
+    (1, 'Admin', '$2a$10$sS5pzrKaD9qeG3ntkT7.gOohefnxSy/9OHR/p1uImyTL2edzYeJzW', 1, 1, 1, 60, 100, 100, 100, 100, 100, 100);
 
 CREATE INDEX index_pc_username ON player_characters(username);
 CREATE INDEX index_race_name ON races(name);

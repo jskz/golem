@@ -25,10 +25,11 @@ type Game struct {
 
 	clients map[*Client]bool
 
-	register      chan *Client
-	unregister    chan *Client
-	quitRequest   chan *Client
-	clientMessage chan ClientTextMessage
+	register        chan *Client
+	unregister      chan *Client
+	quitRequest     chan *Client
+	shutdownRequest chan bool
+	clientMessage   chan ClientTextMessage
 }
 
 func NewGame() (*Game, error) {
@@ -41,6 +42,7 @@ func NewGame() (*Game, error) {
 	game.register = make(chan *Client)
 	game.unregister = make(chan *Client)
 	game.quitRequest = make(chan *Client)
+	game.shutdownRequest = make(chan bool)
 	game.clientMessage = make(chan ClientTextMessage)
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
@@ -133,6 +135,9 @@ func (game *Game) Run() {
 			}
 
 			quit.conn.Close()
+
+		case <-game.shutdownRequest:
+			return
 		}
 	}
 }

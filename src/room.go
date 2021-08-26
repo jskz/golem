@@ -7,8 +7,14 @@
  */
 package main
 
-func do_shutdown(ch *Character, arguments string) {
-	if ch.client != nil {
-		ch.client.game.shutdownRequest <- true
-	}
+type Room struct {
+	id uint
+
+	title       string
+	description string
+}
+
+func LoadRoomIndex(index uint) *Room {
+
+	return nil
 }
