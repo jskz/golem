@@ -16,6 +16,15 @@ const (
 	DirectionDown  = 5
 )
 
+var ReverseDirection = map[int]int{
+	DirectionNorth: DirectionSouth,
+	DirectionEast:  DirectionWest,
+	DirectionSouth: DirectionNorth,
+	DirectionWest:  DirectionEast,
+	DirectionUp:    DirectionDown,
+	DirectionDown:  DirectionUp,
+}
+
 type Exit struct {
 	id        uint
 	direction uint
