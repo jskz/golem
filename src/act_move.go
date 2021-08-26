@@ -16,24 +16,40 @@ const (
 	DirectionDown  = 5
 )
 
+type Exit struct {
+	id        uint
+	direction uint
+	to        *Room
+}
+
+func (room *Room) getExit(direction uint) *Exit {
+	return nil
+}
+
 func (ch *Character) move(direction uint) bool {
-	return true
+	return false
 }
 
 func do_north(ch *Character, arguments string) {
+	ch.move(DirectionNorth)
 }
 
 func do_east(ch *Character, arguments string) {
+	ch.move(DirectionEast)
 }
 
 func do_south(ch *Character, arguments string) {
+	ch.move(DirectionSouth)
 }
 
 func do_west(ch *Character, arguments string) {
+	ch.move(DirectionWest)
 }
 
 func do_up(ch *Character, arguments string) {
+	ch.move(DirectionUp)
 }
 
 func do_down(ch *Character, arguments string) {
+	ch.move(DirectionDown)
 }

@@ -7,22 +7,12 @@
  */
 package main
 
-type Room struct {
+type Zone struct {
 	id uint
 
-	name        string
-	description string
+	name    string
+	authors []string
 
-	exit map[uint]*Exit
-}
-
-var World map[uint]*Room
-
-func LoadRoomIndx(index uint) *Room {
-	room, ok := World[index]
-	if ok {
-		return room
-	}
-
-	return nil
+	low  uint
+	high uint
 }

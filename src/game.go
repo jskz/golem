@@ -84,6 +84,8 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
+	World = make(map[uint]*Room)
+
 	game.LoadRaceTable()
 	game.LoadJobTable()
 

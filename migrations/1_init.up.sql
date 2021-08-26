@@ -1,9 +1,9 @@
-CREATE TABLE rooms (
+CREATE TABLE zones (
     `id` BIGINT NOT NULL,
 
-    `title` VARCHAR(255),
-    `description` TEXT,
-    `flags` INT,
+    `name` VARCHAR(255),
+    `low` INT NOT NULL,
+    `high` INT NOT NULL,
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
@@ -13,6 +13,27 @@ CREATE TABLE rooms (
 
     PRIMARY KEY (id)
 );
+
+CREATE TABLE rooms (
+    `id` BIGINT NOT NULL,
+    `zone_id` BIGINT NOT NULL,
+
+    `name` VARCHAR(255),
+    `description` TEXT,
+    `flags` INT,
+
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (zone_id) REFERENCES zones(id);
+);
+
+INSERT INTO zones(id, name, low, high) VALUES (1, 'Limbo', 1, 99);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 0);
 
 CREATE TABLE exits (
     `id` BIGINT NOT NULL,
