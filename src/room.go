@@ -18,7 +18,7 @@ type Room struct {
 
 var World map[uint]*Room
 
-func LoadRoomIndx(index uint) *Room {
+func LoadRoomIndex(index uint) *Room {
 	room, ok := World[index]
 	if ok {
 		return room
