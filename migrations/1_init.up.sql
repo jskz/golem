@@ -29,7 +29,7 @@ CREATE TABLE rooms (
     `deleted_by` BIGINT DEFAULT NULL,
 
     PRIMARY KEY (id),
-    FOREIGN KEY (zone_id) REFERENCES zones(id);
+    FOREIGN KEY (zone_id) REFERENCES zones(id)
 );
 
 CREATE TABLE exits (

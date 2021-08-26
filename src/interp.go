@@ -37,6 +37,14 @@ func init() {
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
 	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}
 
+	/* act_move.go */
+	CommandTable["north"] = Command{Name: "north", CmdFunc: do_north}
+	CommandTable["east"] = Command{Name: "east", CmdFunc: do_east}
+	CommandTable["south"] = Command{Name: "south", CmdFunc: do_south}
+	CommandTable["west"] = Command{Name: "west", CmdFunc: do_west}
+	CommandTable["up"] = Command{Name: "up", CmdFunc: do_up}
+	CommandTable["down"] = Command{Name: "down", CmdFunc: do_down}
+
 	/* act_wiz.go */
 	CommandTable["goto"] = Command{Name: "goto", CmdFunc: do_goto}
 	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown}

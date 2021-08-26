@@ -29,6 +29,7 @@ type Exit struct {
 	id        uint
 	direction uint
 	to        *Room
+	flags     int
 }
 
 func (room *Room) getExit(direction uint) *Exit {
