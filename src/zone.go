@@ -33,6 +33,8 @@ func (game *Game) LoadZones() error {
 		return err
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		zone := &Zone{}
 

@@ -33,6 +33,8 @@ func (game *Game) LoadRaceTable() {
 		return
 	}
 
+	defer rows.Close()
+
 	for rows.Next() {
 		race := &Race{}
 
@@ -65,6 +67,8 @@ func (game *Game) LoadJobTable() {
 	if err != nil {
 		return
 	}
+
+	defer rows.Close()
 
 	for rows.Next() {
 		job := &Job{}
