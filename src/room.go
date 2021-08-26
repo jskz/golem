@@ -7,6 +7,8 @@
  */
 package main
 
+import "database/sql"
+
 type Room struct {
 	id uint
 
@@ -17,11 +19,50 @@ type Room struct {
 	exit       map[uint]*Exit
 }
 
-func (game *Game) LoadRoomIndex(index uint) *Room {
-	room, ok := game.world[index]
+func (room *Room) addCharacter(ch *Character) {
+	_, ok := room.characters[ch]
 	if ok {
-		return room
+		return
 	}
 
-	return nil
+	room.characters[ch] = true
+	ch.room = room
+}
+
+func (room *Room) removeCharacter(ch *Character) {
+	delete(room.characters, ch)
+	ch.room = nil
+}
+
+func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
+	room, ok := game.world[index]
+	if ok {
+		return room, nil
+	}
+
+	row := game.db.QueryRow(`
+		SELECT
+			id,
+			name,
+			description
+		FROM
+			rooms
+		WHERE
+			id = ?
+		AND
+			deleted_at IS NULL
+	`, index)
+
+	room = &Room{}
+	err := row.Scan(&room.id, &room.name, &room.description)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	return room, nil
 }

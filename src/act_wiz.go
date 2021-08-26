@@ -22,9 +22,14 @@ func do_goto(ch *Character, arguments string) {
 		return
 	}
 
-	room := ch.client.game.LoadRoomIndex(uint(id))
-	if room == nil {
+	room, err := ch.client.game.LoadRoomIndex(uint(id))
+	if err != nil || room == nil {
 		ch.send("No such room.\r\n")
 		return
+	}
+
+	if ch.room != nil {
+		ch.room.removeCharacter(ch)
+		room.addCharacter(ch)
 	}
 }
