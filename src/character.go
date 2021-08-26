@@ -30,6 +30,9 @@ type Race struct {
 	Playable    bool   `json:"playable"`
 }
 
+const LevelAdmin = 60
+const LevelHero = 50
+
 /*
  * This character structure is shared by both player-characters (human beings
  * connected through a session instance available via the client pointer.)
@@ -41,11 +44,12 @@ type Character struct {
 	pageSize   int
 	pageCursor int
 
-	id    int
-	name  string
-	job   *Job
-	race  *Race
-	level uint
+	id     int
+	name   string
+	wizard bool
+	job    *Job
+	race   *Race
+	level  uint
 
 	health     uint
 	maxHealth  uint
@@ -124,6 +128,7 @@ func (ch *Character) Save() bool {
 		UPDATE
 			player_characters
 		SET
+			wizard = ?,
 			race_id = ?,
 			job_id = ?,
 			level = ?,
@@ -136,7 +141,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.race.Id, ch.job.Id, ch.level, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.id)
+	`, ch.wizard, ch.race.Id, ch.job.Id, ch.level, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -170,6 +175,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, error) {
 		SELECT
 			id,
 			username,
+			wizard,
 			race_id,
 			job_id,
 			level,
@@ -192,7 +198,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.id, &ch.name, &raceId, &jobId, &ch.level, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina)
+	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &raceId, &jobId, &ch.level, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina)
 
 	/* Sanity check for pointers by race and job id before continuing */
 	_, ok := RaceTable[raceId]
@@ -282,6 +288,7 @@ func NewCharacter() *Character {
 	character := &Character{}
 
 	character.id = -1
+	character.wizard = false
 	character.job = nil
 	character.race = nil
 	character.pageSize = 1024

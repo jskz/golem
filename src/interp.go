@@ -36,6 +36,9 @@ func init() {
 	CommandTable["quit"] = Command{Name: "quit", CmdFunc: do_quit}
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
 	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}
+
+	/* act_wiz.go */
+	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown}
 }
 
 func (ch *Character) Interpret(input string) bool {

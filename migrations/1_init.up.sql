@@ -1,3 +1,31 @@
+CREATE TABLE rooms (
+    `id` BIGINT NOT NULL,
+
+    `title` VARCHAR(255),
+    `description` TEXT,
+    `flags` INT,
+
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
+
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE exits (
+    `id` BIGINT NOT NULL,
+
+    `room_id` BIGINT NOT NULL,
+    `direction` ENUM('north', 'east', 'south', 'west'),
+    `to_room_id` BIGINT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (room_id) REFERENCES rooms(id),
+    FOREIGN KEY (to_room_id) REFERENCES rooms(id)
+);
+
 CREATE TABLE races (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
 
@@ -35,6 +63,9 @@ CREATE TABLE player_characters (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
     `username` VARCHAR(64) NOT NULL,
     `password_hash` VARCHAR(60) NOT NULL,
+
+    /* Admin status */
+    `wizard` BOOLEAN NOT NULL,
 
     /* Gameplay fields */
     `race_id` BIGINT NOT NULL,
