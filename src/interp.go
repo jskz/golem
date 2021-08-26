@@ -38,6 +38,7 @@ func init() {
 	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}
 
 	/* act_wiz.go */
+	CommandTable["goto"] = Command{Name: "goto", CmdFunc: do_goto}
 	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown}
 }
 
