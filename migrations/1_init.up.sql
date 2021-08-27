@@ -49,8 +49,8 @@ INSERT INTO zones(id, name, low, high) VALUES (1, 'Limbo', 1, 99);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 0);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 0);
 
-INSERT INTO exits(id, room_id, to_room_id, direction, flags,) VALUES (1, 1, 2, 0, 0);
-INSERT INTO exits(id, room_id, to_room_id, direction, flags,) VALUES (1, 2, 1, 2, 0);
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 0);
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 2, 1, 2, 0);
 
 CREATE TABLE races (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
