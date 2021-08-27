@@ -48,6 +48,7 @@ func (room *Room) getExit(direction uint) *Exit {
 
 func (ch *Character) move(direction uint) bool {
 	if ch.room == nil {
+		ch.Send("{RAlas, you cannot go that way.{x\r\n")
 		return false
 	}
 

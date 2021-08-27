@@ -78,13 +78,21 @@ func do_who(ch *Character, arguments string) {
 	}
 
 	sort.Slice(characters, func(i int, j int) bool {
-		return characters[i].level < characters[j].level
+		return characters[i].level > characters[j].level
 	})
 
 	for _, character := range characters {
-		buf.WriteString(fmt.Sprintf("[%-10s] %s (%s)\r\n",
+		var flagsString strings.Builder
+
+		if character.afk != nil {
+			flagsString.WriteString("{G[AFK]{x ")
+		}
+
+		buf.WriteString(fmt.Sprintf("[%3d][%-10s] %s %s(%s)\r\n",
+			character.level,
 			character.job.DisplayName,
 			character.name,
+			flagsString.String(),
 			character.race.DisplayName))
 	}
 

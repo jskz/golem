@@ -13,6 +13,32 @@ import (
 	"time"
 )
 
+type AwayFromKeyboard struct {
+	startedAt time.Time
+	message   string
+}
+
+func do_afk(ch *Character, arguments string) {
+	var reason string = "currently away"
+
+	if len(arguments) != 0 {
+		reason = string(arguments)
+	}
+
+	if ch.afk != nil {
+		ch.Send("{GYou have returned from AFK.{x\r\n")
+		ch.afk = nil
+		return
+	}
+
+	ch.afk = &AwayFromKeyboard{
+		startedAt: time.Now(),
+		message:   string(reason),
+	}
+
+	ch.Send(fmt.Sprintf("{GYou are now AFK: %s{x\r\n", ch.afk.message))
+}
+
 /* say will be room-specific */
 func do_say(ch *Character, arguments string) {
 	var buf strings.Builder

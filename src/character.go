@@ -53,6 +53,8 @@ type Character struct {
 	race   *Race
 	level  uint
 
+	afk *AwayFromKeyboard
+
 	health     uint
 	maxHealth  uint
 	mana       uint
@@ -291,6 +293,7 @@ func NewCharacter() *Character {
 
 	character.id = -1
 	character.wizard = false
+	character.afk = nil
 	character.job = nil
 	character.race = nil
 	character.room = nil

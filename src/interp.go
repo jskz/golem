@@ -32,6 +32,7 @@ func init() {
 	/* Commands table entries which are manually initialized, grouped by file */
 
 	/* act_comm.go */
+	CommandTable["afk"] = Command{Name: "afk", CmdFunc: do_afk}
 	CommandTable["ooc"] = Command{Name: "ooc", CmdFunc: do_ooc}
 	CommandTable["say"] = Command{Name: "say", CmdFunc: do_say}
 	CommandTable["save"] = Command{Name: "save", CmdFunc: do_save}
