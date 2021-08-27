@@ -33,7 +33,7 @@ type Exit struct {
 }
 
 func (room *Room) getExit(direction uint) *Exit {
-	return nil
+	return room.exit[direction]
 }
 
 func (ch *Character) move(direction uint) bool {
@@ -46,6 +46,8 @@ func (ch *Character) move(direction uint) bool {
 		ch.send("{RAlas, you cannot go that way.{x\r\n")
 		return false
 	}
+
+	/* Is the exit closed, etc. */
 
 	ch.room.removeCharacter(ch)
 	exit.to.addCharacter(ch)
