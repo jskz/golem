@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -151,6 +152,7 @@ func (game *Game) Run() {
 			quit.conn.Close()
 
 		case <-game.shutdownRequest:
+			os.Exit(0)
 			return
 		}
 	}
