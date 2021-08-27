@@ -88,6 +88,12 @@ func do_look(ch *Character, arguments string) {
 		return
 	}
 
-	buf.WriteString(fmt.Sprintf("\r\n{Y%-40s\r\n{D(----------------------------------------)\r\n{w   %s{x\r\n", ch.room.name, ch.room.description))
+	buf.WriteString(fmt.Sprintf("\r\n{Y  %-40s\r\n", ch.room.name))
+	buf.WriteString("{D(----------------------------------------)\r\n")
+	buf.WriteString(fmt.Sprintf("{w   %s{x\r\n", ch.room.description))
+
 	ch.send(buf.String())
+
+	ch.room.listObjectsToCharacter(ch)
+	ch.room.listOtherRoomCharactersToCharacter(ch)
 }

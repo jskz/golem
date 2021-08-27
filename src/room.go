@@ -7,7 +7,11 @@
  */
 package main
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+	"strings"
+)
 
 type Room struct {
 	id uint
@@ -32,6 +36,22 @@ func (room *Room) addCharacter(ch *Character) {
 func (room *Room) removeCharacter(ch *Character) {
 	delete(room.characters, ch)
 	ch.room = nil
+}
+
+func (room *Room) listObjectsToCharacter(ch *Character) {
+
+}
+
+func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
+	var output strings.Builder
+
+	for rch := range room.characters {
+		if rch != ch {
+			output.WriteString(fmt.Sprintf("{G%s is here.{x\r\n", rch.name))
+		}
+	}
+
+	ch.send(output.String())
 }
 
 func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
@@ -66,5 +86,6 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 		return nil, err
 	}
 
+	game.world[room.id] = room
 	return room, nil
 }

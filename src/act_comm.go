@@ -22,14 +22,16 @@ func do_say(ch *Character, arguments string) {
 		return
 	}
 
-	buf.WriteString(fmt.Sprintf("{C%s says \"%s{C\"{x\r\n", ch.name, arguments))
-	output := buf.String()
-
 	ch.send(fmt.Sprintf("{CYou say \"%s{C\"{x\r\n", arguments))
 
-	for client := range ch.client.game.clients {
-		if client.character != nil && client.character != ch && client.connectionState == ConnectionStatePlaying {
-			client.character.send(output)
+	buf.WriteString(fmt.Sprintf("\r\n{C%s says \"%s{C\"{x\r\n", ch.name, arguments))
+	output := buf.String()
+
+	if ch.room != nil {
+		for rch := range ch.room.characters {
+			if rch != ch {
+				rch.send(output)
+			}
 		}
 	}
 }
