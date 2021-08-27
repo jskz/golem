@@ -14,6 +14,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/dop251/goja"
+
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/golang-migrate/migrate"
@@ -23,6 +25,7 @@ import (
 
 type Game struct {
 	db *sql.DB
+	vm *goja.Runtime
 
 	clients map[*Client]bool
 	zones   map[*Zone]bool
@@ -98,6 +101,11 @@ func NewGame() (*Game, error) {
 	}
 
 	err = game.FixExits()
+	if err != nil {
+		return nil, err
+	}
+
+	err = game.InitScripting()
 	if err != nil {
 		return nil, err
 	}

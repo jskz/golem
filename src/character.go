@@ -272,7 +272,7 @@ func (game *Game) IsValidPCName(name string) bool {
 	return true
 }
 
-func (ch *Character) send(text string) {
+func (ch *Character) Send(text string) {
 	var output string = string(text)
 
 	if ch.client != nil {

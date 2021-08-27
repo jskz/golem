@@ -10,12 +10,16 @@ package main
 import (
 	"fmt"
 	"strings"
+
+	"github.com/dop251/goja"
 )
 
 type Command struct {
 	Name         string
 	MinimumLevel uint
 	CmdFunc      func(ch *Character, arguments string)
+	Scripted     bool
+	Callback     goja.Callable
 }
 
 var CommandTable map[string]Command
@@ -47,11 +51,16 @@ func init() {
 	CommandTable["down"] = Command{Name: "down", CmdFunc: do_down}
 
 	/* act_wiz.go */
+	CommandTable["exec"] = Command{Name: "exec", CmdFunc: do_exec, MinimumLevel: LevelAdmin}
 	CommandTable["goto"] = Command{Name: "goto", CmdFunc: do_goto, MinimumLevel: LevelHero + 1}
 	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown, MinimumLevel: LevelAdmin}
 }
 
 func (ch *Character) Interpret(input string) bool {
+	defer func() {
+		recover()
+	}()
+
 	words := strings.Split(input, " ")
 	if len(words) < 1 {
 		return false
@@ -64,16 +73,23 @@ func (ch *Character) Interpret(input string) bool {
 	if !ok || ok && ch.level < val.MinimumLevel {
 		/* Send a no such command if there was any command text */
 		if len(command) > 0 {
-			ch.send(fmt.Sprintf("{RAlas, there is no such command: %s{x\r\n", command))
+			ch.Send(fmt.Sprintf("{RAlas, there is no such command: %s{x\r\n", command))
 		} else {
 			/* We'll still want a prompt on no input */
-			ch.send("\r\n")
+			ch.Send("\r\n")
 		}
 
 		return false
 	}
 
+	rest := strings.Join(words, " ")
+
 	/* Call the command func with the remaining command words joined. */
-	val.CmdFunc(ch, strings.Join(words, " "))
+	if val.Scripted {
+		val.Callback(ch.client.game.vm.ToValue(ch), ch.client.game.vm.ToValue(rest))
+		return true
+	}
+
+	val.CmdFunc(ch, rest)
 	return true
 }

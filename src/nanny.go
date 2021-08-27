@@ -267,7 +267,7 @@ func (game *Game) nanny(client *Client, message string) {
 	case ConnectionStateMessageOfTheDay:
 		client.connectionState = ConnectionStatePlaying
 
-		client.character.send(fmt.Sprintf("%s\r\n", JoinedGameFlavourText))
+		client.character.Send(fmt.Sprintf("%s\r\n", JoinedGameFlavourText))
 	}
 
 	if client.connectionState != ConnectionStatePlaying && output.Len() > 0 {

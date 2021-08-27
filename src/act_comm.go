@@ -18,11 +18,11 @@ func do_say(ch *Character, arguments string) {
 	var buf strings.Builder
 
 	if len(arguments) == 0 {
-		ch.send("{CSay what?{x\r\n")
+		ch.Send("{CSay what?{x\r\n")
 		return
 	}
 
-	ch.send(fmt.Sprintf("{CYou say \"%s{C\"{x\r\n", arguments))
+	ch.Send(fmt.Sprintf("{CYou say \"%s{C\"{x\r\n", arguments))
 
 	buf.WriteString(fmt.Sprintf("\r\n{C%s says \"%s{C\"{x\r\n", ch.name, arguments))
 	output := buf.String()
@@ -30,7 +30,7 @@ func do_say(ch *Character, arguments string) {
 	if ch.room != nil {
 		for rch := range ch.room.characters {
 			if rch != ch {
-				rch.send(output)
+				rch.Send(output)
 			}
 		}
 	}
@@ -40,7 +40,7 @@ func do_ooc(ch *Character, arguments string) {
 	var buf strings.Builder
 
 	if len(arguments) == 0 {
-		ch.send("{MWhat message do you wish to globally send out-of-character?{x\r\n")
+		ch.Send("{MWhat message do you wish to globally send out-of-character?{x\r\n")
 		return
 	}
 
@@ -49,7 +49,7 @@ func do_ooc(ch *Character, arguments string) {
 
 	for client := range ch.client.game.clients {
 		if client.character != nil && client.connectionState == ConnectionStatePlaying {
-			client.character.send(output)
+			client.character.Send(output)
 		}
 	}
 }
@@ -57,7 +57,7 @@ func do_ooc(ch *Character, arguments string) {
 func do_save(ch *Character, arguments string) {
 	ch.Save()
 
-	ch.send("Saved.\r\n")
+	ch.Send("Saved.\r\n")
 }
 
 func do_quit(ch *Character, arguments string) {
@@ -69,6 +69,6 @@ func do_quit(ch *Character, arguments string) {
 	output.WriteString("\r\n{RYou are leaving the game world.\r\n")
 	output.WriteString(fmt.Sprintf("You were connected for %d seconds.{x\r\n", seconds))
 
-	ch.send(output.String())
+	ch.Send(output.String())
 	ch.client.conn.Close()
 }

@@ -52,7 +52,7 @@ func (ch *Character) move(direction uint) bool {
 
 	exit := ch.room.getExit(direction)
 	if exit == nil || exit.to == nil {
-		ch.send("{RAlas, you cannot go that way.{x\r\n")
+		ch.Send("{RAlas, you cannot go that way.{x\r\n")
 		return false
 	}
 

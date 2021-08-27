@@ -43,7 +43,7 @@ func do_help(ch *Character, arguments string) {
 		buf.WriteString("\r\n")
 	}
 
-	ch.send(buf.String())
+	ch.Send(buf.String())
 }
 
 /* Display relevant game information about the player's character. */
@@ -61,7 +61,7 @@ func do_score(ch *Character, arguments string) {
 	buf.WriteString("{D└────────────────────────────────┘{x\r\n")
 
 	output := buf.String()
-	ch.send(output)
+	ch.Send(output)
 }
 
 /* Display a list of players online (and visible to the current player character!) */
@@ -81,14 +81,14 @@ func do_who(ch *Character, arguments string) {
 	}
 
 	output := buf.String()
-	ch.send(output)
+	ch.Send(output)
 }
 
 func do_look(ch *Character, arguments string) {
 	var buf strings.Builder
 
 	if ch.room == nil {
-		ch.send("{DYou look around into the void.  There's nothing here, yet!{x\r\n")
+		ch.Send("{DYou look around into the void.  There's nothing here, yet!{x\r\n")
 		return
 	}
 
@@ -105,7 +105,7 @@ func do_look(ch *Character, arguments string) {
 		buf.WriteString(fmt.Sprintf("{W[Exits: %s]{x\r\n", exitsString.String()))
 	}
 
-	ch.send(buf.String())
+	ch.Send(buf.String())
 
 	ch.room.listObjectsToCharacter(ch)
 	ch.room.listOtherRoomCharactersToCharacter(ch)

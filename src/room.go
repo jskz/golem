@@ -52,7 +52,7 @@ func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 		}
 	}
 
-	ch.send(output.String())
+	ch.Send(output.String())
 }
 
 func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
