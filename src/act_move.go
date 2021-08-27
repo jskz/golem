@@ -14,6 +14,7 @@ const (
 	DirectionWest  = 3
 	DirectionUp    = 4
 	DirectionDown  = 5
+	DirectionMax   = 6
 )
 
 var ExitName = map[uint]string{

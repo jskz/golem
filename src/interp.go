@@ -68,9 +68,9 @@ func (ch *Character) Interpret(input string) bool {
 
 	/* Extract the command and shift it out of the input words */
 	command, words := strings.ToLower(words[0]), words[1:]
-	val, ok := CommandTable[command]
 
-	if !ok || ok && ch.level < val.MinimumLevel {
+	val, ok := CommandTable[command]
+	if !ok || (ok && ch.level < val.MinimumLevel) {
 		/* Send a no such command if there was any command text */
 		if len(command) > 0 {
 			ch.Send(fmt.Sprintf("{RAlas, there is no such command: %s{x\r\n", command))

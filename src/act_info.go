@@ -98,8 +98,12 @@ func do_look(ch *Character, arguments string) {
 
 	if len(ch.room.exit) > 0 {
 		var exitsString strings.Builder
-		for _, exit := range ch.room.exit {
-			exitsString.WriteString(ExitName[exit.direction])
+
+		for direction := uint(0); direction < DirectionMax; direction++ {
+			_, ok := ch.room.exit[direction]
+			if ok {
+				exitsString.WriteString(ExitName[direction])
+			}
 		}
 
 		buf.WriteString(fmt.Sprintf("{W[Exits: %s]{x\r\n", exitsString.String()))

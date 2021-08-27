@@ -110,8 +110,6 @@ func (game *Game) FixExits() error {
 
 	defer rows.Close()
 
-	var k int = 0
-
 	for rows.Next() {
 		var err error
 
@@ -133,8 +131,6 @@ func (game *Game) FixExits() error {
 
 		from.exit[exit.direction] = exit
 	}
-
-	log.Printf("Loaded %d exits from database.\r\n", k)
 
 	return nil
 }
