@@ -27,6 +27,10 @@ func do_help(ch *Character, arguments string) {
 	sort.Strings(commands)
 
 	for _, command := range commands {
+		if ch.level < CommandTable[command].MinimumLevel {
+			continue
+		}
+
 		buf.WriteString(fmt.Sprintf("%-10s ", command))
 		index++
 
