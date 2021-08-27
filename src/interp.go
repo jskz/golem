@@ -14,7 +14,7 @@ import (
 
 type Command struct {
 	Name         string
-	MinimumLevel int
+	MinimumLevel uint
 	CmdFunc      func(ch *Character, arguments string)
 }
 
@@ -60,7 +60,8 @@ func (ch *Character) Interpret(input string) bool {
 	/* Extract the command and shift it out of the input words */
 	command, words := strings.ToLower(words[0]), words[1:]
 	val, ok := CommandTable[command]
-	if !ok {
+
+	if !ok || ok && ch.level < val.MinimumLevel {
 		/* Send a no such command if there was any command text */
 		if len(command) > 0 {
 			ch.send(fmt.Sprintf("{RAlas, there is no such command: %s{x\r\n", command))
@@ -68,6 +69,7 @@ func (ch *Character) Interpret(input string) bool {
 			/* We'll still want a prompt on no input */
 			ch.send("\r\n")
 		}
+
 		return false
 	}
 
