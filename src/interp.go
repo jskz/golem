@@ -20,6 +20,7 @@ type Command struct {
 	CmdFunc      func(ch *Character, arguments string)
 	Scripted     bool
 	Callback     goja.Callable
+	Hidden       bool
 }
 
 var CommandTable map[string]Command
@@ -49,6 +50,13 @@ func init() {
 	CommandTable["west"] = Command{Name: "west", CmdFunc: do_west}
 	CommandTable["up"] = Command{Name: "up", CmdFunc: do_up}
 	CommandTable["down"] = Command{Name: "down", CmdFunc: do_down}
+
+	CommandTable["n"] = Command{Name: "north", CmdFunc: do_north, Hidden: true}
+	CommandTable["e"] = Command{Name: "east", CmdFunc: do_east, Hidden: true}
+	CommandTable["s"] = Command{Name: "south", CmdFunc: do_south, Hidden: true}
+	CommandTable["w"] = Command{Name: "west", CmdFunc: do_west, Hidden: true}
+	CommandTable["u"] = Command{Name: "up", CmdFunc: do_up, Hidden: true}
+	CommandTable["d"] = Command{Name: "down", CmdFunc: do_down, Hidden: true}
 
 	/* act_wiz.go */
 	CommandTable["exec"] = Command{Name: "exec", CmdFunc: do_exec, MinimumLevel: LevelAdmin}
