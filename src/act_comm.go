@@ -70,7 +70,7 @@ func do_ooc(ch *Character, arguments string) {
 		return
 	}
 
-	buf.WriteString(fmt.Sprintf("{M[OOC] %s: %s{x\r\n", ch.name, arguments))
+	buf.WriteString(fmt.Sprintf("\r\n{M[OOC] %s: %s{x\r\n", ch.name, arguments))
 	output := buf.String()
 
 	for client := range ch.client.game.clients {
