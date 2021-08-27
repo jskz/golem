@@ -46,12 +46,13 @@ type Character struct {
 
 	room *Room
 
-	id     int
-	name   string
-	wizard bool
-	job    *Job
-	race   *Race
-	level  uint
+	id         int
+	name       string
+	wizard     bool
+	job        *Job
+	race       *Race
+	level      uint
+	experience uint
 
 	afk *AwayFromKeyboard
 
@@ -102,10 +103,10 @@ func (ch *Character) Finalize() bool {
 
 	result, err := ch.client.game.db.Exec(`
 		INSERT INTO
-			player_characters(username, password_hash, wizard, race_id, job_id, level, health, max_health, mana, max_mana, stamina, max_stamina)
+			player_characters(username, password_hash, wizard, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.name, ch.temporaryHash, 0, ch.race.Id, ch.job.Id, ch.level, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina)
+	`, ch.name, ch.temporaryHash, 0, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -136,6 +137,7 @@ func (ch *Character) Save() bool {
 			race_id = ?,
 			job_id = ?,
 			level = ?,
+			experience = ?,
 			health = ?,
 			max_health = ?,
 			mana = ?,
@@ -145,7 +147,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.wizard, ch.race.Id, ch.job.Id, ch.level, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.id)
+	`, ch.wizard, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -183,6 +185,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, error) {
 			race_id,
 			job_id,
 			level,
+			experience,
 			health,
 			max_health,
 			mana,
@@ -202,7 +205,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &raceId, &jobId, &ch.level, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina)
+	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &raceId, &jobId, &ch.level, &ch.experience, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina)
 
 	/* Sanity check for pointers by race and job id before continuing */
 	_, ok := RaceTable[raceId]
@@ -305,6 +308,7 @@ func NewCharacter() *Character {
 	character.name = UnauthenticatedUsername
 	character.client = nil
 	character.level = 0
+	character.experience = 0
 
 	return character
 }

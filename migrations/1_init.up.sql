@@ -98,6 +98,7 @@ CREATE TABLE player_characters (
     `job_id` BIGINT NOT NULL,
 
     `level` INT NOT NULL,
+    `experience` BIGINT NOT NULL,
 
     `health` INT NOT NULL,
     `max_health` INT NOT NULL,
@@ -140,9 +141,9 @@ VALUES
 
 /* Insert an admin character with name password */
 INSERT INTO
-    player_characters(id, username, password_hash, wizard, race_id, job_id, level, health, max_health, mana, max_mana, stamina, max_stamina)
+    player_characters(id, username, password_hash, wizard, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
 VALUES
-    (1, 'Admin', '$2a$10$sS5pzrKaD9qeG3ntkT7.gOohefnxSy/9OHR/p1uImyTL2edzYeJzW', 1, 1, 1, 60, 100, 100, 100, 100, 100, 100);
+    (1, 'Admin', '$2a$10$sS5pzrKaD9qeG3ntkT7.gOohefnxSy/9OHR/p1uImyTL2edzYeJzW', 1, 1, 1, 60, 0, 100, 100, 100, 100, 100, 100);
 
 CREATE INDEX index_pc_username ON player_characters(username);
 CREATE INDEX index_race_name ON races(name);
