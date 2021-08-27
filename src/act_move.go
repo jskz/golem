@@ -37,7 +37,20 @@ func (room *Room) getExit(direction uint) *Exit {
 }
 
 func (ch *Character) move(direction uint) bool {
-	return false
+	if ch.room == nil {
+		return false
+	}
+
+	exit := ch.room.getExit(direction)
+	if exit == nil || exit.to == nil {
+		ch.send("{RAlas, you cannot go that way.{x\r\n")
+		return false
+	}
+
+	ch.room.removeCharacter(ch)
+	exit.to.addCharacter(ch)
+	do_look(ch, "")
+	return true
 }
 
 func do_north(ch *Character, arguments string) {
