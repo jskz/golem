@@ -16,7 +16,16 @@ const (
 	DirectionDown  = 5
 )
 
-var ReverseDirection = map[int]int{
+var ExitName = map[uint]string{
+	DirectionNorth: "north",
+	DirectionEast:  "east",
+	DirectionSouth: "south",
+	DirectionWest:  "west",
+	DirectionUp:    "up",
+	DirectionDown:  "down",
+}
+
+var ReverseDirection = map[uint]int{
 	DirectionNorth: DirectionSouth,
 	DirectionEast:  DirectionWest,
 	DirectionSouth: DirectionNorth,

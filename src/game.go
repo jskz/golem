@@ -96,6 +96,11 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
+	err = game.FixExits()
+	if err != nil {
+		return nil, err
+	}
+
 	return game, nil
 }
 

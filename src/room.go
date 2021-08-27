@@ -10,6 +10,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -88,4 +89,52 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 
 	game.world[room.id] = room
 	return room, nil
+}
+
+func (game *Game) FixExits() error {
+	log.Printf("Fixing exits.\r\n")
+
+	rows, err := game.db.Query(`
+		SELECT
+			id,
+			room_id,
+			to_room_id,
+			direction,
+			flags
+		FROM
+			exits
+	`)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	var k int = 0
+
+	for rows.Next() {
+		var err error
+
+		exit := &Exit{}
+
+		var roomId int
+		var toRoomId int
+
+		rows.Scan(&exit.id, &roomId, &toRoomId, &exit.direction, &exit.flags)
+		exit.to, err = game.LoadRoomIndex(uint(toRoomId))
+		if err != nil {
+			continue
+		}
+
+		from, err := game.LoadRoomIndex(uint(roomId))
+		if err != nil {
+			continue
+		}
+
+		from.exit[exit.direction] = exit
+	}
+
+	log.Printf("Loaded %d exits from database.\r\n", k)
+
+	return nil
 }

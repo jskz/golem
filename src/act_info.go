@@ -92,6 +92,15 @@ func do_look(ch *Character, arguments string) {
 	buf.WriteString("{D(----------------------------------------)\r\n")
 	buf.WriteString(fmt.Sprintf("{w   %s{x\r\n", ch.room.description))
 
+	if len(ch.room.exit) > 0 {
+		var exitsString strings.Builder
+		for _, exit := range ch.room.exit {
+			exitsString.WriteString(ExitName[exit.direction])
+		}
+
+		buf.WriteString(fmt.Sprintf("{W[Exits: %s]{x\r\n", exitsString.String()))
+	}
+
 	ch.send(buf.String())
 
 	ch.room.listObjectsToCharacter(ch)
