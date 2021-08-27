@@ -96,8 +96,8 @@ func do_who(ch *Character, arguments string) {
 			character.race.DisplayName))
 	}
 
-	output := buf.String()
-	ch.Send(output)
+	buf.WriteString(fmt.Sprintf("\r\n%d players online.\r\n", len(characters)))
+	ch.Send(buf.String())
 }
 
 func do_look(ch *Character, arguments string) {
