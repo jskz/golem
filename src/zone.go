@@ -20,6 +20,8 @@ type Zone struct {
 func (game *Game) LoadZones() error {
 	log.Printf("Loading zones.\r\n")
 
+	game.zones = make(map[*Zone]bool)
+
 	rows, err := game.db.Query(`
 		SELECT
 			id,

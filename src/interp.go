@@ -13,8 +13,9 @@ import (
 )
 
 type Command struct {
-	Name    string
-	CmdFunc func(ch *Character, arguments string)
+	Name         string
+	MinimumLevel int
+	CmdFunc      func(ch *Character, arguments string)
 }
 
 var CommandTable map[string]Command
@@ -46,8 +47,8 @@ func init() {
 	CommandTable["down"] = Command{Name: "down", CmdFunc: do_down}
 
 	/* act_wiz.go */
-	CommandTable["goto"] = Command{Name: "goto", CmdFunc: do_goto}
-	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown}
+	CommandTable["goto"] = Command{Name: "goto", CmdFunc: do_goto, MinimumLevel: LevelHero + 1}
+	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown, MinimumLevel: LevelAdmin}
 }
 
 func (ch *Character) Interpret(input string) bool {

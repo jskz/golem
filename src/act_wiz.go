@@ -30,6 +30,8 @@ func do_goto(ch *Character, arguments string) {
 
 	if ch.room != nil {
 		ch.room.removeCharacter(ch)
-		room.addCharacter(ch)
 	}
+
+	room.addCharacter(ch)
+	do_look(ch, "")
 }

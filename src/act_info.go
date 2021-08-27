@@ -83,7 +83,11 @@ func do_who(ch *Character, arguments string) {
 func do_look(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	buf.WriteString("{DYou look around into the void.  There's nothing here, yet!{x\r\n")
-	output := buf.String()
-	ch.send(output)
+	if ch.room == nil {
+		ch.send("{DYou look around into the void.  There's nothing here, yet!{x\r\n")
+		return
+	}
+
+	buf.WriteString(fmt.Sprintf("\r\n{Y%-40s\r\n{D(----------------------------------------)\r\n{w   %s{x\r\n", ch.room.name, ch.room.description))
+	ch.send(buf.String())
 }

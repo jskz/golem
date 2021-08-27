@@ -54,6 +54,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	`, index)
 
 	room = &Room{}
+	room.characters = make(map[*Character]bool)
 	room.exit = make(map[uint]*Exit)
 	err := row.Scan(&room.id, &room.name, &room.description)
 
