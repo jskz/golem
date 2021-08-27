@@ -70,14 +70,22 @@ func do_who(ch *Character, arguments string) {
 
 	buf.WriteString("{CThe following players are online:{x\r\n")
 
+	characters := make([]*Character, 0)
 	for client := range ch.client.game.clients {
-		/* If the client is "at least" playing, then we will display them in the WHO list */
-		if client.connectionState >= ConnectionStatePlaying && client.character != nil {
-			buf.WriteString(fmt.Sprintf("[%-10s] %s (%s)\r\n",
-				client.character.job.DisplayName,
-				client.character.name,
-				client.character.race.DisplayName))
+		if client.character != nil && client.connectionState >= ConnectionStatePlaying {
+			characters = append(characters, client.character)
 		}
+	}
+
+	sort.Slice(characters, func(i int, j int) bool {
+		return characters[i].level < characters[j].level
+	})
+
+	for _, character := range characters {
+		buf.WriteString(fmt.Sprintf("[%-10s] %s (%s)\r\n",
+			character.job.DisplayName,
+			character.name,
+			character.race.DisplayName))
 	}
 
 	output := buf.String()

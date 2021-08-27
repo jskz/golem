@@ -100,10 +100,10 @@ func (ch *Character) Finalize() bool {
 
 	result, err := ch.client.game.db.Exec(`
 		INSERT INTO
-			player_characters(username, password_hash, race_id, job_id, level, health, max_health, mana, max_mana, stamina, max_stamina)
+			player_characters(username, password_hash, wizard, race_id, job_id, level, health, max_health, mana, max_mana, stamina, max_stamina)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.name, ch.temporaryHash, ch.race.Id, ch.job.Id, ch.level, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, ch.name, ch.temporaryHash, 0, ch.race.Id, ch.job.Id, ch.level, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
