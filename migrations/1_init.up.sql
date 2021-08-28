@@ -121,6 +121,34 @@ CREATE TABLE player_characters (
     FOREIGN KEY (job_id) REFERENCES jobs(id)
 );
 
+CREATE TABLE mobiles (
+    `id` BIGINT NOT NULL,
+
+    `name` VARCHAR(255) NOT NULL,
+    `short_description` TEXT,
+    `long_description` TEXT,
+    `description` TEXT,
+
+    `race_id` BIGINT NOT NULL,
+    `job_id` BIGINT NOT NULL,
+
+    `level` INT NOT NULL,
+    `experience` INT NOT NULL,
+
+    `health` INT NOT NULL,
+    `max_health` INT NOT NULL,
+
+    `mana` INT NOT NULL,
+    `max_mana` INT NOT NULL,
+    
+    `stamina` INT NOT NULL,
+    `max_stamina` INT NOT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (race_id) REFERENCES races(id),
+    FOREIGN KEY (job_id) REFERENCES jobs(id)
+);
+
 /* Races */
 INSERT INTO
     races(id, name, display_name, playable)

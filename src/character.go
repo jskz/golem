@@ -44,7 +44,9 @@ type Character struct {
 	pageSize   int
 	pageCursor int
 
-	room *Room
+	room     *Room
+	combat   *Combat
+	fighting *Character
 
 	id         int
 	name       string
@@ -298,6 +300,8 @@ func NewCharacter() *Character {
 	character.wizard = false
 	character.afk = nil
 	character.job = nil
+	character.fighting = nil
+	character.combat = nil
 	character.race = nil
 	character.room = nil
 	character.pageSize = 1024

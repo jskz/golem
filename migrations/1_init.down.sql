@@ -7,3 +7,4 @@ DROP TABLE rooms;
 DROP TABLE jobs;
 DROP TABLE races;
 DROP TABLE player_characters;
+DROP TABLE mobiles;

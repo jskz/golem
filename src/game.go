@@ -27,6 +27,9 @@ type Game struct {
 	db *sql.DB
 	vm *goja.Runtime
 
+	playerCharacters *LinkedList
+	fights           *LinkedList
+
 	clients map[*Client]bool
 	zones   map[*Zone]bool
 	world   map[uint]*Room
@@ -50,6 +53,9 @@ func NewGame() (*Game, error) {
 	game.quitRequest = make(chan *Client)
 	game.shutdownRequest = make(chan bool)
 	game.clientMessage = make(chan ClientTextMessage)
+
+	game.playerCharacters = NewLinkedList()
+	game.fights = NewLinkedList()
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
 	game.db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true&parseTime=true",
@@ -115,11 +121,14 @@ func NewGame() (*Game, error) {
 
 /* Game loop */
 func (game *Game) Run() {
-	// processCombatTicker := time.NewTicker(2 * time.Second)
+	processCombatTicker := time.NewTicker(2 * time.Second)
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)
 
 	for {
 		select {
+		case <-processCombatTicker.C:
+			game.combatUpdate()
+
 		case <-processOutputTicker.C:
 			for client := range game.clients {
 				if client.character != nil {
