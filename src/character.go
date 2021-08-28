@@ -33,6 +33,38 @@ type Race struct {
 const LevelAdmin = 60
 const LevelHero = 50
 
+/* These flag constants are shared by both PCs and NPCs */
+const (
+	CHAR_IS_PLAYER  = 1
+	CHAR_SENTINEL   = 1 << 1
+	CHAR_STAY_AREA  = 1 << 2
+	CHAR_AGGRESSIVE = 1 << 3
+)
+
+const (
+	RESIST_BASH   = 1
+	RESIST_FIRE   = 1 << 1
+	RESIST_COLD   = 1 << 2
+	RESIST_SHOCK  = 1 << 3
+	RESIST_POISON = 1 << 4
+)
+
+const (
+	IMMUNE_BASH   = 1
+	IMMUNE_FIRE   = 1 << 1
+	IMMUNE_COLD   = 1 << 2
+	IMMUNE_SHOCK  = 1 << 3
+	IMMUNE_POISON = 1 << 4
+)
+
+const (
+	SUSCEPT_BASH   = 1
+	SUSCEPT_FIRE   = 1 << 1
+	SUSCEPT_COLD   = 1 << 2
+	SUSCEPT_SHOCK  = 1 << 3
+	SUSCEPT_POISON = 1 << 4
+)
+
 /*
  * This character structure is shared by both player-characters (human beings
  * connected through a session instance available via the client pointer.)
@@ -48,15 +80,21 @@ type Character struct {
 	combat   *Combat
 	fighting *Character
 
-	id         int
-	name       string
+	id int
+
+	name             string
+	shortDescription string
+	longDescription  string
+	description      string
+
 	wizard     bool
 	job        *Job
 	race       *Race
 	level      uint
 	experience uint
 
-	afk *AwayFromKeyboard
+	flags int
+	afk   *AwayFromKeyboard
 
 	health     uint
 	maxHealth  uint
@@ -300,6 +338,7 @@ func NewCharacter() *Character {
 	character.wizard = false
 	character.afk = nil
 	character.job = nil
+	character.flags = 0
 	character.fighting = nil
 	character.combat = nil
 	character.race = nil
