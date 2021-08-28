@@ -26,6 +26,15 @@ var ExitName = map[uint]string{
 	DirectionDown:  "down",
 }
 
+var ExitCompassName = map[uint]string{
+	DirectionNorth: "N",
+	DirectionEast:  "E",
+	DirectionSouth: "S",
+	DirectionWest:  "W",
+	DirectionUp:    "U",
+	DirectionDown:  "D",
+}
+
 var ReverseDirection = map[uint]int{
 	DirectionNorth: DirectionSouth,
 	DirectionEast:  DirectionWest,

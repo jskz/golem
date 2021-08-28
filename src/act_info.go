@@ -109,8 +109,18 @@ func do_look(ch *Character, arguments string) {
 		return
 	}
 
-	buf.WriteString(fmt.Sprintf("\r\n{Y  %-40s\r\n", ch.room.name))
-	buf.WriteString("{D(----------------------------------------)\r\n")
+	var lookCompassOutput map[uint]string = make(map[uint]string)
+	for k := uint(0); k < DirectionMax; k++ {
+		if ch.room.exit[k] != nil {
+			lookCompassOutput[k] = fmt.Sprintf("{Y%s", ExitCompassName[k])
+		} else {
+			lookCompassOutput[k] = "{D-"
+		}
+	}
+
+	buf.WriteString(fmt.Sprintf("\r\n{Y  %-50s {D-      %s{D      -\r\n", ch.room.name, lookCompassOutput[DirectionNorth]))
+	buf.WriteString(fmt.Sprintf("{D(--------------------------------------------------) %s{D <-%s{D-{w({W*{w){D-%s{D-> %s\r\n", lookCompassOutput[DirectionWest], lookCompassOutput[DirectionUp], lookCompassOutput[DirectionDown], lookCompassOutput[DirectionEast]))
+	buf.WriteString(fmt.Sprintf("{D                                                     {D-      %s{D      -\r\n", lookCompassOutput[DirectionSouth]))
 	buf.WriteString(fmt.Sprintf("{w   %s{x\r\n", ch.room.description))
 
 	if len(ch.room.exit) > 0 {
@@ -123,7 +133,7 @@ func do_look(ch *Character, arguments string) {
 			}
 		}
 
-		buf.WriteString(fmt.Sprintf("{W[Exits: %s]{x\r\n", exitsString.String()))
+		buf.WriteString(fmt.Sprintf("\r\n{W[Exits: %s]{x\r\n", exitsString.String()))
 	}
 
 	ch.Send(buf.String())
