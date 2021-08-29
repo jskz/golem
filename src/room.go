@@ -53,7 +53,7 @@ func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 
 	for rch := range room.characters {
 		if rch != ch {
-			output.WriteString(fmt.Sprintf("{G%s{x\r\n", rch.getLongDescription()))
+			output.WriteString(fmt.Sprintf("{G%s{x\r\n", rch.getLongDescription(ch)))
 		}
 	}
 

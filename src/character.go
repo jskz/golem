@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"unicode"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -354,7 +355,7 @@ func (ch *Character) Send(text string) {
 	}
 }
 
-func (ch *Character) getShortDescription() string {
+func (ch *Character) getShortDescription(viewer *Character) string {
 	if ch.flags&CHAR_IS_PLAYER != 0 {
 		return ch.name
 	}
@@ -362,12 +363,44 @@ func (ch *Character) getShortDescription() string {
 	return ch.shortDescription
 }
 
-func (ch *Character) getLongDescription() string {
+func (ch *Character) getShortDescriptionUpper(viewer *Character) string {
+	var short string = ch.getShortDescription(viewer)
+
+	if short == "" {
+		return ""
+	}
+
+	runes := []rune(short)
+	runes[0] = unicode.ToUpper(runes[0])
+	return string(runes)
+}
+
+func (ch *Character) getLongDescription(viewer *Character) string {
+	if ch.fighting != nil {
+		if viewer == ch.fighting {
+			return fmt.Sprintf("%s is here, fighting you!", ch.getShortDescriptionUpper(viewer))
+		}
+
+		return fmt.Sprintf("%s is here, fighting %s.", ch.getShortDescriptionUpper(viewer), ch.fighting.getShortDescription(viewer))
+	}
+
 	if ch.flags&CHAR_IS_PLAYER != 0 {
 		return fmt.Sprintf("%s is here.", ch.name)
 	}
 
 	return ch.longDescription
+}
+
+func (ch *Character) getLongDescriptionUpper(viewer *Character) string {
+	var long string = ch.getLongDescription(viewer)
+
+	if long == "" {
+		return ""
+	}
+
+	runes := []rune(long)
+	runes[0] = unicode.ToUpper(runes[0])
+	return string(runes)
 }
 
 func NewCharacter() *Character {

@@ -32,9 +32,8 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 	}
 
 	if display {
-		ch.Send(fmt.Sprintf("You hit %s for %d damage.\r\n", target.getShortDescription(), amount))
-
-		target.Send(fmt.Sprintf("%s hits you for %d damage.\r\n", strings.Title(strings.ToLower(ch.getShortDescription())), amount))
+		ch.Send(fmt.Sprintf("You hit %s for %d damage.\r\n", target.getShortDescription(ch), amount))
+		target.Send(fmt.Sprintf("%s hits you for %d damage.\r\n", ch.getShortDescriptionUpper(target), amount))
 	}
 
 	return true
@@ -43,9 +42,6 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 func (game *Game) combatUpdate() {
 	for iter := game.fights.head; iter != nil; iter = iter.next {
 		combat := iter.value.(*Combat)
-
-		td := time.Since(combat.startedAt)
-		log.Printf("Combat for %d seconds, calculating damage for round.\r\n", int(td.Seconds()))
 
 		var found bool = false
 		for _, vch := range combat.participants {
@@ -122,5 +118,5 @@ func do_kill(ch *Character, arguments string) {
 		target.fighting = ch
 	}
 
-	ch.Send(fmt.Sprintf("\r\n{RYou begin attacking %s{R!{x\r\n", target.getShortDescription()))
+	ch.Send(fmt.Sprintf("\r\n{RYou begin attacking %s{R!{x\r\n", target.getShortDescription(ch)))
 }
