@@ -60,7 +60,7 @@ func do_help(ch *Character, arguments string) {
 func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	buf.WriteString("{D┌─ {WCharacter Information {D────────┐{x\r\n")
+	buf.WriteString("\r\n{D┌─ {WCharacter Information {D────────┐{x\r\n")
 	buf.WriteString(fmt.Sprintf("{D│ {wName: %-16s         {D│\r\n", ch.name))
 	buf.WriteString(fmt.Sprintf("{D│ {wLevel: %-3d                     {D│\r\n", ch.level))
 	buf.WriteString(fmt.Sprintf("{D| {wExperience: %-11d        {D│\r\n", ch.experience))
@@ -79,7 +79,7 @@ func do_score(ch *Character, arguments string) {
 func do_who(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	buf.WriteString("{CThe following players are online:{x\r\n")
+	buf.WriteString("\r\n{CThe following players are online:{x\r\n")
 
 	characters := make([]*Character, 0)
 	for client := range ch.client.game.clients {

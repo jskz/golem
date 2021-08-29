@@ -33,7 +33,8 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 
 	if display {
 		ch.Send(fmt.Sprintf("You hit %s for %d damage.\r\n", target.getShortDescription(), amount))
-		target.Send(fmt.Sprintf("%s hit you for %d damage.\r\n", ch.getShortDescription(), amount))
+
+		target.Send(fmt.Sprintf("%s hits you for %d damage.\r\n", strings.Title(strings.ToLower(ch.getShortDescription())), amount))
 	}
 
 	return true
@@ -46,16 +47,40 @@ func (game *Game) combatUpdate() {
 		td := time.Since(combat.startedAt)
 		log.Printf("Combat for %d seconds, calculating damage for round.\r\n", int(td.Seconds()))
 
+		var found bool = false
 		for _, vch := range combat.participants {
 			if vch.fighting == nil {
 				log.Printf("Participant target not currently fighting.\r\n")
 				continue
 			}
 
+			if vch.room == nil || vch.fighting.room == nil || vch.room != vch.fighting.room {
+				log.Printf("Some participants are in nil or mismatched rooms and not considered this round.\r\n")
+				continue
+			}
+
+			found = true
 			damage := 0
+
 			game.damage(vch, vch.fighting, true, damage, DamageTypeBash)
 		}
+
+		if !found {
+			log.Printf("Discarding fight without active participants.\r\n")
+
+			game.disposeCombat(combat)
+			break
+		}
 	}
+}
+
+func (game *Game) disposeCombat(combat *Combat) {
+	for _, vch := range combat.participants {
+		vch.combat = nil
+		vch.fighting = nil
+	}
+
+	game.fights.Remove(combat)
 }
 
 func do_kill(ch *Character, arguments string) {
@@ -92,5 +117,10 @@ func do_kill(ch *Character, arguments string) {
 	ch.client.game.fights.Insert(combat)
 
 	ch.fighting = target
+
+	if target.fighting == nil {
+		target.fighting = ch
+	}
+
 	ch.Send(fmt.Sprintf("\r\n{RYou begin attacking %s{R!{x\r\n", target.getShortDescription()))
 }
