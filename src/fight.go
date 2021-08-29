@@ -69,6 +69,7 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 				}
 
 				limbo.addCharacter(target)
+				target.health = target.maxHealth / 2
 			} else {
 				exp := target.experience
 				ch.gainExperience(int(exp))
