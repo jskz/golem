@@ -68,6 +68,14 @@ func init() {
 	/* fight.go */
 	CommandTable["kill"] = Command{Name: "kill", CmdFunc: do_kill}
 
+	/* magic.go */
+	CommandTable["cast"] = Command{Name: "cast", CmdFunc: do_cast}
+	CommandTable["spells"] = Command{Name: "spells", CmdFunc: do_spells}
+
+	/* skills.go */
+	CommandTable["practice"] = Command{Name: "practice", CmdFunc: do_practice}
+	CommandTable["skills"] = Command{Name: "skills", CmdFunc: do_skills}
+
 	/* Aliases */
 	CommandTable["eq"] = Command{Name: "equipment", CmdFunc: do_equipment, Hidden: true}
 	CommandTable["i"] = Command{Name: "inventory", CmdFunc: do_inventory, Hidden: true}

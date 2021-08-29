@@ -36,7 +36,7 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 		if ch.room != nil && target.room != nil && target.room == ch.room {
 			for character := range ch.room.characters {
 				if character != ch && character != target {
-					character.Send(fmt.Sprintf("%s hits %s for %d damage.\r\n",
+					character.Send(fmt.Sprintf("{G%s{G hits %s{G for %d damage.{x\r\n",
 						ch.getShortDescriptionUpper(character),
 						target.getShortDescription(character),
 						amount))
@@ -44,8 +44,8 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 			}
 		}
 
-		ch.Send(fmt.Sprintf("You hit %s for %d damage.\r\n", target.getShortDescription(ch), amount))
-		target.Send(fmt.Sprintf("%s hits you for %d damage.\r\n", ch.getShortDescriptionUpper(target), amount))
+		ch.Send(fmt.Sprintf("{GYou hit %s{G for %d damage.{x\r\n", target.getShortDescription(ch), amount))
+		target.Send(fmt.Sprintf("{G%s{G hits you for %d damage.{x\r\n", ch.getShortDescriptionUpper(target), amount))
 	}
 
 	target.health -= amount

@@ -31,13 +31,25 @@ func (client *Client) displayPrompt() {
 	/*
 	 * TODO: if the character's paging cursor is in a page less than the top page, instead display pager info.
 	 */
-	prompt.WriteString(fmt.Sprintf("\r\n[%d/%dhp %d/%dm %d/%dst] ",
-		client.character.health,
-		client.character.maxHealth,
-		client.character.mana,
-		client.character.maxMana,
-		client.character.stamina,
-		client.character.maxStamina))
+	healthPercentage := client.character.health * 100 / client.character.maxHealth
+	manaPercentage := client.character.mana * 100 / client.character.maxMana
+	staminaPercentage := client.character.stamina * 100 / client.character.maxStamina
+
+	currentHealthColour := SeverityColourFromPercentage(healthPercentage)
+	currentManaColour := SeverityColourFromPercentage(manaPercentage)
+	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
+
+	prompt.WriteString(
+		client.TranslateColourCodes(fmt.Sprintf("\r\n{w[%s%d{w/{G%d{ghp %s%d{w/{G%d{gm %s%d{w/{G%d{gst{w]{x ",
+			currentHealthColour,
+			client.character.health,
+			client.character.maxHealth,
+			currentManaColour,
+			client.character.mana,
+			client.character.maxMana,
+			currentStaminaColour,
+			client.character.stamina,
+			client.character.maxStamina)))
 	client.character.Write(prompt.Bytes())
 }
 
