@@ -18,4 +18,4 @@ docker-compose up
 
 The MUD is exposed on the host's TCP port 4000 by default.
 
-![Early signs of gameplay and combat in the game loop](img/2021-08-29.png)
+![Early signs of gameplay and combat in the game loop](img/2021-08-29-2.png)
