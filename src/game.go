@@ -171,6 +171,8 @@ func (game *Game) Run() {
 			log.Printf("New connection from %s.\r\n", client.conn.RemoteAddr().String())
 
 			client.connectionState = ConnectionStateName
+
+			client.send <- Config.greeting
 			client.send <- []byte("By what name do you wish to be known? ")
 
 		case client := <-game.unregister:

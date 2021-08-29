@@ -9,6 +9,8 @@ RUN go mod download
 
 COPY migrations /migrations
 COPY src/*.go ./
+COPY etc/greeting.ansi /greeting.ansi
+COPY etc/motd.ansi /motd.ansi
 
 RUN go build -o /golem
 

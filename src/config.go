@@ -30,6 +30,9 @@ type AppMySQLConfiguration struct {
 type AppConfiguration struct {
 	Port               int                   `json:"port"`
 	MySQLConfiguration AppMySQLConfiguration `json:"mysql"`
+
+	greeting []byte
+	motd     []byte
 }
 
 /* Magic method is automatically called before main */
@@ -65,5 +68,19 @@ func init() {
 		if err != nil {
 			panic("Malformed config file.")
 		}
+	}
+
+	/* Read greeting */
+	Config.greeting, err = ioutil.ReadFile("/greeting.ansi")
+	if err != nil {
+		log.Printf("Warning: failed to read greeting ANSI file: %v.\r\n", err)
+		Config.greeting = []byte(string(""))
+	}
+
+	/* Read MOTD */
+	Config.motd, err = ioutil.ReadFile("/motd.ansi")
+	if err != nil {
+		log.Printf("Warning: failed to read MOTD ANSI file: %v.\r\n", err)
+		Config.motd = []byte(string(""))
 	}
 }

@@ -66,7 +66,8 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		client.connectionState = ConnectionStateMessageOfTheDay
-		output.WriteString("[ Press any key to continue ]")
+		output.WriteString(string(Config.motd))
+		output.WriteString("[ Press return to continue ]")
 
 	case ConnectionStateName:
 		log.Printf("Guest attempting to login with name: %s\r\n", message)
@@ -266,7 +267,8 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		client.connectionState = ConnectionStateMessageOfTheDay
-		output.WriteString("[ Press any key to continue ]")
+		output.WriteString(string(Config.motd))
+		output.WriteString("[ Press return to continue ]")
 
 	case ConnectionStateMessageOfTheDay:
 		client.connectionState = ConnectionStatePlaying
