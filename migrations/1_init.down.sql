@@ -8,3 +8,5 @@ DROP TABLE jobs;
 DROP TABLE races;
 DROP TABLE player_characters;
 DROP TABLE mobiles;
+DROP TABLE resets;
+DROP TABLE zones;
