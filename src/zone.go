@@ -63,13 +63,16 @@ func (game *Game) ResetRoom(room *Room) {
 			}
 
 			if mobile != nil {
-				room.characters[mobile] = true
-				mobile.room = room
+				room.addCharacter(mobile)
 			}
 
 		default:
 			log.Printf("Reset of unknown type found for room.\r\n")
 		}
+	}
+
+	for character := range room.characters {
+		character.onZoneUpdate()
 	}
 }
 

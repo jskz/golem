@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"unicode"
 
 	"golang.org/x/crypto/bcrypt"
@@ -140,6 +141,13 @@ func (game *Game) AttemptLogin(username string, password string) bool {
 	}
 
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
+}
+
+func (ch *Character) onZoneUpdate() {
+	/* Regen, script hooks, etc. */
+	if ch.health < ch.maxHealth {
+		ch.health = int(math.Min(float64(ch.maxHealth), float64(ch.health+5)))
+	}
 }
 
 func (ch *Character) Finalize() bool {
@@ -477,7 +485,7 @@ func NewCharacter() *Character {
 	character.combat = nil
 	character.race = nil
 	character.room = nil
-	character.pageSize = 1024
+	character.pageSize = 2048
 	character.pages = make([][]byte, 1)
 	character.pages[0] = make([]byte, character.pageSize)
 	character.pageCursor = 0

@@ -60,17 +60,37 @@ func do_help(ch *Character, arguments string) {
 func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
+	healthPercentage := ch.health * 100 / ch.maxHealth
+	manaPercentage := ch.mana * 100 / ch.maxMana
+	staminaPercentage := ch.stamina * 100 / ch.maxStamina
+
+	currentHealthColour := SeverityColourFromPercentage(healthPercentage)
+	currentManaColour := SeverityColourFromPercentage(manaPercentage)
+	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
+
 	buf.WriteString("\r\n{D┌─ {WCharacter Information {D──────────────────┐{x\r\n")
-	buf.WriteString(fmt.Sprintf("{D│ {wName: %-16s                   {D│\r\n", ch.name))
-	buf.WriteString(fmt.Sprintf("{D│ {wLevel: %-3d                               {D│\r\n", ch.level))
+	buf.WriteString(fmt.Sprintf("{D│ {CName: {c%-16s                   {D│\r\n", ch.name))
+	buf.WriteString(fmt.Sprintf("{D│ {CLevel: {c%-3d                               {D│\r\n", ch.level))
 	if ch.level < LevelHero {
-		buf.WriteString(fmt.Sprintf("{D│ {wExperience: %-7d (%-7d until next) {D│\r\n", ch.experience, ExperienceRequiredForLevel(int(ch.level+1))-int(ch.experience)))
+		buf.WriteString(fmt.Sprintf("{D│ {CExperience: {c%-7d {C({c%-7d until next{C) {D│\r\n", ch.experience, ExperienceRequiredForLevel(int(ch.level+1))-int(ch.experience)))
 	}
-	buf.WriteString(fmt.Sprintf("{D│ {wRace: %-21s              {D│\r\n", ch.race.DisplayName))
-	buf.WriteString(fmt.Sprintf("{D│ {wJob: %-21s               {D│\r\n", ch.job.DisplayName))
-	buf.WriteString(fmt.Sprintf("{D│ {wHealth: %-15s                  {D│\r\n", fmt.Sprintf("%d/%d", ch.health, ch.maxHealth)))
-	buf.WriteString(fmt.Sprintf("{D│ {wMana: %-15s                    {D│\r\n", fmt.Sprintf("%d/%d", ch.mana, ch.maxMana)))
-	buf.WriteString(fmt.Sprintf("{D│ {wStamina: %-15s                 {D│\r\n", fmt.Sprintf("%d/%d", ch.stamina, ch.maxStamina)))
+	buf.WriteString(fmt.Sprintf("{D│ {CRace: {c%-21s              {D│\r\n", ch.race.DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {CJob: {c%-21s               {D│\r\n", ch.job.DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {CHealth:  {c%s%-20s                {D│\r\n",
+		currentHealthColour,
+		fmt.Sprintf("%-5d{w/{G%-5d",
+			ch.health,
+			ch.maxHealth)))
+	buf.WriteString(fmt.Sprintf("{D│ {CMana:    {c%s%-18s                  {D│\r\n",
+		currentManaColour,
+		fmt.Sprintf("%-5d{w/{G%-5d",
+			ch.mana,
+			ch.maxMana)))
+	buf.WriteString(fmt.Sprintf("{D│ {CStamina: {c%s%-21s               {D│\r\n",
+		currentStaminaColour,
+		fmt.Sprintf("%-5d{w/{G%-5d",
+			ch.stamina,
+			ch.maxStamina)))
 	buf.WriteString("{D└──────────────────────────────────────────┘{x\r\n")
 
 	output := buf.String()

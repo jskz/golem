@@ -110,6 +110,7 @@ func (ch *Character) Interpret(input string) bool {
 		} else {
 			/* We'll still want a prompt on no input */
 			ch.Send("\r\n")
+			return true
 		}
 
 		return false

@@ -172,6 +172,10 @@ func do_kill(ch *Character, arguments string) {
 		target.fighting = ch
 	}
 
+	if target.combat == nil {
+		target.combat = combat
+	}
+
 	ch.Send(fmt.Sprintf("\r\n{RYou begin attacking %s{R!{x\r\n", target.getShortDescription(ch)))
 	target.Send(fmt.Sprintf("\r\n{R%s{R begins attacking you!{x\r\n", ch.getShortDescriptionUpper(target)))
 
