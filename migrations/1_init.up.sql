@@ -175,10 +175,81 @@ CREATE TABLE resets (
     FOREIGN KEY (zone_id) REFERENCES zones(id)
 );
 
+
+CREATE TABLE objects (
+    `id` BIGINT NOT NULL,
+    `zone_id` BIGINT NOT NULL,
+
+    `name` VARCHAR(255) NOT NULL,
+    `short_description` VARCHAR(255) NOT NULL,
+    `long_description` VARCHAR(255) NOT NULL,
+    `description` TEXT,
+
+    `value_1` INT,
+    `value_2` INT,
+    `value_3` INT,
+    `value_4` INT,
+    
+    /* Timestamps & soft deletion */
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (zone_id) REFERENCES zones(id)
+);
+
+CREATE TABLE object_instances (
+    `id` BIGINT NOT NULL,
+    `parent_id` BIGINT,
+
+    `name` VARCHAR(255) NOT NULL,
+    `short_description` VARCHAR(255) NOT NULL,
+    `long_description` VARCHAR(255) NOT NULL,
+    `description` TEXT,
+
+    `value_1` INT,
+    `value_2` INT,
+    `value_3` INT,
+    `value_4` INT,
+    
+    /* Timestamps & soft deletion */
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
+
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE player_character_object (
+    `id` BIGINT NOT NULL,
+
+    `player_character_id` BIGINT NOT NULL,
+    `object_instance_id` BIGINT NOT NULL,
+    
+    /* Timestamps & soft deletion */
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (player_character_id) REFERENCES player_characters(id),
+    FOREIGN KEY (object_instance_id) REFERENCES object_instances(id)
+);
+
 /* Seed data */
 INSERT INTO zones(id, name, low, high) VALUES (1, 'Limbo', 1, 99);
+
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 0);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 0);
+
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!');
 
 INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 0);
 INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (2, 2, 1, 2, 0);

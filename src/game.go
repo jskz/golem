@@ -132,8 +132,11 @@ func (game *Game) Update() {
 
 /* Game loop */
 func (game *Game) Run() {
+	/* Handle violence logic */
 	processCombatTicker := time.NewTicker(2 * time.Second)
+	/* Buffered/paged output for clients */
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)
+	/* Handle resets and trigger one immediately */
 	processZoneUpdateTicker := time.NewTicker(1 * time.Minute)
 
 	game.Update()
@@ -158,11 +161,6 @@ func (game *Game) Run() {
 			}
 
 		case clientMessage := <-game.clientMessage:
-			/*
-				log.Printf("Received client message from %s: %s\r\n",
-					clientMessage.client.conn.RemoteAddr().String(),
-					clientMessage.message)
-			*/
 			game.nanny(clientMessage.client, clientMessage.message)
 
 		case client := <-game.register:
