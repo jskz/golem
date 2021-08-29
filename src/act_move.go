@@ -56,6 +56,11 @@ func (room *Room) getExit(direction uint) *Exit {
 }
 
 func (ch *Character) move(direction uint) bool {
+	if ch.isFighting() {
+		ch.Send("{RYou are in the middle of fighting!{x\r\n")
+		return false
+	}
+
 	if ch.room == nil {
 		ch.Send("{RAlas, you cannot go that way.{x\r\n")
 		return false

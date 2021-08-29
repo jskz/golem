@@ -9,6 +9,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 
@@ -296,10 +297,18 @@ func (ch *Character) flushOutput() {
 	ch.pageCursor = 0
 }
 
+func (ch *Character) isFighting() bool {
+	return ch.fighting != nil
+}
+
 func (ch *Character) Write(data []byte) (n int, err error) {
 	if ch.client == nil {
 		/* If there is no client, succeed silently. */
 		return len(data), nil
+	}
+
+	if len(data)+ch.pageCursor > ch.pageSize {
+		return 0, errors.New("overflowed client buffer")
 	}
 
 	/*
