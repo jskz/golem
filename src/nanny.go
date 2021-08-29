@@ -83,8 +83,8 @@ func (game *Game) nanny(client *Client, message string) {
 
 		if character != nil {
 			client.character = character
+			client.character.flags |= CHAR_IS_PLAYER
 			client.character.client = client
-
 			output.WriteString("Password: ")
 			client.connectionState = ConnectionStatePassword
 			break
@@ -94,6 +94,7 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character.client = client
 		client.character.name = name
 		client.character.level = 1
+		client.character.flags |= CHAR_IS_PLAYER
 		client.connectionState = ConnectionStateConfirmName
 
 		client.character.health = 20

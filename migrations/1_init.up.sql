@@ -45,13 +45,6 @@ CREATE TABLE exits (
     FOREIGN KEY (to_room_id) REFERENCES rooms(id)
 );
 
-INSERT INTO zones(id, name, low, high) VALUES (1, 'Limbo', 1, 99);
-INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 0);
-INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 0);
-
-INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 0);
-INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (2, 2, 1, 2, 0);
-
 CREATE TABLE races (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
 
@@ -149,6 +142,31 @@ CREATE TABLE mobiles (
     FOREIGN KEY (job_id) REFERENCES jobs(id)
 );
 
+CREATE TABLE resets (
+    `id` BIGINT NOT NULL,
+    `zone_id` BIGINT NOT NULL,
+    `room_id` BIGINT NOT NULL,
+
+    `type` ENUM('mobile', 'room', 'object') NOT NULL,
+
+    `value_1` INT,
+    `value_2` INT,
+    `value_3` INT,
+    `value_4` INT,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (room_id) REFERENCES rooms(id),
+    FOREIGN KEY (zone_id) REFERENCES zones(id)
+);
+
+/* Seed data */
+INSERT INTO zones(id, name, low, high) VALUES (1, 'Limbo', 1, 99);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 0);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 0);
+
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 0);
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (2, 2, 1, 2, 0);
+
 /* Races */
 INSERT INTO
     races(id, name, display_name, playable)
@@ -167,7 +185,7 @@ VALUES
     (3, 'mage', 'Mage', 1),
     (4, 'cleric', 'Cleric', 1);
 
-/* Insert an admin character with name password */
+/* Insert a testing admin character with details: Admin/password */
 INSERT INTO
     player_characters(id, username, password_hash, wizard, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
 VALUES
@@ -178,6 +196,12 @@ INSERT INTO
     mobiles(id, name, short_description, long_description, description, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
 VALUES
     (1, 'test creature', 'a test creature', 'A test creature is here to test some development features.', 'Deeper description would be placed here.', 1, 1, 5, 0, 100, 100, 100, 100, 100, 100);
+
+/* Reset to place the test creature in the developer room */
+INSERT INTO
+    resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
+VALUES
+    (1, 1, 2, 'mobile', 1, 1, 1, 1);
 
 CREATE INDEX index_pc_username ON player_characters(username);
 CREATE INDEX index_race_name ON races(name);

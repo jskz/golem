@@ -17,6 +17,24 @@ type Zone struct {
 	high uint
 }
 
+func (game *Game) resetRoom(room *Room) {
+	log.Printf("Attempting reset for room %d.\r\n", room.id)
+
+	for iter := room.resets.head; iter != nil; iter = iter.next {
+	}
+}
+
+func (game *Game) resetZone(zone *Zone) {
+	for id := zone.low; id <= zone.high; id++ {
+		room, err := game.LoadRoomIndex(id)
+		if err != nil || room == nil {
+			continue
+		}
+
+		game.resetRoom(room)
+	}
+}
+
 func (game *Game) LoadZones() error {
 	log.Printf("Loading zones.\r\n")
 

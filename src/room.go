@@ -20,6 +20,7 @@ type Room struct {
 	name        string
 	description string
 
+	resets     *LinkedList
 	characters map[*Character]bool
 	exit       map[uint]*Exit
 }
@@ -75,6 +76,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	`, index)
 
 	room = &Room{}
+	room.resets = NewLinkedList()
 	room.characters = make(map[*Character]bool)
 	room.exit = make(map[uint]*Exit)
 	err := row.Scan(&room.id, &room.name, &room.description)

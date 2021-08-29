@@ -123,9 +123,15 @@ func NewGame() (*Game, error) {
 func (game *Game) Run() {
 	processCombatTicker := time.NewTicker(2 * time.Second)
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)
+	processZoneUpdateTicker := time.NewTicker(1 * time.Minute)
 
 	for {
 		select {
+		case <-processZoneUpdateTicker.C:
+			for zone := range game.zones {
+				game.resetZone(zone)
+			}
+
 		case <-processCombatTicker.C:
 			game.combatUpdate()
 
