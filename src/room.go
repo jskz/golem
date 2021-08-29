@@ -60,7 +60,7 @@ func (room *Room) listObjectsToCharacter(ch *Character) {
 	for iter := room.objects.head; iter != nil; iter = iter.next {
 		obj := iter.value.(*Object)
 
-		output.WriteString(fmt.Sprintf("   {W%s{x\r\n", obj.longDescription))
+		output.WriteString(fmt.Sprintf("    {W%s{x\r\n", obj.longDescription))
 	}
 
 	ch.Send(output.String())
