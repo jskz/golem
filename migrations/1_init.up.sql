@@ -246,7 +246,7 @@ CREATE TABLE skills (
     `id` BIGINT NOT NULL,
     
     `name` VARCHAR(255) NOT NULL,
-    `type` ENUM('none', 'passive', 'skill', 'spell') NOT NULL;
+    `type` ENUM('none', 'passive', 'skill', 'spell') NOT NULL,
     `cost_factor` INT NOT NULL,
 
     PRIMARY KEY (id)
