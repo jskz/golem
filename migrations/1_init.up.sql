@@ -39,6 +39,12 @@ CREATE TABLE exits (
     `to_room_id` BIGINT NULL,
     `direction` INT NOT NULL,
     `flags` INT NOT NULL,
+    
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (room_id) REFERENCES rooms(id),
