@@ -170,7 +170,7 @@ func do_look(ch *Character, arguments string) {
 	buf.WriteString(fmt.Sprintf("\r\n{Y  %-50s {D-      %s{D      -\r\n", ch.room.name, lookCompassOutput[DirectionNorth]))
 	buf.WriteString(fmt.Sprintf("{D(--------------------------------------------------) %s{D <-%s{D-{w({W*{w){D-%s{D-> %s\r\n", lookCompassOutput[DirectionWest], lookCompassOutput[DirectionUp], lookCompassOutput[DirectionDown], lookCompassOutput[DirectionEast]))
 	buf.WriteString(fmt.Sprintf("{D                                                     {D-      %s{D      -\r\n", lookCompassOutput[DirectionSouth]))
-	buf.WriteString(fmt.Sprintf("{w   %s{x\r\n", ch.room.description))
+	buf.WriteString(fmt.Sprintf("{w  %s{x\r\n", ch.room.description))
 
 	if len(ch.room.exit) > 0 {
 		var exitsString strings.Builder

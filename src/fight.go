@@ -27,6 +27,17 @@ const (
 	DamageTypeExotic = 3
 )
 
+func (game *Game) createCorpse(ch *Character) *Object {
+	obj := &Object{}
+
+	obj.id = 1
+	obj.description = fmt.Sprintf("The slain corpse of %s.", ch.getShortDescription(ch))
+	obj.longDescription = fmt.Sprintf("The corpse of %s is lying here.", ch.getShortDescription(ch))
+	obj.name = fmt.Sprintf("corpse %s", ch.name)
+
+	return obj
+}
+
 func (game *Game) damage(ch *Character, target *Character, display bool, amount int, damageType int) bool {
 	if ch == nil || target == nil {
 		return false
@@ -45,7 +56,7 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 		}
 
 		ch.Send(fmt.Sprintf("{GYou hit %s{G for %d damage.{x\r\n", target.getShortDescription(ch), amount))
-		target.Send(fmt.Sprintf("{G%s{G hits you for %d damage.{x\r\n", ch.getShortDescriptionUpper(target), amount))
+		target.Send(fmt.Sprintf("{Y%s{Y hits you for %d damage.{x\r\n", ch.getShortDescriptionUpper(target), amount))
 	}
 
 	target.health -= amount
@@ -53,8 +64,10 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 		if target.room != nil {
 			room := target.room
 
+			corpse := game.createCorpse(target)
 			room.removeCharacter(target)
 			target.room = nil
+			room.addObject(corpse)
 
 			for character := range room.characters {
 				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.getShortDescriptionUpper(character)))
@@ -176,13 +189,13 @@ func do_kill(ch *Character, arguments string) {
 		target.combat = combat
 	}
 
-	ch.Send(fmt.Sprintf("\r\n{RYou begin attacking %s{R!{x\r\n", target.getShortDescription(ch)))
-	target.Send(fmt.Sprintf("\r\n{R%s{R begins attacking you!{x\r\n", ch.getShortDescriptionUpper(target)))
+	ch.Send(fmt.Sprintf("\r\n{GYou begin attacking %s{G!{x\r\n", target.getShortDescription(ch)))
+	target.Send(fmt.Sprintf("\r\n{G%s{G begins attacking you!{x\r\n", ch.getShortDescriptionUpper(target)))
 
 	if ch.room != nil && target.room != nil && target.room == ch.room {
 		for character := range ch.room.characters {
 			if character != ch && character != target {
-				character.Send(fmt.Sprintf("{R%s{R begins attacking %s{R!{x\r\n",
+				character.Send(fmt.Sprintf("{G%s{G begins attacking %s{G!{x\r\n",
 					ch.getShortDescriptionUpper(character),
 					target.getShortDescription(character)))
 			}
