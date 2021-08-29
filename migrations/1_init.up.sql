@@ -211,7 +211,7 @@ VALUES
 INSERT INTO
     mobiles(id, name, short_description, long_description, description, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
 VALUES
-    (1, 'test creature', 'a test creature', 'A test creature is here to test some development features.', 'Deeper description would be placed here.', 1, 1, 5, 0, 100, 100, 100, 100, 100, 100);
+    (1, 'test creature', 'a test creature', 'A test creature is here to test some development features.', 'Deeper description would be placed here.', 1, 1, 5, 1250, 15, 15, 100, 100, 100, 100);
 
 /* Reset to place the test creature in the developer room */
 INSERT INTO

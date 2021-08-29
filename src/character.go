@@ -99,14 +99,18 @@ type Character struct {
 	flags int
 	afk   *AwayFromKeyboard
 
-	health     uint
-	maxHealth  uint
-	mana       uint
-	maxMana    uint
-	stamina    uint
-	maxStamina uint
+	health     int
+	maxHealth  int
+	mana       int
+	maxMana    int
+	stamina    int
+	maxStamina int
 
 	temporaryHash string
+}
+
+func ExperienceRequiredForLevel(level int) int {
+	return int(500*(level*level) - (500 * level))
 }
 
 /*
@@ -296,6 +300,45 @@ func (ch *Character) flushOutput() {
 	ch.pages = make([][]byte, 1)
 	ch.pages[0] = make([]byte, ch.pageSize)
 	ch.pageCursor = 0
+}
+
+func (ch *Character) gainExperience(experience int) {
+	if ch.flags&CHAR_IS_PLAYER == 0 {
+		return
+	}
+
+	ch.Send(fmt.Sprintf("{WYou gained %d experience points.{x\r\n", experience))
+	ch.experience = ch.experience + uint(experience)
+
+	if ch.level < LevelHero {
+		/* If we gain enough experience to level up multiple times */
+		for {
+			tnl := uint(ExperienceRequiredForLevel(int(ch.level + 1)))
+
+			if ch.experience > tnl {
+				ch.level = ch.level + 1
+
+				/* Calculate stat gains, skill points, etc... */
+				healthGain := 20
+				manaGain := 20
+				staminaGain := 20
+
+				ch.maxHealth += healthGain
+				ch.health += healthGain
+				ch.maxMana += manaGain
+				ch.mana += manaGain
+				ch.maxStamina += staminaGain
+				ch.stamina += staminaGain
+
+				ch.Send(fmt.Sprintf("{YYou have advanced to level %d!\r\n{x", ch.level))
+				/* Any extra announce/log */
+
+				continue
+			}
+
+			break
+		}
+	}
 }
 
 func (ch *Character) isFighting() bool {

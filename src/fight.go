@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -36,6 +37,34 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 		target.Send(fmt.Sprintf("%s hits you for %d damage.\r\n", ch.getShortDescriptionUpper(target), amount))
 	}
 
+	target.health -= amount
+	if target.health < 0 {
+		if target.room != nil {
+			room := target.room
+
+			room.removeCharacter(target)
+			target.room = nil
+
+			for character := range room.characters {
+				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.getShortDescriptionUpper(character)))
+			}
+
+			if target.flags&CHAR_IS_PLAYER != 0 {
+				target.Send("{RYou have been slain!{x\r\n")
+
+				limbo, err := game.LoadRoomIndex(RoomLimbo)
+				if err != nil {
+					return true
+				}
+
+				limbo.addCharacter(target)
+			} else {
+				exp := target.experience
+				ch.gainExperience(int(exp))
+			}
+		}
+	}
+
 	return true
 }
 
@@ -56,9 +85,22 @@ func (game *Game) combatUpdate() {
 			}
 
 			found = true
-			damage := 0
 
-			game.damage(vch, vch.fighting, true, damage, DamageTypeBash)
+			/* Determine number of attacks - agility, haste/slow spells, etc */
+			var attackerRounds int = 1
+
+			for round := 0; round < attackerRounds; round++ {
+				damage := 0
+
+				/* No weapon equipped, calculate unarmed damage with strength and skill */
+				damage = rand.Intn(5)
+
+				/* Modify with attributes */
+
+				/* Evasion check */
+
+				game.damage(vch, vch.fighting, true, damage, DamageTypeBash)
+			}
 		}
 
 		if !found {

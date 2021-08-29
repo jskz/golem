@@ -60,16 +60,18 @@ func do_help(ch *Character, arguments string) {
 func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	buf.WriteString("\r\n{D┌─ {WCharacter Information {D────────┐{x\r\n")
-	buf.WriteString(fmt.Sprintf("{D│ {wName: %-16s         {D│\r\n", ch.name))
-	buf.WriteString(fmt.Sprintf("{D│ {wLevel: %-3d                     {D│\r\n", ch.level))
-	buf.WriteString(fmt.Sprintf("{D│ {wExperience: %-11d        {D│\r\n", ch.experience))
-	buf.WriteString(fmt.Sprintf("{D│ {wRace: %-17s        {D│\r\n", ch.race.DisplayName))
-	buf.WriteString(fmt.Sprintf("{D│ {wJob: %-17s         {D│\r\n", ch.job.DisplayName))
-	buf.WriteString(fmt.Sprintf("{D│ {wHealth: %-11s            {D│\r\n", fmt.Sprintf("%d/%d", ch.health, ch.maxHealth)))
-	buf.WriteString(fmt.Sprintf("{D│ {wMana: %-11s              {D│\r\n", fmt.Sprintf("%d/%d", ch.mana, ch.maxMana)))
-	buf.WriteString(fmt.Sprintf("{D│ {wStamina: %-11s           {D│\r\n", fmt.Sprintf("%d/%d", ch.stamina, ch.maxStamina)))
-	buf.WriteString("{D└────────────────────────────────┘{x\r\n")
+	buf.WriteString("\r\n{D┌─ {WCharacter Information {D──────────────────┐{x\r\n")
+	buf.WriteString(fmt.Sprintf("{D│ {wName: %-16s                   {D│\r\n", ch.name))
+	buf.WriteString(fmt.Sprintf("{D│ {wLevel: %-3d                               {D│\r\n", ch.level))
+	if true || ch.level < LevelHero {
+		buf.WriteString(fmt.Sprintf("{D│ {wExperience: %-7d (%-7d until next) {D│\r\n", ch.experience, ExperienceRequiredForLevel(int(ch.level+1))-int(ch.experience)))
+	}
+	buf.WriteString(fmt.Sprintf("{D│ {wRace: %-21s              {D│\r\n", ch.race.DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {wJob: %-21s               {D│\r\n", ch.job.DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {wHealth: %-15s                  {D│\r\n", fmt.Sprintf("%d/%d", ch.health, ch.maxHealth)))
+	buf.WriteString(fmt.Sprintf("{D│ {wMana: %-15s                    {D│\r\n", fmt.Sprintf("%d/%d", ch.mana, ch.maxMana)))
+	buf.WriteString(fmt.Sprintf("{D│ {wStamina: %-15s                 {D│\r\n", fmt.Sprintf("%d/%d", ch.stamina, ch.maxStamina)))
+	buf.WriteString("{D└──────────────────────────────────────────┘{x\r\n")
 
 	output := buf.String()
 	ch.Send(output)
