@@ -7,7 +7,9 @@
  */
 package main
 
-import "log"
+import (
+	"log"
+)
 
 type Zone struct {
 	id uint
@@ -24,7 +26,9 @@ const (
 )
 
 type Reset struct {
-	id uint
+	id   uint
+	zone *Zone
+	room *Room
 
 	resetType uint
 
@@ -54,6 +58,7 @@ func (game *Game) ResetRoom(room *Room) {
 
 			mobile, err := game.LoadMobileIndex(uint(reset.value0))
 			if err != nil {
+				log.Printf("Could not load mobile during reset: %v\r\n", err)
 				break
 			}
 
@@ -92,6 +97,8 @@ func (game *Game) LoadZones() error {
 			high
 		FROM
 			zones
+		WHERE
+			deleted_at IS NULL
 	`)
 	if err != nil {
 		return err
@@ -112,5 +119,78 @@ func (game *Game) LoadZones() error {
 	}
 
 	log.Printf("Loaded %d zones from database.\r\n", len(game.zones))
+	return nil
+}
+
+func (game *Game) LoadResets() error {
+	var resetCount int = 0
+
+	log.Printf("Loading resets.\r\n")
+
+	rows, err := game.db.Query(`
+		SELECT
+			id,
+			zone_id,
+			room_id,
+			type,
+			value_1,
+			value_2,
+			value_3,
+			value_4
+		FROM
+			resets
+		WHERE
+			deleted_at IS NULL
+	`)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		reset := &Reset{}
+
+		var zoneId uint
+		var roomId uint
+		var resetType string
+
+		err := rows.Scan(&reset.id, &zoneId, &roomId, &resetType, &reset.value0, &reset.value1, &reset.value2, &reset.value3)
+		if err != nil {
+			log.Printf("Unable to scan reset row: %v.\r\n", err)
+			continue
+		}
+
+		for zone := range game.zones {
+			if zone.id == zoneId {
+				room, err := game.LoadRoomIndex(roomId)
+				if err != nil {
+					return err
+				}
+
+				//`type` ENUM('mobile', 'room', 'object')
+				var resetEnumToUintType = map[string]uint{
+					"mobile": ResetTypeMobile,
+					"room":   ResetTypeRoom,
+					"object": ResetTypeObject,
+				}
+
+				var ok bool
+
+				reset.resetType, ok = resetEnumToUintType[resetType]
+				if !ok {
+					break
+				}
+
+				reset.zone = zone
+				reset.room = room
+
+				room.resets.Insert(reset)
+				resetCount++
+			}
+		}
+	}
+
+	log.Printf("Loaded %d resets from database.\r\n", resetCount)
 	return nil
 }

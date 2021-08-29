@@ -116,7 +116,18 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
+	err = game.LoadResets()
+	if err != nil {
+		return nil, err
+	}
+
 	return game, nil
+}
+
+func (game *Game) Update() {
+	for zone := range game.zones {
+		game.ResetZone(zone)
+	}
 }
 
 /* Game loop */
@@ -125,12 +136,12 @@ func (game *Game) Run() {
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)
 	processZoneUpdateTicker := time.NewTicker(1 * time.Minute)
 
+	game.Update()
+
 	for {
 		select {
 		case <-processZoneUpdateTicker.C:
-			for zone := range game.zones {
-				game.ResetZone(zone)
-			}
+			game.Update()
 
 		case <-processCombatTicker.C:
 			game.combatUpdate()

@@ -9,6 +9,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
@@ -145,7 +146,7 @@ func (ch *Character) Finalize() bool {
 		INSERT INTO
 			player_characters(username, password_hash, wizard, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`, ch.name, ch.temporaryHash, 0, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina)
 	ch.temporaryHash = ""
 	if err != nil {
@@ -329,6 +330,14 @@ func (ch *Character) Send(text string) {
 		log.Printf("Failed to write to character: %v.\r\n", err)
 		return
 	}
+}
+
+func (ch *Character) getLongDescription() string {
+	if ch.flags&CHAR_IS_PLAYER != 0 {
+		return fmt.Sprintf("%s is here.", ch.name)
+	}
+
+	return ch.longDescription
 }
 
 func NewCharacter() *Character {

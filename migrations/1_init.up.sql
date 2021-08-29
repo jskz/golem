@@ -136,6 +136,13 @@ CREATE TABLE mobiles (
     
     `stamina` INT NOT NULL,
     `max_stamina` INT NOT NULL,
+    
+    /* Timestamps & soft deletion */
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (race_id) REFERENCES races(id),
@@ -153,6 +160,13 @@ CREATE TABLE resets (
     `value_2` INT,
     `value_3` INT,
     `value_4` INT,
+    
+    /* Timestamps & soft deletion */
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (room_id) REFERENCES rooms(id),
