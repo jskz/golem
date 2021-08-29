@@ -284,6 +284,7 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		client.character.Send(fmt.Sprintf("%s\r\n", JoinedGameFlavourText))
+		do_look(client.character, "")
 	}
 
 	if client.connectionState != ConnectionStatePlaying && output.Len() > 0 {
