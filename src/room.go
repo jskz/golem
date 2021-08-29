@@ -109,6 +109,8 @@ func (game *Game) FixExits() error {
 			flags
 		FROM
 			exits
+		AND
+			deleted_at IS NULL
 	`)
 	if err != nil {
 		return err
