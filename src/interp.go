@@ -52,6 +52,14 @@ func init() {
 	CommandTable["up"] = Command{Name: "up", CmdFunc: do_up}
 	CommandTable["down"] = Command{Name: "down", CmdFunc: do_down}
 
+	/* act_obj.go */
+	CommandTable["equipment"] = Command{Name: "equipment", CmdFunc: do_equipment}
+	CommandTable["inventory"] = Command{Name: "inventory", CmdFunc: do_inventory}
+	CommandTable["wear"] = Command{Name: "wear", CmdFunc: do_wear}
+	CommandTable["remove"] = Command{Name: "remove", CmdFunc: do_remove}
+	CommandTable["take"] = Command{Name: "take", CmdFunc: do_take}
+	CommandTable["drop"] = Command{Name: "drop", CmdFunc: do_drop}
+
 	/* act_wiz.go */
 	CommandTable["exec"] = Command{Name: "exec", CmdFunc: do_exec, MinimumLevel: LevelAdmin}
 	CommandTable["goto"] = Command{Name: "goto", CmdFunc: do_goto, MinimumLevel: LevelHero + 1}
@@ -61,6 +69,8 @@ func init() {
 	CommandTable["kill"] = Command{Name: "kill", CmdFunc: do_kill}
 
 	/* Aliases */
+	CommandTable["eq"] = Command{Name: "equipment", CmdFunc: do_equipment, Hidden: true}
+	CommandTable["i"] = Command{Name: "inventory", CmdFunc: do_inventory, Hidden: true}
 	CommandTable["k"] = Command{Name: "kill", CmdFunc: do_kill, Hidden: true}
 	CommandTable["l"] = Command{Name: "look", CmdFunc: do_look, Hidden: true}
 	CommandTable["n"] = Command{Name: "north", CmdFunc: do_north, Hidden: true}

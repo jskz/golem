@@ -63,7 +63,7 @@ func do_score(ch *Character, arguments string) {
 	buf.WriteString("\r\n{D┌─ {WCharacter Information {D──────────────────┐{x\r\n")
 	buf.WriteString(fmt.Sprintf("{D│ {wName: %-16s                   {D│\r\n", ch.name))
 	buf.WriteString(fmt.Sprintf("{D│ {wLevel: %-3d                               {D│\r\n", ch.level))
-	if true || ch.level < LevelHero {
+	if ch.level < LevelHero {
 		buf.WriteString(fmt.Sprintf("{D│ {wExperience: %-7d (%-7d until next) {D│\r\n", ch.experience, ExperienceRequiredForLevel(int(ch.level+1))-int(ch.experience)))
 	}
 	buf.WriteString(fmt.Sprintf("{D│ {wRace: %-21s              {D│\r\n", ch.race.DisplayName))
