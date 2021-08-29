@@ -69,13 +69,13 @@ func do_score(ch *Character, arguments string) {
 	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
 
 	buf.WriteString("\r\n{D┌─ {WCharacter Information {D──────────────────┐{x\r\n")
-	buf.WriteString(fmt.Sprintf("{D│ {CName: {c%-16s                   {D│\r\n", ch.name))
-	buf.WriteString(fmt.Sprintf("{D│ {CLevel: {c%-3d                               {D│\r\n", ch.level))
+	buf.WriteString(fmt.Sprintf("{D│ {CName:    {c%-13s                   {D│\r\n", ch.name))
+	buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d                             {D│\r\n", ch.level))
 	if ch.level < LevelHero {
 		buf.WriteString(fmt.Sprintf("{D│ {CExperience: {c%-7d {C({c%-7d until next{C) {D│\r\n", ch.experience, ExperienceRequiredForLevel(int(ch.level+1))-int(ch.experience)))
 	}
-	buf.WriteString(fmt.Sprintf("{D│ {CRace: {c%-21s              {D│\r\n", ch.race.DisplayName))
-	buf.WriteString(fmt.Sprintf("{D│ {CJob: {c%-21s               {D│\r\n", ch.job.DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {CRace:    {c%-21s           {D│\r\n", ch.race.DisplayName))
+	buf.WriteString(fmt.Sprintf("{D│ {CJob:     {c%-21s           {D│\r\n", ch.job.DisplayName))
 	buf.WriteString(fmt.Sprintf("{D│ {CHealth:  {c%s%-20s                {D│\r\n",
 		currentHealthColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
