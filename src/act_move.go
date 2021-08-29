@@ -7,6 +7,8 @@
  */
 package main
 
+import "fmt"
+
 const (
 	DirectionNorth = 0
 	DirectionEast  = 1
@@ -35,7 +37,7 @@ var ExitCompassName = map[uint]string{
 	DirectionDown:  "D",
 }
 
-var ReverseDirection = map[uint]int{
+var ReverseDirection = map[uint]uint{
 	DirectionNorth: DirectionSouth,
 	DirectionEast:  DirectionWest,
 	DirectionSouth: DirectionNorth,
@@ -73,9 +75,19 @@ func (ch *Character) move(direction uint) bool {
 	}
 
 	/* Is the exit closed, etc. */
+	from := ch.room
+	from.removeCharacter(ch)
+	for character := range from.characters {
+		character.Send(fmt.Sprintf("{W%s leaves %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[direction]))
+	}
 
-	ch.room.removeCharacter(ch)
 	exit.to.addCharacter(ch)
+	for character := range exit.to.characters {
+		if character != ch {
+			character.Send(fmt.Sprintf("{W%s arrives from the %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[ReverseDirection[direction]]))
+		}
+	}
+
 	do_look(ch, "")
 	return true
 }

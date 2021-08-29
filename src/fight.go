@@ -33,6 +33,17 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 	}
 
 	if display {
+		if ch.room != nil && target.room != nil && target.room == ch.room {
+			for character := range ch.room.characters {
+				if character != ch && character != target {
+					character.Send(fmt.Sprintf("%s hits %s for %d damage.\r\n",
+						ch.getShortDescriptionUpper(character),
+						target.getShortDescription(character),
+						amount))
+				}
+			}
+		}
+
 		ch.Send(fmt.Sprintf("You hit %s for %d damage.\r\n", target.getShortDescription(ch), amount))
 		target.Send(fmt.Sprintf("%s hits you for %d damage.\r\n", ch.getShortDescriptionUpper(target), amount))
 	}
@@ -161,4 +172,15 @@ func do_kill(ch *Character, arguments string) {
 	}
 
 	ch.Send(fmt.Sprintf("\r\n{RYou begin attacking %s{R!{x\r\n", target.getShortDescription(ch)))
+	target.Send(fmt.Sprintf("\r\n{R%s{R begins attacking you!{x\r\n", ch.getShortDescriptionUpper(target)))
+
+	if ch.room != nil && target.room != nil && target.room == ch.room {
+		for character := range ch.room.characters {
+			if character != ch && character != target {
+				character.Send(fmt.Sprintf("{R%s{R begins attacking %s{R!{x\r\n",
+					ch.getShortDescriptionUpper(character),
+					target.getShortDescription(character)))
+			}
+		}
+	}
 }

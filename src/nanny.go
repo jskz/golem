@@ -65,7 +65,6 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		client.character.room.addCharacter(client.character)
 		client.connectionState = ConnectionStateMessageOfTheDay
 		output.WriteString("[ Press any key to continue ]")
 
@@ -271,6 +270,16 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStateMessageOfTheDay:
 		client.connectionState = ConnectionStatePlaying
+
+		if client.character.room != nil {
+			client.character.room.addCharacter(client.character)
+
+			for character := range client.character.room.characters {
+				if character != client.character {
+					character.Send(fmt.Sprintf("{W%s has entered the game.{x\r\n", client.character.name))
+				}
+			}
+		}
 
 		client.character.Send(fmt.Sprintf("%s\r\n", JoinedGameFlavourText))
 	}

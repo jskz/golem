@@ -167,6 +167,13 @@ func (ch *Character) Finalize() bool {
 	}
 
 	ch.id = int(userId)
+
+	limbo, err := ch.client.game.LoadRoomIndex(RoomLimbo)
+	if err != nil {
+		return false
+	}
+
+	ch.room = limbo
 	return true
 }
 
@@ -400,6 +407,14 @@ func (ch *Character) Send(text string) {
 		log.Printf("Failed to write to character: %v.\r\n", err)
 		return
 	}
+}
+
+func (ch *Character) getMaxItemsInventory() int {
+	return 20
+}
+
+func (ch *Character) getMaxCarryWeight() float64 {
+	return 200.0
 }
 
 func (ch *Character) getShortDescription(viewer *Character) string {

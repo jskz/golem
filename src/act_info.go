@@ -101,12 +101,29 @@ func do_who(ch *Character, arguments string) {
 			flagsString.WriteString("{G[AFK]{x ")
 		}
 
-		buf.WriteString(fmt.Sprintf("[%3d][%-10s] %s %s(%s)\r\n",
-			character.level,
-			character.job.DisplayName,
-			character.name,
-			flagsString.String(),
-			character.race.DisplayName))
+		jobDisplay := character.job.DisplayName
+		if character.level == LevelAdmin {
+			jobDisplay = " Administrator"
+		} else if character.level > LevelHero {
+			jobDisplay = "   Immortal   "
+		} else if character.level == LevelHero {
+			jobDisplay = "     Hero     "
+		}
+
+		if character.level >= LevelHero {
+			buf.WriteString(fmt.Sprintf("[%-15s] %s %s(%s)\r\n",
+				jobDisplay,
+				character.name,
+				flagsString.String(),
+				character.race.DisplayName))
+		} else {
+			buf.WriteString(fmt.Sprintf("[%3d][%-10s] %s %s(%s)\r\n",
+				character.level,
+				jobDisplay,
+				character.name,
+				flagsString.String(),
+				character.race.DisplayName))
+		}
 	}
 
 	buf.WriteString(fmt.Sprintf("\r\n%d players online.\r\n", len(characters)))
