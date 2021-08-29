@@ -345,6 +345,14 @@ func (ch *Character) Send(text string) {
 	}
 }
 
+func (ch *Character) getShortDescription() string {
+	if ch.flags&CHAR_IS_PLAYER != 0 {
+		return ch.name
+	}
+
+	return ch.shortDescription
+}
+
 func (ch *Character) getLongDescription() string {
 	if ch.flags&CHAR_IS_PLAYER != 0 {
 		return fmt.Sprintf("%s is here.", ch.name)

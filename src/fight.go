@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -30,6 +31,11 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 		return false
 	}
 
+	if display {
+		ch.Send(fmt.Sprintf("You hit %s for %d damage.\r\n", target.getShortDescription(), amount))
+		target.Send(fmt.Sprintf("%s hit you for %d damage.\r\n", ch.getShortDescription(), amount))
+	}
+
 	return true
 }
 
@@ -47,9 +53,44 @@ func (game *Game) combatUpdate() {
 			}
 
 			damage := 0
-
 			game.damage(vch, vch.fighting, true, damage, DamageTypeBash)
-			vch.Send(fmt.Sprintf("You did %d damage in a combat round.\r\n", damage))
 		}
 	}
+}
+
+func do_kill(ch *Character, arguments string) {
+	if ch.room == nil {
+		return
+	}
+
+	if ch.fighting != nil {
+		ch.Send("You are already fighting somebody else!\r\n")
+		return
+	}
+
+	if len(arguments) < 1 {
+		ch.Send("Attack who?\r\n")
+		return
+	}
+
+	var target *Character = nil
+
+	for rch := range ch.room.characters {
+		if strings.Contains(rch.name, arguments) {
+			target = rch
+		}
+	}
+
+	if target == ch || target == nil {
+		ch.Send("No such target.  Attack who?\r\n")
+		return
+	}
+
+	combat := &Combat{}
+	combat.startedAt = time.Now()
+	combat.participants = []*Character{ch, target}
+	ch.client.game.fights.Insert(combat)
+
+	ch.fighting = target
+	ch.Send(fmt.Sprintf("\r\n{RYou begin attacking %s{R!{x\r\n", target.getShortDescription()))
 }

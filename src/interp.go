@@ -44,8 +44,6 @@ func init() {
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
 	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}
 
-	CommandTable["l"] = Command{Name: "look", CmdFunc: do_look, Hidden: true}
-
 	/* act_move.go */
 	CommandTable["north"] = Command{Name: "north", CmdFunc: do_north}
 	CommandTable["east"] = Command{Name: "east", CmdFunc: do_east}
@@ -54,17 +52,23 @@ func init() {
 	CommandTable["up"] = Command{Name: "up", CmdFunc: do_up}
 	CommandTable["down"] = Command{Name: "down", CmdFunc: do_down}
 
+	/* act_wiz.go */
+	CommandTable["exec"] = Command{Name: "exec", CmdFunc: do_exec, MinimumLevel: LevelAdmin}
+	CommandTable["goto"] = Command{Name: "goto", CmdFunc: do_goto, MinimumLevel: LevelHero + 1}
+	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown, MinimumLevel: LevelAdmin}
+
+	/* fight.go */
+	CommandTable["kill"] = Command{Name: "kill", CmdFunc: do_kill}
+
+	/* Aliases */
+	CommandTable["k"] = Command{Name: "kill", CmdFunc: do_kill, Hidden: true}
+	CommandTable["l"] = Command{Name: "look", CmdFunc: do_look, Hidden: true}
 	CommandTable["n"] = Command{Name: "north", CmdFunc: do_north, Hidden: true}
 	CommandTable["e"] = Command{Name: "east", CmdFunc: do_east, Hidden: true}
 	CommandTable["s"] = Command{Name: "south", CmdFunc: do_south, Hidden: true}
 	CommandTable["w"] = Command{Name: "west", CmdFunc: do_west, Hidden: true}
 	CommandTable["u"] = Command{Name: "up", CmdFunc: do_up, Hidden: true}
 	CommandTable["d"] = Command{Name: "down", CmdFunc: do_down, Hidden: true}
-
-	/* act_wiz.go */
-	CommandTable["exec"] = Command{Name: "exec", CmdFunc: do_exec, MinimumLevel: LevelAdmin}
-	CommandTable["goto"] = Command{Name: "goto", CmdFunc: do_goto, MinimumLevel: LevelHero + 1}
-	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown, MinimumLevel: LevelAdmin}
 }
 
 func (ch *Character) Interpret(input string) bool {
