@@ -28,7 +28,7 @@ func (game *Game) LoadRaceTable() {
 			playable
 		FROM
 			races
-		AND
+		WHERE
 			deleted_at IS NULL
 	`)
 	if err != nil {
@@ -65,7 +65,7 @@ func (game *Game) LoadJobTable() {
 			playable
 		FROM
 			jobs
-		AND
+		WHERE
 			deleted_at IS NULL
 	`)
 	if err != nil {
