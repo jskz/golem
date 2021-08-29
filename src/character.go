@@ -313,6 +313,10 @@ func (ch *Character) gainExperience(experience int) {
 	if ch.level < LevelHero {
 		/* If we gain enough experience to level up multiple times */
 		for {
+			if ch.level >= LevelHero {
+				break
+			}
+
 			tnl := uint(ExperienceRequiredForLevel(int(ch.level + 1)))
 
 			if ch.experience > tnl {
