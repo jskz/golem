@@ -17,21 +17,65 @@ type Zone struct {
 	high uint
 }
 
-func (game *Game) resetRoom(room *Room) {
-	log.Printf("Attempting reset for room %d.\r\n", room.id)
+const (
+	ResetTypeMobile = 0
+	ResetTypeObject = 1
+	ResetTypeRoom   = 2
+)
 
+type Reset struct {
+	id uint
+
+	resetType uint
+
+	value0 int
+	value1 int
+	value2 int
+	value3 int
+}
+
+func (game *Game) ResetRoom(room *Room) {
 	for iter := room.resets.head; iter != nil; iter = iter.next {
+		reset := iter.value.(*Reset)
+
+		switch reset.resetType {
+		case ResetTypeMobile:
+			count := 0
+
+			for rch := range room.characters {
+				if rch.id == reset.value0 {
+					count++
+				}
+			}
+
+			if count >= reset.value2 {
+				break
+			}
+
+			mobile, err := game.LoadMobileIndex(uint(reset.value0))
+			if err != nil {
+				break
+			}
+
+			if mobile != nil {
+				room.characters[mobile] = true
+				mobile.room = room
+			}
+
+		default:
+			log.Printf("Reset of unknown type found for room.\r\n")
+		}
 	}
 }
 
-func (game *Game) resetZone(zone *Zone) {
+func (game *Game) ResetZone(zone *Zone) {
 	for id := zone.low; id <= zone.high; id++ {
 		room, err := game.LoadRoomIndex(id)
 		if err != nil || room == nil {
 			continue
 		}
 
-		game.resetRoom(room)
+		game.ResetRoom(room)
 	}
 }
 

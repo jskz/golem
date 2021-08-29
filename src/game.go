@@ -129,7 +129,7 @@ func (game *Game) Run() {
 		select {
 		case <-processZoneUpdateTicker.C:
 			for zone := range game.zones {
-				game.resetZone(zone)
+				game.ResetZone(zone)
 			}
 
 		case <-processCombatTicker.C:
