@@ -109,6 +109,14 @@ CREATE TABLE player_characters (
     `stamina` INT NOT NULL,
     `max_stamina` INT NOT NULL,
 
+    `stat_str` INT NOT NULL,
+    `stat_dex` INT NOT NULL,
+    `stat_int` INT NOT NULL,
+    `stat_wis` INT NOT NULL,
+    `stat_con` INT NOT NULL,
+    `stat_cha` INT NOT NULL,
+    `stat_lck` INT NOT NULL,
+
     /* Timestamps & soft deletion */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
@@ -144,6 +152,14 @@ CREATE TABLE mobiles (
     
     `stamina` INT NOT NULL,
     `max_stamina` INT NOT NULL,
+
+    `stat_str` INT NOT NULL,
+    `stat_dex` INT NOT NULL,
+    `stat_int` INT NOT NULL,
+    `stat_wis` INT NOT NULL,
+    `stat_con` INT NOT NULL,
+    `stat_cha` INT NOT NULL,
+    `stat_lck` INT NOT NULL,
     
     /* Timestamps & soft deletion */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -289,15 +305,15 @@ VALUES
 
 /* Insert a testing admin character with details: Admin/password */
 INSERT INTO
-    player_characters(id, username, password_hash, wizard, room_id, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
+    player_characters(id, username, password_hash, wizard, room_id, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 VALUES
-    (1, 'Admin', '$2a$10$sS5pzrKaD9qeG3ntkT7.gOohefnxSy/9OHR/p1uImyTL2edzYeJzW', 1, 1, 1, 1, 60, 0, 100, 100, 100, 100, 100, 100);
+    (1, 'Admin', '$2a$10$sS5pzrKaD9qeG3ntkT7.gOohefnxSy/9OHR/p1uImyTL2edzYeJzW', 1, 1, 1, 1, 60, 0, 100, 100, 100, 100, 100, 100, 18, 18, 18, 18, 18, 18, 18);
 
 /* Test NPC in Limbo area */
 INSERT INTO
-    mobiles(id, name, short_description, long_description, description, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
+    mobiles(id, name, short_description, long_description, description, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 VALUES
-    (1, 'test creature', 'a test creature', 'A test creature is here to test some development features.', 'Deeper description would be placed here.', 1, 1, 5, 1250, 15, 15, 100, 100, 100, 100);
+    (1, 'test creature', 'a test creature', 'A test creature is here to test some development features.', 'Deeper description would be placed here.', 1, 1, 5, 1250, 15, 15, 100, 100, 100, 100, 12, 12, 12, 12, 12, 12, 10);
 
 /* Reset to place the test creature in the developer room */
 INSERT INTO

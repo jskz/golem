@@ -34,6 +34,16 @@ type Race struct {
 	Playable    bool   `json:"playable"`
 }
 
+type CharacterStatistics struct {
+	Strength     int
+	Dexterity    int
+	Intelligence int
+	Wisdom       int
+	Constitution int
+	Charisma     int
+	Luck         int
+}
+
 const LevelAdmin = 60
 const LevelHero = 50
 
