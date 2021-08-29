@@ -21,7 +21,17 @@ func do_help(ch *Character, arguments string) {
 	var commands []string = []string{}
 
 	for _, command := range CommandTable {
-		commands = append(commands, command.Name)
+		found := false
+
+		for _, c := range commands {
+			if c == command.Name {
+				found = true
+			}
+		}
+
+		if !found {
+			commands = append(commands, command.Name)
+		}
 	}
 
 	sort.Strings(commands)

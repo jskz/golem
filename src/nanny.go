@@ -59,10 +59,13 @@ func (game *Game) nanny(client *Client, message string) {
 	case ConnectionStatePassword:
 		if !game.AttemptLogin(client.character.name, message) {
 			client.connectionState = ConnectionStateName
+			client.character = nil
+
 			output.WriteString("Wrong password.\r\n\r\nBy what name do you wish to be known? ")
 			break
 		}
 
+		client.character.room.addCharacter(client.character)
 		client.connectionState = ConnectionStateMessageOfTheDay
 		output.WriteString("[ Press any key to continue ]")
 
@@ -76,7 +79,7 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		character, err := game.FindPlayerByName(name)
+		character, room, err := game.FindPlayerByName(name)
 		if err != nil {
 			panic(err)
 		}
@@ -86,6 +89,7 @@ func (game *Game) nanny(client *Client, message string) {
 			client.character.flags |= CHAR_IS_PLAYER
 			client.character.client = client
 			output.WriteString("Password: ")
+			client.character.room = room
 			client.connectionState = ConnectionStatePassword
 			break
 		}

@@ -144,10 +144,10 @@ func (ch *Character) Finalize() bool {
 
 	result, err := ch.client.game.db.Exec(`
 		INSERT INTO
-			player_characters(username, password_hash, wizard, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
+			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.name, ch.temporaryHash, 0, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, ch.name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -170,11 +170,17 @@ func (ch *Character) Save() bool {
 		return false
 	}
 
+	var roomId uint = RoomLimbo
+	if ch.room != nil {
+		roomId = ch.room.id
+	}
+
 	result, err := ch.client.game.db.Exec(`
 		UPDATE
 			player_characters
 		SET
 			wizard = ?,
+			room_id = ?,
 			race_id = ?,
 			job_id = ?,
 			level = ?,
@@ -188,7 +194,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.wizard, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.id)
+	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -210,10 +216,10 @@ func (ch *Character) Save() bool {
  * If the character was not already online in an active session, then attempt
  * a lookup against the database.
  */
-func (game *Game) FindPlayerByName(username string) (*Character, error) {
+func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	for client := range game.clients {
 		if client.character != nil && client.character.name == username {
-			return client.character, nil
+			return client.character, client.character.room, nil
 		}
 	}
 
@@ -223,6 +229,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, error) {
 			id,
 			username,
 			wizard,
+			room_id,
 			race_id,
 			job_id,
 			level,
@@ -243,20 +250,21 @@ func (game *Game) FindPlayerByName(username string) (*Character, error) {
 
 	ch := NewCharacter()
 
+	var roomId uint
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &raceId, &jobId, &ch.level, &ch.experience, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina)
+	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina)
 
 	/* Sanity check for pointers by race and job id before continuing */
 	_, ok := RaceTable[raceId]
 	if !ok {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	_, ok = JobTable[jobId]
 	if !ok {
-		return nil, nil
+		return nil, nil, nil
 	}
 
 	ch.race = RaceTable[raceId]
@@ -264,13 +272,18 @@ func (game *Game) FindPlayerByName(username string) (*Character, error) {
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, nil, nil
 		}
 
-		return nil, err
+		return nil, nil, err
 	}
 
-	return ch, nil
+	room, err := game.LoadRoomIndex(roomId)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return ch, room, nil
 }
 
 func (ch *Character) flushOutput() {

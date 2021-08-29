@@ -87,6 +87,7 @@ CREATE TABLE player_characters (
     `wizard` BOOLEAN NOT NULL,
 
     /* Gameplay fields */
+    `room_id` BIGINT NOT NULL,
     `race_id` BIGINT NOT NULL,
     `job_id` BIGINT NOT NULL,
 
@@ -110,6 +111,7 @@ CREATE TABLE player_characters (
     `deleted_by` BIGINT DEFAULT NULL,
 
     PRIMARY KEY (id),
+    FOREIGN KEY (room_id) REFERENCES rooms(id),
     FOREIGN KEY (race_id) REFERENCES races(id),
     FOREIGN KEY (job_id) REFERENCES jobs(id)
 );
@@ -201,9 +203,9 @@ VALUES
 
 /* Insert a testing admin character with details: Admin/password */
 INSERT INTO
-    player_characters(id, username, password_hash, wizard, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
+    player_characters(id, username, password_hash, wizard, room_id, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina)
 VALUES
-    (1, 'Admin', '$2a$10$sS5pzrKaD9qeG3ntkT7.gOohefnxSy/9OHR/p1uImyTL2edzYeJzW', 1, 1, 1, 60, 0, 100, 100, 100, 100, 100, 100);
+    (1, 'Admin', '$2a$10$sS5pzrKaD9qeG3ntkT7.gOohefnxSy/9OHR/p1uImyTL2edzYeJzW', 1, 1, 1, 1, 60, 0, 100, 100, 100, 100, 100, 100);
 
 /* Test NPC in Limbo area */
 INSERT INTO

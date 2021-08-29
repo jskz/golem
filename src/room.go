@@ -14,6 +14,10 @@ import (
 	"strings"
 )
 
+/* Fixed location IDs */
+const RoomLimbo = 1
+const RoomDeveloperLounge = 2
+
 type Room struct {
 	id uint
 

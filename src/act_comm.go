@@ -95,6 +95,10 @@ func do_quit(ch *Character, arguments string) {
 	output.WriteString("\r\n{RYou are leaving the game world.\r\n")
 	output.WriteString(fmt.Sprintf("You were connected for %d seconds.{x\r\n", seconds))
 
+	if ch.room != nil {
+		ch.room.removeCharacter(ch)
+	}
+
 	ch.Send(output.String())
 	ch.client.conn.Close()
 }

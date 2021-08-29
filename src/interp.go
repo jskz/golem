@@ -44,6 +44,8 @@ func init() {
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
 	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}
 
+	CommandTable["l"] = Command{Name: "look", CmdFunc: do_look, Hidden: true}
+
 	/* act_move.go */
 	CommandTable["north"] = Command{Name: "north", CmdFunc: do_north}
 	CommandTable["east"] = Command{Name: "east", CmdFunc: do_east}
