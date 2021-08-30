@@ -44,7 +44,7 @@ func do_purge(ch *Character, arguments string) {
 			break
 		}
 
-		ch.room.objects.Remove(ch.room.objects.head)
+		ch.room.objects.Remove(ch.room.objects.head.value)
 	}
 
 	ch.Send("You have purged the contents of the room.\r\n")
