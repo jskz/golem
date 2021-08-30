@@ -296,7 +296,9 @@ func (game *Game) nanny(client *Client, message string) {
 		if client.character.room != nil {
 			client.character.room.addCharacter(client.character)
 
-			for character := range client.character.room.characters {
+			for iter := client.character.room.characters.head; iter != nil; iter = iter.next {
+				character := iter.value.(*Character)
+
 				if character != client.character {
 					character.Send(fmt.Sprintf("{W%s has entered the game.{x\r\n", client.character.name))
 				}

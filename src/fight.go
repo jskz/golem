@@ -45,7 +45,8 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 
 	if display {
 		if ch.room != nil && target.room != nil && target.room == ch.room {
-			for character := range ch.room.characters {
+			for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+				character := iter.value.(*Character)
 				if character != ch && character != target {
 					character.Send(fmt.Sprintf("{G%s{G hits %s{G for %d damage.{x\r\n",
 						ch.getShortDescriptionUpper(character),
@@ -68,7 +69,8 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 			room.removeCharacter(target)
 			room.addObject(corpse)
 
-			for character := range room.characters {
+			for iter := room.characters.head; iter != nil; iter = iter.next {
+				character := iter.value.(*Character)
 				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.getShortDescriptionUpper(character)))
 			}
 
@@ -165,7 +167,9 @@ func do_kill(ch *Character, arguments string) {
 
 	var target *Character = nil
 
-	for rch := range ch.room.characters {
+	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+		rch := iter.value.(*Character)
+
 		if strings.Contains(rch.name, arguments) {
 			target = rch
 		}
@@ -195,7 +199,8 @@ func do_kill(ch *Character, arguments string) {
 	target.Send(fmt.Sprintf("\r\n{G%s{G begins attacking you!{x\r\n", ch.getShortDescriptionUpper(target)))
 
 	if ch.room != nil && target.room != nil && target.room == ch.room {
-		for character := range ch.room.characters {
+		for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+			character := iter.value.(*Character)
 			if character != ch && character != target {
 				character.Send(fmt.Sprintf("{G%s{G begins attacking %s{G!{x\r\n",
 					ch.getShortDescriptionUpper(character),

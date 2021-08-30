@@ -46,7 +46,9 @@ func (game *Game) ResetRoom(room *Room) {
 		case ResetTypeMobile:
 			count := 0
 
-			for rch := range room.characters {
+			for iter := room.characters.head; iter != nil; iter = iter.next {
+				rch := iter.value.(*Character)
+
 				if rch.id == reset.value0 {
 					count++
 				}
@@ -71,7 +73,8 @@ func (game *Game) ResetRoom(room *Room) {
 		}
 	}
 
-	for character := range room.characters {
+	for iter := room.characters.head; iter != nil; iter = iter.next {
+		character := iter.value.(*Character)
 		character.onZoneUpdate()
 	}
 }

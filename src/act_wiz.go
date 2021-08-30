@@ -30,12 +30,13 @@ func do_purge(ch *Character, arguments string) {
 		return
 	}
 
-	for rch := range ch.room.characters {
+	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+		rch := iter.value.(*Character)
 		if rch == ch || rch.client != nil || rch.flags&CHAR_IS_PLAYER != 0 {
 			continue
 		}
 
-		delete(rch.room.characters, rch)
+		ch.room.characters.Remove(rch)
 	}
 
 	for {

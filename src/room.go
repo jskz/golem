@@ -24,11 +24,11 @@ type Room struct {
 	name        string
 	description string
 
-	objects *LinkedList
-	resets  *LinkedList
+	objects    *LinkedList
+	resets     *LinkedList
+	characters *LinkedList
 
-	characters map[*Character]bool
-	exit       map[uint]*Exit
+	exit map[uint]*Exit
 }
 
 func (room *Room) addObject(obj *ObjectInstance) {
@@ -40,17 +40,12 @@ func (room *Room) removeObject(obj *ObjectInstance) {
 }
 
 func (room *Room) addCharacter(ch *Character) {
-	_, ok := room.characters[ch]
-	if ok {
-		return
-	}
-
-	room.characters[ch] = true
+	room.characters.Insert(ch)
 	ch.room = room
 }
 
 func (room *Room) removeCharacter(ch *Character) {
-	delete(room.characters, ch)
+	room.characters.Remove(ch)
 	ch.room = nil
 }
 
@@ -69,7 +64,9 @@ func (room *Room) listObjectsToCharacter(ch *Character) {
 func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 	var output strings.Builder
 
-	for rch := range room.characters {
+	for iter := room.characters.head; iter != nil; iter = iter.next {
+		rch := iter.value.(*Character)
+
 		if rch != ch {
 			output.WriteString(fmt.Sprintf("{G%s{x\r\n", rch.getLongDescription(ch)))
 		}
@@ -100,7 +97,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	room = &Room{}
 	room.resets = NewLinkedList()
 	room.objects = NewLinkedList()
-	room.characters = make(map[*Character]bool)
+	room.characters = NewLinkedList()
 	room.exit = make(map[uint]*Exit)
 	err := row.Scan(&room.id, &room.name, &room.description)
 
