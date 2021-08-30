@@ -27,8 +27,8 @@ const (
 	DamageTypeExotic = 3
 )
 
-func (game *Game) createCorpse(ch *Character) *Object {
-	obj := &Object{}
+func (game *Game) createCorpse(ch *Character) *ObjectInstance {
+	obj := &ObjectInstance{}
 
 	obj.id = 1
 	obj.description = fmt.Sprintf("The slain corpse of %s.", ch.getShortDescription(ch))
@@ -66,7 +66,6 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 
 			corpse := game.createCorpse(target)
 			room.removeCharacter(target)
-			target.room = nil
 			room.addObject(corpse)
 
 			for character := range room.characters {

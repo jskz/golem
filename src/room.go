@@ -31,11 +31,11 @@ type Room struct {
 	exit       map[uint]*Exit
 }
 
-func (room *Room) addObject(obj *Object) {
+func (room *Room) addObject(obj *ObjectInstance) {
 	room.objects.Insert(obj)
 }
 
-func (room *Room) removeObject(obj *Object) {
+func (room *Room) removeObject(obj *ObjectInstance) {
 	room.objects.Remove(obj)
 }
 
@@ -58,7 +58,7 @@ func (room *Room) listObjectsToCharacter(ch *Character) {
 	var output strings.Builder
 
 	for iter := room.objects.head; iter != nil; iter = iter.next {
-		obj := iter.value.(*Object)
+		obj := iter.value.(*ObjectInstance)
 
 		output.WriteString(fmt.Sprintf("    {W%s{x\r\n", obj.longDescription))
 	}
