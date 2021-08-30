@@ -113,17 +113,20 @@ func (game *Game) combatUpdate() {
 
 			/* Determine number of attacks - agility, haste/slow spells, etc */
 			var attackerRounds int = 1
+			var dexterityBonusRounds int = int(float64((vch.dexterity - 10) / 4))
+
+			attackerRounds += dexterityBonusRounds
 
 			for round := 0; round < attackerRounds; round++ {
 				damage := 0
 
 				/* No weapon equipped, calculate unarmed damage with strength and skill */
-				damage = rand.Intn(5)
+				damage = rand.Intn(2)
 
 				/* Modify with attributes */
+				damage += rand.Intn(vch.strength / 3)
 
 				/* Evasion check */
-
 				game.damage(vch, vch.fighting, true, damage, DamageTypeBash)
 			}
 		}
