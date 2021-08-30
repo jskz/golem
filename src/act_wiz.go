@@ -30,6 +30,14 @@ func do_purge(ch *Character, arguments string) {
 		return
 	}
 
+	for rch := range ch.room.characters {
+		if rch == ch || rch.client != nil || rch.flags&CHAR_IS_PLAYER != 0 {
+			continue
+		}
+
+		delete(rch.room.characters, rch)
+	}
+
 	for {
 		if ch.room.objects.head == nil {
 			break
