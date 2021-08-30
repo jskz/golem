@@ -43,6 +43,44 @@ func (game *Game) ResetRoom(room *Room) {
 		reset := iter.value.(*Reset)
 
 		switch reset.resetType {
+		case ResetTypeObject:
+			count := 0
+
+			for iter := room.objects.head; iter != nil; iter = iter.next {
+				obj := iter.value.(*ObjectInstance)
+
+				if obj.parentId == uint(reset.value0) {
+					count++
+				}
+			}
+
+			if count >= reset.value2 {
+				break
+			}
+
+			/* Create a new object instance and place it in the room */
+			objIndex, err := game.LoadObjectIndex(uint(reset.value0))
+			if err != nil {
+				log.Printf("Failed to load object for reset: %v\r\n", err)
+				continue
+			}
+
+			if objIndex != nil {
+				obj := &ObjectInstance{
+					parentId:         objIndex.id,
+					name:             objIndex.name,
+					shortDescription: objIndex.shortDescription,
+					longDescription:  objIndex.longDescription,
+					description:      objIndex.description,
+					value0:           objIndex.value0,
+					value1:           objIndex.value1,
+					value2:           objIndex.value2,
+					value3:           objIndex.value3,
+				}
+
+				room.addObject(obj)
+			}
+
 		case ResetTypeMobile:
 			count := 0
 

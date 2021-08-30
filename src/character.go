@@ -74,7 +74,8 @@ const (
  * connected through a session instance available via the client pointer.)
  */
 type Character struct {
-	client *Client
+	client    *Client
+	inventory *LinkedList
 
 	pages      [][]byte
 	pageSize   int
