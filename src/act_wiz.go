@@ -25,6 +25,22 @@ func do_exec(ch *Character, arguments string) {
 	}
 }
 
+func do_purge(ch *Character, arguments string) {
+	if ch.room == nil {
+		return
+	}
+
+	for {
+		if ch.room.objects.head == nil {
+			break
+		}
+
+		ch.room.objects.Remove(ch.room.objects.head)
+	}
+
+	ch.Send("You have purged the contents of the room.\r\n")
+}
+
 func do_shutdown(ch *Character, arguments string) {
 	if ch.client != nil {
 		ch.client.game.shutdownRequest <- true
