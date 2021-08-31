@@ -495,6 +495,14 @@ func (ch *Character) getLongDescriptionUpper(viewer *Character) string {
 	return string(runes)
 }
 
+func (ch *Character) addObject(obj *ObjectInstance) {
+	ch.inventory.Insert(obj)
+}
+
+func (ch *Character) removeObject(obj *ObjectInstance) {
+	ch.inventory.Remove(obj)
+}
+
 func NewCharacter() *Character {
 	character := &Character{}
 
@@ -516,6 +524,7 @@ func NewCharacter() *Character {
 	character.client = nil
 	character.level = 0
 	character.experience = 0
+	character.inventory = NewLinkedList()
 
 	character.strength = 10
 	character.dexterity = 10

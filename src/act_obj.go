@@ -60,7 +60,29 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
-	ch.Send("Not yet implemented, try again soon!\r\n")
+	if ch.room == nil {
+		return
+	}
+
+	var found *ObjectInstance = nil
+	for iter := ch.room.objects.head; iter != nil; iter = iter.next {
+		obj := iter.value.(*ObjectInstance)
+
+		if strings.Contains(obj.name, arguments) {
+			found = obj
+		}
+	}
+
+	if found == nil {
+		ch.Send("No such item found.\r\n")
+		return
+	}
+
+	/* TODO: Check if object can be taken, weight limits, etc */
+	ch.room.removeObject(found)
+	ch.addObject(found)
+
+	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.shortDescription))
 }
 
 func do_drop(ch *Character, arguments string) {
