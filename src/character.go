@@ -123,13 +123,6 @@ func ExperienceRequiredForLevel(level int) int {
 	return int(500*(level*level) - (500 * level))
 }
 
-/*
- * FindPlayerByName returns a reference to the named PC, if such an account
- * exists.  Character returned may or may not have a nullable client property.
- *
- * If the character was not already online in an active session, then attempt
- * a lookup against the database.
- */
 func (game *Game) AttemptLogin(username string, password string) bool {
 	var hash string
 
@@ -245,6 +238,48 @@ func (ch *Character) Save() bool {
 	return rowsAffected == 1
 }
 
+func (game *Game) LoadPlayerInventory(ch *Character) error {
+	rows, err := game.db.Query(`
+		SELECT
+			object_instances.id,
+			object_instances.parent_id,
+			object_instances.name,
+			object_instances.short_description,
+			object_instances.long_description,
+			object_instances.description,
+			object_instances.value_1,
+			object_instances.value_2,
+			object_instances.value_3,
+			object_instances.value_4
+		FROM
+			object_instances
+		INNER JOIN
+			player_character_object
+		ON
+			object_instances.id = player_character_object.object_instance_id
+		WHERE
+			player_character_object.player_character_id = ?
+	`, ch.id)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		obj := &ObjectInstance{}
+
+		err = rows.Scan(&obj.id, &obj.parentId, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.value0, &obj.value1, &obj.value2, &obj.value3)
+		if err != nil {
+			return err
+		}
+
+		ch.inventory.Insert(obj)
+	}
+
+	return nil
+}
+
 /*
  * FindPlayerByName returns a reference to the named PC, if such an account
  * exists.  Character returned may or may not have a nullable client property.
@@ -322,6 +357,11 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	}
 
 	room, err := game.LoadRoomIndex(roomId)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	err = game.LoadPlayerInventory(ch)
 	if err != nil {
 		return nil, nil, err
 	}
