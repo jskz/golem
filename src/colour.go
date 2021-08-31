@@ -122,3 +122,21 @@ func (client *Client) TranslateColourCodes(s string) string {
 
 	return input
 }
+
+func SeverityColourFromPercentage(percentage int) string {
+	if percentage < 10 {
+		return "{D"
+	} else if percentage < 20 {
+		return "{r"
+	} else if percentage < 30 {
+		return "{R"
+	} else if percentage < 50 {
+		return "{y"
+	} else if percentage < 75 {
+		return "{Y"
+	} else if percentage < 90 {
+		return "{g"
+	}
+
+	return "{G"
+}

@@ -82,6 +82,7 @@ func init() {
 	CommandTable["i"] = Command{Name: "inventory", CmdFunc: do_inventory, Hidden: true}
 	CommandTable["k"] = Command{Name: "kill", CmdFunc: do_kill, Hidden: true}
 	CommandTable["l"] = Command{Name: "look", CmdFunc: do_look, Hidden: true}
+	CommandTable["get"] = Command{Name: "take", CmdFunc: do_take, Hidden: true}
 	CommandTable["n"] = Command{Name: "north", CmdFunc: do_north, Hidden: true}
 	CommandTable["e"] = Command{Name: "east", CmdFunc: do_east, Hidden: true}
 	CommandTable["s"] = Command{Name: "south", CmdFunc: do_south, Hidden: true}

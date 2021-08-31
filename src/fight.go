@@ -32,6 +32,7 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 
 	obj.id = 1
 	obj.description = fmt.Sprintf("The slain corpse of %s.", ch.getShortDescription(ch))
+	obj.shortDescription = fmt.Sprintf("the corpse of %s", ch.getShortDescription(ch))
 	obj.longDescription = fmt.Sprintf("The corpse of %s is lying here.", ch.getShortDescription(ch))
 	obj.name = fmt.Sprintf("corpse %s", ch.name)
 
