@@ -2,7 +2,9 @@
 
 ## Overview
 
-Golem is a from-scratch attempt at a Diku-like MUD implemented with Golang in 2021.  Entirely for tinker-fun.
+Golem is a from-scratch attempt at a Diku-like MUD implemented with Golang in 2021.
+
+The objective is to create a hackable, scriptable skeleton for a hack-and-slash MUD.
 
 ## Requirements
 
@@ -18,4 +20,11 @@ docker-compose up
 
 The MUD is exposed on the host's TCP port 4000 by default.
 
-![Early signs of gameplay and combat in the game loop](img/2021-08-29-2.png)
+A phpMyAdmin instance is exposed on port 8000 providing root access to the game's MySQL storage.
+
+## Destroying all database data and starting over
+
+```
+docker-compose down
+docker volume rm golem_db_data
+```
