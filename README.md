@@ -4,7 +4,9 @@
 
 Golem is a from-scratch attempt at a Diku-like MUD implemented with Golang in 2021.
 
-The objective is to create a hackable, scriptable skeleton for a hack-and-slash MUD.
+The objective is to create a hackable, scriptable skeleton for a hack-and-slash MUD; a secondary
+goal is to provide this with a directory and module structure that is immediately familiar to 
+enthusiasts who have tinkered with similar Diku derivatives over the years.
 
 ## Requirements
 
