@@ -17,6 +17,7 @@ import (
 
 type Combat struct {
 	startedAt    time.Time
+	room         *Room
 	participants []*Character
 }
 
@@ -253,6 +254,7 @@ func do_kill(ch *Character, arguments string) {
 
 	combat := &Combat{}
 	combat.startedAt = time.Now()
+	combat.room = ch.room
 	combat.participants = []*Character{ch, target}
 	ch.client.game.fights.Insert(combat)
 

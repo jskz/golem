@@ -50,6 +50,21 @@ func do_purge(ch *Character, arguments string) {
 	ch.Send("You have purged the contents of the room.\r\n")
 }
 
+func do_peace(ch *Character, arguments string) {
+	if ch.room == nil || ch.client == nil {
+		return
+	}
+
+	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+		rch := iter.value.(*Character)
+
+		rch.fighting = nil
+		rch.combat = nil
+	}
+
+	ch.Send("Ok.\r\n")
+}
+
 func do_shutdown(ch *Character, arguments string) {
 	if ch.client != nil {
 		ch.client.game.shutdownRequest <- true
