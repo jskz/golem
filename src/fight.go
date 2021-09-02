@@ -151,6 +151,76 @@ func (game *Game) disposeCombat(combat *Combat) {
 	game.fights.Remove(combat)
 }
 
+func do_flee(ch *Character, arguments string) {
+	if ch.room == nil {
+		return
+	}
+
+	if ch.fighting == nil {
+		ch.Send("{RYou can't flee while not fighting.{x\r\n")
+		return
+	}
+
+	/* TODO: other logic/affects preventing a player from fleeing */
+	var exits []*Exit = make([]*Exit, 0)
+
+	for _, exit := range ch.room.exit {
+		if exit.to != nil {
+			exits = append(exits, exit)
+		}
+	}
+
+	if rand.Intn(10) < 7 {
+		ch.Send("{RYou panic and attempt to flee, but can't get away!{x\r\n")
+
+		/* Announce player's failed flee attempt to others in the room */
+		for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+			rch := iter.value.(*Character)
+
+			if rch != ch {
+				output := fmt.Sprintf("\r\n{R%s{R panics and attempts to flee, but can't get away!{x\r\n", ch.getShortDescriptionUpper(rch))
+				rch.Send(output)
+			}
+		}
+
+		return
+	}
+
+	var choice int = rand.Intn(len(exits))
+	var chosenEscape *Exit = exits[choice]
+
+	ch.Send(fmt.Sprintf("{RYou panic and flee %s!{x\r\n", ExitName[chosenEscape.direction]))
+
+	/* Announce player's departure to all other players in the current room */
+	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+		rch := iter.value.(*Character)
+
+		if rch != ch {
+			output := fmt.Sprintf("\r\n{R%s{R has panic and fled %s!{x\r\n", ch.getShortDescriptionUpper(rch), ExitName[chosenEscape.direction])
+			rch.Send(output)
+		}
+	}
+
+	ch.fighting = nil
+	ch.combat = nil
+
+	ch.room.characters.Remove(ch)
+	ch.room = chosenEscape.to
+	chosenEscape.to.characters.Insert(ch)
+
+	/* Announce player's arrival to all other players in the new room */
+	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+		rch := iter.value.(*Character)
+
+		if rch != ch {
+			output := fmt.Sprintf("\r\n{W%s{W arrives from %s.{x\r\n", ch.getShortDescriptionUpper(rch), ExitName[ReverseDirection[chosenEscape.direction]])
+			rch.Send(output)
+		}
+	}
+
+	do_look(ch, "")
+}
+
 func do_kill(ch *Character, arguments string) {
 	if ch.room == nil {
 		return

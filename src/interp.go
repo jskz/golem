@@ -67,6 +67,7 @@ func init() {
 	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown, MinimumLevel: LevelAdmin}
 
 	/* fight.go */
+	CommandTable["flee"] = Command{Name: "flee", CmdFunc: do_flee}
 	CommandTable["kill"] = Command{Name: "kill", CmdFunc: do_kill}
 
 	/* magic.go */

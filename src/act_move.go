@@ -79,14 +79,14 @@ func (ch *Character) move(direction uint) bool {
 	from.removeCharacter(ch)
 	for iter := from.characters.head; iter != nil; iter = iter.next {
 		character := iter.value.(*Character)
-		character.Send(fmt.Sprintf("{W%s leaves %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[direction]))
+		character.Send(fmt.Sprintf("{W%s{W leaves %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[direction]))
 	}
 
 	exit.to.addCharacter(ch)
 	for iter := exit.to.characters.head; iter != nil; iter = iter.next {
 		character := iter.value.(*Character)
 		if character != ch {
-			character.Send(fmt.Sprintf("{W%s arrives from the %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[ReverseDirection[direction]]))
+			character.Send(fmt.Sprintf("{W%s{W arrives from %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[ReverseDirection[direction]]))
 		}
 	}
 

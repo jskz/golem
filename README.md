@@ -30,3 +30,7 @@ A phpMyAdmin instance is exposed on port 8000 providing root access to the game'
 docker-compose down
 docker volume rm golem_db_data
 ```
+
+## Screenshot
+
+![Golem development as of September 2, slowly progressing](img/2021-09-02.png)
