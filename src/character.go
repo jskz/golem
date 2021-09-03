@@ -526,18 +526,6 @@ func (ch *Character) getLongDescription(viewer *Character) string {
 	return ch.longDescription
 }
 
-func (ch *Character) getLongDescriptionUpper(viewer *Character) string {
-	var long string = ch.getLongDescription(viewer)
-
-	if long == "" {
-		return ""
-	}
-
-	runes := []rune(long)
-	runes[0] = unicode.ToUpper(runes[0])
-	return string(runes)
-}
-
 func (ch *Character) addObject(obj *ObjectInstance) {
 	ch.inventory.Insert(obj)
 }
