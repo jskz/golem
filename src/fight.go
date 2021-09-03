@@ -73,6 +73,10 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 			for iter := room.characters.head; iter != nil; iter = iter.next {
 				character := iter.value.(*Character)
 				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.getShortDescriptionUpper(character)))
+
+				if character.fighting == target {
+					character.fighting = nil
+				}
 			}
 
 			if target.flags&CHAR_IS_PLAYER != 0 {
