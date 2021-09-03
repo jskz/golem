@@ -72,19 +72,7 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
-	var found *ObjectInstance = nil
-	for iter := ch.room.objects.head; iter != nil; iter = iter.next {
-		obj := iter.value.(*ObjectInstance)
-
-		/*
-		 * TODO: add method on character to lookup prefix/name on inventory.
-		 * Implement familiar syntax for indexing: take 2.sword, drop 3.potion, etc.
-		 */
-		if strings.Contains(obj.name, arguments) {
-			found = obj
-		}
-	}
-
+	var found *ObjectInstance = ch.findObjectInRoom(arguments)
 	if found == nil {
 		ch.Send("No such item found.\r\n")
 		return
@@ -119,19 +107,7 @@ func do_drop(ch *Character, arguments string) {
 		return
 	}
 
-	var found *ObjectInstance = nil
-	for iter := ch.inventory.head; iter != nil; iter = iter.next {
-		obj := iter.value.(*ObjectInstance)
-
-		/*
-		 * TODO: add method on character to lookup prefix/name on inventory.
-		 * Implement familiar syntax for indexing: take 2.sword, drop 3.potion, etc.
-		 */
-		if strings.Contains(obj.name, arguments) {
-			found = obj
-		}
-	}
-
+	var found *ObjectInstance = ch.findObjectOnSelf(arguments)
 	if found == nil {
 		ch.Send("No such item in your inventory.\r\n")
 		return

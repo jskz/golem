@@ -534,6 +534,48 @@ func (ch *Character) removeObject(obj *ObjectInstance) {
 	ch.inventory.Remove(obj)
 }
 
+func (ch *Character) findObjectInRoom(argument string) *ObjectInstance {
+	processed := strings.ToLower(argument)
+
+	if ch.room == nil || len(processed) < 1 {
+		return nil
+	}
+
+	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+		obj := iter.value.(*ObjectInstance)
+
+		nameParts := strings.Split(obj.name, " ")
+		for _, part := range nameParts {
+			if strings.Compare(strings.ToLower(part), processed) < 0 {
+				return obj
+			}
+		}
+	}
+
+	return nil
+}
+
+func (ch *Character) findObjectOnSelf(argument string) *ObjectInstance {
+	processed := strings.ToLower(argument)
+
+	if ch.room == nil || len(processed) < 1 {
+		return nil
+	}
+
+	for iter := ch.inventory.head; iter != nil; iter = iter.next {
+		obj := iter.value.(*ObjectInstance)
+
+		nameParts := strings.Split(obj.name, " ")
+		for _, part := range nameParts {
+			if strings.Compare(strings.ToLower(part), processed) < 0 {
+				return obj
+			}
+		}
+	}
+
+	return nil
+}
+
 func (ch *Character) findCharacterInRoom(argument string) *Character {
 	processed := strings.ToLower(argument)
 
