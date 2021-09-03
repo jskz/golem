@@ -9,7 +9,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"strings"
 	"time"
@@ -102,13 +101,7 @@ func (game *Game) combatUpdate() {
 
 		var found bool = false
 		for _, vch := range combat.participants {
-			if vch.fighting == nil {
-				log.Printf("Participant target not currently fighting.\r\n")
-				continue
-			}
-
-			if vch.room == nil || vch.fighting.room == nil || vch.room != vch.fighting.room {
-				log.Printf("Some participants are in nil or mismatched rooms and not considered this round.\r\n")
+			if vch.room == nil || vch.fighting == nil || vch.fighting.room == nil || vch.room.id != vch.fighting.room.id {
 				continue
 			}
 
@@ -134,9 +127,8 @@ func (game *Game) combatUpdate() {
 			}
 		}
 
+		/* Dispose of fight without active participants */
 		if !found {
-			log.Printf("Discarding fight without active participants.\r\n")
-
 			game.disposeCombat(combat)
 			break
 		}
