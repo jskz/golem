@@ -108,7 +108,7 @@ func do_who(ch *Character, arguments string) {
 	buf.WriteString("\r\n{CThe following players are online:{x\r\n")
 
 	characters := make([]*Character, 0)
-	for client := range ch.client.game.clients {
+	for client := range ch.game.clients {
 		if client.character != nil && client.connectionState >= ConnectionStatePlaying {
 			characters = append(characters, client.character)
 		}

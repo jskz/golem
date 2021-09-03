@@ -75,7 +75,7 @@ func do_ooc(ch *Character, arguments string) {
 	buf.WriteString(fmt.Sprintf("\r\n{M[OOC] %s: %s{x\r\n", ch.name, arguments))
 	output := buf.String()
 
-	for client := range ch.client.game.clients {
+	for client := range ch.game.clients {
 		if client.character != nil && client.connectionState == ConnectionStatePlaying {
 			client.character.Send(output)
 		}

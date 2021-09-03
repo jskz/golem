@@ -256,7 +256,7 @@ func do_kill(ch *Character, arguments string) {
 	combat.startedAt = time.Now()
 	combat.room = ch.room
 	combat.participants = []*Character{ch, target}
-	ch.client.game.fights.Insert(combat)
+	ch.game.fights.Insert(combat)
 
 	ch.fighting = target
 

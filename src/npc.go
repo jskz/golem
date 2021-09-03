@@ -42,6 +42,7 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 	`, index)
 
 	ch := NewCharacter()
+	ch.game = game
 
 	var raceId uint
 	var jobId uint

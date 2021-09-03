@@ -107,6 +107,7 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		client.character = NewCharacter()
+		client.character.game = game
 		client.character.client = client
 		client.character.name = name
 		client.character.level = 1

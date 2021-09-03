@@ -14,7 +14,7 @@ import (
 
 func do_exec(ch *Character, arguments string) {
 	if ch.client != nil {
-		value, err := ch.client.game.vm.RunString(arguments)
+		value, err := ch.game.vm.RunString(arguments)
 
 		if err != nil {
 			ch.Send(fmt.Sprintf("{R\r\nError: %s{x.\r\n", err.Error()))
@@ -67,7 +67,7 @@ func do_peace(ch *Character, arguments string) {
 
 func do_shutdown(ch *Character, arguments string) {
 	if ch.client != nil {
-		ch.client.game.shutdownRequest <- true
+		ch.game.shutdownRequest <- true
 	}
 }
 
@@ -78,7 +78,7 @@ func do_goto(ch *Character, arguments string) {
 		return
 	}
 
-	room, err := ch.client.game.LoadRoomIndex(uint(id))
+	room, err := ch.game.LoadRoomIndex(uint(id))
 	if err != nil || room == nil {
 		ch.Send("No such room.\r\n")
 		return

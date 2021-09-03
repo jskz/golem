@@ -74,6 +74,7 @@ const (
  * connected through a session instance available via the client pointer.)
  */
 type Character struct {
+	game      *Game
 	client    *Client
 	inventory *LinkedList
 
@@ -153,12 +154,12 @@ func (ch *Character) onZoneUpdate() {
 }
 
 func (ch *Character) Finalize() bool {
-	if ch.client == nil || ch.client.game == nil {
+	if ch.client == nil || ch.game == nil {
 		/* If somehow an NPC were to try to save, do not allow it. */
 		return false
 	}
 
-	result, err := ch.client.game.db.Exec(`
+	result, err := ch.game.db.Exec(`
 		INSERT INTO
 			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
@@ -178,7 +179,7 @@ func (ch *Character) Finalize() bool {
 
 	ch.id = int(userId)
 
-	limbo, err := ch.client.game.LoadRoomIndex(RoomLimbo)
+	limbo, err := ch.game.LoadRoomIndex(RoomLimbo)
 	if err != nil {
 		return false
 	}
@@ -188,7 +189,7 @@ func (ch *Character) Finalize() bool {
 }
 
 func (ch *Character) Save() bool {
-	if ch.client == nil || ch.client.game == nil {
+	if ch.client == nil || ch.game == nil {
 		/* If somehow an NPC were to try to save, do not allow it. */
 		return false
 	}
@@ -197,7 +198,7 @@ func (ch *Character) Save() bool {
 	if ch.room != nil {
 		roomId = ch.room.id
 	}
-	result, err := ch.client.game.db.Exec(`
+	result, err := ch.game.db.Exec(`
 		UPDATE
 			player_characters
 		SET
@@ -327,6 +328,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	`, username)
 
 	ch := NewCharacter()
+	ch.game = game
 
 	var roomId uint
 	var raceId uint
