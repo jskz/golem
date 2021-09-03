@@ -10,7 +10,6 @@ package main
 import (
 	"fmt"
 	"math/rand"
-	"strings"
 	"time"
 )
 
@@ -80,7 +79,9 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 			}
 
 			if target.flags&CHAR_IS_PLAYER != 0 {
-				target.Send("{RYou have been slain!{x\r\n")
+				target.Send("{RYou have been slain!{D\r\n")
+				target.Send(string(Config.death))
+				target.Send("{x\r\n")
 
 				limbo, err := game.LoadRoomIndex(RoomLimbo)
 				if err != nil {
@@ -88,7 +89,10 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 				}
 
 				limbo.addCharacter(target)
-				target.health = target.maxHealth / 2
+				target.fighting = nil
+				target.combat = nil
+				target.health = target.maxHealth / 5
+				do_look(target, "")
 			} else {
 				exp := target.experience
 				ch.gainExperience(int(exp))
@@ -233,15 +237,7 @@ func do_kill(ch *Character, arguments string) {
 		return
 	}
 
-	var target *Character = nil
-
-	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-		rch := iter.value.(*Character)
-
-		if strings.Contains(rch.name, arguments) {
-			target = rch
-		}
-	}
+	var target *Character = ch.findCharacterInRoom(arguments)
 
 	if target == ch || target == nil {
 		ch.Send("No such target.  Attack who?\r\n")

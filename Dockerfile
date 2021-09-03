@@ -11,6 +11,7 @@ COPY migrations /migrations
 COPY src/*.go ./
 COPY etc/greeting.ansi /greeting.ansi
 COPY etc/motd.ansi /motd.ansi
+COPY etc/death.ansi /death.ansi
 
 RUN go build -o /golem
 

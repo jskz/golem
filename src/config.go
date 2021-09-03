@@ -33,6 +33,7 @@ type AppConfiguration struct {
 
 	greeting []byte
 	motd     []byte
+	death    []byte
 }
 
 /* Magic method is automatically called before main */
@@ -82,5 +83,12 @@ func init() {
 	if err != nil {
 		log.Printf("Warning: failed to read MOTD ANSI file: %v.\r\n", err)
 		Config.motd = []byte(string(""))
+	}
+
+	/* Read death ANSI */
+	Config.death, err = ioutil.ReadFile("/death.ansi")
+	if err != nil {
+		log.Printf("Warning: failed to read death ANSI file: %v.\r\n", err)
+		Config.death = []byte(string(""))
 	}
 }

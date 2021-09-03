@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"strings"
 	"unicode"
 
 	"golang.org/x/crypto/bcrypt"
@@ -545,6 +546,32 @@ func (ch *Character) removeObject(obj *ObjectInstance) {
 	ch.inventory.Remove(obj)
 }
 
+func (ch *Character) findCharacterInRoom(argument string) *Character {
+	processed := strings.ToLower(argument)
+
+	if processed == "self" {
+		return ch
+	}
+
+	if ch.room == nil || len(processed) < 1 {
+		return nil
+	}
+
+	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+		rch := iter.value.(*Character)
+
+		nameParts := strings.Split(rch.name, " ")
+		for _, part := range nameParts {
+
+			if strings.Compare(strings.ToLower(part), processed) < 0 {
+				return rch
+			}
+		}
+	}
+
+	return nil
+}
+
 func NewCharacter() *Character {
 	character := &Character{}
 
@@ -557,7 +584,7 @@ func NewCharacter() *Character {
 	character.combat = nil
 	character.race = nil
 	character.room = nil
-	character.pageSize = 2048
+	character.pageSize = 4096
 	character.pages = make([][]byte, 1)
 	character.pages[0] = make([]byte, character.pageSize)
 	character.pageCursor = 0

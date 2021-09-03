@@ -27,8 +27,8 @@ type Game struct {
 	db *sql.DB
 	vm *goja.Runtime
 
-	playerCharacters *LinkedList
-	fights           *LinkedList
+	characters *LinkedList
+	fights     *LinkedList
 
 	clients map[*Client]bool
 	zones   map[*Zone]bool
@@ -54,7 +54,7 @@ func NewGame() (*Game, error) {
 	game.shutdownRequest = make(chan bool)
 	game.clientMessage = make(chan ClientTextMessage)
 
-	game.playerCharacters = NewLinkedList()
+	game.characters = NewLinkedList()
 	game.fights = NewLinkedList()
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
