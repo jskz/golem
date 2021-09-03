@@ -25,7 +25,14 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 			mana,
 			max_mana,
 			stamina,
-			max_stamina
+			max_stamina,
+			stat_str,
+			stat_dex,
+			stat_int,
+			stat_wis,
+			stat_con,
+			stat_cha,
+			stat_lck
 		FROM
 			mobiles
 		WHERE
@@ -39,7 +46,27 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.id, &ch.name, &ch.shortDescription, &ch.longDescription, &ch.description, &raceId, &jobId, &ch.level, &ch.experience, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina)
+	err := row.Scan(&ch.id,
+		&ch.name,
+		&ch.shortDescription,
+		&ch.longDescription,
+		&ch.description,
+		&raceId,
+		&jobId,
+		&ch.level,
+		&ch.experience,
+		&ch.health,
+		&ch.maxHealth,
+		&ch.mana,
+		&ch.maxMana,
+		&ch.stamina,
+		&ch.maxStamina,
+		&ch.strength,
+		&ch.dexterity,
+		&ch.intelligence,
+		&ch.constitution,
+		&ch.charisma,
+		&ch.luck)
 	if err != nil {
 		return nil, err
 	}
