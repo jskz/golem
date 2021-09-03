@@ -69,6 +69,9 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 			room.removeCharacter(target)
 			room.addObject(corpse)
 
+			target.fighting = nil
+			target.combat = nil
+
 			for iter := room.characters.head; iter != nil; iter = iter.next {
 				character := iter.value.(*Character)
 				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.getShortDescriptionUpper(character)))
@@ -89,8 +92,6 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 				}
 
 				limbo.addCharacter(target)
-				target.fighting = nil
-				target.combat = nil
 				target.health = target.maxHealth / 5
 				do_look(target, "")
 			} else {
