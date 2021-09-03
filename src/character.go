@@ -386,10 +386,10 @@ func (ch *Character) gainExperience(experience int) {
 		return
 	}
 
-	ch.Send(fmt.Sprintf("{WYou gained %d experience points.{x\r\n", experience))
-	ch.experience = ch.experience + uint(experience)
-
 	if ch.level < LevelHero {
+		ch.Send(fmt.Sprintf("{WYou gained %d experience points.{x\r\n", experience))
+		ch.experience = ch.experience + uint(experience)
+
 		/* If we gain enough experience to level up multiple times */
 		for {
 			if ch.level >= LevelHero {
