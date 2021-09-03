@@ -63,7 +63,7 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 	}
 
 	target.health -= amount
-	if target.health < 0 {
+	if target.health <= 0 {
 		if target.room != nil {
 			room := target.room
 
