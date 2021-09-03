@@ -85,6 +85,13 @@ func do_goto(ch *Character, arguments string) {
 	}
 
 	if ch.room != nil {
+		for iter := room.characters.head; iter != nil; iter = iter.next {
+			character := iter.value.(*Character)
+			if character != ch {
+				character.Send(fmt.Sprintf("\r\n{W%s{W disappears in a puff of smoke.{x\r\n", ch.getShortDescriptionUpper(character)))
+			}
+		}
+
 		ch.room.removeCharacter(ch)
 	}
 
@@ -93,7 +100,7 @@ func do_goto(ch *Character, arguments string) {
 	for iter := room.characters.head; iter != nil; iter = iter.next {
 		character := iter.value.(*Character)
 		if character != ch {
-			character.Send(fmt.Sprintf("{W%s{W appears in a puff of smoke.{x\r\n", ch.getShortDescriptionUpper(character)))
+			character.Send(fmt.Sprintf("\r\n{W%s{W appears in a puff of smoke.{x\r\n", ch.getShortDescriptionUpper(character)))
 		}
 	}
 

@@ -84,7 +84,7 @@ func do_take(ch *Character, arguments string) {
 	ch.addObject(found)
 
 	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.shortDescription))
-	outString := fmt.Sprintf("\r\n%s takes %s{x.\r\n", ch.name, found.shortDescription)
+	outString := fmt.Sprintf("\r\n%s{x takes %s{x.\r\n", ch.name, found.shortDescription)
 
 	if ch.room != nil {
 		for iter := ch.room.characters.head; iter != nil; iter = iter.next {
