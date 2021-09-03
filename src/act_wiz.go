@@ -89,5 +89,13 @@ func do_goto(ch *Character, arguments string) {
 	}
 
 	room.addCharacter(ch)
+
+	for iter := room.characters.head; iter != nil; iter = iter.next {
+		character := iter.value.(*Character)
+		if character != ch {
+			character.Send(fmt.Sprintf("{W%s{W appears in a puff of smoke.{x\r\n", ch.getShortDescriptionUpper(character)))
+		}
+	}
+
 	do_look(ch, "")
 }

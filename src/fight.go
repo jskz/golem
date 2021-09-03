@@ -92,7 +92,7 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 				}
 
 				limbo.addCharacter(target)
-				target.health = target.maxHealth / 5
+				target.health = target.maxHealth / 8
 				do_look(target, "")
 			} else {
 				exp := target.experience
