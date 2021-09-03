@@ -64,6 +64,7 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 		&ch.strength,
 		&ch.dexterity,
 		&ch.intelligence,
+		&ch.wisdom,
 		&ch.constitution,
 		&ch.charisma,
 		&ch.luck)
