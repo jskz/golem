@@ -61,7 +61,6 @@ const (
 /* Instance of a client connection */
 type Client struct {
 	sessionStartedAt time.Time
-	game             *Game
 	conn             net.Conn
 	ansiEnabled      bool
 	send             chan []byte
@@ -74,11 +73,11 @@ type ClientTextMessage struct {
 	message string
 }
 
-func (client *Client) readPump() {
+func (client *Client) readPump(game *Game) {
 	defer func() {
 		client.conn.Close()
 
-		client.game.unregister <- client
+		game.unregister <- client
 	}()
 
 	reader := bufio.NewReader(client.conn)
@@ -160,7 +159,7 @@ func (client *Client) readPump() {
 				message: trimmed,
 			}
 
-			client.game.clientMessage <- clientMessage
+			game.clientMessage <- clientMessage
 		}
 
 		for _, command := range commands {
@@ -210,7 +209,7 @@ func (client *Client) readPump() {
 	}
 }
 
-func (client *Client) writePump() {
+func (client *Client) writePump(game *Game) {
 	defer func() {
 		close(client.send)
 	}()
@@ -227,7 +226,6 @@ func (client *Client) writePump() {
 
 func (game *Game) handleConnection(conn net.Conn) {
 	client := &Client{sessionStartedAt: time.Now()}
-	client.game = game
 	client.conn = conn
 	client.send = make(chan []byte)
 	client.character = nil
@@ -235,8 +233,8 @@ func (game *Game) handleConnection(conn net.Conn) {
 	client.ansiEnabled = true
 
 	/* Spawn two goroutines to handle client I/O */
-	go client.readPump()
-	go client.writePump()
+	go client.readPump(game)
+	go client.writePump(game)
 
 	game.register <- client
 }
