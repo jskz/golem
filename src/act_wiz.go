@@ -58,6 +58,7 @@ func do_peace(ch *Character, arguments string) {
 	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
 		rch := iter.value.(*Character)
 
+		rch.flags &= ^CHAR_AGGRESSIVE
 		rch.fighting = nil
 		rch.combat = nil
 	}
