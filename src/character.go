@@ -78,6 +78,7 @@ type Character struct {
 	game      *Game
 	client    *Client
 	inventory *LinkedList
+	skills    *LinkedList
 
 	pages      [][]byte
 	pageSize   int

@@ -16,5 +16,25 @@ func do_practice(ch *Character, arguments string) {
 }
 
 func (ch *Character) LoadPlayerSkills() error {
+	rows, err := ch.game.db.Query(`
+		SELECT
+			pc_skill_proficiency.id,
+			pc_skill_proficiency.player_character_id,
+			pc_skill_proficiency.skill_id,
+			pc_skill_proficiency.proficiency
+		FROM
+			pc_skill_proficiency
+		WHERE
+			pc_skill_proficiency.player_character_id = ?
+	`, ch.id)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+	}
+
 	return nil
 }
