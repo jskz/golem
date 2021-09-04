@@ -264,16 +264,6 @@ CREATE TABLE player_character_object (
     FOREIGN KEY (object_instance_id) REFERENCES object_instances(id)
 );
 
-CREATE TABLE skills (
-    `id` BIGINT NOT NULL,
-    
-    `name` VARCHAR(255) NOT NULL,
-    `type` ENUM('none', 'passive', 'skill', 'spell') NOT NULL,
-    `cost_factor` INT NOT NULL,
-
-    PRIMARY KEY (id)
-);
-
 /* Seed data */
 INSERT INTO zones(id, name, low, high) VALUES (1, 'Limbo', 1, 99);
 
@@ -324,4 +314,3 @@ VALUES
 CREATE INDEX index_pc_username ON player_characters(username);
 CREATE INDEX index_race_name ON races(name);
 CREATE INDEX index_job_name ON jobs(name);
-CREATE INDEX index_skill_name ON skills(name);
