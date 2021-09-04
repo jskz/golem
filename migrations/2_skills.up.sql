@@ -21,18 +21,16 @@ CREATE TABLE job_skill (
     FOREIGN KEY (skill_id) REFERENCES skills(id)
 );
 
-CREATE TABLE pc_job_skill_proficiency (
+CREATE TABLE pc_skill_proficiency (
     `id` BIGINT NOT NULL,
 
     `player_character_id` BIGINT NOT NULL,
-    `job_id` BIGINT NOT NULL,
     `skill_id` BIGINT NOT NULL,
 
     `proficiency` INT NOT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (player_character_id) REFERENCES player_characters(id),
-    FOREIGN KEY (job_id) REFERENCES jobs(id),
     FOREIGN KEY (skill_id) REFERENCES skills(id)
 );
 

@@ -369,6 +369,11 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 		return nil, nil, err
 	}
 
+	err = ch.LoadPlayerSkills()
+	if err != nil {
+		return nil, nil, err
+	}
+
 	return ch, room, nil
 }
 

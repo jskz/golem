@@ -14,3 +14,7 @@ func do_skills(ch *Character, arguments string) {
 func do_practice(ch *Character, arguments string) {
 	ch.Send("Not yet implemented, try again soon!\r\n")
 }
+
+func (ch *Character) LoadPlayerSkills() error {
+	return nil
+}
