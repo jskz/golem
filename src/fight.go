@@ -198,7 +198,7 @@ func do_flee(ch *Character, arguments string) {
 		rch := iter.value.(*Character)
 
 		if rch != ch {
-			output := fmt.Sprintf("\r\n{R%s{R has panic and fled %s!{x\r\n", ch.getShortDescriptionUpper(rch), ExitName[chosenEscape.direction])
+			output := fmt.Sprintf("\r\n{R%s{R has fled %s!{x\r\n", ch.getShortDescriptionUpper(rch), ExitName[chosenEscape.direction])
 			rch.Send(output)
 		}
 	}
