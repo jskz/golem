@@ -21,9 +21,17 @@ func (ch *Character) LoadPlayerSkills() error {
 			pc_skill_proficiency.id,
 			pc_skill_proficiency.player_character_id,
 			pc_skill_proficiency.skill_id,
-			pc_skill_proficiency.proficiency
+			pc_skill_proficiency.proficiency,
+			
+			job_skill.level,
+			job_skill.complexity,
+			job_skill.cost
 		FROM
 			pc_skill_proficiency
+		INNER JOIN
+			job_skill
+		ON
+			job_skill.id = pc_skill_proficiency.player_character_id
 		WHERE
 			pc_skill_proficiency.player_character_id = ?
 	`, ch.id)
