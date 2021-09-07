@@ -99,6 +99,7 @@ type Character struct {
 	race       *Race
 	level      uint
 	experience uint
+	practices  int
 
 	skills map[uint]*Proficiency
 
@@ -164,10 +165,10 @@ func (ch *Character) Finalize() bool {
 
 	result, err := ch.game.db.Exec(`
 		INSERT INTO
-			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
+			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.strength, ch.dexterity, ch.intelligence, ch.wisdom, ch.constitution, ch.charisma, ch.luck)
+	`, ch.name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.strength, ch.dexterity, ch.intelligence, ch.wisdom, ch.constitution, ch.charisma, ch.luck)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -211,6 +212,7 @@ func (ch *Character) Save() bool {
 			job_id = ?,
 			level = ?,
 			experience = ?,
+			practices = ?,
 			health = ?,
 			max_health = ?,
 			mana = ?,
@@ -227,7 +229,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.strength, ch.dexterity, ch.intelligence, ch.wisdom, ch.constitution, ch.charisma, ch.luck, ch.id)
+	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.strength, ch.dexterity, ch.intelligence, ch.wisdom, ch.constitution, ch.charisma, ch.luck, ch.id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -309,6 +311,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 			job_id,
 			level,
 			experience,
+			practices,
 			health,
 			max_health,
 			mana,
@@ -337,7 +340,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.strength, &ch.dexterity, &ch.intelligence, &ch.wisdom, &ch.constitution, &ch.charisma, &ch.luck)
+	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.practices, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.strength, &ch.dexterity, &ch.intelligence, &ch.wisdom, &ch.constitution, &ch.charisma, &ch.luck)
 
 	/* Sanity check for pointers by race and job id before continuing */
 	_, ok := RaceTable[raceId]
@@ -621,6 +624,7 @@ func NewCharacter() *Character {
 	character.combat = nil
 	character.race = nil
 	character.room = nil
+	character.practices = 0
 	character.pageSize = 4096
 	character.pages = make([][]byte, 1)
 	character.pages[0] = make([]byte, character.pageSize)

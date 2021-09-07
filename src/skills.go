@@ -42,6 +42,13 @@ func do_practice(ch *Character, arguments string) {
 	var output strings.Builder
 	var count int = 0
 
+	/*
+	 * TODO: implement the has-arguments path where we can practice skills
+	 * TODO: group output items alphasorted by skill type, colourized
+	 * TBD: will train be a separate command, or do we practice attributes, too?
+	 */
+	output.WriteString("\r\nYou have knowledge in the following skills:\r\n")
+
 	for id, proficiency := range ch.skills {
 		count++
 
@@ -52,7 +59,7 @@ func do_practice(ch *Character, arguments string) {
 		}
 	}
 
-	output.WriteString("\r\nYou have x practice sessions.\r\n")
+	output.WriteString(fmt.Sprintf("\r\nYou have %d practice sessions.\r\n", ch.practices))
 	ch.Send(output.String())
 }
 

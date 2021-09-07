@@ -114,6 +114,7 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character.flags |= CHAR_IS_PLAYER
 		client.connectionState = ConnectionStateConfirmName
 
+		client.character.practices = 100
 		client.character.strength = 10
 		client.character.dexterity = 10
 		client.character.intelligence = 10
