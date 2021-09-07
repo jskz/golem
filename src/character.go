@@ -100,7 +100,7 @@ type Character struct {
 	level      uint
 	experience uint
 
-	skills map[int]*Proficiency
+	skills map[uint]*Proficiency
 
 	flags int
 	afk   *AwayFromKeyboard
@@ -631,7 +631,7 @@ func NewCharacter() *Character {
 	character.level = 0
 	character.experience = 0
 	character.inventory = NewLinkedList()
-	character.skills = make(map[int]*Proficiency)
+	character.skills = make(map[uint]*Proficiency)
 
 	character.strength = 10
 	character.dexterity = 10
