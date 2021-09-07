@@ -78,7 +78,6 @@ type Character struct {
 	game      *Game
 	client    *Client
 	inventory *LinkedList
-	skills    *LinkedList
 
 	pages      [][]byte
 	pageSize   int
@@ -100,6 +99,8 @@ type Character struct {
 	race       *Race
 	level      uint
 	experience uint
+
+	skills map[int]*Proficiency
 
 	flags int
 	afk   *AwayFromKeyboard
@@ -630,6 +631,7 @@ func NewCharacter() *Character {
 	character.level = 0
 	character.experience = 0
 	character.inventory = NewLinkedList()
+	character.skills = make(map[int]*Proficiency)
 
 	character.strength = 10
 	character.dexterity = 10
