@@ -35,7 +35,30 @@ type Proficiency struct {
 }
 
 func do_skills(ch *Character, arguments string) {
-	ch.Send("Not yet implemented, try again soon!\r\n")
+	var output strings.Builder
+	var count int = 0
+
+	output.WriteString("You have knowledge of the following skills:\r\n")
+
+	for id, proficiency := range ch.skills {
+		if ch.game.skills[id].skillType != SkillTypeSkill && ch.game.skills[id].skillType != SkillTypePassive {
+			continue
+		}
+
+		count++
+
+		output.WriteString(fmt.Sprintf("%-15s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
+
+		if count%3 == 0 {
+			output.WriteString("\r\n")
+		}
+	}
+
+	if count%3 != 0 {
+		output.WriteString("\r\n")
+	}
+
+	ch.Send(output.String())
 }
 
 func do_practice(ch *Character, arguments string) {
@@ -47,7 +70,7 @@ func do_practice(ch *Character, arguments string) {
 	 * TODO: group output items alphasorted by skill type, colourized
 	 * TBD: will train be a separate command, or do we practice attributes, too?
 	 */
-	output.WriteString("\r\nYou have knowledge in the following skills:\r\n")
+	output.WriteString("You have knowledge in the following skills:\r\n")
 
 	for id, proficiency := range ch.skills {
 		count++

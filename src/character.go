@@ -70,6 +70,16 @@ const (
 	SUSCEPT_POISON = 1 << 4
 )
 
+const (
+	PositionDead     = 0
+	PositionStunned  = 1
+	PositionSleeping = 2
+	PositionResting  = 3
+	PositionSitting  = 4
+	PositionFighting = 5
+	PositionStanding = 8
+)
+
 /*
  * This character structure is shared by both player-characters (human beings
  * connected through a session instance available via the client pointer.)
@@ -112,6 +122,8 @@ type Character struct {
 	maxMana    int
 	stamina    int
 	maxStamina int
+
+	position int
 
 	strength     int
 	dexterity    int
@@ -626,6 +638,7 @@ func NewCharacter() *Character {
 	character.room = nil
 	character.practices = 0
 	character.pageSize = 4096
+	character.position = PositionDead
 	character.pages = make([][]byte, 1)
 	character.pages[0] = make([]byte, character.pageSize)
 	character.pageCursor = 0
