@@ -89,7 +89,6 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		log.Printf("Setting MOTD state...\r\n")
 		client.connectionState = ConnectionStateMessageOfTheDay
 		output.WriteString(string(Config.motd))
 		output.WriteString("[ Press return to continue ]")
