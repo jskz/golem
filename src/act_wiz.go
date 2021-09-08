@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 func do_exec(ch *Character, arguments string) {
@@ -23,6 +24,37 @@ func do_exec(ch *Character, arguments string) {
 
 		ch.Send(fmt.Sprintf("{w\r\n%s{x\r\n", value.String()))
 	}
+}
+
+func do_mem(ch *Character, arguments string) {
+	var output strings.Builder
+
+	output.WriteString("Usage statistics:\r\n")
+	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Characters", ch.game.characters.count))
+
+	ch.Send(output.String())
+}
+
+func do_mlist(ch *Character, arguments string) {
+	var output strings.Builder
+
+	output.WriteString(fmt.Sprintf("Displaying all %d character instances in the world:\r\n", ch.game.characters.count))
+
+	for iter := ch.game.characters.head; iter != nil; iter = iter.next {
+		wch := iter.value.(*Character)
+
+		if wch.flags&CHAR_IS_PLAYER != 0 {
+			if wch.client != nil {
+				output.WriteString(fmt.Sprintf("{G%s@%s{x\r\n", wch.name, wch.client.conn.RemoteAddr().String()))
+			} else {
+				output.WriteString(fmt.Sprintf("{G%s@DISCONNECTED{x\r\n", wch.name))
+			}
+		} else {
+			output.WriteString(fmt.Sprintf("%s{x (id#%d)\r\n", wch.getShortDescriptionUpper(ch), wch.id))
+		}
+	}
+
+	ch.Send(output.String())
 }
 
 func do_purge(ch *Character, arguments string) {
