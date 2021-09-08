@@ -61,10 +61,12 @@ const (
 
 /* Instance of a client connection */
 type Client struct {
+	id               string
 	sessionStartedAt time.Time
 	conn             net.Conn
 	ansiEnabled      bool
 	send             chan []byte
+	close            chan bool
 	character        *Character
 	connectionState  uint
 }
@@ -77,8 +79,6 @@ type ClientTextMessage struct {
 func (client *Client) readPump(game *Game) {
 	defer func() {
 		client.conn.Close()
-
-		game.unregister <- client
 	}()
 
 	reader := bufio.NewReader(client.conn)
@@ -213,16 +213,31 @@ func (client *Client) readPump(game *Game) {
 func (client *Client) writePump(game *Game) {
 	defer func() {
 		close(client.send)
+
+		game.unregister <- client
 	}()
 
 	for {
-		outgoing := <-client.send
-		_, err := client.conn.Write(outgoing)
-		if err != nil {
-			log.Printf("Error writing to socket: %v\r\n", err)
-			break
+		select {
+		case <-client.close:
+			return
+
+		case outgoing := <-client.send:
+			_, err := client.conn.Write(outgoing)
+			if err != nil {
+				log.Printf("Error writing to socket: %v\r\n", err)
+				return
+			}
 		}
 	}
+}
+
+func (client *Client) closeConnection() {
+	defer func() {
+		recover()
+	}()
+
+	client.close <- true
 }
 
 func (game *Game) checkReconnect(client *Client, name string) bool {
@@ -230,17 +245,14 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 		ch := iter.value.(*Character)
 
 		if ch.flags&CHAR_IS_PLAYER != 0 && ch.name == name {
-			if ch.client != nil {
-				return false
-			}
-
-			ch.clearOutputBuffer()
-
+			client.character = nil
 			ch.client = client
+
 			client.character = ch
 			client.connectionState = ConnectionStatePlaying
 
-			ch.Send("Reconnecting to an abandoned session in progress.\r\n")
+			ch.clearOutputBuffer()
+			ch.Send("Reconnecting to a session in progress.\r\n")
 
 			if ch.room != nil {
 				for iter := ch.room.characters.head; iter != nil; iter = iter.next {
@@ -260,9 +272,14 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 }
 
 func (game *Game) handleConnection(conn net.Conn) {
+	defer func() {
+		recover()
+	}()
+
 	client := &Client{sessionStartedAt: time.Now()}
 	client.conn = conn
 	client.send = make(chan []byte)
+	client.close = make(chan bool)
 	client.character = nil
 	client.connectionState = ConnectionStateNone
 	client.ansiEnabled = true

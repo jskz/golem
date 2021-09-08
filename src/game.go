@@ -172,7 +172,7 @@ func (game *Game) Run() {
 		case client := <-game.register:
 			game.clients[client] = true
 
-			log.Printf("New connection from %s.\r\n", client.conn.RemoteAddr().String())
+			log.Printf("New connection from %s (assigned session ID %s)\r\n", client.conn.RemoteAddr().String(), client.id)
 
 			client.connectionState = ConnectionStateName
 
@@ -181,6 +181,13 @@ func (game *Game) Run() {
 
 		case client := <-game.unregister:
 			delete(game.clients, client)
+
+			if client.character != nil {
+				log.Printf("Lost connection with %s@%s.\r\n", client.character.name, client.conn.RemoteAddr().String())
+
+				client.character.client = nil
+				break
+			}
 
 			log.Printf("Lost connection with %s.\r\n", client.conn.RemoteAddr().String())
 

@@ -10,11 +10,15 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
 	"os"
+	"time"
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	/* Game instance will encapsulate both the world and player session management */
 	game, err := NewGame()
 	if err != nil {

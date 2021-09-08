@@ -77,10 +77,19 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
+		for other := range game.clients {
+			if other != client && other.character != nil && other.character.name == client.character.name {
+				delete(game.clients, other)
+
+				other.conn.Close()
+			}
+		}
+
 		if game.checkReconnect(client, client.character.name) {
 			break
 		}
 
+		log.Printf("Setting MOTD state...\r\n")
 		client.connectionState = ConnectionStateMessageOfTheDay
 		output.WriteString(string(Config.motd))
 		output.WriteString("[ Press return to continue ]")
