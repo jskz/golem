@@ -13,14 +13,16 @@ type LinkedListNode struct {
 }
 
 type LinkedList struct {
-	head *LinkedListNode
-	tail *LinkedListNode
+	head  *LinkedListNode
+	tail  *LinkedListNode
+	count int
 }
 
 func NewLinkedList() *LinkedList {
 	list := &LinkedList{}
 	list.head = nil
 	list.tail = nil
+	list.count = 0
 
 	return list
 }
@@ -31,6 +33,8 @@ func (list *LinkedList) Remove(value interface{}) {
 	if list.head.value == value {
 		list.head = list.head.next
 		list.tail = list.head
+
+		list.count--
 		return
 	}
 
@@ -41,6 +45,7 @@ func (list *LinkedList) Remove(value interface{}) {
 
 		list.tail = iter
 		list.tail.next = nil
+		list.count--
 		return
 	}
 
@@ -55,6 +60,7 @@ func (list *LinkedList) Remove(value interface{}) {
 
 	if iter != nil && iter.next != nil {
 		iter.next = iter.next.next
+		list.count--
 	}
 }
 
@@ -65,11 +71,13 @@ func (list *LinkedList) Insert(value interface{}) {
 	if list.head == nil {
 		list.head = node
 		list.tail = node
+		list.count++
 		return
 	}
 
 	list.tail.next = node
 	list.tail = list.tail.next
+	list.count++
 }
 
 func (list *LinkedList) Values() []interface{} {
