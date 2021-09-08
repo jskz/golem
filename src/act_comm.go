@@ -111,6 +111,8 @@ func do_quit(ch *Character, arguments string) {
 		ch.room.removeCharacter(ch)
 	}
 
+	ch.game.characters.Remove(ch)
+
 	ch.Send(output.String())
 	ch.client.conn.Close()
 }

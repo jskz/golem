@@ -77,6 +77,10 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
+		if game.checkReconnect(client, client.character.name) {
+			break
+		}
+
 		client.connectionState = ConnectionStateMessageOfTheDay
 		output.WriteString(string(Config.motd))
 		output.WriteString("[ Press return to continue ]")
@@ -294,6 +298,8 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStateMessageOfTheDay:
 		client.connectionState = ConnectionStatePlaying
+
+		game.characters.Insert(client.character)
 
 		if client.character.room != nil {
 			client.character.room.addCharacter(client.character)

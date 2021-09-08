@@ -97,6 +97,8 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 			} else {
 				exp := target.experience
 				ch.gainExperience(int(exp))
+
+				game.characters.Remove(target)
 			}
 		}
 	}

@@ -10,6 +10,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"log"
 	"net"
 	"strings"
@@ -222,6 +223,38 @@ func (client *Client) writePump(game *Game) {
 			break
 		}
 	}
+}
+
+func (game *Game) checkReconnect(client *Client, name string) bool {
+	for iter := game.characters.head; iter != nil; iter = iter.next {
+		ch := iter.value.(*Character)
+
+		if ch.flags&CHAR_IS_PLAYER != 0 && ch.name == name {
+			if ch.client != nil {
+				ch.client.conn.Close()
+
+				ch.client = client
+				client.character = ch
+				client.connectionState = ConnectionStateMessageOfTheDay
+
+				ch.Send("Reconnecting to a session in progress.\r\n")
+
+				if ch.room != nil {
+					for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+						character := iter.value.(*Character)
+
+						if character != ch {
+							character.Send(fmt.Sprintf("\r\n%s{x has reconnected.\r\n", ch.getShortDescriptionUpper(character)))
+						}
+					}
+				}
+			}
+
+			return true
+		}
+	}
+
+	return false
 }
 
 func (game *Game) handleConnection(conn net.Conn) {

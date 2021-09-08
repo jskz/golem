@@ -104,6 +104,8 @@ func (game *Game) ResetRoom(room *Room) {
 
 			if mobile != nil {
 				room.addCharacter(mobile)
+
+				game.characters.Insert(mobile)
 			}
 
 		default:

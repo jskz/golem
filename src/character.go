@@ -395,6 +395,10 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 }
 
 func (ch *Character) flushOutput() {
+	defer func() {
+		recover()
+	}()
+
 	for _, page := range ch.pages {
 		ch.client.send <- page
 	}
