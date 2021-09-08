@@ -89,14 +89,6 @@ func do_save(ch *Character, arguments string) {
 }
 
 func do_quit(ch *Character, arguments string) {
-	var output strings.Builder
-
-	sessionDuration := time.Since(ch.client.sessionStartedAt)
-	seconds := int(sessionDuration.Seconds())
-
-	output.WriteString("\r\n{RYou are leaving the game world.\r\n")
-	output.WriteString(fmt.Sprintf("You were connected for %d seconds.{x\r\n", seconds))
-
 	ch.Save()
 
 	if ch.room != nil {
@@ -112,7 +104,5 @@ func do_quit(ch *Character, arguments string) {
 	}
 
 	ch.game.characters.Remove(ch)
-
-	ch.Send(output.String())
 	ch.client.conn.Close()
 }

@@ -37,7 +37,7 @@ func do_help(ch *Character, arguments string) {
 	sort.Strings(commands)
 
 	for _, command := range commands {
-		if ch.level < CommandTable[command].MinimumLevel || CommandTable[command].Hidden {
+		if ch.level <= CommandTable[command].MinimumLevel || CommandTable[command].Hidden {
 			continue
 		}
 

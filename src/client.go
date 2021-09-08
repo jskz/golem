@@ -231,21 +231,23 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 
 		if ch.flags&CHAR_IS_PLAYER != 0 && ch.name == name {
 			if ch.client != nil {
-				ch.client.conn.Close()
+				return false
+			}
 
-				ch.client = client
-				client.character = ch
-				client.connectionState = ConnectionStateMessageOfTheDay
+			ch.clearOutputBuffer()
 
-				ch.Send("Reconnecting to a session in progress.\r\n")
+			ch.client = client
+			client.character = ch
+			client.connectionState = ConnectionStatePlaying
 
-				if ch.room != nil {
-					for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-						character := iter.value.(*Character)
+			ch.Send("Reconnecting to an abandoned session in progress.\r\n")
 
-						if character != ch {
-							character.Send(fmt.Sprintf("\r\n%s{x has reconnected.\r\n", ch.getShortDescriptionUpper(character)))
-						}
+			if ch.room != nil {
+				for iter := ch.room.characters.head; iter != nil; iter = iter.next {
+					character := iter.value.(*Character)
+
+					if character != ch {
+						character.Send(fmt.Sprintf("\r\n%s{x has reconnected.\r\n", ch.getShortDescriptionUpper(character)))
 					}
 				}
 			}

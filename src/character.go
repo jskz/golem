@@ -394,6 +394,12 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	return ch, room, nil
 }
 
+func (ch *Character) clearOutputBuffer() {
+	ch.pages = make([][]byte, 1)
+	ch.pages[0] = make([]byte, ch.pageSize)
+	ch.pageCursor = 0
+}
+
 func (ch *Character) flushOutput() {
 	defer func() {
 		recover()
@@ -403,9 +409,7 @@ func (ch *Character) flushOutput() {
 		ch.client.send <- page
 	}
 
-	ch.pages = make([][]byte, 1)
-	ch.pages[0] = make([]byte, ch.pageSize)
-	ch.pageCursor = 0
+	ch.clearOutputBuffer()
 }
 
 func (ch *Character) gainExperience(experience int) {
