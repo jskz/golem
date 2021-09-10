@@ -19,7 +19,8 @@ const RoomLimbo = 1
 const RoomDeveloperLounge = 2
 
 type Room struct {
-	id uint
+	id   uint
+	zone *Zone
 
 	name        string
 	description string
@@ -84,6 +85,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	row := game.db.QueryRow(`
 		SELECT
 			id,
+			zone_id,
 			name,
 			description
 		FROM
@@ -94,12 +96,14 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 			deleted_at IS NULL
 	`, index)
 
+	var zoneId int
+
 	room = &Room{}
 	room.resets = NewLinkedList()
 	room.objects = NewLinkedList()
 	room.characters = NewLinkedList()
 	room.exit = make(map[uint]*Exit)
-	err := row.Scan(&room.id, &room.name, &room.description)
+	err := row.Scan(&room.id, &zoneId, &room.name, &room.description)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
