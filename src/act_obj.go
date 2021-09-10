@@ -12,6 +12,21 @@ import (
 	"strings"
 )
 
+const (
+	WearLocationNone    = 0
+	WearLocationHead    = 1
+	WearLocationNeck    = 2
+	WearLocationArms    = 3
+	WearLocationTorso   = 4
+	WearLocationLegs    = 5
+	WearLocationHands   = 6
+	WearLocationShield  = 7
+	WearLocationBody    = 8
+	WearLocationWaist   = 9
+	WearLocationWielded = 10
+	WearLocationHeld    = 11
+)
+
 func do_equipment(ch *Character, arguments string) {
 	var output strings.Builder
 
