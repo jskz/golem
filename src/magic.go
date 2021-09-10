@@ -38,7 +38,7 @@ func do_cast(ch *Character, arguments string) {
 
 	spell := args[0]
 	var found *Skill = ch.game.FindSkillByName(spell)
-	if found == nil {
+	if found == nil || found.skillType != SkillTypeSpell {
 		ch.Send("You have no knowledge of that spell, try another.\r\n")
 		return
 	}
