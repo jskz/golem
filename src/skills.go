@@ -34,6 +34,16 @@ type Proficiency struct {
 	cost        int
 }
 
+func (game *Game) FindSkillByName(name string) *Skill {
+	for _, skill := range game.skills {
+		if skill.name == name {
+			return skill
+		}
+	}
+
+	return nil
+}
+
 func do_skills(ch *Character, arguments string) {
 	var output strings.Builder
 	var count int = 0

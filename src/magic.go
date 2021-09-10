@@ -10,7 +10,13 @@ package main
 import (
 	"fmt"
 	"strings"
+	"time"
 )
+
+type SpellContext struct {
+	casting   *Skill
+	startedAt time.Time
+}
 
 func do_cast(ch *Character, arguments string) {
 	ch.Send("Not yet implemented, try again soon!\r\n")
