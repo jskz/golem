@@ -17,6 +17,8 @@ type Zone struct {
 	name string
 	low  uint
 	high uint
+
+	resetMessage string
 }
 
 const (
@@ -116,6 +118,8 @@ func (game *Game) ResetRoom(room *Room) {
 	for iter := room.characters.head; iter != nil; iter = iter.next {
 		character := iter.value.(*Character)
 		character.onZoneUpdate()
+
+		/* TODO: if room.zone.resetMessage != '', send to character ... */
 	}
 }
 

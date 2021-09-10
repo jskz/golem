@@ -130,12 +130,6 @@ func NewGame() (*Game, error) {
 	return game, nil
 }
 
-func (game *Game) Update() {
-	for zone := range game.zones {
-		game.ResetZone(zone)
-	}
-}
-
 /* Game loop */
 func (game *Game) Run() {
 	/* Handle violence logic */
