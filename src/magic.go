@@ -62,7 +62,7 @@ func do_spells(ch *Character, arguments string) {
 	var output strings.Builder
 	var count int = 0
 
-	output.WriteString("You have knowledge of the following spells:\r\n")
+	output.WriteString("{WYou have knowledge of the following spells:{x\r\n")
 
 	for id, proficiency := range ch.skills {
 		if ch.game.skills[id].skillType != SkillTypeSpell {
@@ -71,7 +71,7 @@ func do_spells(ch *Character, arguments string) {
 
 		count++
 
-		output.WriteString(fmt.Sprintf("%-15s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")

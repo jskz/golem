@@ -48,7 +48,7 @@ func do_skills(ch *Character, arguments string) {
 	var output strings.Builder
 	var count int = 0
 
-	output.WriteString("You have knowledge of the following skills:\r\n")
+	output.WriteString("{WYou have knowledge of the following skills:{x\r\n")
 
 	for id, proficiency := range ch.skills {
 		if ch.game.skills[id].skillType != SkillTypeSkill && ch.game.skills[id].skillType != SkillTypePassive {
@@ -57,7 +57,7 @@ func do_skills(ch *Character, arguments string) {
 
 		count++
 
-		output.WriteString(fmt.Sprintf("%-15s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")
@@ -80,12 +80,12 @@ func do_practice(ch *Character, arguments string) {
 	 * TODO: group output items alphasorted by skill type, colourized
 	 * TBD: will train be a separate command, or do we practice attributes, too?
 	 */
-	output.WriteString("You have knowledge in the following skills:\r\n")
+	output.WriteString("{WYou have knowledge of the following skills and spells:{x\r\n")
 
 	for id, proficiency := range ch.skills {
 		count++
 
-		output.WriteString(fmt.Sprintf("%-15s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")
