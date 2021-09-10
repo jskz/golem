@@ -120,7 +120,7 @@ func (game *Game) ResetRoom(room *Room) {
 		character := iter.value.(*Character)
 		character.onZoneUpdate()
 
-		if room.zone.resetMessage != "" {
+		if room.zone.resetMessage != "" && character.flags&CHAR_IS_PLAYER != 0 {
 			character.Send(fmt.Sprintf("\r\n{x%s{x\r\n", room.zone.resetMessage))
 		}
 	}
