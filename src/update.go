@@ -8,7 +8,9 @@
 package main
 
 func (game *Game) Update() {
-	for zone := range game.zones {
+	for iter := game.zones.head; iter != nil; iter = iter.next {
+		zone := iter.value.(*Zone)
+
 		game.ResetZone(zone)
 	}
 }

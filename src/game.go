@@ -29,9 +29,9 @@ type Game struct {
 
 	characters *LinkedList
 	fights     *LinkedList
+	zones      *LinkedList
 
 	clients map[*Client]bool
-	zones   map[*Zone]bool
 	skills  map[uint]*Skill
 	world   map[uint]*Room
 

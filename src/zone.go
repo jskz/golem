@@ -137,7 +137,7 @@ func (game *Game) ResetZone(zone *Zone) {
 func (game *Game) LoadZones() error {
 	log.Printf("Loading zones.\r\n")
 
-	game.zones = make(map[*Zone]bool)
+	game.zones = NewLinkedList()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -165,10 +165,10 @@ func (game *Game) LoadZones() error {
 			continue
 		}
 
-		game.zones[zone] = true
+		game.zones.Insert(zone)
 	}
 
-	log.Printf("Loaded %d zones from database.\r\n", len(game.zones))
+	log.Printf("Loaded %d zones from database.\r\n", game.zones.count)
 	return nil
 }
 
@@ -211,7 +211,9 @@ func (game *Game) LoadResets() error {
 			continue
 		}
 
-		for zone := range game.zones {
+		for iter := game.zones.head; iter != nil; iter = iter.next {
+			zone := iter.value.(*Zone)
+
 			if zone.id == zoneId {
 				room, err := game.LoadRoomIndex(roomId)
 				if err != nil {
