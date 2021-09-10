@@ -13,4 +13,12 @@ func (game *Game) Update() {
 
 		game.ResetZone(zone)
 	}
+
+	if game.eventHandlers["update"] != nil {
+		for iter := game.eventHandlers["update"].head; iter != nil; iter = iter.next {
+			eventHandler := iter.value.(*EventHandler)
+
+			eventHandler.callback(game.vm.ToValue(game))
+		}
+	}
 }

@@ -634,6 +634,14 @@ func (ch *Character) findCharacterInRoom(argument string) *Character {
 	return nil
 }
 
+func (game *Game) Broadcast(message string) {
+	for iter := game.characters.head; iter != nil; iter = iter.next {
+		ch := iter.value.(*Character)
+
+		ch.Send(message)
+	}
+}
+
 func NewCharacter() *Character {
 	character := &Character{}
 
