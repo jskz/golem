@@ -19,6 +19,35 @@ type EventHandler struct {
 	callback goja.Callable
 }
 
+func (game *Game) InvokeNamedEventHandlersWithContextAndValues(name string, this goja.Value, arguments ...goja.Value) ([]goja.Value, []error) {
+	if game.eventHandlers[name] != nil {
+		values := make([]goja.Value, game.eventHandlers[name].count)
+		errors := make([]error, game.eventHandlers[name].count)
+		i := 0
+
+		for iter := game.eventHandlers[name].head; iter != nil; iter = iter.next {
+			eventHandler := iter.value.(*EventHandler)
+
+			result, err := eventHandler.callback(this, arguments...)
+			if err != nil {
+				errors[i] = err
+				values[i] = nil
+				i++
+
+				continue
+			}
+
+			values[i] = result
+			errors[i] = nil
+			i++
+		}
+
+		return values, errors
+	}
+
+	return nil, nil
+}
+
 func (game *Game) InitScripting() error {
 	game.vm = goja.New()
 	game.eventHandlers = make(map[string]*LinkedList)
@@ -35,6 +64,7 @@ func (game *Game) InitScripting() error {
 
 		handler := &EventHandler{name: eventName, callback: fn}
 		game.eventHandlers[eventName].Insert(handler)
+
 		return game.vm.ToValue(handler)
 	}))
 
