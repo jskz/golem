@@ -27,6 +27,17 @@ func (game *Game) InitScripting() error {
 
 	obj := game.vm.NewObject()
 
+	obj.Set("registerEventHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
+		eventName := name.String()
+		if game.eventHandlers[eventName] == nil {
+			game.eventHandlers[eventName] = NewLinkedList()
+		}
+
+		handler := &EventHandler{name: eventName, callback: fn}
+		game.eventHandlers[eventName].Insert(handler)
+		return game.vm.ToValue(handler)
+	}))
+
 	obj.Set("registerPlayerCommand", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		command := strings.ToLower(name.String())
 		_, ok := CommandTable[command]
