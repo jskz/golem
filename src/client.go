@@ -252,7 +252,7 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 			client.connectionState = ConnectionStatePlaying
 
 			ch.clearOutputBuffer()
-			ch.Send("Reconnecting to a session in progress.\r\n")
+			ch.Send("{MReconnecting to a session in progress.{x\r\n")
 
 			if ch.room != nil {
 				for iter := ch.room.characters.head; iter != nil; iter = iter.next {
