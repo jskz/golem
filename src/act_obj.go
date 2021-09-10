@@ -25,12 +25,47 @@ const (
 	WearLocationWaist   = 9
 	WearLocationWielded = 10
 	WearLocationHeld    = 11
+	WearLocationMax     = 12
 )
+
+var WearLocations = make(map[int]string)
+
+func init() {
+	/* Initialize our wear location string map */
+	WearLocations[WearLocationNone] = ""
+	WearLocations[WearLocationHead] = "<worn on head>        "
+	WearLocations[WearLocationNeck] = "<worn around neck>    "
+	WearLocations[WearLocationArms] = "<worn on arms>        "
+	WearLocations[WearLocationTorso] = "<worn on torso>       "
+	WearLocations[WearLocationLegs] = "<worn on legs>        "
+	WearLocations[WearLocationHands] = "<worn on hands>       "
+	WearLocations[WearLocationShield] = "<worn as shield>      "
+	WearLocations[WearLocationBody] = "<worn on body>        "
+	WearLocations[WearLocationWaist] = "<worn around waist>   "
+	WearLocations[WearLocationWielded] = "<wielded>             "
+	WearLocations[WearLocationHeld] = "<held>                "
+}
 
 func do_equipment(ch *Character, arguments string) {
 	var output strings.Builder
 
 	output.WriteString("\r\n{WYou are equipped with the following:{x\r\n")
+
+	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
+		var objectDescription strings.Builder
+
+		if ch.equipment[i] == nil {
+			objectDescription.WriteString("nothing")
+		} else {
+			obj := ch.equipment[i]
+
+			objectDescription.WriteString(obj.shortDescription)
+
+			/* TODO: item flags - glowing, humming, etc? Append extra details here. */
+		}
+
+		output.WriteString(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], objectDescription.String()))
+	}
 
 	ch.Send(output.String())
 }

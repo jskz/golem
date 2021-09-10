@@ -88,6 +88,7 @@ type Character struct {
 	game      *Game
 	client    *Client
 	inventory *LinkedList
+	equipment []*ObjectInstance
 
 	pages      [][]byte
 	pageSize   int
@@ -667,5 +668,6 @@ func NewCharacter() *Character {
 	character.charisma = 10
 	character.luck = 10
 
+	character.equipment = make([]*ObjectInstance, WearLocationMax)
 	return character
 }
