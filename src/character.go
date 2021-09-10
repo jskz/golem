@@ -96,6 +96,7 @@ type Character struct {
 	room     *Room
 	combat   *Combat
 	fighting *Character
+	casting  *CastingContext
 
 	id int
 
