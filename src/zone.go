@@ -8,6 +8,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 )
 
@@ -119,7 +120,9 @@ func (game *Game) ResetRoom(room *Room) {
 		character := iter.value.(*Character)
 		character.onZoneUpdate()
 
-		/* TODO: if room.zone.resetMessage != '', send to character ... */
+		if room.zone.resetMessage != "" {
+			character.Send(fmt.Sprintf("\r\n{x%s{x\r\n", room.zone.resetMessage))
+		}
 	}
 }
 
@@ -144,7 +147,8 @@ func (game *Game) LoadZones() error {
 			id,
 			name,
 			low,
-			high
+			high,
+			reset_message
 		FROM
 			zones
 		WHERE
@@ -159,7 +163,7 @@ func (game *Game) LoadZones() error {
 	for rows.Next() {
 		zone := &Zone{}
 
-		err := rows.Scan(&zone.id, &zone.name, &zone.low, &zone.high)
+		err := rows.Scan(&zone.id, &zone.name, &zone.low, &zone.high, &zone.resetMessage)
 		if err != nil {
 			log.Printf("Unable to scan zone row: %v.\r\n", err)
 			continue
