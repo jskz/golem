@@ -9,6 +9,7 @@ package main
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -96,7 +97,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 			deleted_at IS NULL
 	`, index)
 
-	var zoneId int
+	var zoneId uint
 
 	room = &Room{}
 	room.resets = NewLinkedList()
@@ -111,6 +112,18 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 		}
 
 		return nil, err
+	}
+
+	for iter := game.zones.head; iter != nil; iter = iter.next {
+		zone := iter.value.(*Zone)
+
+		if zone.id == zoneId {
+			room.zone = zone
+		}
+	}
+
+	if room.zone == nil {
+		return nil, errors.New("trying to instance a room without a zone")
 	}
 
 	game.world[room.id] = room
