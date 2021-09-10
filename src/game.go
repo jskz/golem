@@ -27,6 +27,8 @@ type Game struct {
 	db *sql.DB
 	vm *goja.Runtime
 
+	eventHandlers map[string]*LinkedList
+
 	characters *LinkedList
 	fights     *LinkedList
 	zones      *LinkedList

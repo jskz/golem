@@ -14,12 +14,19 @@ import (
 	"github.com/dop251/goja"
 )
 
+type EventHandler struct {
+	name     string
+	callback goja.Callable
+}
+
 func (game *Game) InitScripting() error {
 	game.vm = goja.New()
+	game.eventHandlers = make(map[string]*LinkedList)
 
 	game.vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
 
 	obj := game.vm.NewObject()
+
 	obj.Set("registerPlayerCommand", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		command := strings.ToLower(name.String())
 		_, ok := CommandTable[command]

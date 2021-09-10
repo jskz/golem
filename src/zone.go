@@ -129,6 +129,7 @@ func (game *Game) ResetRoom(room *Room) {
 func (game *Game) ResetZone(zone *Zone) {
 	for id := zone.low; id <= zone.high; id++ {
 		room, err := game.LoadRoomIndex(id)
+
 		if err != nil || room == nil {
 			continue
 		}
