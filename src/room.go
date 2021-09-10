@@ -23,6 +23,8 @@ type Room struct {
 	id   uint
 	zone *Zone
 
+	virtual bool
+
 	name        string
 	description string
 
