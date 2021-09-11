@@ -141,6 +141,7 @@ func (game *Game) Run() {
 	/* Handle resets and trigger one immediately */
 	processZoneUpdateTicker := time.NewTicker(1 * time.Minute)
 
+	game.doMazeTesting()
 	game.Update()
 
 	for {

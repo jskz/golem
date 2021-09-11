@@ -79,6 +79,12 @@ func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 	ch.Send(output.String())
 }
 
+func (game *Game) NewRoom() *Room {
+	room := &Room{}
+
+	return room
+}
+
 func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	room, ok := game.world[index]
 	if ok {

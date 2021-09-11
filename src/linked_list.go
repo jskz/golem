@@ -7,6 +7,8 @@
  */
 package main
 
+import "math/rand"
+
 type LinkedListNode struct {
 	next  *LinkedListNode
 	value interface{}
@@ -78,6 +80,49 @@ func (list *LinkedList) Insert(value interface{}) {
 	list.tail.next = node
 	list.tail = list.tail.next
 	list.count++
+}
+
+func (list *LinkedList) GetRandomNode() *LinkedListNode {
+	c := len(list.Values())
+	if c <= 0 {
+		return nil
+	}
+
+	choice := rand.Intn(c)
+
+	i := 0
+	for iter := list.head; iter != nil; iter = iter.next {
+		if i == choice {
+			return iter
+		}
+
+		i++
+	}
+
+	return nil
+}
+
+/* Utility method to concatenate one linked list to another */
+func (list *LinkedList) Concat(other *LinkedList) *LinkedList {
+	for iter := other.head; iter != nil; iter = iter.next {
+		v := iter.value
+
+		list.Insert(v)
+	}
+
+	return list
+}
+
+func (list *LinkedList) Contains(value interface{}) bool {
+	for iter := list.head; iter != nil; iter = iter.next {
+		v := iter.value
+
+		if v == value {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (list *LinkedList) Values() []interface{} {

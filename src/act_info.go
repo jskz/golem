@@ -183,11 +183,11 @@ func do_look(ch *Character, arguments string) {
 		for direction := uint(0); direction < DirectionMax; direction++ {
 			_, ok := ch.room.exit[direction]
 			if ok {
-				exitsString.WriteString(ExitName[direction])
+				exitsString.WriteString(fmt.Sprintf("%s ", ExitName[direction]))
 			}
 		}
 
-		buf.WriteString(fmt.Sprintf("\r\n{W[Exits: %s]{x\r\n", exitsString.String()))
+		buf.WriteString(fmt.Sprintf("\r\n{W[Exits: %s]{x\r\n", strings.TrimRight(exitsString.String(), " ")))
 	}
 
 	ch.Send(buf.String())
