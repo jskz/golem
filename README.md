@@ -29,6 +29,6 @@ docker-compose down
 docker volume rm golem_db_data
 ```
 
-## Screenshot
+## Video
 
-![Golem development as of September 2, slowly progressing](img/2021-09-02.png)
+https://user-images.githubusercontent.com/5122630/132934734-8df857bc-a403-48ec-b941-3f159c591bb7.mp4
