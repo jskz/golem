@@ -169,6 +169,10 @@ func (ch *Character) onZoneUpdate() {
 	if ch.health < ch.maxHealth {
 		ch.health = int(math.Min(float64(ch.maxHealth), float64(ch.health+5)))
 	}
+
+	if ch.stamina < ch.maxStamina {
+		ch.stamina = int(math.Min(float64(ch.maxStamina), float64(ch.stamina+30)))
+	}
 }
 
 func (ch *Character) Finalize() bool {
