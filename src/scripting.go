@@ -56,6 +56,8 @@ func (game *Game) InitScripting() error {
 
 	obj := game.vm.NewObject()
 
+	obj.Set("game", game.vm.ToValue(game))
+
 	obj.Set("registerEventHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		eventName := name.String()
 		if game.eventHandlers[eventName] == nil {
