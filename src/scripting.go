@@ -19,7 +19,7 @@ type EventHandler struct {
 	callback goja.Callable
 }
 
-func (game *Game) InvokeNamedEventHandlersWithContextAndValues(name string, this goja.Value, arguments ...goja.Value) ([]goja.Value, []error) {
+func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, this goja.Value, arguments ...goja.Value) ([]goja.Value, []error) {
 	if game.eventHandlers[name] != nil {
 		values := make([]goja.Value, game.eventHandlers[name].count)
 		errors := make([]error, game.eventHandlers[name].count)

@@ -7,9 +7,13 @@
  */
 package main
 
-import "time"
+import (
+	"time"
+)
 
 func (game *Game) Update() {
+	game.InvokeNamedEventHandlersWithContextAndArguments("gameUpdate", game.vm.ToValue(game))
+
 	for iter := game.characters.head; iter != nil; iter = iter.next {
 		ch := iter.value.(*Character)
 
@@ -23,6 +27,7 @@ func (game *Game) ZoneUpdate() {
 
 		if time.Since(zone.lastReset).Minutes() > float64(zone.resetFrequency) {
 			game.ResetZone(zone)
+			game.InvokeNamedEventHandlersWithContextAndArguments("zoneUpdate", game.vm.ToValue(zone))
 		}
 	}
 }
