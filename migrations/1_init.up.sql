@@ -5,6 +5,7 @@ CREATE TABLE zones (
     `low` INT NOT NULL,
     `high` INT NOT NULL,
     `reset_message` TEXT,
+    `reset_frequency` INT NOT NULL,
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
@@ -268,7 +269,7 @@ CREATE TABLE player_character_object (
 );
 
 /* Seed data */
-INSERT INTO zones(id, name, low, high, reset_message) VALUES (1, 'Limbo', 1, 1000, '{DYou hear a faint rumbling in the distance.{x');
+INSERT INTO zones(id, name, low, high, reset_message, reset_frequency) VALUES (1, 'Limbo', 1, 1000, '{DYou hear a faint rumbling in the distance.{x', 15);
 
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 0);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 0);
