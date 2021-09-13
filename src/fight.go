@@ -107,6 +107,8 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 }
 
 func (game *Game) combatUpdate() {
+	game.InvokeNamedEventHandlersWithContextAndArguments("combatUpdate", game.vm.ToValue(game))
+
 	for iter := game.fights.head; iter != nil; iter = iter.next {
 		combat := iter.value.(*Combat)
 
