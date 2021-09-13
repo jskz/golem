@@ -61,7 +61,7 @@ func (game *Game) NewMaze(width int, height int) *MazeGrid {
 }
 
 func (grid *MazeGrid) isValidPosition(x int, y int) bool {
-	return x >= 0 && x < grid.width && y >= 0 && y < grid.height
+	return x >= 1 && x < grid.width-1 && y >= 1 && y < grid.height-1
 }
 
 func (cell *MazeCell) getAdjacentCells(wall bool) *LinkedList {
@@ -139,7 +139,7 @@ func (game *Game) doMazeTesting() {
 	maze := game.NewMaze(30, 30)
 
 	maze.generatePrimMaze()
-	//maze.print()
+	maze.print()
 	maze.reify()
 
 	/* Hardcode an exit from limbo into the test maze */
