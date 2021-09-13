@@ -139,7 +139,7 @@ func (game *Game) Run() {
 	/* Buffered/paged output for clients */
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)
 
-	processUpdateTicker := time.NewTicker(20 * time.Second)
+	processUpdateTicker := time.NewTicker(15 * time.Second)
 	game.Update()
 
 	/* Handle resets and trigger one immediately */

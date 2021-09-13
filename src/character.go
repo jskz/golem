@@ -165,13 +165,16 @@ func (game *Game) AttemptLogin(username string, password string) bool {
 }
 
 func (ch *Character) onZoneUpdate() {
+}
+
+func (ch *Character) onUpdate() {
 	/* Regen, script hooks, etc. */
 	if ch.health < ch.maxHealth {
-		ch.health = int(math.Min(float64(ch.maxHealth), float64(ch.health+5)))
+		ch.health = int(math.Min(float64(ch.maxHealth), float64(ch.health+10)))
 	}
 
 	if ch.stamina < ch.maxStamina {
-		ch.stamina = int(math.Min(float64(ch.maxStamina), float64(ch.stamina+30)))
+		ch.stamina = int(math.Min(float64(ch.maxStamina), float64(ch.stamina+15)))
 	}
 }
 

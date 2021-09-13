@@ -10,6 +10,11 @@ package main
 import "time"
 
 func (game *Game) Update() {
+	for iter := game.characters.head; iter != nil; iter = iter.next {
+		ch := iter.value.(*Character)
+
+		ch.onUpdate()
+	}
 }
 
 func (game *Game) ZoneUpdate() {
