@@ -7,6 +7,8 @@
  */
 package main
 
+import "errors"
+
 func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 	/* There was no online player with this name, search the database. */
 	row := game.db.QueryRow(`
@@ -73,19 +75,14 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 		return nil, err
 	}
 
-	/* Sanity check for pointers by race and job id before continuing */
-	_, ok := RaceTable[raceId]
-	if !ok {
-		return nil, nil
+	if ch.race == nil {
+		return nil, errors.New("failed to load race")
 	}
 
-	_, ok = JobTable[jobId]
-	if !ok {
-		return nil, nil
+	ch.job = FindJobByID(jobId)
+	if ch.job == nil {
+		return nil, errors.New("failed to load job")
 	}
-
-	ch.race = RaceTable[raceId]
-	ch.job = JobTable[jobId]
 
 	return ch, nil
 }

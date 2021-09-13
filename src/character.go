@@ -360,26 +360,22 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 
 	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.practices, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.strength, &ch.dexterity, &ch.intelligence, &ch.wisdom, &ch.constitution, &ch.charisma, &ch.luck)
 
-	/* Sanity check for pointers by race and job id before continuing */
-	_, ok := RaceTable[raceId]
-	if !ok {
-		return nil, nil, nil
-	}
-
-	_, ok = JobTable[jobId]
-	if !ok {
-		return nil, nil, nil
-	}
-
-	ch.race = RaceTable[raceId]
-	ch.job = JobTable[jobId]
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil, nil
 		}
 
 		return nil, nil, err
+	}
+
+	ch.race = FindRaceByID(raceId)
+	if ch.race == nil {
+		return nil, nil, fmt.Errorf("failed to load race %d", raceId)
+	}
+
+	ch.job = FindJobByID(jobId)
+	if ch.job == nil {
+		return nil, nil, fmt.Errorf("failed to load job %d", jobId)
 	}
 
 	room, err := game.LoadRoomIndex(roomId)

@@ -12,13 +12,13 @@ import (
 	"strings"
 )
 
-var JobTable map[uint]*Job
-var RaceTable map[uint]*Race
+var Jobs *LinkedList
+var Races *LinkedList
 
 func (game *Game) LoadRaceTable() {
 	log.Printf("Loading races.\r\n")
 
-	RaceTable = make(map[uint]*Race)
+	Races = NewLinkedList()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -46,16 +46,16 @@ func (game *Game) LoadRaceTable() {
 			continue
 		}
 
-		RaceTable[race.Id] = race
+		Races.Insert(race)
 	}
 
-	log.Printf("Loaded %d races from database.\r\n", len(RaceTable))
+	log.Printf("Loaded %d races from database.\r\n", Races.count)
 }
 
 func (game *Game) LoadJobTable() {
 	log.Printf("Loading jobs.\r\n")
 
-	JobTable = make(map[uint]*Job)
+	Jobs = NewLinkedList()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -83,15 +83,17 @@ func (game *Game) LoadJobTable() {
 			continue
 		}
 
-		JobTable[job.Id] = job
+		Jobs.Insert(job)
 	}
 
-	log.Printf("Loaded %d jobs from database.\r\n", len(JobTable))
+	log.Printf("Loaded %d jobs from database.\r\n", Jobs.count)
 }
 
 /* Utility lookup methods */
 func FindJobByName(name string) *Job {
-	for _, job := range JobTable {
+	for iter := Jobs.head; iter != nil; iter = iter.next {
+		job := iter.value.(*Job)
+
 		if strings.Compare(name, job.Name) == 0 {
 			return job
 		}
@@ -101,8 +103,34 @@ func FindJobByName(name string) *Job {
 }
 
 func FindRaceByName(name string) *Race {
-	for _, race := range RaceTable {
+	for iter := Races.head; iter != nil; iter = iter.next {
+		race := iter.value.(*Race)
+
 		if strings.Compare(name, race.Name) == 0 {
+			return race
+		}
+	}
+
+	return nil
+}
+
+func FindJobByID(id uint) *Job {
+	for iter := Jobs.head; iter != nil; iter = iter.next {
+		job := iter.value.(*Job)
+
+		if job.Id == id {
+			return job
+		}
+	}
+
+	return nil
+}
+
+func FindRaceByID(id uint) *Race {
+	for iter := Races.head; iter != nil; iter = iter.next {
+		race := iter.value.(*Race)
+
+		if race.Id == id {
 			return race
 		}
 	}
