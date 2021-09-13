@@ -8,6 +8,9 @@
 package main
 
 func (game *Game) Update() {
+}
+
+func (game *Game) ZoneUpdate() {
 	for iter := game.zones.head; iter != nil; iter = iter.next {
 		zone := iter.value.(*Zone)
 

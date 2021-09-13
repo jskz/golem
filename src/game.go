@@ -138,16 +138,23 @@ func (game *Game) Run() {
 	processCombatTicker := time.NewTicker(2 * time.Second)
 	/* Buffered/paged output for clients */
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)
+
+	processUpdateTicker := time.NewTicker(20 * time.Second)
+	game.Update()
+
 	/* Handle resets and trigger one immediately */
 	processZoneUpdateTicker := time.NewTicker(1 * time.Minute)
+	game.ZoneUpdate()
 
 	game.doMazeTesting()
-	game.Update()
 
 	for {
 		select {
-		case <-processZoneUpdateTicker.C:
+		case <-processUpdateTicker.C:
 			game.Update()
+
+		case <-processZoneUpdateTicker.C:
+			game.ZoneUpdate()
 
 		case <-processCombatTicker.C:
 			game.combatUpdate()
