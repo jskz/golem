@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func do_exec(ch *Character, arguments string) {
@@ -26,11 +27,42 @@ func do_exec(ch *Character, arguments string) {
 	}
 }
 
+func do_zones(ch *Character, arguments string) {
+	var output strings.Builder
+
+	output.WriteString(fmt.Sprintf("{Y%-4s %-35s [%-11s] %s/%s\r\n",
+		"ID#",
+		"Zone Name",
+		"Low# -High#",
+		"Reset Freq.",
+		"Min. Since"))
+
+	for iter := ch.game.zones.head; iter != nil; iter = iter.next {
+		zone := iter.value.(*Zone)
+
+		minutesSinceZoneReset := int(time.Since(zone.lastReset).Minutes())
+
+		output.WriteString(fmt.Sprintf("%-4d %-35s [%-5d-%-5d] %d/%d\r\n",
+			zone.id,
+			zone.name,
+			zone.low,
+			zone.high,
+			zone.resetFrequency,
+			minutesSinceZoneReset))
+	}
+
+	output.WriteString("{x")
+	ch.Send(output.String())
+}
+
 func do_mem(ch *Character, arguments string) {
 	var output strings.Builder
 
-	output.WriteString("Usage statistics:\r\n")
+	output.WriteString("{YUsage statistics:\r\n")
 	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Characters", ch.game.characters.count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Jobs", Jobs.count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Races", Races.count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d{x\r\n", "Zones", ch.game.zones.count))
 
 	ch.Send(output.String())
 }

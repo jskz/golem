@@ -68,6 +68,7 @@ func init() {
 	CommandTable["peace"] = Command{Name: "peace", CmdFunc: do_peace, MinimumLevel: LevelHero + 1}
 	CommandTable["purge"] = Command{Name: "purge", CmdFunc: do_purge, MinimumLevel: LevelHero + 2}
 	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown, MinimumLevel: LevelAdmin}
+	CommandTable["zones"] = Command{Name: "zones", CmdFunc: do_zones, MinimumLevel: LevelHero + 1}
 
 	/* fight.go */
 	CommandTable["flee"] = Command{Name: "flee", CmdFunc: do_flee}
