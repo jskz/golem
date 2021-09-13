@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"time"
 )
 
 type Zone struct {
@@ -19,7 +20,9 @@ type Zone struct {
 	low  uint
 	high uint
 
-	resetMessage string
+	resetMessage   string
+	resetFrequency int
+	lastReset      time.Time
 }
 
 const (
@@ -136,6 +139,8 @@ func (game *Game) ResetZone(zone *Zone) {
 
 		game.ResetRoom(room)
 	}
+
+	zone.lastReset = time.Now()
 }
 
 func (game *Game) LoadZones() error {

@@ -7,6 +7,8 @@
  */
 package main
 
+import "time"
+
 func (game *Game) Update() {
 }
 
@@ -14,6 +16,8 @@ func (game *Game) ZoneUpdate() {
 	for iter := game.zones.head; iter != nil; iter = iter.next {
 		zone := iter.value.(*Zone)
 
-		game.ResetZone(zone)
+		if time.Since(zone.lastReset).Minutes() > float64(zone.resetFrequency) {
+			game.ResetZone(zone)
+		}
 	}
 }
