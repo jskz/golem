@@ -154,7 +154,8 @@ func (game *Game) LoadZones() error {
 			name,
 			low,
 			high,
-			reset_message
+			reset_message,
+			reset_frequency
 		FROM
 			zones
 		WHERE
@@ -169,7 +170,7 @@ func (game *Game) LoadZones() error {
 	for rows.Next() {
 		zone := &Zone{}
 
-		err := rows.Scan(&zone.id, &zone.name, &zone.low, &zone.high, &zone.resetMessage)
+		err := rows.Scan(&zone.id, &zone.name, &zone.low, &zone.high, &zone.resetMessage, &zone.resetFrequency)
 		if err != nil {
 			log.Printf("Unable to scan zone row: %v.\r\n", err)
 			continue
