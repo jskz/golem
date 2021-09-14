@@ -20,7 +20,7 @@ const RoomLimbo = 1
 const RoomDeveloperLounge = 2
 
 type Room struct {
-	id   uint
+	Id   uint `json:"id"`
 	zone *Zone
 
 	virtual bool
@@ -45,19 +45,19 @@ func (room *Room) removeObject(obj *ObjectInstance) {
 
 func (room *Room) addCharacter(ch *Character) {
 	room.characters.Insert(ch)
-	ch.room = room
+	ch.Room = room
 }
 
 func (room *Room) removeCharacter(ch *Character) {
 	room.characters.Remove(ch)
-	ch.room = nil
+	ch.Room = nil
 }
 
 func (room *Room) listObjectsToCharacter(ch *Character) {
 	var output strings.Builder
 
-	for iter := room.objects.head; iter != nil; iter = iter.next {
-		obj := iter.value.(*ObjectInstance)
+	for iter := room.objects.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
 
 		output.WriteString(fmt.Sprintf("    {W%s{x\r\n", obj.longDescription))
 	}
@@ -68,8 +68,8 @@ func (room *Room) listObjectsToCharacter(ch *Character) {
 func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 	var output strings.Builder
 
-	for iter := room.characters.head; iter != nil; iter = iter.next {
-		rch := iter.value.(*Character)
+	for iter := room.characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
 
 		if rch != ch {
 			output.WriteString(fmt.Sprintf("{G%s{x\r\n", rch.getLongDescription(ch)))
@@ -112,7 +112,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	room.objects = NewLinkedList()
 	room.characters = NewLinkedList()
 	room.exit = make(map[uint]*Exit)
-	err := row.Scan(&room.id, &zoneId, &room.name, &room.description)
+	err := row.Scan(&room.Id, &zoneId, &room.name, &room.description)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -122,8 +122,8 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 		return nil, err
 	}
 
-	for iter := game.zones.head; iter != nil; iter = iter.next {
-		zone := iter.value.(*Zone)
+	for iter := game.zones.Head; iter != nil; iter = iter.Next {
+		zone := iter.Value.(*Zone)
 
 		if zone.id == zoneId {
 			room.zone = zone
@@ -134,7 +134,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 		return nil, errors.New("trying to instance a room without a zone")
 	}
 
-	game.world[room.id] = room
+	game.world[room.Id] = room
 	return room, nil
 }
 

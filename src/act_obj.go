@@ -77,8 +77,8 @@ func do_inventory(ch *Character, arguments string) {
 
 	output.WriteString("\r\n{YYour current inventory:{x\r\n")
 
-	for iter := ch.inventory.head; iter != nil; iter = iter.next {
-		obj := iter.value.(*ObjectInstance)
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
 
 		output.WriteString(fmt.Sprintf("{x    %s\r\n", obj.shortDescription))
 
@@ -118,7 +118,7 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
-	if ch.room == nil {
+	if ch.Room == nil {
 		return
 	}
 
@@ -130,15 +130,15 @@ func do_take(ch *Character, arguments string) {
 
 	/* TODO: Check if object can be taken, weight limits, etc */
 
-	ch.room.removeObject(found)
+	ch.Room.removeObject(found)
 	ch.addObject(found)
 
 	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.shortDescription))
 	outString := fmt.Sprintf("\r\n%s{x takes %s{x.\r\n", ch.name, found.shortDescription)
 
-	if ch.room != nil {
-		for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-			rch := iter.value.(*Character)
+	if ch.Room != nil {
+		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+			rch := iter.Value.(*Character)
 
 			if rch != ch {
 				rch.Send(outString)
@@ -153,7 +153,7 @@ func do_drop(ch *Character, arguments string) {
 		return
 	}
 
-	if ch.room == nil {
+	if ch.Room == nil {
 		return
 	}
 
@@ -164,14 +164,14 @@ func do_drop(ch *Character, arguments string) {
 	}
 
 	ch.removeObject(found)
-	ch.room.addObject(found)
+	ch.Room.addObject(found)
 
 	ch.Send(fmt.Sprintf("You drop %s{x.\r\n", found.shortDescription))
 	outString := fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.name, found.shortDescription)
 
-	if ch.room != nil {
-		for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-			rch := iter.value.(*Character)
+	if ch.Room != nil {
+		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+			rch := iter.Value.(*Character)
 
 			if rch != ch {
 				rch.Send(outString)

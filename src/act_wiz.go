@@ -37,8 +37,8 @@ func do_zones(ch *Character, arguments string) {
 		"Reset Freq.",
 		"Min. Since"))
 
-	for iter := ch.game.zones.head; iter != nil; iter = iter.next {
-		zone := iter.value.(*Zone)
+	for iter := ch.game.zones.Head; iter != nil; iter = iter.Next {
+		zone := iter.Value.(*Zone)
 
 		minutesSinceZoneReset := int(time.Since(zone.lastReset).Minutes())
 
@@ -59,10 +59,10 @@ func do_mem(ch *Character, arguments string) {
 	var output strings.Builder
 
 	output.WriteString("{YUsage statistics:\r\n")
-	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Characters", ch.game.characters.count))
-	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Jobs", Jobs.count))
-	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Races", Races.count))
-	output.WriteString(fmt.Sprintf("%-15s %-6d{x\r\n", "Zones", ch.game.zones.count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Characters", ch.game.characters.Count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Jobs", Jobs.Count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Races", Races.Count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d{x\r\n", "Zones", ch.game.zones.Count))
 
 	ch.Send(output.String())
 }
@@ -70,10 +70,10 @@ func do_mem(ch *Character, arguments string) {
 func do_mlist(ch *Character, arguments string) {
 	var output strings.Builder
 
-	output.WriteString(fmt.Sprintf("Displaying all %d character instances in the world:\r\n", ch.game.characters.count))
+	output.WriteString(fmt.Sprintf("Displaying all %d character instances in the world:\r\n", ch.game.characters.Count))
 
-	for iter := ch.game.characters.head; iter != nil; iter = iter.next {
-		wch := iter.value.(*Character)
+	for iter := ch.game.characters.Head; iter != nil; iter = iter.Next {
+		wch := iter.Value.(*Character)
 
 		if wch.flags&CHAR_IS_PLAYER != 0 {
 			if wch.client != nil {
@@ -90,41 +90,41 @@ func do_mlist(ch *Character, arguments string) {
 }
 
 func do_purge(ch *Character, arguments string) {
-	if ch.room == nil {
+	if ch.Room == nil {
 		return
 	}
 
-	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-		rch := iter.value.(*Character)
+	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
 		if rch == ch || rch.client != nil || rch.flags&CHAR_IS_PLAYER != 0 {
 			continue
 		}
 
-		ch.room.characters.Remove(rch)
+		ch.Room.characters.Remove(rch)
 	}
 
 	for {
-		if ch.room.objects.head == nil {
+		if ch.Room.objects.Head == nil {
 			break
 		}
 
-		ch.room.objects.Remove(ch.room.objects.head.value)
+		ch.Room.objects.Remove(ch.Room.objects.Head.Value)
 	}
 
 	ch.Send("You have purged the contents of the room.\r\n")
 }
 
 func do_peace(ch *Character, arguments string) {
-	if ch.room == nil || ch.client == nil {
+	if ch.Room == nil || ch.client == nil {
 		return
 	}
 
-	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-		rch := iter.value.(*Character)
+	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
 
 		rch.flags &= ^CHAR_AGGRESSIVE
-		rch.fighting = nil
-		rch.combat = nil
+		rch.Fighting = nil
+		rch.Combat = nil
 	}
 
 	ch.Send("Ok.\r\n")
@@ -149,21 +149,21 @@ func do_goto(ch *Character, arguments string) {
 		return
 	}
 
-	if ch.room != nil {
-		for iter := room.characters.head; iter != nil; iter = iter.next {
-			character := iter.value.(*Character)
+	if ch.Room != nil {
+		for iter := room.characters.Head; iter != nil; iter = iter.Next {
+			character := iter.Value.(*Character)
 			if character != ch {
 				character.Send(fmt.Sprintf("\r\n{W%s{W disappears in a puff of smoke.{x\r\n", ch.getShortDescriptionUpper(character)))
 			}
 		}
 
-		ch.room.removeCharacter(ch)
+		ch.Room.removeCharacter(ch)
 	}
 
 	room.addCharacter(ch)
 
-	for iter := room.characters.head; iter != nil; iter = iter.next {
-		character := iter.value.(*Character)
+	for iter := room.characters.Head; iter != nil; iter = iter.Next {
+		character := iter.Value.(*Character)
 		if character != ch {
 			character.Send(fmt.Sprintf("\r\n{W%s{W appears in a puff of smoke.{x\r\n", ch.getShortDescriptionUpper(character)))
 		}

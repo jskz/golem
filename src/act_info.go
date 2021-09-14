@@ -69,32 +69,32 @@ func do_score(ch *Character, arguments string) {
 	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
 
 	buf.WriteString("\r\n{D┌─ {WCharacter Information {D──────────────────┬─ {WStatistics{D ───────┐{x\r\n")
-	buf.WriteString(fmt.Sprintf("{D│ {CName:    {c%-13s                   {D│ Strength:       {M%2d{D │\r\n", ch.name, ch.strength))
+	buf.WriteString(fmt.Sprintf("{D│ {CName:    {c%-13s                   {D│ Strength:       {M%2d{D │\r\n", ch.name, ch.Strength))
 	if ch.level < LevelHero {
-		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d  {D[%8d exp. until next] {D│ Dexterity:      {M%2d{D │\r\n", ch.level, ExperienceRequiredForLevel(int(ch.level+1))-int(ch.experience), ch.dexterity))
+		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d  {D[%8d exp. until next] {D│ Dexterity:      {M%2d{D │\r\n", ch.level, ExperienceRequiredForLevel(int(ch.level+1))-int(ch.experience), ch.Dexterity))
 	} else {
-		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d                             {D│ Dexterity:      {M%2d{D │\r\n", ch.level, ch.dexterity))
+		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d                             {D│ Dexterity:      {M%2d{D │\r\n", ch.level, ch.Dexterity))
 	}
-	buf.WriteString(fmt.Sprintf("{D│ {CRace:    {c%-21s           {D│ Intelligence:   {M%2d{D │\r\n", ch.race.DisplayName, ch.intelligence))
-	buf.WriteString(fmt.Sprintf("{D│ {CJob:     {c%-21s           {D│ Wisdom:         {M%2d{D │\r\n", ch.job.DisplayName, ch.wisdom))
+	buf.WriteString(fmt.Sprintf("{D│ {CRace:    {c%-21s           {D│ Intelligence:   {M%2d{D │\r\n", ch.race.DisplayName, ch.Intelligence))
+	buf.WriteString(fmt.Sprintf("{D│ {CJob:     {c%-21s           {D│ Wisdom:         {M%2d{D │\r\n", ch.job.DisplayName, ch.Wisdom))
 	buf.WriteString(fmt.Sprintf("{D│ {CHealth:  {c%s%-20s                {D│ Constitution:   {M%2d{D │\r\n",
 		currentHealthColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
 			ch.health,
 			ch.maxHealth),
-		ch.constitution))
+		ch.Constitution))
 	buf.WriteString(fmt.Sprintf("{D│ {CMana:    {c%s%-18s                  {D│ Charisma:       {M%2d{D │\r\n",
 		currentManaColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
 			ch.mana,
 			ch.maxMana),
-		ch.charisma))
+		ch.Charisma))
 	buf.WriteString(fmt.Sprintf("{D│ {CStamina: {c%s%-21s               {D│ Luck:           {M%2d{D │\r\n",
 		currentStaminaColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
 			ch.stamina,
 			ch.maxStamina),
-		ch.luck))
+		ch.Luck))
 	buf.WriteString("{D└──────────────────────────────────────────┴────────────────────┘{x\r\n")
 
 	output := buf.String()
@@ -158,30 +158,30 @@ func do_who(ch *Character, arguments string) {
 func do_look(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	if ch.room == nil {
+	if ch.Room == nil {
 		ch.Send("{DYou look around into the void.  There's nothing here, yet!{x\r\n")
 		return
 	}
 
 	var lookCompassOutput map[uint]string = make(map[uint]string)
 	for k := uint(0); k < DirectionMax; k++ {
-		if ch.room.exit[k] != nil {
+		if ch.Room.exit[k] != nil {
 			lookCompassOutput[k] = fmt.Sprintf("{Y%s", ExitCompassName[k])
 		} else {
 			lookCompassOutput[k] = "{D-"
 		}
 	}
 
-	buf.WriteString(fmt.Sprintf("\r\n{Y  %-50s {D-      %s{D      -\r\n", ch.room.name, lookCompassOutput[DirectionNorth]))
+	buf.WriteString(fmt.Sprintf("\r\n{Y  %-50s {D-      %s{D      -\r\n", ch.Room.name, lookCompassOutput[DirectionNorth]))
 	buf.WriteString(fmt.Sprintf("{D(--------------------------------------------------) %s{D <-%s{D-{w({W*{w){D-%s{D-> %s\r\n", lookCompassOutput[DirectionWest], lookCompassOutput[DirectionUp], lookCompassOutput[DirectionDown], lookCompassOutput[DirectionEast]))
 	buf.WriteString(fmt.Sprintf("{D                                                     {D-      %s{D      -\r\n", lookCompassOutput[DirectionSouth]))
-	buf.WriteString(fmt.Sprintf("{w  %s{x\r\n", ch.room.description))
+	buf.WriteString(fmt.Sprintf("{w  %s{x\r\n", ch.Room.description))
 
-	if len(ch.room.exit) > 0 {
+	if len(ch.Room.exit) > 0 {
 		var exitsString strings.Builder
 
 		for direction := uint(0); direction < DirectionMax; direction++ {
-			_, ok := ch.room.exit[direction]
+			_, ok := ch.Room.exit[direction]
 			if ok {
 				exitsString.WriteString(fmt.Sprintf("%s ", ExitName[direction]))
 			}
@@ -192,6 +192,6 @@ func do_look(ch *Character, arguments string) {
 
 	ch.Send(buf.String())
 
-	ch.room.listObjectsToCharacter(ch)
-	ch.room.listOtherRoomCharactersToCharacter(ch)
+	ch.Room.listObjectsToCharacter(ch)
+	ch.Room.listOtherRoomCharactersToCharacter(ch)
 }

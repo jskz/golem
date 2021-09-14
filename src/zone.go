@@ -45,15 +45,15 @@ type Reset struct {
 }
 
 func (game *Game) ResetRoom(room *Room) {
-	for iter := room.resets.head; iter != nil; iter = iter.next {
-		reset := iter.value.(*Reset)
+	for iter := room.resets.Head; iter != nil; iter = iter.Next {
+		reset := iter.Value.(*Reset)
 
 		switch reset.resetType {
 		case ResetTypeObject:
 			count := 0
 
-			for iter := room.objects.head; iter != nil; iter = iter.next {
-				obj := iter.value.(*ObjectInstance)
+			for iter := room.objects.Head; iter != nil; iter = iter.Next {
+				obj := iter.Value.(*ObjectInstance)
 
 				if obj.parentId == uint(reset.value0) {
 					count++
@@ -90,8 +90,8 @@ func (game *Game) ResetRoom(room *Room) {
 		case ResetTypeMobile:
 			count := 0
 
-			for iter := room.characters.head; iter != nil; iter = iter.next {
-				rch := iter.value.(*Character)
+			for iter := room.characters.Head; iter != nil; iter = iter.Next {
+				rch := iter.Value.(*Character)
 
 				if rch.id == reset.value0 {
 					count++
@@ -119,8 +119,8 @@ func (game *Game) ResetRoom(room *Room) {
 		}
 	}
 
-	for iter := room.characters.head; iter != nil; iter = iter.next {
-		character := iter.value.(*Character)
+	for iter := room.characters.Head; iter != nil; iter = iter.Next {
+		character := iter.Value.(*Character)
 		character.onZoneUpdate()
 
 		if room.zone.resetMessage != "" && character.flags&CHAR_IS_PLAYER != 0 {
@@ -179,7 +179,7 @@ func (game *Game) LoadZones() error {
 		game.zones.Insert(zone)
 	}
 
-	log.Printf("Loaded %d zones from database.\r\n", game.zones.count)
+	log.Printf("Loaded %d zones from database.\r\n", game.zones.Count)
 	return nil
 }
 
@@ -222,8 +222,8 @@ func (game *Game) LoadResets() error {
 			continue
 		}
 
-		for iter := game.zones.head; iter != nil; iter = iter.next {
-			zone := iter.value.(*Zone)
+		for iter := game.zones.Head; iter != nil; iter = iter.Next {
+			zone := iter.Value.(*Zone)
 
 			if zone.id == zoneId {
 				room, err := game.LoadRoomIndex(roomId)

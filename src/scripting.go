@@ -8,6 +8,8 @@
 package main
 
 import (
+	"fmt"
+	"io/ioutil"
 	"log"
 	"strings"
 
@@ -21,12 +23,12 @@ type EventHandler struct {
 
 func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, this goja.Value, arguments ...goja.Value) ([]goja.Value, []error) {
 	if game.eventHandlers[name] != nil {
-		values := make([]goja.Value, game.eventHandlers[name].count)
-		errors := make([]error, game.eventHandlers[name].count)
+		values := make([]goja.Value, game.eventHandlers[name].Count)
+		errors := make([]error, game.eventHandlers[name].Count)
 		i := 0
 
-		for iter := game.eventHandlers[name].head; iter != nil; iter = iter.next {
-			eventHandler := iter.value.(*EventHandler)
+		for iter := game.eventHandlers[name].Head; iter != nil; iter = iter.Next {
+			eventHandler := iter.Value.(*EventHandler)
 
 			result, err := eventHandler.callback(this, arguments...)
 			if err != nil {
@@ -46,6 +48,30 @@ func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, t
 	}
 
 	return nil, nil
+}
+
+func (game *Game) LoadScriptsFromDirectory() error {
+	const ScriptDirectory = "/scripts"
+
+	scripts, err := ioutil.ReadDir(ScriptDirectory)
+	if err != nil {
+		return err
+	}
+
+	for _, filename := range scripts {
+		bytes, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", ScriptDirectory, filename.Name()))
+		if err != nil {
+			return err
+		}
+
+		_, err = game.vm.RunString(string(bytes))
+		if err != nil {
+			log.Println(err)
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (game *Game) InitScripting() error {
@@ -90,7 +116,19 @@ func (game *Game) InitScripting() error {
 		return game.vm.ToValue(scriptedCommand)
 	}))
 
+	combatObj := game.vm.NewObject()
+	combatObj.Set("DamageTypeBash", game.vm.ToValue(DamageTypeBash))
+	combatObj.Set("DamageTypeSlash", game.vm.ToValue(DamageTypeSlash))
+	combatObj.Set("DamageTypeStab", game.vm.ToValue(DamageTypeStab))
+	combatObj.Set("DamageTypeExotic", game.vm.ToValue(DamageTypeExotic))
+
+	obj.Set("Combat", combatObj)
 	game.vm.Set("Golem", obj)
+
+	err := game.LoadScriptsFromDirectory()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

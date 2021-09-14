@@ -33,7 +33,7 @@ func do_cast(ch *Character, arguments string) {
 		return
 	}
 
-	if ch.room == nil {
+	if ch.Room == nil {
 		return
 	}
 
@@ -52,8 +52,8 @@ func do_cast(ch *Character, arguments string) {
 	}
 
 	ch.Send("{WYou start uttering the words of the spell...{x\r\n")
-	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-		character := iter.value.(*Character)
+	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		character := iter.Value.(*Character)
 		if character != ch {
 			character.Send(fmt.Sprintf("\r\n{W%s{W begins casting a spell...{x\r\n", ch.getShortDescriptionUpper(character)))
 		}

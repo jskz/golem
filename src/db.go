@@ -49,7 +49,7 @@ func (game *Game) LoadRaceTable() {
 		Races.Insert(race)
 	}
 
-	log.Printf("Loaded %d races from database.\r\n", Races.count)
+	log.Printf("Loaded %d races from database.\r\n", Races.Count)
 }
 
 func (game *Game) LoadJobTable() {
@@ -86,13 +86,13 @@ func (game *Game) LoadJobTable() {
 		Jobs.Insert(job)
 	}
 
-	log.Printf("Loaded %d jobs from database.\r\n", Jobs.count)
+	log.Printf("Loaded %d jobs from database.\r\n", Jobs.Count)
 }
 
 /* Utility lookup methods */
 func FindJobByName(name string) *Job {
-	for iter := Jobs.head; iter != nil; iter = iter.next {
-		job := iter.value.(*Job)
+	for iter := Jobs.Head; iter != nil; iter = iter.Next {
+		job := iter.Value.(*Job)
 
 		if strings.Compare(name, job.Name) == 0 {
 			return job
@@ -103,8 +103,8 @@ func FindJobByName(name string) *Job {
 }
 
 func FindRaceByName(name string) *Race {
-	for iter := Races.head; iter != nil; iter = iter.next {
-		race := iter.value.(*Race)
+	for iter := Races.Head; iter != nil; iter = iter.Next {
+		race := iter.Value.(*Race)
 
 		if strings.Compare(name, race.Name) == 0 {
 			return race
@@ -115,8 +115,8 @@ func FindRaceByName(name string) *Race {
 }
 
 func FindJobByID(id uint) *Job {
-	for iter := Jobs.head; iter != nil; iter = iter.next {
-		job := iter.value.(*Job)
+	for iter := Jobs.Head; iter != nil; iter = iter.Next {
+		job := iter.Value.(*Job)
 
 		if job.Id == id {
 			return job
@@ -127,8 +127,8 @@ func FindJobByID(id uint) *Job {
 }
 
 func FindRaceByID(id uint) *Race {
-	for iter := Races.head; iter != nil; iter = iter.next {
-		race := iter.value.(*Race)
+	for iter := Races.Head; iter != nil; iter = iter.Next {
+		race := iter.Value.(*Race)
 
 		if race.Id == id {
 			return race

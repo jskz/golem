@@ -39,6 +39,7 @@ services:
       - "6060:6060"
     volumes:
       - ./etc:/etc/golem
+      - ./scripts:/scripts
 
 networks:
   overlay:

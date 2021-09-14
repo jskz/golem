@@ -10,76 +10,76 @@ package main
 import "math/rand"
 
 type LinkedListNode struct {
-	next  *LinkedListNode
-	value interface{}
+	Next  *LinkedListNode `json:"next"`
+	Value interface{}     `json:"value"`
 }
 
 type LinkedList struct {
-	head  *LinkedListNode
-	tail  *LinkedListNode
-	count int
+	Head  *LinkedListNode `json:"head"`
+	Tail  *LinkedListNode `json:"tail"`
+	Count int             `json:"count"`
 }
 
 func NewLinkedList() *LinkedList {
 	list := &LinkedList{}
-	list.head = nil
-	list.tail = nil
-	list.count = 0
+	list.Head = nil
+	list.Tail = nil
+	list.Count = 0
 
 	return list
 }
 
 func (list *LinkedList) Remove(value interface{}) {
-	var iter *LinkedListNode = list.head
+	var iter *LinkedListNode = list.Head
 
-	if list.head.value == value {
-		list.head = list.head.next
-		list.tail = list.head
+	if list.Head.Value == value {
+		list.Head = list.Head.Next
+		list.Tail = list.Head
 
-		list.count--
+		list.Count--
 		return
 	}
 
-	if list.tail.value == value {
-		for iter.next != list.tail {
-			iter = iter.next
+	if list.Tail.Value == value {
+		for iter.Next != list.Tail {
+			iter = iter.Next
 		}
 
-		list.tail = iter
-		list.tail.next = nil
-		list.count--
+		list.Tail = iter
+		list.Tail.Next = nil
+		list.Count--
 		return
 	}
 
-	iter = list.head
-	for iter.next.value != value {
-		iter = iter.next
+	iter = list.Head
+	for iter.Next.Value != value {
+		iter = iter.Next
 
-		if iter.next == nil {
+		if iter.Next == nil {
 			break
 		}
 	}
 
-	if iter != nil && iter.next != nil {
-		iter.next = iter.next.next
-		list.count--
+	if iter != nil && iter.Next != nil {
+		iter.Next = iter.Next.Next
+		list.Count--
 	}
 }
 
 func (list *LinkedList) Insert(value interface{}) {
 	node := &LinkedListNode{}
-	node.value = value
+	node.Value = value
 
-	if list.head == nil {
-		list.head = node
-		list.tail = node
-		list.count++
+	if list.Head == nil {
+		list.Head = node
+		list.Tail = node
+		list.Count++
 		return
 	}
 
-	list.tail.next = node
-	list.tail = list.tail.next
-	list.count++
+	list.Tail.Next = node
+	list.Tail = list.Tail.Next
+	list.Count++
 }
 
 func (list *LinkedList) GetRandomNode() *LinkedListNode {
@@ -91,7 +91,7 @@ func (list *LinkedList) GetRandomNode() *LinkedListNode {
 	choice := rand.Intn(c)
 
 	i := 0
-	for iter := list.head; iter != nil; iter = iter.next {
+	for iter := list.Head; iter != nil; iter = iter.Next {
 		if i == choice {
 			return iter
 		}
@@ -104,8 +104,8 @@ func (list *LinkedList) GetRandomNode() *LinkedListNode {
 
 /* Utility method to concatenate one linked list to another */
 func (list *LinkedList) Concat(other *LinkedList) *LinkedList {
-	for iter := other.head; iter != nil; iter = iter.next {
-		v := iter.value
+	for iter := other.Head; iter != nil; iter = iter.Next {
+		v := iter.Value
 
 		list.Insert(v)
 	}
@@ -114,8 +114,8 @@ func (list *LinkedList) Concat(other *LinkedList) *LinkedList {
 }
 
 func (list *LinkedList) Contains(value interface{}) bool {
-	for iter := list.head; iter != nil; iter = iter.next {
-		v := iter.value
+	for iter := list.Head; iter != nil; iter = iter.Next {
+		v := iter.Value
 
 		if v == value {
 			return true
@@ -128,8 +128,8 @@ func (list *LinkedList) Contains(value interface{}) bool {
 func (list *LinkedList) Values() []interface{} {
 	var values []interface{} = make([]interface{}, 0)
 
-	for iter := list.head; iter != nil; iter = iter.next {
-		values = append(values, iter.value)
+	for iter := list.Head; iter != nil; iter = iter.Next {
+		values = append(values, iter.Value)
 	}
 
 	return values

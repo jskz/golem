@@ -20,6 +20,7 @@ COPY etc/death.ansi /death.ansi
 RUN go build -gcflags="all=-N -l" -o /golem
 
 VOLUME /etc
+VOLUME /scripts
 
 # Stage 2
 FROM debian:buster

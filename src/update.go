@@ -14,16 +14,16 @@ import (
 func (game *Game) Update() {
 	game.InvokeNamedEventHandlersWithContextAndArguments("gameUpdate", game.vm.ToValue(game))
 
-	for iter := game.characters.head; iter != nil; iter = iter.next {
-		ch := iter.value.(*Character)
+	for iter := game.characters.Head; iter != nil; iter = iter.Next {
+		ch := iter.Value.(*Character)
 
 		ch.onUpdate()
 	}
 }
 
 func (game *Game) ZoneUpdate() {
-	for iter := game.zones.head; iter != nil; iter = iter.next {
-		zone := iter.value.(*Zone)
+	for iter := game.zones.Head; iter != nil; iter = iter.Next {
+		zone := iter.Value.(*Zone)
 
 		if time.Since(zone.lastReset).Minutes() > float64(zone.resetFrequency) {
 			game.ResetZone(zone)

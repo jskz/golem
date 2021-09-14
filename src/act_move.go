@@ -65,12 +65,12 @@ func (ch *Character) move(direction uint) bool {
 		return false
 	}
 
-	if ch.room == nil {
+	if ch.Room == nil {
 		ch.Send("{RAlas, you cannot go that way.{x\r\n")
 		return false
 	}
 
-	exit := ch.room.getExit(direction)
+	exit := ch.Room.getExit(direction)
 	if exit == nil || exit.to == nil {
 		ch.Send("{RAlas, you cannot go that way.{x\r\n")
 		return false
@@ -84,16 +84,16 @@ func (ch *Character) move(direction uint) bool {
 	ch.stamina -= MovementCost
 
 	/* Is the exit closed, etc. */
-	from := ch.room
+	from := ch.Room
 	from.removeCharacter(ch)
-	for iter := from.characters.head; iter != nil; iter = iter.next {
-		character := iter.value.(*Character)
+	for iter := from.characters.Head; iter != nil; iter = iter.Next {
+		character := iter.Value.(*Character)
 		character.Send(fmt.Sprintf("{W%s{W leaves %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[direction]))
 	}
 
 	exit.to.addCharacter(ch)
-	for iter := exit.to.characters.head; iter != nil; iter = iter.next {
-		character := iter.value.(*Character)
+	for iter := exit.to.characters.Head; iter != nil; iter = iter.Next {
+		character := iter.Value.(*Character)
 		if character != ch {
 			character.Send(fmt.Sprintf("{W%s{W arrives from %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[ReverseDirection[direction]]))
 		}

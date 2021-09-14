@@ -113,7 +113,7 @@ func (game *Game) nanny(client *Client, message string) {
 			client.character.flags |= CHAR_IS_PLAYER
 			client.character.client = client
 			output.WriteString("Password: ")
-			client.character.room = room
+			client.character.Room = room
 			client.connectionState = ConnectionStatePassword
 			break
 		}
@@ -127,13 +127,13 @@ func (game *Game) nanny(client *Client, message string) {
 		client.connectionState = ConnectionStateConfirmName
 
 		client.character.practices = 100
-		client.character.strength = 10
-		client.character.dexterity = 10
-		client.character.intelligence = 10
-		client.character.wisdom = 10
-		client.character.constitution = 10
-		client.character.charisma = 10
-		client.character.luck = 10
+		client.character.Strength = 10
+		client.character.Dexterity = 10
+		client.character.Intelligence = 10
+		client.character.Wisdom = 10
+		client.character.Constitution = 10
+		client.character.Charisma = 10
+		client.character.Luck = 10
 
 		client.character.health = 20
 		client.character.maxHealth = 20
@@ -183,8 +183,8 @@ func (game *Game) nanny(client *Client, message string) {
 		/* Counter value for periodically line-breaking */
 		index := 0
 
-		for iter := Races.head; iter != nil; iter = iter.next {
-			race := iter.value.(*Race)
+		for iter := Races.Head; iter != nil; iter = iter.Next {
+			race := iter.Value.(*Race)
 
 			if !race.Playable {
 				continue
@@ -220,8 +220,8 @@ func (game *Game) nanny(client *Client, message string) {
 			/* Counter value for periodically line-breaking */
 			index := 0
 
-			for iter := Races.head; iter != nil; iter = iter.next {
-				race := iter.value.(*Race)
+			for iter := Races.Head; iter != nil; iter = iter.Next {
+				race := iter.Value.(*Race)
 
 				if !race.Playable {
 					continue
@@ -246,8 +246,8 @@ func (game *Game) nanny(client *Client, message string) {
 		/* Counter value for periodically line-breaking */
 		index := 0
 
-		for iter := Jobs.head; iter != nil; iter = iter.next {
-			job := iter.value.(*Job)
+		for iter := Jobs.Head; iter != nil; iter = iter.Next {
+			job := iter.Value.(*Job)
 
 			if !job.Playable {
 				continue
@@ -283,8 +283,8 @@ func (game *Game) nanny(client *Client, message string) {
 			/* Counter value for periodically line-breaking */
 			index := 0
 
-			for iter := Jobs.head; iter != nil; iter = iter.next {
-				job := iter.value.(*Job)
+			for iter := Jobs.Head; iter != nil; iter = iter.Next {
+				job := iter.Value.(*Job)
 
 				if !job.Playable {
 					continue
@@ -317,11 +317,11 @@ func (game *Game) nanny(client *Client, message string) {
 
 		game.characters.Insert(client.character)
 
-		if client.character.room != nil {
-			client.character.room.addCharacter(client.character)
+		if client.character.Room != nil {
+			client.character.Room.addCharacter(client.character)
 
-			for iter := client.character.room.characters.head; iter != nil; iter = iter.next {
-				character := iter.value.(*Character)
+			for iter := client.character.Room.characters.Head; iter != nil; iter = iter.Next {
+				character := iter.Value.(*Character)
 
 				if character != client.character {
 					character.Send(fmt.Sprintf("{W%s has entered the game.{x\r\n", client.character.name))

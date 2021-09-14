@@ -16,6 +16,7 @@ COPY etc/death.ansi /death.ansi
 RUN go build -o /golem
 
 VOLUME /etc
+VOLUME /scripts
 
 EXPOSE 8080
 

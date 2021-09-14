@@ -94,17 +94,17 @@ type Character struct {
 	pageSize   int
 	pageCursor int
 
-	room     *Room
-	combat   *Combat
-	fighting *Character
-	casting  *CastingContext
+	Room     *Room           `json:"room"`
+	Combat   *Combat         `json:"combat"`
+	Fighting *Character      `json:"fighting"`
+	casting  *CastingContext `json:"casting"`
 
-	id int
+	id int `json:"id"`
 
-	name             string
-	shortDescription string
-	longDescription  string
-	description      string
+	name             string `json:"name"`
+	shortDescription string `json:"shortDescription"`
+	longDescription  string `json:"longDescription"`
+	description      string `json:"description"`
 
 	wizard     bool
 	job        *Job
@@ -127,13 +127,13 @@ type Character struct {
 
 	position int
 
-	strength     int
-	dexterity    int
-	intelligence int
-	wisdom       int
-	constitution int
-	charisma     int
-	luck         int
+	Strength     int `json:"strength"`
+	Dexterity    int `json:"dexterity"`
+	Intelligence int `json:"intelligence"`
+	Wisdom       int `json:"wisdom"`
+	Constitution int `json:"constitution"`
+	Charisma     int `json:"charisma"`
+	Luck         int `json:"luck"`
 
 	temporaryHash string
 }
@@ -189,7 +189,7 @@ func (ch *Character) Finalize() bool {
 			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.strength, ch.dexterity, ch.intelligence, ch.wisdom, ch.constitution, ch.charisma, ch.luck)
+	`, ch.name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -209,7 +209,7 @@ func (ch *Character) Finalize() bool {
 		return false
 	}
 
-	ch.room = limbo
+	ch.Room = limbo
 	return true
 }
 
@@ -220,8 +220,8 @@ func (ch *Character) Save() bool {
 	}
 
 	var roomId uint = RoomLimbo
-	if ch.room != nil {
-		roomId = ch.room.id
+	if ch.Room != nil {
+		roomId = ch.Room.Id
 	}
 	result, err := ch.game.db.Exec(`
 		UPDATE
@@ -250,7 +250,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.strength, ch.dexterity, ch.intelligence, ch.wisdom, ch.constitution, ch.charisma, ch.luck, ch.id)
+	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -317,7 +317,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	for client := range game.clients {
 		if client.character != nil && client.character.name == username {
-			return client.character, client.character.room, nil
+			return client.character, client.character.Room, nil
 		}
 	}
 
@@ -361,7 +361,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.practices, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.strength, &ch.dexterity, &ch.intelligence, &ch.wisdom, &ch.constitution, &ch.charisma, &ch.luck)
+	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.practices, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -461,7 +461,7 @@ func (ch *Character) gainExperience(experience int) {
 }
 
 func (ch *Character) isFighting() bool {
-	return ch.fighting != nil
+	return ch.Fighting != nil
 }
 
 func (ch *Character) Write(data []byte) (n int, err error) {
@@ -546,12 +546,12 @@ func (ch *Character) getShortDescriptionUpper(viewer *Character) string {
 }
 
 func (ch *Character) getLongDescription(viewer *Character) string {
-	if ch.fighting != nil {
-		if viewer == ch.fighting {
+	if ch.Fighting != nil {
+		if viewer == ch.Fighting {
 			return fmt.Sprintf("%s is here, fighting you!", ch.getShortDescriptionUpper(viewer))
 		}
 
-		return fmt.Sprintf("%s is here, fighting %s.", ch.getShortDescriptionUpper(viewer), ch.fighting.getShortDescription(viewer))
+		return fmt.Sprintf("%s is here, fighting %s.", ch.getShortDescriptionUpper(viewer), ch.Fighting.getShortDescription(viewer))
 	}
 
 	if ch.flags&CHAR_IS_PLAYER != 0 {
@@ -572,12 +572,12 @@ func (ch *Character) removeObject(obj *ObjectInstance) {
 func (ch *Character) findObjectInRoom(argument string) *ObjectInstance {
 	processed := strings.ToLower(argument)
 
-	if ch.room == nil || len(processed) < 1 {
+	if ch.Room == nil || len(processed) < 1 {
 		return nil
 	}
 
-	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-		obj := iter.value.(*ObjectInstance)
+	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
 
 		nameParts := strings.Split(obj.name, " ")
 		for _, part := range nameParts {
@@ -593,12 +593,12 @@ func (ch *Character) findObjectInRoom(argument string) *ObjectInstance {
 func (ch *Character) findObjectOnSelf(argument string) *ObjectInstance {
 	processed := strings.ToLower(argument)
 
-	if ch.room == nil || len(processed) < 1 {
+	if ch.Room == nil || len(processed) < 1 {
 		return nil
 	}
 
-	for iter := ch.inventory.head; iter != nil; iter = iter.next {
-		obj := iter.value.(*ObjectInstance)
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
 
 		nameParts := strings.Split(obj.name, " ")
 		for _, part := range nameParts {
@@ -618,12 +618,12 @@ func (ch *Character) findCharacterInRoom(argument string) *Character {
 		return ch
 	}
 
-	if ch.room == nil || len(processed) < 1 {
+	if ch.Room == nil || len(processed) < 1 {
 		return nil
 	}
 
-	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-		rch := iter.value.(*Character)
+	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
 
 		nameParts := strings.Split(rch.name, " ")
 		for _, part := range nameParts {
@@ -638,8 +638,9 @@ func (ch *Character) findCharacterInRoom(argument string) *Character {
 }
 
 func (game *Game) Broadcast(message string) {
-	for iter := game.characters.head; iter != nil; iter = iter.next {
-		ch := iter.value.(*Character)
+	log.Printf("Broadcast: %s\r\n", message)
+	for iter := game.characters.Head; iter != nil; iter = iter.Next {
+		ch := iter.Value.(*Character)
 
 		ch.Send(message)
 	}
@@ -653,10 +654,10 @@ func NewCharacter() *Character {
 	character.afk = nil
 	character.job = nil
 	character.flags = 0
-	character.fighting = nil
-	character.combat = nil
+	character.Fighting = nil
+	character.Combat = nil
 	character.race = nil
-	character.room = nil
+	character.Room = nil
 	character.practices = 0
 	character.pageSize = 4096
 	character.position = PositionDead
@@ -671,13 +672,13 @@ func NewCharacter() *Character {
 	character.inventory = NewLinkedList()
 	character.skills = make(map[uint]*Proficiency)
 
-	character.strength = 10
-	character.dexterity = 10
-	character.intelligence = 10
-	character.wisdom = 10
-	character.constitution = 10
-	character.charisma = 10
-	character.luck = 10
+	character.Strength = 10
+	character.Dexterity = 10
+	character.Intelligence = 10
+	character.Wisdom = 10
+	character.Constitution = 10
+	character.Charisma = 10
+	character.Luck = 10
 
 	character.equipment = make([]*ObjectInstance, WearLocationMax)
 	return character

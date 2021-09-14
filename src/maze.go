@@ -109,11 +109,11 @@ func (maze *MazeGrid) generatePrimMaze() {
 			break
 		}
 
-		f := frontiers.GetRandomNode().value.(*MazeCell)
+		f := frontiers.GetRandomNode().Value.(*MazeCell)
 		neighbours := f.getAdjacentCells(false)
 
-		if neighbours.count > 0 {
-			neighbour := neighbours.GetRandomNode().value.(*MazeCell)
+		if neighbours.Count > 0 {
+			neighbour := neighbours.GetRandomNode().Value.(*MazeCell)
 
 			passageX := (neighbour.x + f.x) / 2
 			passageY := (neighbour.y + f.y) / 2
@@ -168,7 +168,7 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 	}
 
 	room := maze.game.NewRoom()
-	room.id = 0
+	room.Id = 0
 	room.zone = nil
 	room.virtual = true
 	room.name = "In the Underground"

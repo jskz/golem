@@ -29,9 +29,9 @@ type Game struct {
 
 	eventHandlers map[string]*LinkedList
 
-	characters *LinkedList
-	fights     *LinkedList
-	zones      *LinkedList
+	characters *LinkedList `json:"characters"`
+	Fights     *LinkedList `json:"fights"`
+	zones      *LinkedList `json:"zones"`
 
 	clients map[*Client]bool
 	skills  map[uint]*Skill
@@ -58,7 +58,7 @@ func NewGame() (*Game, error) {
 	game.clientMessage = make(chan ClientTextMessage)
 
 	game.characters = NewLinkedList()
-	game.fights = NewLinkedList()
+	game.Fights = NewLinkedList()
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
 	game.db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true&parseTime=true",
@@ -146,8 +146,6 @@ func (game *Game) Run() {
 	processZoneUpdateTicker := time.NewTicker(1 * time.Minute)
 	game.ZoneUpdate()
 
-	game.doMazeTesting()
-
 	for {
 		select {
 		case <-processUpdateTicker.C:
@@ -176,7 +174,7 @@ func (game *Game) Run() {
 		case client := <-game.register:
 			game.clients[client] = true
 
-			log.Printf("New connection from %s (assigned session ID %s)\r\n", client.conn.RemoteAddr().String(), client.id)
+			log.Printf("New connection from %s\r\n", client.conn.RemoteAddr().String())
 
 			client.connectionState = ConnectionStateName
 

@@ -14,9 +14,9 @@ import (
 )
 
 type Combat struct {
-	startedAt    time.Time
-	room         *Room
-	participants []*Character
+	StartedAt    time.Time    `json:"startedAt"`
+	Room         *Room        `json:"room"`
+	Participants []*Character `json:"participants"`
 }
 
 const (
@@ -38,15 +38,15 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	return obj
 }
 
-func (game *Game) damage(ch *Character, target *Character, display bool, amount int, damageType int) bool {
+func (game *Game) Damage(ch *Character, target *Character, display bool, amount int, damageType int) bool {
 	if ch == nil || target == nil {
 		return false
 	}
 
 	if display {
-		if ch.room != nil && target.room != nil && target.room == ch.room {
-			for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-				character := iter.value.(*Character)
+		if ch.Room != nil && target.Room != nil && target.Room == ch.Room {
+			for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+				character := iter.Value.(*Character)
 				if character != ch && character != target {
 					character.Send(fmt.Sprintf("{G%s{G hits %s{G for %d damage.{x\r\n",
 						ch.getShortDescriptionUpper(character),
@@ -62,22 +62,22 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 
 	target.health -= amount
 	if target.health <= 0 {
-		if target.room != nil {
-			room := target.room
+		if target.Room != nil {
+			room := target.Room
 
 			corpse := game.createCorpse(target)
 			room.removeCharacter(target)
 			room.addObject(corpse)
 
-			target.fighting = nil
-			target.combat = nil
+			target.Fighting = nil
+			target.Combat = nil
 
-			for iter := room.characters.head; iter != nil; iter = iter.next {
-				character := iter.value.(*Character)
+			for iter := room.characters.Head; iter != nil; iter = iter.Next {
+				character := iter.Value.(*Character)
 				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.getShortDescriptionUpper(character)))
 
-				if character.fighting == target {
-					character.fighting = nil
+				if character.Fighting == target {
+					character.Fighting = nil
 				}
 			}
 
@@ -109,60 +109,28 @@ func (game *Game) damage(ch *Character, target *Character, display bool, amount 
 func (game *Game) combatUpdate() {
 	game.InvokeNamedEventHandlersWithContextAndArguments("combatUpdate", game.vm.ToValue(game))
 
-	for iter := game.fights.head; iter != nil; iter = iter.next {
-		combat := iter.value.(*Combat)
-
-		var found bool = false
-		for _, vch := range combat.participants {
-			if vch.room == nil || vch.fighting == nil || vch.fighting.room == nil || vch.room.id != vch.fighting.room.id {
-				continue
-			}
-
-			found = true
-
-			/* Determine number of attacks - agility, haste/slow spells, etc */
-			var attackerRounds int = 1
-			var dexterityBonusRounds int = int(float64((vch.dexterity - 10) / 4))
-
-			attackerRounds += dexterityBonusRounds
-
-			for round := 0; round < attackerRounds; round++ {
-				damage := 0
-
-				/* No weapon equipped, calculate unarmed damage with strength and skill */
-				damage = rand.Intn(2)
-
-				/* Modify with attributes */
-				damage += rand.Intn(vch.strength / 3)
-
-				/* Evasion check */
-				game.damage(vch, vch.fighting, true, damage, DamageTypeBash)
-			}
-		}
-
-		/* Dispose of fight without active participants */
-		if !found {
-			game.disposeCombat(combat)
-			break
-		}
-	}
+	/*
+		damage := 0
+		damage = rand.Intn(2)
+		damage += rand.Intn(vch.Strength / 3)
+	*/
 }
 
-func (game *Game) disposeCombat(combat *Combat) {
-	for _, vch := range combat.participants {
-		vch.combat = nil
-		vch.fighting = nil
+func (game *Game) DisposeCombat(combat *Combat) {
+	for _, vch := range combat.Participants {
+		vch.Combat = nil
+		vch.Fighting = nil
 	}
 
-	game.fights.Remove(combat)
+	game.Fights.Remove(combat)
 }
 
 func do_flee(ch *Character, arguments string) {
-	if ch.room == nil {
+	if ch.Room == nil {
 		return
 	}
 
-	if ch.fighting == nil {
+	if ch.Fighting == nil {
 		ch.Send("{RYou can't flee while not fighting.{x\r\n")
 		return
 	}
@@ -170,7 +138,7 @@ func do_flee(ch *Character, arguments string) {
 	/* TODO: other logic/affects preventing a player from fleeing */
 	var exits []*Exit = make([]*Exit, 0)
 
-	for _, exit := range ch.room.exit {
+	for _, exit := range ch.Room.exit {
 		if exit.to != nil {
 			exits = append(exits, exit)
 		}
@@ -180,8 +148,8 @@ func do_flee(ch *Character, arguments string) {
 		ch.Send("{RYou panic and attempt to flee, but can't get away!{x\r\n")
 
 		/* Announce player's failed flee attempt to others in the room */
-		for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-			rch := iter.value.(*Character)
+		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+			rch := iter.Value.(*Character)
 
 			if rch != ch {
 				output := fmt.Sprintf("\r\n{R%s{R panics and attempts to flee, but can't get away!{x\r\n", ch.getShortDescriptionUpper(rch))
@@ -198,8 +166,8 @@ func do_flee(ch *Character, arguments string) {
 	ch.Send(fmt.Sprintf("{RYou panic and flee %s!{x\r\n", ExitName[chosenEscape.direction]))
 
 	/* Announce player's departure to all other players in the current room */
-	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-		rch := iter.value.(*Character)
+	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
 
 		if rch != ch {
 			output := fmt.Sprintf("\r\n{R%s{R has fled %s!{x\r\n", ch.getShortDescriptionUpper(rch), ExitName[chosenEscape.direction])
@@ -207,16 +175,16 @@ func do_flee(ch *Character, arguments string) {
 		}
 	}
 
-	ch.fighting = nil
-	ch.combat = nil
+	ch.Fighting = nil
+	ch.Combat = nil
 
-	ch.room.characters.Remove(ch)
-	ch.room = chosenEscape.to
+	ch.Room.characters.Remove(ch)
+	ch.Room = chosenEscape.to
 	chosenEscape.to.characters.Insert(ch)
 
 	/* Announce player's arrival to all other players in the new room */
-	for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-		rch := iter.value.(*Character)
+	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
 
 		if rch != ch {
 			output := fmt.Sprintf("\r\n{W%s{W arrives from %s.{x\r\n", ch.getShortDescriptionUpper(rch), ExitName[ReverseDirection[chosenEscape.direction]])
@@ -228,11 +196,11 @@ func do_flee(ch *Character, arguments string) {
 }
 
 func do_kill(ch *Character, arguments string) {
-	if ch.room == nil {
+	if ch.Room == nil {
 		return
 	}
 
-	if ch.fighting != nil {
+	if ch.Fighting != nil {
 		ch.Send("You are already fighting somebody else!\r\n")
 		return
 	}
@@ -250,27 +218,27 @@ func do_kill(ch *Character, arguments string) {
 	}
 
 	combat := &Combat{}
-	combat.startedAt = time.Now()
-	combat.room = ch.room
-	combat.participants = []*Character{ch, target}
-	ch.game.fights.Insert(combat)
+	combat.StartedAt = time.Now()
+	combat.Room = ch.Room
+	combat.Participants = []*Character{ch, target}
+	ch.game.Fights.Insert(combat)
 
-	ch.fighting = target
+	ch.Fighting = target
 
-	if target.fighting == nil {
-		target.fighting = ch
+	if target.Fighting == nil {
+		target.Fighting = ch
 	}
 
-	if target.combat == nil {
-		target.combat = combat
+	if target.Combat == nil {
+		target.Combat = combat
 	}
 
 	ch.Send(fmt.Sprintf("\r\n{GYou begin attacking %s{G!{x\r\n", target.getShortDescription(ch)))
 	target.Send(fmt.Sprintf("\r\n{G%s{G begins attacking you!{x\r\n", ch.getShortDescriptionUpper(target)))
 
-	if ch.room != nil && target.room != nil && target.room == ch.room {
-		for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-			character := iter.value.(*Character)
+	if ch.Room != nil && target.Room != nil && target.Room == ch.Room {
+		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+			character := iter.Value.(*Character)
 			if character != ch && character != target {
 				character.Send(fmt.Sprintf("{G%s{G begins attacking %s{G!{x\r\n",
 					ch.getShortDescriptionUpper(character),

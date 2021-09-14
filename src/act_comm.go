@@ -53,9 +53,9 @@ func do_say(ch *Character, arguments string) {
 	buf.WriteString(fmt.Sprintf("\r\n{C%s says \"%s{C\"{x\r\n", ch.name, arguments))
 	output := buf.String()
 
-	if ch.room != nil {
-		for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-			rch := iter.value.(*Character)
+	if ch.Room != nil {
+		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+			rch := iter.Value.(*Character)
 
 			if rch != ch {
 				rch.Send(output)
@@ -91,16 +91,16 @@ func do_save(ch *Character, arguments string) {
 func do_quit(ch *Character, arguments string) {
 	ch.Save()
 
-	if ch.room != nil {
-		for iter := ch.room.characters.head; iter != nil; iter = iter.next {
-			character := iter.value.(*Character)
+	if ch.Room != nil {
+		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+			character := iter.Value.(*Character)
 
 			if character != ch {
 				character.Send(fmt.Sprintf("{W%s{W has quit the game.{x\r\n", ch.getShortDescriptionUpper(character)))
 			}
 		}
 
-		ch.room.removeCharacter(ch)
+		ch.Room.removeCharacter(ch)
 	}
 
 	ch.game.characters.Remove(ch)
