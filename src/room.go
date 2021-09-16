@@ -23,7 +23,9 @@ type Room struct {
 	Id   uint `json:"id"`
 	zone *Zone
 
+	flags   int
 	virtual bool
+	cell    *MazeCell
 
 	name        string
 	description string

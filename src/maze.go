@@ -64,7 +64,7 @@ func (grid *MazeGrid) isValidPosition(x int, y int) bool {
 	return x >= 1 && x < grid.width-1 && y >= 1 && y < grid.height-1
 }
 
-func (cell *MazeCell) getAdjacentCells(wall bool) *LinkedList {
+func (cell *MazeCell) getAdjacentCells(wall bool, distance int) *LinkedList {
 	list := NewLinkedList()
 
 	for direction := DirectionNorth; direction < DirectionUp; direction++ {
@@ -74,15 +74,15 @@ func (cell *MazeCell) getAdjacentCells(wall bool) *LinkedList {
 		switch direction {
 		case DirectionNorth:
 			translatedX = cell.x
-			translatedY = cell.y - 2
+			translatedY = cell.y - distance
 		case DirectionEast:
-			translatedX = cell.x + 2
+			translatedX = cell.x + distance
 			translatedY = cell.y
 		case DirectionSouth:
 			translatedX = cell.x
-			translatedY = cell.y + 2
+			translatedY = cell.y + distance
 		case DirectionWest:
-			translatedX = cell.x - 2
+			translatedX = cell.x - distance
 			translatedY = cell.y
 		}
 
@@ -102,7 +102,7 @@ func (maze *MazeGrid) generatePrimMaze() {
 	var entryPoint *MazeCell = maze.grid[maze.entryX][maze.entryY]
 
 	entryPoint.setWall(false)
-	frontiers := entryPoint.getAdjacentCells(true)
+	frontiers := entryPoint.getAdjacentCells(true, 2)
 
 	for {
 		if len(frontiers.Values()) < 1 {
@@ -110,7 +110,7 @@ func (maze *MazeGrid) generatePrimMaze() {
 		}
 
 		f := frontiers.GetRandomNode().Value.(*MazeCell)
-		neighbours := f.getAdjacentCells(false)
+		neighbours := f.getAdjacentCells(false, 2)
 
 		if neighbours.Count > 0 {
 			neighbour := neighbours.GetRandomNode().Value.(*MazeCell)
@@ -123,7 +123,7 @@ func (maze *MazeGrid) generatePrimMaze() {
 			neighbour.setWall(false)
 		}
 
-		frontierCells := f.getAdjacentCells(true)
+		frontierCells := f.getAdjacentCells(true, 2)
 		frontiers.Concat(frontierCells)
 		frontiers.Remove(f)
 
@@ -171,6 +171,7 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 	room.Id = 0
 	room.zone = nil
 	room.virtual = true
+	room.cell = maze.grid[x][y]
 	room.name = "In the Underground"
 	room.description = "You are deep within the dark dungeons of development."
 	room.exit = make(map[uint]*Exit)

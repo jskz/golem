@@ -65,6 +65,7 @@ func init() {
 	CommandTable["goto"] = Command{Name: "goto", CmdFunc: do_goto, MinimumLevel: LevelHero + 1}
 	CommandTable["mem"] = Command{Name: "mem", CmdFunc: do_mem, MinimumLevel: LevelAdmin}
 	CommandTable["mlist"] = Command{Name: "mlist", CmdFunc: do_mlist, MinimumLevel: LevelAdmin}
+	CommandTable["path"] = Command{Name: "path", CmdFunc: do_path, MinimumLevel: LevelAdmin}
 	CommandTable["peace"] = Command{Name: "peace", CmdFunc: do_peace, MinimumLevel: LevelHero + 1}
 	CommandTable["purge"] = Command{Name: "purge", CmdFunc: do_purge, MinimumLevel: LevelHero + 2}
 	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown, MinimumLevel: LevelAdmin}
