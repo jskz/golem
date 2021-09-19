@@ -14,10 +14,10 @@ import (
 )
 
 type CastingContext struct {
-	casting        *Skill
-	arguments      string
-	startedAt      time.Time
-	ticksRemaining int
+	casting    *Skill
+	arguments  string
+	startedAt  time.Time
+	complexity int
 }
 
 func do_cast(ch *Character, arguments string) {
@@ -45,10 +45,10 @@ func do_cast(ch *Character, arguments string) {
 	}
 
 	ch.casting = &CastingContext{
-		casting:        found,
-		arguments:      strings.Join(args[1:], " "),
-		startedAt:      time.Now(),
-		ticksRemaining: 2,
+		casting:    found,
+		arguments:  strings.Join(args[1:], " "),
+		startedAt:  time.Now(),
+		complexity: 3,
 	}
 
 	ch.Send("{WYou start uttering the words of the spell...{x\r\n")
