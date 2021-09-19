@@ -51,6 +51,7 @@ func init() {
 	CommandTable["west"] = Command{Name: "west", CmdFunc: do_west}
 	CommandTable["up"] = Command{Name: "up", CmdFunc: do_up}
 	CommandTable["down"] = Command{Name: "down", CmdFunc: do_down}
+	CommandTable["follow"] = Command{Name: "follow", CmdFunc: do_follow}
 
 	/* act_obj.go */
 	CommandTable["equipment"] = Command{Name: "equipment", CmdFunc: do_equipment}

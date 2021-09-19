@@ -635,8 +635,7 @@ func (ch *Character) findCharacterInRoom(argument string) *Character {
 
 		nameParts := strings.Split(rch.name, " ")
 		for _, part := range nameParts {
-
-			if strings.Compare(strings.ToLower(part), processed) < 0 {
+			if strings.Compare(strings.ToLower(part), processed) == 0 {
 				return rch
 			}
 		}

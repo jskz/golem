@@ -117,6 +117,43 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	return true
 }
 
+func do_follow(ch *Character, arguments string) {
+	if ch.Room == nil {
+		return
+	}
+
+	if len(arguments) < 1 {
+		ch.Send("Follow who?\r\n")
+		return
+	}
+
+	var target *Character = ch.findCharacterInRoom(arguments)
+
+	if target == nil {
+		ch.Send("No such target.  Follow who?\r\n")
+		return
+	}
+
+	if target == ch && ch.following == nil {
+		ch.Send("You are already following yourself.\r\n")
+		return
+	}
+
+	if target == ch && ch.following != nil {
+		ch.Send(fmt.Sprintf("You stop following %s{x.\r\n", ch.following.getShortDescription(ch)))
+		ch.following = nil
+		return
+	}
+
+	if ch.following != nil {
+		ch.Send("You are already following somebody else.  Follow yourself first.\r\n")
+		return
+	}
+
+	ch.Send(fmt.Sprintf("You start following %s{x.\r\n", target.getShortDescription(ch)))
+	ch.following = target
+}
+
 func do_north(ch *Character, arguments string) {
 	ch.move(DirectionNorth, false)
 }
