@@ -95,10 +95,11 @@ type Character struct {
 	pageSize   int
 	pageCursor int
 
-	Room     *Room           `json:"room"`
-	Combat   *Combat         `json:"combat"`
-	Fighting *Character      `json:"fighting"`
-	casting  *CastingContext `json:"casting"`
+	Room      *Room           `json:"room"`
+	Combat    *Combat         `json:"combat"`
+	Fighting  *Character      `json:"fighting"`
+	casting   *CastingContext `json:"casting"`
+	following *Character
 
 	id int `json:"id"`
 

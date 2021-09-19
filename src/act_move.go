@@ -57,7 +57,7 @@ func (room *Room) getExit(direction uint) *Exit {
 	return room.exit[direction]
 }
 
-func (ch *Character) move(direction uint) bool {
+func (ch *Character) move(direction uint, follow bool) bool {
 	const MovementCost = 2 /* update with terrain-based cost */
 
 	if ch.isFighting() {
@@ -100,29 +100,43 @@ func (ch *Character) move(direction uint) bool {
 	}
 
 	do_look(ch, "")
+
+	if exit.to == from {
+		return true
+	}
+
+	for iter := from.characters.Head; iter != nil; iter = iter.Next {
+		character := iter.Value.(*Character)
+
+		if character.following == ch {
+			character.Send(fmt.Sprintf("{WYou follow %s{W.{x\r\n", ch.getShortDescription(character)))
+			character.move(direction, true)
+		}
+	}
+
 	return true
 }
 
 func do_north(ch *Character, arguments string) {
-	ch.move(DirectionNorth)
+	ch.move(DirectionNorth, false)
 }
 
 func do_east(ch *Character, arguments string) {
-	ch.move(DirectionEast)
+	ch.move(DirectionEast, false)
 }
 
 func do_south(ch *Character, arguments string) {
-	ch.move(DirectionSouth)
+	ch.move(DirectionSouth, false)
 }
 
 func do_west(ch *Character, arguments string) {
-	ch.move(DirectionWest)
+	ch.move(DirectionWest, false)
 }
 
 func do_up(ch *Character, arguments string) {
-	ch.move(DirectionUp)
+	ch.move(DirectionUp, false)
 }
 
 func do_down(ch *Character, arguments string) {
-	ch.move(DirectionDown)
+	ch.move(DirectionDown, false)
 }
