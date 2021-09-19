@@ -7,6 +7,8 @@
  */
 function onReload() {
     Golem.clearAllEventHandlers();
+    Golem.clearScriptedCommandHandlers();
+    Golem.clearScriptedSkillHandlers();
 }
 
 Golem.registerEventHandler('reload', onReload);

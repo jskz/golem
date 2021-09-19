@@ -124,6 +124,22 @@ func (game *Game) InitScripting() error {
 		return game.vm.ToValue(true)
 	}))
 
+	obj.Set("clearScriptedCommandHandlers", game.vm.ToValue(func() goja.Value {
+		for _, cmd := range CommandTable {
+			cmd.Callback = nil
+		}
+
+		return game.vm.ToValue(true)
+	}))
+
+	obj.Set("clearScriptedSkillHandlers", game.vm.ToValue(func() goja.Value {
+		for _, skill := range game.skills {
+			skill.handler = nil
+		}
+
+		return game.vm.ToValue(true)
+	}))
+
 	obj.Set("registerEventHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		eventName := name.String()
 		if game.eventHandlers[eventName] == nil {
