@@ -96,6 +96,18 @@ func (game *Game) LoadScriptsFromDirectory(directory string) error {
 	return nil
 }
 
+func do_reload(ch *Character, arguments string) {
+	ch.game.InvokeNamedEventHandlersWithContextAndArguments("reload", ch.game.vm.ToValue(ch.game))
+
+	err := ch.game.LoadScripts()
+	if err != nil {
+		ch.Send(fmt.Sprintf("{RFailed reload: %s{x\r\n", err.Error()))
+		return
+	}
+
+	ch.Send("{GScripts reloaded.{x\r\n")
+}
+
 func (game *Game) InitScripting() error {
 	game.vm = goja.New()
 	game.eventHandlers = make(map[string]*LinkedList)
@@ -105,6 +117,12 @@ func (game *Game) InitScripting() error {
 	obj := game.vm.NewObject()
 
 	obj.Set("game", game.vm.ToValue(game))
+
+	obj.Set("clearAllEventHandlers", game.vm.ToValue(func() goja.Value {
+		game.eventHandlers = make(map[string]*LinkedList)
+
+		return game.vm.ToValue(true)
+	}))
 
 	obj.Set("registerEventHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		eventName := name.String()
@@ -132,12 +150,6 @@ func (game *Game) InitScripting() error {
 
 	obj.Set("registerPlayerCommand", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		command := strings.ToLower(name.String())
-		_, ok := CommandTable[command]
-		if ok {
-			log.Printf("Trying to register duplicate command, aborting.\r\n")
-			return game.vm.ToValue(false)
-		}
-
 		scriptedCommand := Command{
 			Name:         command,
 			Scripted:     true,

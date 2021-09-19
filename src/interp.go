@@ -80,6 +80,9 @@ func init() {
 	CommandTable["cast"] = Command{Name: "cast", CmdFunc: do_cast}
 	CommandTable["spells"] = Command{Name: "spells", CmdFunc: do_spells}
 
+	/* scripting.go */
+	CommandTable["reload"] = Command{Name: "reload", CmdFunc: do_reload, MinimumLevel: LevelAdmin}
+
 	/* skills.go */
 	CommandTable["practice"] = Command{Name: "practice", CmdFunc: do_practice}
 	CommandTable["skills"] = Command{Name: "skills", CmdFunc: do_skills}

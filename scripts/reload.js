@@ -5,8 +5,8 @@
  * Authors:
  *     James Skarzinskas <james@jskarzin.org>
  */
-function do_example(ch) {
-    ch.send("Hello from an example command!\r\n");
+function onReload() {
+    Golem.clearAllEventHandlers();
 }
 
-Golem.registerPlayerCommand('example', do_example);
+Golem.registerEventHandler('reload', onReload);
