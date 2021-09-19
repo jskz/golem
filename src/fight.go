@@ -135,6 +135,11 @@ func do_flee(ch *Character, arguments string) {
 		return
 	}
 
+	if ch.casting != nil {
+		ch.Send("{RYou are too concentrated on casting a magical spell to flee from combat.{x\r\n")
+		return
+	}
+
 	/* TODO: other logic/affects preventing a player from fleeing */
 	var exits []*Exit = make([]*Exit, 0)
 
