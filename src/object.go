@@ -10,7 +10,8 @@ package main
 import "database/sql"
 
 type Object struct {
-	id uint
+	id       uint
+	itemType string
 
 	name             string
 	shortDescription string
@@ -26,6 +27,7 @@ type Object struct {
 type ObjectInstance struct {
 	id       uint
 	parentId uint
+	itemType string
 
 	name             string
 	shortDescription string
@@ -45,7 +47,8 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 			name,
 			short_description,
 			long_description,
-			description
+			description,
+			item_type
 		FROM
 			objects
 		WHERE
@@ -55,7 +58,7 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	`, index)
 
 	obj := &Object{}
-	err := row.Scan(&obj.id, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description)
+	err := row.Scan(&obj.id, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.itemType)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil

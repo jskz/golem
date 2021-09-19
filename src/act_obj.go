@@ -46,6 +46,18 @@ func init() {
 	WearLocations[WearLocationHeld] = "<held>                "
 }
 
+func (ch *Character) examineObject(obj *ObjectInstance) {
+	var output strings.Builder
+
+	/*
+	 * TODO: conditionally limit the amount of information revealed about the object
+	 * based on factors like: perks/skills RE: lore knowledge, stats, luck, is admin, etc.
+	 */
+	output.WriteString(fmt.Sprintf("Object '%s' is type %s.\r\n", obj.name, obj.itemType))
+
+	ch.Send(output.String())
+}
+
 func do_equipment(ch *Character, arguments string) {
 	var output strings.Builder
 

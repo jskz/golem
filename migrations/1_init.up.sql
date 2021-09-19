@@ -211,6 +211,7 @@ CREATE TABLE objects (
     `long_description` VARCHAR(255) NOT NULL,
     `description` TEXT,
 
+    `item_type` ENUM ('protoplasm', 'light', 'container', 'armor', 'weapon', 'furniture') NOT NULL DEFAULT 'protoplasm',
     `value_1` INT,
     `value_2` INT,
     `value_3` INT,
@@ -275,7 +276,7 @@ INSERT INTO zones(id, name, low, high, reset_message, reset_frequency) VALUES (1
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 0);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 0);
 
-INSERT INTO objects(id, zone_id, name, short_description, long_description, description) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!');
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, item_type) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!', 'protoplasm');
 
 INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 0);
 INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (2, 2, 1, 2, 0);
