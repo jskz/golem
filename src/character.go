@@ -584,12 +584,12 @@ func (ch *Character) findObjectInRoom(argument string) *ObjectInstance {
 		return nil
 	}
 
-	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Room.objects.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
 		nameParts := strings.Split(obj.name, " ")
 		for _, part := range nameParts {
-			if strings.Compare(strings.ToLower(part), processed) < 0 {
+			if strings.Compare(strings.ToLower(part), processed) == 0 {
 				return obj
 			}
 		}
@@ -610,7 +610,7 @@ func (ch *Character) findObjectOnSelf(argument string) *ObjectInstance {
 
 		nameParts := strings.Split(obj.name, " ")
 		for _, part := range nameParts {
-			if strings.Compare(strings.ToLower(part), processed) < 0 {
+			if strings.Compare(strings.ToLower(part), processed) == 0 {
 				return obj
 			}
 		}

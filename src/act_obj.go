@@ -28,6 +28,15 @@ const (
 	WearLocationMax     = 12
 )
 
+const (
+	ItemTypeNone      = "protoplasm"
+	ItemTypeContainer = "container"
+	ItemTypeArmor     = "armor"
+	ItemTypeWeapon    = "weapon"
+	ItemTypeLight     = "light"
+	ItemTypeFurniture = "furniture"
+)
+
 var WearLocations = make(map[int]string)
 
 func init() {

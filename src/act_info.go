@@ -157,10 +157,28 @@ func do_who(ch *Character, arguments string) {
 
 func do_look(ch *Character, arguments string) {
 	var buf strings.Builder
+	var obj *ObjectInstance = nil
 
 	if ch.Room == nil {
 		ch.Send("{DYou look around into the void.  There's nothing here, yet!{x\r\n")
 		return
+	}
+
+	if len(arguments) > 0 {
+		var found *ObjectInstance = ch.findObjectOnSelf(arguments)
+		if found != nil {
+			obj = found
+		}
+
+		found = ch.findObjectInRoom(arguments)
+		if found != nil {
+			obj = found
+		}
+
+		if obj != nil {
+			ch.examineObject(obj)
+			return
+		}
 	}
 
 	var lookCompassOutput map[uint]string = make(map[uint]string)
