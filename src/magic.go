@@ -20,6 +20,16 @@ type CastingContext struct {
 	complexity int
 }
 
+func (ch *Character) onCastingUpdate() {
+	finishedCastingAt := ch.casting.startedAt.Add(time.Duration(ch.casting.complexity) * time.Second)
+	sinceCastingFinished := time.Since(finishedCastingAt)
+
+	if sinceCastingFinished.Seconds() >= 0 {
+		ch.Send("\r\n{WYou finish casting the magic spell.{x\r\n")
+		ch.casting = nil
+	}
+}
+
 func do_cast(ch *Character, arguments string) {
 	if len(arguments) < 1 {
 		ch.Send("Cast what?\r\n")

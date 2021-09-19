@@ -136,6 +136,9 @@ func NewGame() (*Game, error) {
 func (game *Game) Run() {
 	/* Handle violence logic */
 	processCombatTicker := time.NewTicker(2 * time.Second)
+	/* Handle frequent character update logic */
+	processCharacterUpdateTicker := time.NewTicker(2 * time.Second)
+
 	/* Buffered/paged output for clients */
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)
 
@@ -155,6 +158,9 @@ func (game *Game) Run() {
 
 		case <-processZoneUpdateTicker.C:
 			game.ZoneUpdate()
+
+		case <-processCharacterUpdateTicker.C:
+			game.characterUpdate()
 
 		case <-processCombatTicker.C:
 			game.combatUpdate()

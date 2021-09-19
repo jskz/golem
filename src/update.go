@@ -11,6 +11,16 @@ import (
 	"time"
 )
 
+func (game *Game) characterUpdate() {
+	for iter := game.characters.Head; iter != nil; iter = iter.Next {
+		ch := iter.Value.(*Character)
+
+		if ch.casting != nil {
+			ch.onCastingUpdate()
+		}
+	}
+}
+
 func (game *Game) Update() {
 	game.InvokeNamedEventHandlersWithContextAndArguments("gameUpdate", game.vm.ToValue(game))
 
