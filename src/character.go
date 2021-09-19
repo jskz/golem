@@ -138,7 +138,7 @@ type Character struct {
 	temporaryHash string
 }
 
-func ExperienceRequiredForLevel(level int) int {
+func (ch *Character) experienceRequiredForLevel(level int) int {
 	return int(500*(level*level) - (500 * level))
 }
 
@@ -432,7 +432,7 @@ func (ch *Character) gainExperience(experience int) {
 				break
 			}
 
-			tnl := uint(ExperienceRequiredForLevel(int(ch.level + 1)))
+			tnl := uint(ch.experienceRequiredForLevel(int(ch.level + 1)))
 
 			if ch.experience > tnl {
 				ch.level = ch.level + 1
