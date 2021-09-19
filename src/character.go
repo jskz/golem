@@ -22,10 +22,11 @@ import (
 const UnauthenticatedUsername = "unnamed"
 
 type Job struct {
-	Id          uint   `json:"id"`
-	Name        string `json:"name"`
-	DisplayName string `json:"display_name"`
-	Playable    bool   `json:"playable"`
+	Id                         uint    `json:"id"`
+	Name                       string  `json:"name"`
+	DisplayName                string  `json:"display_name"`
+	Playable                   bool    `json:"playable"`
+	ExperienceRequiredModifier float64 `json:"experience_required_modifier"`
 }
 
 type Race struct {
@@ -139,7 +140,13 @@ type Character struct {
 }
 
 func (ch *Character) experienceRequiredForLevel(level int) int {
-	return int(500*(level*level) - (500 * level))
+	required := int(500*(level*level) - (500 * level))
+
+	if ch.job != nil {
+		required = int(float64(required) * ch.job.ExperienceRequiredModifier)
+	}
+
+	return required
 }
 
 func (game *Game) AttemptLogin(username string, password string) bool {

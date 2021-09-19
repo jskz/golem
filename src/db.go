@@ -62,6 +62,7 @@ func (game *Game) LoadJobTable() {
 			id,
 			name,
 			display_name,
+			experience_required_modifier,
 			playable
 		FROM
 			jobs
@@ -77,7 +78,7 @@ func (game *Game) LoadJobTable() {
 	for rows.Next() {
 		job := &Job{}
 
-		err := rows.Scan(&job.Id, &job.Name, &job.DisplayName, &job.Playable)
+		err := rows.Scan(&job.Id, &job.Name, &job.DisplayName, &job.ExperienceRequiredModifier, &job.Playable)
 		if err != nil {
 			log.Printf("Unable to scan job row: %v.\r\n", err)
 			continue

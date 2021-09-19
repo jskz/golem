@@ -75,6 +75,7 @@ CREATE TABLE jobs (
     `name` VARCHAR(64) NOT NULL,
     `display_name` VARCHAR(64) NOT NULL,
     `playable` BOOLEAN NOT NULL,
+    `experience_required_modifier` FLOAT NOT NULL DEFAULT 1.0,
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
@@ -290,12 +291,12 @@ VALUES
 
 /* Jobs */
 INSERT INTO
-    jobs(id, name, display_name, playable)
+    jobs(id, name, display_name, experience_required_modifier, playable)
 VALUES
-    (1, 'warrior', 'Warrior', 1),
-    (2, 'thief', 'Thief', 1),
-    (3, 'mage', 'Mage', 1),
-    (4, 'cleric', 'Cleric', 1);
+    (1, 'warrior', 'Warrior', 1.0, 1),
+    (2, 'thief', 'Thief', 1.1, 1),
+    (3, 'mage', 'Mage', 1.25, 1),
+    (4, 'cleric', 'Cleric', 1.5, 1);
 
 /* Insert a testing admin character with details: Admin/password */
 INSERT INTO
