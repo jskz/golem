@@ -154,7 +154,13 @@ func (client *Client) readPump(game *Game) {
 				break
 			}
 
+			if len(line) > 512 {
+				log.Printf("Client line input was too long, dropping connection.\r\n")
+				return
+			}
+
 			trimmed := strings.TrimRight(line, "\r\n")
+
 			clientMessage := ClientTextMessage{
 				client:  client,
 				message: trimmed,
