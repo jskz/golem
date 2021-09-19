@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	"github.com/dop251/goja"
@@ -50,24 +51,45 @@ func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, t
 	return nil, nil
 }
 
-func (game *Game) LoadScriptsFromDirectory() error {
+func (game *Game) LoadScripts() error {
 	const ScriptDirectory = "/scripts"
 
-	scripts, err := ioutil.ReadDir(ScriptDirectory)
+	return game.LoadScriptsFromDirectory(ScriptDirectory)
+}
+
+func (game *Game) LoadScriptsFromDirectory(directory string) error {
+	log.Printf(fmt.Sprintf("Loading scripts from directory %s:\r\n", directory))
+	scripts, err := ioutil.ReadDir(directory)
 	if err != nil {
 		return err
 	}
 
 	for _, filename := range scripts {
-		bytes, err := ioutil.ReadFile(fmt.Sprintf("%s/%s", ScriptDirectory, filename.Name()))
+		path := fmt.Sprintf("%s/%s", directory, filename.Name())
+
+		file, err := os.Stat(path)
 		if err != nil {
 			return err
 		}
 
-		_, err = game.vm.RunString(string(bytes))
-		if err != nil {
-			log.Println(err)
-			return err
+		fileFlags := file.Mode()
+		if fileFlags.IsDir() {
+			err := game.LoadScriptsFromDirectory(fmt.Sprintf("%s/%s", directory, filename.Name()))
+			if err != nil {
+				return err
+			}
+		} else {
+			log.Printf(fmt.Sprintf("Loading script: %s\r\n", path))
+			bytes, err := ioutil.ReadFile(path)
+			if err != nil {
+				return err
+			}
+
+			_, err = game.vm.RunString(string(bytes))
+			if err != nil {
+				log.Println(err)
+				return err
+			}
 		}
 	}
 
@@ -94,6 +116,16 @@ func (game *Game) InitScripting() error {
 		game.eventHandlers[eventName].Insert(handler)
 
 		return game.vm.ToValue(handler)
+	}))
+
+	obj.Set("registerSkillHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
+		// skillName := name.String()
+		return game.vm.ToValue(nil)
+	}))
+
+	obj.Set("registerSpellHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
+		// spellName := name.String()
+		return game.vm.ToValue(nil)
 	}))
 
 	obj.Set("registerPlayerCommand", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
@@ -125,7 +157,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("Combat", combatObj)
 	game.vm.Set("Golem", obj)
 
-	err := game.LoadScriptsFromDirectory()
+	err := game.LoadScripts()
 	if err != nil {
 		return err
 	}

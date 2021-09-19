@@ -11,12 +11,15 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+
+	"github.com/dop251/goja"
 )
 
 type Skill struct {
 	id        uint
 	name      string
 	skillType int
+	handler   *goja.Callable
 }
 
 const (
