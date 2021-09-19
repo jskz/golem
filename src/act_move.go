@@ -65,6 +65,11 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		return false
 	}
 
+	if ch.casting != nil {
+		ch.Send("{RYou are focused on casting a magical spell and cannot move!{x\r\n")
+		return false
+	}
+
 	if ch.Room == nil {
 		ch.Send("{RAlas, you cannot go that way.{x\r\n")
 		return false
