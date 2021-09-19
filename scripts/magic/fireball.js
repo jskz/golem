@@ -5,7 +5,7 @@
  * Authors:
  *     James Skarzinskas <james@jskarzin.org>
  */
-function spell_fireball(ch, args) {
+function spell_fireball(ch) {
     ch.send("Fireball spell!\r\n");
 }
 

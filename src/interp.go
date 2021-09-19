@@ -129,7 +129,7 @@ func (ch *Character) Interpret(input string) bool {
 
 	/* Call the command func with the remaining command words joined. */
 	if val.Scripted {
-		val.Callback(ch.game.vm.ToValue(ch), ch.game.vm.ToValue(rest))
+		val.Callback(ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(rest))
 		return true
 	}
 

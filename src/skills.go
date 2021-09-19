@@ -37,6 +37,16 @@ type Proficiency struct {
 	cost        int
 }
 
+func (game *Game) RegisterSkillHandler(name string, fn goja.Callable) goja.Value {
+	skill := game.FindSkillByName(name)
+	if skill == nil || skill.skillType != SkillTypeSkill {
+		return game.vm.ToValue(nil)
+	}
+
+	skill.handler = &fn
+	return game.vm.ToValue(skill)
+}
+
 func (game *Game) FindSkillByName(name string) *Skill {
 	for _, skill := range game.skills {
 		if skill.name == name {

@@ -5,7 +5,7 @@
  * Authors:
  *     James Skarzinskas <james@jskarzin.org>
  */
-function spell_armor(ch, args) {
+function spell_armor(ch) {
     ch.send("Armor spell!\r\n");
 }
 

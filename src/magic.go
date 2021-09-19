@@ -11,6 +11,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/dop251/goja"
 )
 
 type CastingContext struct {
@@ -26,8 +28,24 @@ func (ch *Character) onCastingUpdate() {
 
 	if sinceCastingFinished.Seconds() >= 0 {
 		ch.Send("\r\n{WYou finish casting the magic spell.{x\r\n")
+		if ch.casting.casting.handler != nil {
+			fn := *ch.casting.casting.handler
+
+			fn(ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch.casting.arguments))
+		}
+
 		ch.casting = nil
 	}
+}
+
+func (game *Game) RegisterSpellHandler(name string, fn goja.Callable) goja.Value {
+	spell := game.FindSkillByName(name)
+	if spell == nil || spell.skillType != SkillTypeSpell {
+		return game.vm.ToValue(nil)
+	}
+
+	spell.handler = &fn
+	return game.vm.ToValue(spell)
 }
 
 func do_cast(ch *Character, arguments string) {

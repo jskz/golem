@@ -119,13 +119,15 @@ func (game *Game) InitScripting() error {
 	}))
 
 	obj.Set("registerSkillHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
-		// skillName := name.String()
-		return game.vm.ToValue(nil)
+		skillName := name.String()
+
+		return game.vm.ToValue(game.RegisterSkillHandler(skillName, fn))
 	}))
 
 	obj.Set("registerSpellHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
-		// spellName := name.String()
-		return game.vm.ToValue(nil)
+		spellName := name.String()
+
+		return game.vm.ToValue(game.RegisterSpellHandler(spellName, fn))
 	}))
 
 	obj.Set("registerPlayerCommand", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
