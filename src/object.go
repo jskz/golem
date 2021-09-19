@@ -40,6 +40,15 @@ type ObjectInstance struct {
 	value3 int
 }
 
+const (
+	ItemTypeNone      = "protoplasm"
+	ItemTypeContainer = "container"
+	ItemTypeArmor     = "armor"
+	ItemTypeWeapon    = "weapon"
+	ItemTypeLight     = "light"
+	ItemTypeFurniture = "furniture"
+)
+
 func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	row := game.db.QueryRow(`
 		SELECT
