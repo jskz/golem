@@ -39,14 +39,21 @@ type Room struct {
 
 func (room *Room) addObject(obj *ObjectInstance) {
 	room.objects.Insert(obj)
+
+	obj.inside = nil
+	obj.carriedBy = nil
+	obj.inRoom = room
 }
 
 func (room *Room) removeObject(obj *ObjectInstance) {
 	room.objects.Remove(obj)
+
+	obj.inRoom = nil
 }
 
 func (room *Room) addCharacter(ch *Character) {
 	room.characters.Insert(ch)
+
 	ch.Room = room
 }
 
