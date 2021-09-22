@@ -7,7 +7,11 @@
  */
 package main
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+	"strings"
+)
 
 type Object struct {
 	id       uint
@@ -90,4 +94,20 @@ func (container *ObjectInstance) addObject(obj *ObjectInstance) {
 	obj.inside = container
 	obj.carriedBy = nil
 	obj.inRoom = nil
+}
+
+func (ch *Character) showObjectList(objects *LinkedList) {
+	var output strings.Builder
+
+	if objects == nil || objects.Count < 1 {
+		return
+	}
+
+	for iter := objects.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		output.WriteString(fmt.Sprintf("%s\r\n", obj.carriedBy.getShortDescriptionUpper(ch)))
+	}
+
+	ch.Send(output.String())
 }

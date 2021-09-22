@@ -60,6 +60,11 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 		output.WriteString(fmt.Sprintf("can hold up to %d items with a maximum weight of %d lbs.", obj.value0, obj.value1))
 	}
 
+	if obj.contents.Count > 0 {
+		output.WriteString(fmt.Sprintf("%s contains the following items:\r\n", obj.carriedBy.getShortDescriptionUpper(ch)))
+		ch.showObjectList(obj.contents)
+	}
+
 	ch.Send(output.String())
 }
 
