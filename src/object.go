@@ -25,6 +25,11 @@ type Object struct {
 }
 
 type ObjectInstance struct {
+	contents  *LinkedList
+	inside    *ObjectInstance
+	inRoom    *Room
+	carriedBy *Character
+
 	id       uint
 	parentId uint
 	itemType string
@@ -77,4 +82,12 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	}
 
 	return obj, nil
+}
+
+func (container *ObjectInstance) addObject(obj *ObjectInstance) {
+	container.contents.Insert(obj)
+
+	obj.inside = container
+	obj.carriedBy = nil
+	obj.inRoom = nil
 }
