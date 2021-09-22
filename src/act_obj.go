@@ -169,6 +169,46 @@ func do_take(ch *Character, arguments string) {
 	}
 }
 
+func do_give(ch *Character, arguments string) {
+	args := strings.Split(arguments, " ")
+	if len(args) < 2 {
+		ch.Send("Give what to whom?\r\n")
+		return
+	}
+
+	if ch.Room == nil {
+		return
+	}
+
+	var found *ObjectInstance = ch.findObjectOnSelf(args[0])
+	if found == nil {
+		ch.Send("No such item in your inventory.\r\n")
+		return
+	}
+
+	var target *Character = ch.findCharacterInRoom(arguments)
+	if target == ch || target == nil {
+		ch.Send("No such person here.\r\n")
+		return
+	}
+
+	ch.removeObject(found)
+	target.addObject(found)
+
+	ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", found.shortDescription, target.getShortDescription(ch)))
+	target.Send(fmt.Sprintf("%s{x gives you %s{x.\r\n", ch.getShortDescriptionUpper(target), found.shortDescription))
+
+	if ch.Room != nil {
+		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+			rch := iter.Value.(*Character)
+
+			if rch != ch && rch != target {
+				rch.Send(fmt.Sprintf("\r\n%s{x gives %s{x to %s{x.\r\n", ch.getShortDescriptionUpper(rch), found.shortDescription, target.getShortDescription(rch)))
+			}
+		}
+	}
+}
+
 func do_drop(ch *Character, arguments string) {
 	if len(arguments) < 1 {
 		ch.Send("Drop what?\r\n")

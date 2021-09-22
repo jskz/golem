@@ -58,6 +58,7 @@ func init() {
 	CommandTable["inventory"] = Command{Name: "inventory", CmdFunc: do_inventory}
 	CommandTable["wear"] = Command{Name: "wear", CmdFunc: do_wear}
 	CommandTable["remove"] = Command{Name: "remove", CmdFunc: do_remove}
+	CommandTable["give"] = Command{Name: "give", CmdFunc: do_give}
 	CommandTable["take"] = Command{Name: "take", CmdFunc: do_take}
 	CommandTable["drop"] = Command{Name: "drop", CmdFunc: do_drop}
 
