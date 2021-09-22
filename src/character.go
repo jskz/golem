@@ -571,10 +571,16 @@ func (ch *Character) getLongDescription(viewer *Character) string {
 
 func (ch *Character) addObject(obj *ObjectInstance) {
 	ch.inventory.Insert(obj)
+
+	obj.carriedBy = ch
+	obj.inRoom = nil
+	obj.inside = nil
 }
 
 func (ch *Character) removeObject(obj *ObjectInstance) {
 	ch.inventory.Remove(obj)
+
+	obj.carriedBy = nil
 }
 
 func (ch *Character) findObjectInRoom(argument string) *ObjectInstance {
