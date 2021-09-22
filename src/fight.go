@@ -114,12 +114,6 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 
 func (game *Game) combatUpdate() {
 	game.InvokeNamedEventHandlersWithContextAndArguments("combatUpdate", game.vm.ToValue(game))
-
-	/*
-		damage := 0
-		damage = rand.Intn(2)
-		damage += rand.Intn(vch.Strength / 3)
-	*/
 }
 
 func (game *Game) DisposeCombat(combat *Combat) {
