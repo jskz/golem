@@ -57,7 +57,7 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 
 	switch obj.itemType {
 	case ItemTypeContainer:
-		output.WriteString(fmt.Sprintf("%s can hold up to %d items with a maximum weight of %d lbs.\r\n", obj.shortDescription, obj.value0, obj.value1))
+		output.WriteString(fmt.Sprintf("%s can hold up to %d items and %d lbs.\r\n", obj.shortDescription, obj.value0, obj.value1))
 	}
 
 	if obj.contents.Count > 0 {
