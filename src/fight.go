@@ -36,6 +36,11 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj.name = fmt.Sprintf("corpse %s", ch.name)
 	obj.itemType = "container"
 
+	if ch.flags&CHAR_IS_PLAYER != 0 {
+		obj.contents = ch.inventory
+		ch.inventory = NewLinkedList()
+	}
+
 	return obj
 }
 
