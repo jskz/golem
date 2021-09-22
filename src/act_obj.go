@@ -55,6 +55,11 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	 */
 	output.WriteString(fmt.Sprintf("Object '%s' is type %s.\r\n", obj.name, obj.itemType))
 
+	switch obj.itemType {
+	case ItemTypeContainer:
+		output.WriteString(fmt.Sprintf("can hold up to %d items with a maximum weight of %d lbs.", obj.value0, obj.value1))
+	}
+
 	ch.Send(output.String())
 }
 

@@ -302,14 +302,18 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 	defer rows.Close()
 
 	for rows.Next() {
-		obj := &ObjectInstance{}
+		obj := &ObjectInstance{
+			contents:  NewLinkedList(),
+			inside:    nil,
+			carriedBy: nil,
+		}
 
 		err = rows.Scan(&obj.id, &obj.parentId, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.value0, &obj.value1, &obj.value2, &obj.value3)
 		if err != nil {
 			return err
 		}
 
-		ch.inventory.Insert(obj)
+		ch.addObject(obj)
 	}
 
 	return nil
