@@ -190,10 +190,10 @@ func (ch *Character) onUpdate() {
 	}
 }
 
-func (ch *Character) Finalize() bool {
+func (ch *Character) Finalize() error {
 	if ch.client == nil || ch.game == nil {
 		/* If somehow an NPC were to try to save, do not allow it. */
-		return false
+		return nil
 	}
 
 	result, err := ch.game.db.Exec(`
@@ -205,24 +205,24 @@ func (ch *Character) Finalize() bool {
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
-		return false
+		return err
 	}
 
 	userId, err := result.LastInsertId()
 	if err != nil {
 		log.Printf("Failed to retrieve insert id: %v.\r\n", err)
-		return false
+		return err
 	}
 
 	ch.id = int(userId)
 
 	limbo, err := ch.game.LoadRoomIndex(RoomLimbo)
 	if err != nil {
-		return false
+		return err
 	}
 
 	ch.Room = limbo
-	return true
+	return nil
 }
 
 func (ch *Character) Save() bool {
@@ -275,6 +275,14 @@ func (ch *Character) Save() bool {
 	}
 
 	return rowsAffected == 1
+}
+
+func (game *Game) attachObject(ch *Character) error {
+	return nil
+}
+
+func (game *Game) detachObject(ch *Character) error {
+	return nil
 }
 
 func (game *Game) SavePlayerInventory(ch *Character) error {

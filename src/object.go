@@ -105,6 +105,10 @@ func (obj *ObjectInstance) getShortDescriptionUpper(viewer *Character) string {
 	return string(runes)
 }
 
+func (obj *ObjectInstance) Finalize() error {
+	return nil
+}
+
 func (container *ObjectInstance) addObject(obj *ObjectInstance) {
 	container.contents.Insert(obj)
 
