@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -274,6 +275,53 @@ func (ch *Character) Save() bool {
 	}
 
 	return rowsAffected == 1
+}
+
+func (game *Game) SavePlayerInventory(ch *Character) error {
+	/* Object instances whose records have dirtied */
+	var updating []*ObjectInstance = make([]*ObjectInstance, 0)
+
+	/* Iterate over all objects in this player's inventory */
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		updating = append(updating, obj)
+	}
+
+	/* Create a context and begin a transaction for bulk upsert */
+	ctx := context.Background()
+	tx, err := game.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	for _, obj := range updating {
+		_, err = tx.ExecContext(ctx, `
+			UPDATE
+				object_instances
+			SET
+				name = ?,
+				short_description = ?,
+				long_description = ?,
+				description = ?,
+				value_1 = ?,
+				value_2 = ?,
+				value_3 = ?,
+				value_4 = ?
+		`, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.value0, obj.value1, obj.value2, obj.value3)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
 }
 
 func (game *Game) LoadPlayerInventory(ch *Character) error {
