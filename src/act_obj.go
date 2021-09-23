@@ -187,8 +187,13 @@ func do_give(ch *Character, arguments string) {
 	}
 
 	var target *Character = ch.findCharacterInRoom(args[1])
-	if target == ch || target == nil {
+	if target == nil {
 		ch.Send("No such person here.\r\n")
+		return
+	}
+
+	if target == ch {
+		ch.Send("You cannot give to yourself!\r\n")
 		return
 	}
 
