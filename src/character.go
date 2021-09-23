@@ -86,9 +86,12 @@ const (
  * connected through a session instance available via the client pointer.)
  */
 type Character struct {
-	game      *Game
-	client    *Client
-	inventory *LinkedList
+	game   *Game
+	client *Client
+
+	inventory                 *LinkedList
+	serializedObjectInstances map[uint]bool
+
 	equipment []*ObjectInstance
 
 	pages      [][]byte
@@ -314,6 +317,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 		}
 
 		ch.addObject(obj)
+		ch.serializedObjectInstances[obj.id] = true
 	}
 
 	return nil
@@ -367,6 +371,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	`, username)
 
 	ch := NewCharacter()
+	ch.serializedObjectInstances = make(map[uint]bool)
 	ch.game = game
 
 	var roomId uint
