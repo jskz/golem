@@ -48,11 +48,11 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 }
 
 func (game *Game) Damage(ch *Character, target *Character, display bool, amount int, damageType int) bool {
-	if ch == nil || target == nil {
+	if target == nil {
 		return false
 	}
 
-	if display {
+	if display && ch != nil {
 		if ch.Room != nil && target.Room != nil && target.Room == ch.Room {
 			for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
 				character := iter.Value.(*Character)
@@ -105,7 +105,9 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 				do_look(target, "")
 			} else {
 				exp := target.experience
-				ch.gainExperience(int(exp))
+				if ch != nil {
+					ch.gainExperience(int(exp))
+				}
 
 				game.characters.Remove(target)
 			}
