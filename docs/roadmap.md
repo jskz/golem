@@ -16,12 +16,13 @@ This will be a working document to track major feature development goals for eac
 - [ ] Exit flags: closing and opening doors, movement obstruction
 - [ ] Clean up the inconsistent title case method and field naming stemming from the scripting field mapper change
 - [ ] Extend to scripting and entities a timer-based "effects" model for behaviours like buffs/enchantments on equipment or spellcasting, permanent or with expiration
+- [ ] Implement a few NPC flags for behaviours: stay in an area, move, aggressive/hostile towards PCs, etc.
 
 ## 0.3 Telnet Done Right Milestones
 
 - [ ] Telnet IAC parsing/session handling implementation overhaul
 
-## 0.4 Telnet Zlib Compression and Milestones
+## 0.4 Telnet Zlib Compression Milestones
 
 - [ ] [MCCP2 or MCCP3 support](https://mudhalla.net/tintin/protocols/mccp/)
 - [ ] Find a solution to perform some fuzz testing of the telnet implementation
