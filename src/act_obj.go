@@ -57,7 +57,7 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 
 	switch obj.itemType {
 	case ItemTypeContainer:
-		output.WriteString(fmt.Sprintf("%s can hold up to %d items and %d lbs.\r\n", obj.shortDescription, obj.value0, obj.value1))
+		output.WriteString(fmt.Sprintf("%s can hold up to %d items and %d lbs.\r\n", obj.getShortDescriptionUpper(ch), obj.value0, obj.value1))
 	}
 
 	if obj.contents.Count > 0 {
@@ -81,7 +81,7 @@ func do_equipment(ch *Character, arguments string) {
 		} else {
 			obj := ch.equipment[i]
 
-			objectDescription.WriteString(obj.shortDescription)
+			objectDescription.WriteString(obj.getShortDescription(ch))
 
 			/* TODO: item flags - glowing, humming, etc? Append extra details here. */
 		}
@@ -102,7 +102,7 @@ func do_inventory(ch *Character, arguments string) {
 	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
-		output.WriteString(fmt.Sprintf("{x    %s\r\n", obj.shortDescription))
+		output.WriteString(fmt.Sprintf("{x    %s\r\n", obj.getShortDescription(ch)))
 
 		count++
 	}
@@ -200,15 +200,15 @@ func do_give(ch *Character, arguments string) {
 	ch.removeObject(found)
 	target.addObject(found)
 
-	ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", found.shortDescription, target.getShortDescription(ch)))
-	target.Send(fmt.Sprintf("%s{x gives you %s{x.\r\n", ch.getShortDescriptionUpper(target), found.shortDescription))
+	ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", found.getShortDescription(ch), target.getShortDescription(ch)))
+	target.Send(fmt.Sprintf("%s{x gives you %s{x.\r\n", ch.getShortDescriptionUpper(target), found.getShortDescription(target)))
 
 	if ch.Room != nil {
 		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
 			rch := iter.Value.(*Character)
 
 			if rch != ch && rch != target {
-				rch.Send(fmt.Sprintf("\r\n%s{x gives %s{x to %s{x.\r\n", ch.getShortDescriptionUpper(rch), found.shortDescription, target.getShortDescription(rch)))
+				rch.Send(fmt.Sprintf("\r\n%s{x gives %s{x to %s{x.\r\n", ch.getShortDescriptionUpper(rch), found.getShortDescription(rch), target.getShortDescription(rch)))
 			}
 		}
 	}
