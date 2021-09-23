@@ -277,11 +277,34 @@ func (ch *Character) Save() bool {
 	return rowsAffected == 1
 }
 
-func (game *Game) attachObject(ch *Character) error {
+func (ch *Character) attachObject(obj *ObjectInstance) error {
+	//	obj.reify()
+
 	return nil
 }
 
-func (game *Game) detachObject(ch *Character) error {
+func (ch *Character) detachObject(obj *ObjectInstance) error {
+	result, err := ch.game.db.Exec(`
+		DELETE FROM
+			player_character_object
+		WHERE
+			player_character_id = ?
+		AND
+			object_instance_id = ?`, ch.id, obj.id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected != 1 {
+		/* Weird, but not fatal */
+		return nil
+	}
+
 	return nil
 }
 
