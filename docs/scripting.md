@@ -10,7 +10,7 @@ The **Golem** global provides access to the following properties:
 | --- | --- | --- | ----------- | --- | 
 | Method | broadcast | `message`: **String** | Sends `message` to all connected and in-game players, without a filter. | ```Golem.broadcast("The sky is falling; the server is shutting down!\r\n");```
 | Method | registerPlayerCommand | `command`: **String**, `callback`: function(`ch`: **Character**, `args`: **String**) | Registers a player interpreter command `command` if a system default does not exist.  If a scripted `command` already exists, its callback is overriden.  The callback is executed with the calling player character handle and any command arguments unsplit. | `Golem.registerPlayerCommand('echo', function(ch, args) { ch.send("Your arguments: " + args + "\r\n"); });`
-| Field | game: **Game** |  | Provides acess to many gameplay global gameplay session values and utility methods.   Refer Game section. | `Golem.game.fights.head.value.participants` 
+| Field | game: **Game** |  | Provides access to many global gameplay session values and utility methods.   Refer Game section. | `Golem.game.fights.head.value.participants` 
 
 ## Game
 
