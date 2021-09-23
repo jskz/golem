@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"unicode"
 )
 
 type Object struct {
@@ -86,6 +87,22 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	}
 
 	return obj, nil
+}
+
+func (obj *ObjectInstance) getShortDescription(viewer *Character) string {
+	return obj.shortDescription
+}
+
+func (obj *ObjectInstance) getShortDescriptionUpper(viewer *Character) string {
+	var short string = obj.getShortDescription(viewer)
+
+	if short == "" {
+		return ""
+	}
+
+	runes := []rune(short)
+	runes[0] = unicode.ToUpper(runes[0])
+	return string(runes)
 }
 
 func (container *ObjectInstance) addObject(obj *ObjectInstance) {
