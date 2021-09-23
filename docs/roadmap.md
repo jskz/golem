@@ -44,7 +44,6 @@ This will be a working document to track major feature development goals for eac
 - [ ] Procedural object instance generation for "ephemeral" items that do not have prototype objects, only instances; string tables will suffice for 1.0
 - [ ] Procedural NPC monster instance generation for similar creature Character instances to populate generated maze zones
 
-
 ## 0.8 Gameplay Content Development
 
 - [ ] Gameplay development and balancing: experience curves and enchantment tweaks for races and jobs
@@ -58,4 +57,4 @@ This will be a working document to track major feature development goals for eac
 
 ## 1.0 Release Milestones
 
-- [ ] Open a persistent instance of the server to alpha testing and tag the most recent master commit as 1.0 when a stranger first joins the game - we're live
+- [ ] Open instance of the server to alpha testing and tag the most recent master commit as 1.0 when a stranger first joins the game
