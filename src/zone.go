@@ -73,6 +73,7 @@ func (game *Game) ResetRoom(room *Room) {
 
 			if objIndex != nil {
 				obj := &ObjectInstance{
+					game:             game,
 					parentId:         objIndex.id,
 					contents:         NewLinkedList(),
 					inside:           nil,

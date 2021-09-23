@@ -293,6 +293,15 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
+		/* If this is a container, ensure that all contained object instances are also updated */
+		if obj.contents != nil && obj.contents.Count > 0 {
+			for containerIter := obj.contents.Head; containerIter != nil; containerIter = containerIter.Next {
+				containedObj := containerIter.Value.(*ObjectInstance)
+
+				updating = append(updating, containedObj)
+			}
+		}
+
 		updating = append(updating, obj)
 	}
 
@@ -362,6 +371,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 
 	for rows.Next() {
 		obj := &ObjectInstance{
+			game:      game,
 			contents:  NewLinkedList(),
 			inside:    nil,
 			carriedBy: nil,

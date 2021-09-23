@@ -10,6 +10,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 	"unicode"
 )
@@ -30,6 +31,7 @@ type Object struct {
 }
 
 type ObjectInstance struct {
+	game      *Game
 	contents  *LinkedList
 	inside    *ObjectInstance
 	inRoom    *Room
@@ -106,6 +108,28 @@ func (obj *ObjectInstance) getShortDescriptionUpper(viewer *Character) string {
 }
 
 func (obj *ObjectInstance) Finalize() error {
+	if obj == nil || obj.id > 0 {
+		return nil
+	}
+
+	result, err := obj.game.db.Exec(`
+		INSERT INTO
+			object_instances(parent_id, name, short_description, long_description, description, value_1, value_2, value_3, value_4)
+		VALUES
+			(?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, obj.parentId, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.value0, obj.value1, obj.value2, obj.value3)
+	if err != nil {
+		log.Printf("Failed to finalize new character: %v.\r\n", err)
+		return err
+	}
+
+	objectInstanceId, err := result.LastInsertId()
+	if err != nil {
+		log.Printf("Failed to retrieve insert id: %v.\r\n", err)
+		return err
+	}
+
+	obj.id = uint(objectInstanceId)
 	return nil
 }
 

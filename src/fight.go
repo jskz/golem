@@ -27,7 +27,7 @@ const (
 )
 
 func (game *Game) createCorpse(ch *Character) *ObjectInstance {
-	obj := &ObjectInstance{}
+	obj := &ObjectInstance{game: game}
 
 	obj.id = 1
 	obj.description = fmt.Sprintf("The slain corpse of %s.", ch.getShortDescription(ch))
