@@ -170,7 +170,7 @@ func (ch *Character) showObjectList(objects *LinkedList) {
 	for iter := objects.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
-		output.WriteString(fmt.Sprintf("%s\r\n", obj.carriedBy.getShortDescriptionUpper(ch)))
+		output.WriteString(fmt.Sprintf("%s\r\n", obj.getShortDescriptionUpper(ch)))
 	}
 
 	ch.Send(output.String())

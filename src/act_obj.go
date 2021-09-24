@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -61,11 +62,11 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	}
 
 	if obj.contents.Count > 0 {
-		output.WriteString(fmt.Sprintf("%s contains the following items:\r\n", obj.carriedBy.getShortDescriptionUpper(ch)))
+		output.WriteString(fmt.Sprintf("%s contains the following items:\r\n", obj.getShortDescriptionUpper(ch)))
+		ch.Send(output.String())
+
 		ch.showObjectList(obj.contents)
 	}
-
-	ch.Send(output.String())
 }
 
 func do_equipment(ch *Character, arguments string) {
@@ -154,6 +155,7 @@ func do_take(ch *Character, arguments string) {
 	if ch.flags&CHAR_IS_PLAYER != 0 {
 		err := ch.attachObject(found)
 		if err != nil {
+			log.Println(err)
 			ch.Send("A strange force prevented you from taking that.\r\n")
 			return
 		}
