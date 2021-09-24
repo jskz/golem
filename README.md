@@ -4,11 +4,8 @@
 
 Golem is a from-scratch attempt at a Diku-like MUD implemented with [Go](https://golang.org/) in 2021.
 
-The development objective is to create an approachably simple yet flexible and scriptable skeleton for a hack-and-slash MUD; a secondary goal is to provide this with a directory and module structure that is immediately *at home* familiar to enthusiasts who have tinkered with similar [DIKU](https://github.com/sneezymud/dikumud) [derivatives](https://github.com/alexmchale/merc-mud) [over](https://github.com/Yuffster/CircleMUD) [the](https://github.com/DikuMUDOmnibus/ROM) [years](https://github.com/smaugmuds/_smaug_).
+## Docker-based Setup
 
-## Requirements
-
-Docker
 ## Retrieve, Build, Start
 
 ```
