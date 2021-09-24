@@ -41,6 +41,7 @@ INSERT INTO skills(id, name, type) VALUES (3, 'peek', 'passive');
 INSERT INTO skills(id, name, type) VALUES (4, 'armor', 'spell');
 INSERT INTO skills(id, name, type) VALUES (5, 'fireball', 'spell');
 INSERT INTO skills(id, name, type) VALUES (6, 'bash', 'skill');
+INSERT INTO skills(id, name, type) VALUES (7, 'heal', 'spell');
 
 /* Grant unarmed combat as a seed skill for all four base jobs with varying complexity and cost */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (1, 1, 2, 1, 1, 1);
@@ -54,8 +55,9 @@ INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (5, 
 /* Thief defaults: peek */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (6, 2, 3, 1, 5, 5);
 
-/* Cleric defaults: armor */
+/* Cleric defaults: armor, heal */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (7, 4, 4, 1, 1, 20);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (9, 4, 7, 1, 1, 20);
 
 /* Mage defaults: fireball */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (8, 3, 5, 1, 1, 20);
@@ -67,5 +69,6 @@ INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency)
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (4, 1, 4, 100);
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (5, 1, 5, 100);
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (6, 1, 6, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (7, 1, 6, 100);
 
 CREATE INDEX index_skill_name ON skills(name);
