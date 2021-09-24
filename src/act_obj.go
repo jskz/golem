@@ -66,7 +66,10 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 		ch.Send(output.String())
 
 		ch.showObjectList(obj.contents)
+		return
 	}
+
+	ch.Send(output.String())
 }
 
 func do_equipment(ch *Character, arguments string) {
