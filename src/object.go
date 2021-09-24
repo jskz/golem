@@ -55,6 +55,8 @@ type ObjectInstance struct {
 const (
 	ItemTypeNone      = "protoplasm"
 	ItemTypeContainer = "container"
+	ItemTypeScroll    = "scroll"
+	ItemTypePotion    = "potion"
 	ItemTypeArmor     = "armor"
 	ItemTypeWeapon    = "weapon"
 	ItemTypeLight     = "light"
