@@ -279,6 +279,16 @@ func (ch *Character) Save() bool {
 func (ch *Character) attachObject(obj *ObjectInstance) error {
 	obj.reify()
 
+	_, err := ch.game.db.Exec(`
+	INSERT INTO
+		player_character_object(player_character_id, object_instance_id)
+	VALUES
+		(?, ?)
+	`, ch.id, obj.id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
