@@ -211,7 +211,7 @@ CREATE TABLE objects (
     `long_description` VARCHAR(255) NOT NULL,
     `description` TEXT,
 
-    `item_type` ENUM ('protoplasm', 'light', 'container', 'armor', 'weapon', 'furniture') NOT NULL DEFAULT 'protoplasm',
+    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture') NOT NULL DEFAULT 'protoplasm',
     `value_1` INT,
     `value_2` INT,
     `value_3` INT,
@@ -237,7 +237,7 @@ CREATE TABLE object_instances (
     `long_description` VARCHAR(255) NOT NULL,
     `description` TEXT,
 
-    `item_type` ENUM ('protoplasm', 'light', 'container', 'armor', 'weapon', 'furniture') NOT NULL DEFAULT 'protoplasm',
+    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture') NOT NULL DEFAULT 'protoplasm',
 
     `value_1` INT,
     `value_2` INT,
