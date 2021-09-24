@@ -125,7 +125,7 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 			(?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`, obj.parentId, insideObjectInstanceId, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.value0, obj.value1, obj.value2, obj.value3)
 	if err != nil {
-		log.Printf("Failed to finalize new character: %v.\r\n", err)
+		log.Printf("Failed to finalize new object: %v.\r\n", err)
 		return err
 	}
 
