@@ -90,8 +90,7 @@ type Character struct {
 	game   *Game
 	client *Client
 
-	inventory                 *LinkedList
-	serializedObjectInstances map[uint]bool
+	inventory *LinkedList
 
 	equipment []*ObjectInstance
 
@@ -278,7 +277,7 @@ func (ch *Character) Save() bool {
 }
 
 func (ch *Character) attachObject(obj *ObjectInstance) error {
-	//	obj.reify()
+	obj.reify()
 
 	return nil
 }
@@ -406,7 +405,47 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 		}
 
 		ch.addObject(obj)
-		ch.serializedObjectInstances[obj.id] = true
+	}
+
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		rows, err := game.db.Query(`
+			SELECT
+				object_instances.id,
+				object_instances.parent_id,
+				object_instances.name,
+				object_instances.short_description,
+				object_instances.long_description,
+				object_instances.description,
+				object_instances.value_1,
+				object_instances.value_2,
+				object_instances.value_3,
+				object_instances.value_4
+			WHERE
+				object_instances.inside_object_instance_id = ?
+		`, obj.id)
+		if err != nil {
+			return err
+		}
+
+		defer rows.Close()
+
+		for rows.Next() {
+			containedObj := &ObjectInstance{
+				game:      game,
+				contents:  NewLinkedList(),
+				inside:    nil,
+				carriedBy: nil,
+			}
+
+			err = rows.Scan(&containedObj.id, &containedObj.parentId, &containedObj.name, &containedObj.shortDescription, &containedObj.longDescription, &containedObj.description, &containedObj.value0, &containedObj.value1, &containedObj.value2, &containedObj.value3)
+			if err != nil {
+				return err
+			}
+
+			obj.contents.Insert(containedObj)
+		}
 	}
 
 	return nil
@@ -460,7 +499,6 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	`, username)
 
 	ch := NewCharacter()
-	ch.serializedObjectInstances = make(map[uint]bool)
 	ch.game = game
 
 	var roomId uint
