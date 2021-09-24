@@ -107,6 +107,19 @@ func (obj *ObjectInstance) getShortDescriptionUpper(viewer *Character) string {
 	return string(runes)
 }
 
+func (obj *ObjectInstance) reify() error {
+	obj.Finalize(nil)
+
+	if obj.contents != nil && obj.contents.Count > 0 {
+		for iter := obj.contents.Head; iter != nil; iter = iter.Next {
+			containedObject := iter.Value.(*ObjectInstance)
+			containedObject.Finalize(obj)
+		}
+	}
+
+	return nil
+}
+
 func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 	if obj == nil || obj.id > 0 {
 		return nil
