@@ -135,10 +135,10 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 
 	result, err := obj.game.db.Exec(`
 		INSERT INTO
-			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, value_1, value_2, value_3, value_4)
+			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, item_type, value_1, value_2, value_3, value_4)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, obj.parentId, insideObjectInstanceId, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.value0, obj.value1, obj.value2, obj.value3)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, obj.parentId, insideObjectInstanceId, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.itemType, obj.value0, obj.value1, obj.value2, obj.value3)
 	if err != nil {
 		log.Printf("Failed to finalize new object: %v.\r\n", err)
 		return err

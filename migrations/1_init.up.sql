@@ -1,5 +1,5 @@
 CREATE TABLE zones (
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
 
     `name` VARCHAR(255),
     `low` INT NOT NULL,
@@ -136,7 +136,7 @@ CREATE TABLE player_characters (
 );
 
 CREATE TABLE mobiles (
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
 
     `name` VARCHAR(255) NOT NULL,
     `short_description` TEXT,
@@ -179,7 +179,7 @@ CREATE TABLE mobiles (
 );
 
 CREATE TABLE resets (
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `zone_id` BIGINT NOT NULL,
     `room_id` BIGINT NOT NULL,
 
@@ -203,7 +203,7 @@ CREATE TABLE resets (
 );
 
 CREATE TABLE objects (
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `zone_id` BIGINT NOT NULL,
 
     `name` VARCHAR(255) NOT NULL,
@@ -229,7 +229,7 @@ CREATE TABLE objects (
 );
 
 CREATE TABLE object_instances (
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
     `parent_id` BIGINT,
 
     `name` VARCHAR(255) NOT NULL,
