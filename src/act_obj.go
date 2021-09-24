@@ -139,6 +139,8 @@ func do_remove(ch *Character, arguments string) {
 }
 
 func do_take(ch *Character, arguments string) {
+	var firstArgument string = ""
+
 	if len(arguments) < 1 {
 		ch.Send("Take what?\r\n")
 		return
@@ -148,7 +150,8 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
-	var found *ObjectInstance = ch.findObjectInRoom(arguments)
+	firstArgument, arguments = oneArgument(arguments)
+	var found *ObjectInstance = ch.findObjectInRoom(firstArgument)
 	if found == nil {
 		ch.Send("No such item found.\r\n")
 		return
