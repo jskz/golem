@@ -444,7 +444,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 				return err
 			}
 
-			obj.contents.Insert(containedObj)
+			obj.addObject(containedObj)
 		}
 	}
 
