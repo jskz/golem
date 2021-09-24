@@ -302,7 +302,8 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		if !client.character.Finalize() {
+		err := client.character.Finalize()
+		if err != nil {
 			log.Printf("Unable to create new character %v, dropping connection.\r\n", client.character)
 			client.conn.Close()
 			break

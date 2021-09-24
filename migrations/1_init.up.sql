@@ -237,6 +237,8 @@ CREATE TABLE object_instances (
     `long_description` VARCHAR(255) NOT NULL,
     `description` TEXT,
 
+    `item_type` ENUM ('protoplasm', 'light', 'container', 'armor', 'weapon', 'furniture') NOT NULL DEFAULT 'protoplasm',
+
     `value_1` INT,
     `value_2` INT,
     `value_3` INT,
@@ -253,7 +255,7 @@ CREATE TABLE object_instances (
 );
 
 CREATE TABLE player_character_object (
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
 
     `player_character_id` BIGINT NOT NULL,
     `object_instance_id` BIGINT NOT NULL,

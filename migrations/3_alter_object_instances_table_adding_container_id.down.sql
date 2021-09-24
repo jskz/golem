@@ -1,0 +1,1 @@
+ALTER TABLE `object_instances` DROP `inside_object_instance_id`;

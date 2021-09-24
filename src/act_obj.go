@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -61,11 +62,11 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	}
 
 	if obj.contents.Count > 0 {
-		output.WriteString(fmt.Sprintf("%s contains the following items:\r\n", obj.carriedBy.getShortDescriptionUpper(ch)))
+		output.WriteString(fmt.Sprintf("%s contains the following items:\r\n", obj.getShortDescriptionUpper(ch)))
+		ch.Send(output.String())
+
 		ch.showObjectList(obj.contents)
 	}
-
-	ch.Send(output.String())
 }
 
 func do_equipment(ch *Character, arguments string) {
@@ -151,9 +152,20 @@ func do_take(ch *Character, arguments string) {
 	}
 
 	/* TODO: Check if object can be taken, weight limits, etc */
+	if ch.flags&CHAR_IS_PLAYER != 0 {
+		err := ch.attachObject(found)
+		if err != nil {
+			log.Println(err)
+			ch.Send("A strange force prevented you from taking that.\r\n")
+			return
+		}
 
-	ch.Room.removeObject(found)
-	ch.addObject(found)
+		ch.addObject(found)
+		ch.Room.removeObject(found)
+	} else {
+		ch.addObject(found)
+		ch.Room.removeObject(found)
+	}
 
 	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.shortDescription))
 	outString := fmt.Sprintf("\r\n%s{x takes %s{x.\r\n", ch.name, found.shortDescription)
@@ -197,8 +209,25 @@ func do_give(ch *Character, arguments string) {
 		return
 	}
 
-	ch.removeObject(found)
-	target.addObject(found)
+	if ch.flags&CHAR_IS_PLAYER != 0 {
+		err := ch.detachObject(found)
+		if err != nil {
+			ch.Send("A strange force prevented you from releasing your grip.\r\n")
+			return
+		}
+
+		ch.removeObject(found)
+	}
+
+	if target.flags&CHAR_IS_PLAYER != 0 {
+		err := target.attachObject(found)
+		if err != nil {
+			ch.Send("A strange force prevented you from releasing your grip.\r\n")
+			return
+		}
+
+		target.addObject(found)
+	}
 
 	ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", found.getShortDescription(ch), target.getShortDescription(ch)))
 	target.Send(fmt.Sprintf("%s{x gives you %s{x.\r\n", ch.getShortDescriptionUpper(target), found.getShortDescription(target)))
@@ -230,8 +259,19 @@ func do_drop(ch *Character, arguments string) {
 		return
 	}
 
-	ch.removeObject(found)
-	ch.Room.addObject(found)
+	if ch.flags&CHAR_IS_PLAYER != 0 {
+		err := ch.detachObject(found)
+		if err != nil {
+			ch.Send("A strange force prevented you from releasing your grip.\r\n")
+			return
+		}
+
+		ch.removeObject(found)
+		ch.Room.addObject(found)
+	} else {
+		ch.removeObject(found)
+		ch.Room.addObject(found)
+	}
 
 	ch.Send(fmt.Sprintf("You drop %s{x.\r\n", found.shortDescription))
 	outString := fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.name, found.shortDescription)

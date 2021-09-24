@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -86,9 +87,11 @@ const (
  * connected through a session instance available via the client pointer.)
  */
 type Character struct {
-	game      *Game
-	client    *Client
+	game   *Game
+	client *Client
+
 	inventory *LinkedList
+
 	equipment []*ObjectInstance
 
 	pages      [][]byte
@@ -186,10 +189,10 @@ func (ch *Character) onUpdate() {
 	}
 }
 
-func (ch *Character) Finalize() bool {
+func (ch *Character) Finalize() error {
 	if ch.client == nil || ch.game == nil {
 		/* If somehow an NPC were to try to save, do not allow it. */
-		return false
+		return nil
 	}
 
 	result, err := ch.game.db.Exec(`
@@ -201,24 +204,24 @@ func (ch *Character) Finalize() bool {
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
-		return false
+		return err
 	}
 
 	userId, err := result.LastInsertId()
 	if err != nil {
 		log.Printf("Failed to retrieve insert id: %v.\r\n", err)
-		return false
+		return err
 	}
 
 	ch.id = int(userId)
 
 	limbo, err := ch.game.LoadRoomIndex(RoomLimbo)
 	if err != nil {
-		return false
+		return err
 	}
 
 	ch.Room = limbo
-	return true
+	return nil
 }
 
 func (ch *Character) Save() bool {
@@ -273,6 +276,103 @@ func (ch *Character) Save() bool {
 	return rowsAffected == 1
 }
 
+func (ch *Character) attachObject(obj *ObjectInstance) error {
+	obj.reify()
+
+	_, err := ch.game.db.Exec(`
+	INSERT INTO
+		player_character_object(player_character_id, object_instance_id)
+	VALUES
+		(?, ?)
+	`, ch.id, obj.id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ch *Character) detachObject(obj *ObjectInstance) error {
+	result, err := ch.game.db.Exec(`
+		DELETE FROM
+			player_character_object
+		WHERE
+			player_character_id = ?
+		AND
+			object_instance_id = ?`, ch.id, obj.id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected != 1 {
+		/* Weird, but not fatal */
+		return nil
+	}
+
+	return nil
+}
+
+func (game *Game) SavePlayerInventory(ch *Character) error {
+	/* Object instances whose records have dirtied */
+	var updating []*ObjectInstance = make([]*ObjectInstance, 0)
+
+	/* Iterate over all objects in this player's inventory */
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		/* If this is a container, ensure that all contained object instances are also updated */
+		if obj.contents != nil && obj.contents.Count > 0 {
+			for containerIter := obj.contents.Head; containerIter != nil; containerIter = containerIter.Next {
+				containedObj := containerIter.Value.(*ObjectInstance)
+
+				updating = append(updating, containedObj)
+			}
+		}
+
+		updating = append(updating, obj)
+	}
+
+	/* Create a context and begin a transaction for bulk upsert */
+	ctx := context.Background()
+	tx, err := game.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	for _, obj := range updating {
+		_, err = tx.ExecContext(ctx, `
+			UPDATE
+				object_instances
+			SET
+				name = ?,
+				short_description = ?,
+				long_description = ?,
+				description = ?,
+				value_1 = ?,
+				value_2 = ?,
+				value_3 = ?,
+				value_4 = ?
+		`, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.value0, obj.value1, obj.value2, obj.value3)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
+
 func (game *Game) LoadPlayerInventory(ch *Character) error {
 	rows, err := game.db.Query(`
 		SELECT
@@ -282,6 +382,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			object_instances.short_description,
 			object_instances.long_description,
 			object_instances.description,
+			object_instances.item_type,
 			object_instances.value_1,
 			object_instances.value_2,
 			object_instances.value_3,
@@ -303,17 +404,63 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 
 	for rows.Next() {
 		obj := &ObjectInstance{
+			game:      game,
 			contents:  NewLinkedList(),
 			inside:    nil,
 			carriedBy: nil,
 		}
 
-		err = rows.Scan(&obj.id, &obj.parentId, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.value0, &obj.value1, &obj.value2, &obj.value3)
+		err = rows.Scan(&obj.id, &obj.parentId, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.itemType, &obj.value0, &obj.value1, &obj.value2, &obj.value3)
 		if err != nil {
 			return err
 		}
 
 		ch.addObject(obj)
+	}
+
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		rows, err := game.db.Query(`
+			SELECT
+				object_instances.id,
+				object_instances.parent_id,
+				object_instances.name,
+				object_instances.short_description,
+				object_instances.long_description,
+				object_instances.description,
+				object_instances.item_type,
+				object_instances.value_1,
+				object_instances.value_2,
+				object_instances.value_3,
+				object_instances.value_4
+			FROM
+				object_instances
+			WHERE
+				object_instances.inside_object_instance_id = ?
+		`, obj.id)
+		if err != nil {
+			return err
+		}
+
+		defer rows.Close()
+
+		for rows.Next() {
+			containedObj := &ObjectInstance{
+				game:      game,
+				contents:  NewLinkedList(),
+				inside:    nil,
+				carriedBy: nil,
+			}
+
+			err = rows.Scan(&containedObj.id, &containedObj.parentId, &containedObj.name, &containedObj.shortDescription, &containedObj.longDescription, &containedObj.description, &containedObj.itemType, &containedObj.value0, &containedObj.value1, &containedObj.value2, &containedObj.value3)
+			if err != nil {
+				return err
+			}
+
+			obj.addObject(containedObj)
+			log.Println(containedObj)
+		}
 	}
 
 	return nil

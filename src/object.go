@@ -10,6 +10,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 	"unicode"
 )
@@ -30,6 +31,7 @@ type Object struct {
 }
 
 type ObjectInstance struct {
+	game      *Game
 	contents  *LinkedList
 	inside    *ObjectInstance
 	inRoom    *Room
@@ -105,6 +107,51 @@ func (obj *ObjectInstance) getShortDescriptionUpper(viewer *Character) string {
 	return string(runes)
 }
 
+func (obj *ObjectInstance) reify() error {
+	obj.Finalize(nil)
+
+	if obj.contents != nil && obj.contents.Count > 0 {
+		for iter := obj.contents.Head; iter != nil; iter = iter.Next {
+			containedObject := iter.Value.(*ObjectInstance)
+			containedObject.Finalize(obj)
+		}
+	}
+
+	return nil
+}
+
+func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
+	if obj == nil || obj.id > 0 {
+		return nil
+	}
+
+	var insideObjectInstanceId *uint = nil
+
+	if container != nil {
+		insideObjectInstanceId = &container.id
+	}
+
+	result, err := obj.game.db.Exec(`
+		INSERT INTO
+			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, value_1, value_2, value_3, value_4)
+		VALUES
+			(?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, obj.parentId, insideObjectInstanceId, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.value0, obj.value1, obj.value2, obj.value3)
+	if err != nil {
+		log.Printf("Failed to finalize new object: %v.\r\n", err)
+		return err
+	}
+
+	objectInstanceId, err := result.LastInsertId()
+	if err != nil {
+		log.Printf("Failed to retrieve insert id: %v.\r\n", err)
+		return err
+	}
+
+	obj.id = uint(objectInstanceId)
+	return nil
+}
+
 func (container *ObjectInstance) addObject(obj *ObjectInstance) {
 	container.contents.Insert(obj)
 
@@ -123,7 +170,7 @@ func (ch *Character) showObjectList(objects *LinkedList) {
 	for iter := objects.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
-		output.WriteString(fmt.Sprintf("%s\r\n", obj.carriedBy.getShortDescriptionUpper(ch)))
+		output.WriteString(fmt.Sprintf("%s\r\n", obj.getShortDescriptionUpper(ch)))
 	}
 
 	ch.Send(output.String())
