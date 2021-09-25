@@ -150,11 +150,10 @@ func do_flee(ch *Character, arguments string) {
 		return
 	}
 
-	/* TODO: other logic/affects preventing a player from fleeing */
 	var exits []*Exit = make([]*Exit, 0)
 
 	for _, exit := range ch.Room.exit {
-		if exit.to != nil {
+		if exit.to != nil && exit.flags&EXIT_CLOSED == 0 {
 			exits = append(exits, exit)
 		}
 	}
