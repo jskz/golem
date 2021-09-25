@@ -70,6 +70,11 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 	}
 
 	target.health -= amount
+
+	if target.health > target.maxHealth {
+		target.health = target.maxHealth
+	}
+
 	if target.health <= 0 {
 		if target.Room != nil {
 			room := target.Room
