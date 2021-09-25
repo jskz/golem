@@ -7,7 +7,10 @@
  */
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	DirectionNorth = 0
@@ -131,6 +134,74 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	}
 
 	return true
+}
+
+func do_close(ch *Character, arguments string) {
+	/* Will be able to close containers and closeable exits in the room - for now just exits */
+	if ch.Room == nil {
+		return
+	}
+
+	if len(arguments) < 1 {
+		ch.Send("Close what?\r\n")
+		return
+	}
+}
+
+func do_open(ch *Character, arguments string) {
+	/* Will be able to open containers and closeable exits in the room - for now just exits */
+	if ch.Room == nil {
+		return
+	}
+
+	if len(arguments) < 1 {
+		ch.Send("Open what?\r\n")
+		return
+	}
+
+	args := strings.ToLower(arguments)
+	var exit *Exit = nil
+
+	if args == "n" || args == "north" {
+		exit = ch.Room.getExit(DirectionNorth)
+	} else if args == "e" || args == "east" {
+		exit = ch.Room.getExit(DirectionEast)
+	} else if args == "s" || args == "south" {
+		exit = ch.Room.getExit(DirectionSouth)
+	} else if args == "w" || args == "west" {
+		exit = ch.Room.getExit(DirectionWest)
+	} else if args == "u" || args == "up" {
+		exit = ch.Room.getExit(DirectionUp)
+	} else if args == "d" || args == "down" {
+		exit = ch.Room.getExit(DirectionDown)
+	} else {
+		ch.Send("Open what?\r\n")
+		return
+	}
+
+	if exit == nil {
+		ch.Send("You can't open that.\r\n")
+		return
+	}
+
+	if exit.flags&EXIT_CLOSED == 0 {
+		ch.Send("It isn't closed.\r\n")
+		return
+	} else if exit.flags&EXIT_LOCKED != 0 {
+		ch.Send("It's locked.\r\n")
+		return
+	}
+
+	exit.flags &= ^EXIT_CLOSED
+	ch.Send("You open the door.\r\n")
+
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+
+		if rch != ch {
+			rch.Send(fmt.Sprintf("{W%s{W opens the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.direction]))
+		}
+	}
 }
 
 func do_follow(ch *Character, arguments string) {
