@@ -256,7 +256,7 @@ func do_open(ch *Character, arguments string) {
 
 	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
-		character.Send(fmt.Sprintf("{WThe %s door closes.{x\r\n", ExitName[ReverseDirection[exit.direction]]))
+		character.Send(fmt.Sprintf("{WThe %s door opens.{x\r\n", ExitName[ReverseDirection[exit.direction]]))
 	}
 }
 

@@ -183,6 +183,7 @@ func do_look(ch *Character, arguments string) {
 		var foundCh *Character = ch.FindCharacterInRoom(arguments)
 		if foundCh != nil {
 			ch.examineCharacter(foundCh)
+			return
 		}
 	}
 

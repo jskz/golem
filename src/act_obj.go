@@ -53,7 +53,7 @@ func (ch *Character) examineCharacter(other *Character) {
 	}
 
 	if other.inventory.Count > 0 {
-		ch.Send(fmt.Sprintf("%s is carrying the following items:\r\n", other.GetShortDescriptionUpper(ch)))
+		ch.Send(fmt.Sprintf("{Y%s{Y is carrying the following items:{x\r\n", other.GetShortDescriptionUpper(ch)))
 		ch.showObjectList(other.inventory)
 		return
 	}

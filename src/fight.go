@@ -37,7 +37,10 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj.itemType = "container"
 
 	if ch.flags&CHAR_IS_PLAYER == 0 {
-		obj.contents = ch.inventory
+		obj.contents = NewLinkedList()
+		obj.contents.Tail = ch.inventory.Tail
+		obj.contents.Head = ch.inventory.Head
+		obj.contents.Count = ch.inventory.Count
 
 		ch.inventory = NewLinkedList()
 	} else {
