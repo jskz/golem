@@ -50,9 +50,10 @@ var ReverseDirection = map[uint]uint{
 }
 
 const (
-	EXIT_CLOSED = 1
-	EXIT_LOCKED = 1 << 1
-	EXIT_HIDDEN = 1 << 2
+	EXIT_IS_DOOR = 1
+	EXIT_CLOSED  = 1 << 1
+	EXIT_LOCKED  = 1 << 1
+	EXIT_HIDDEN  = 1 << 2
 )
 
 type Exit struct {
@@ -167,7 +168,7 @@ func do_close(ch *Character, arguments string) {
 		return
 	}
 
-	if exit == nil {
+	if exit == nil || exit.flags&EXIT_IS_DOOR == 0 {
 		ch.Send("You can't close that.\r\n")
 		return
 	}
@@ -227,7 +228,7 @@ func do_open(ch *Character, arguments string) {
 		return
 	}
 
-	if exit == nil {
+	if exit == nil || exit.flags&EXIT_IS_DOOR == 0 {
 		ch.Send("You can't open that.\r\n")
 		return
 	}
