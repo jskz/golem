@@ -72,11 +72,24 @@ func do_cast(ch *Character, arguments string) {
 		return
 	}
 
+	prof, ok := ch.skills[found.id]
+	if !ok {
+		ch.Send("You have no knowledge of that spell, try another.\r\n")
+		return
+	}
+
+	if prof.cost > ch.mana {
+		ch.Send("You do not have enough mana to cast that spell.\r\n")
+		return
+	}
+
+	ch.mana -= prof.cost
+
 	ch.casting = &CastingContext{
 		casting:    found,
 		arguments:  arguments,
 		startedAt:  time.Now(),
-		complexity: 3,
+		complexity: prof.complexity,
 	}
 
 	ch.Send("{WYou start uttering the words of the spell...{x\r\n")
