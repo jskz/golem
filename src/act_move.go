@@ -52,8 +52,8 @@ var ReverseDirection = map[uint]uint{
 const (
 	EXIT_IS_DOOR = 1
 	EXIT_CLOSED  = 1 << 1
-	EXIT_LOCKED  = 1 << 1
-	EXIT_HIDDEN  = 1 << 2
+	EXIT_LOCKED  = 1 << 2
+	EXIT_HIDDEN  = 1 << 3
 )
 
 type Exit struct {
