@@ -46,6 +46,12 @@ var ReverseDirection = map[uint]uint{
 	DirectionDown:  DirectionUp,
 }
 
+const (
+	EXIT_CLOSED = 1
+	EXIT_LOCKED = 1 << 1
+	EXIT_HIDDEN = 1 << 2
+)
+
 type Exit struct {
 	id        uint
 	direction uint
