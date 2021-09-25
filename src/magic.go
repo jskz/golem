@@ -31,7 +31,7 @@ func (ch *Character) onCastingUpdate() {
 		if ch.casting.casting.handler != nil {
 			fn := *ch.casting.casting.handler
 
-			fn(ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch.casting.arguments))
+			fn(ch.game.vm.ToValue(ch.casting), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch.casting.arguments))
 		}
 
 		ch.casting = nil
