@@ -91,16 +91,16 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	/* Is the exit closed, etc. */
 	from := ch.Room
 	from.removeCharacter(ch)
-	for iter := from.characters.Head; iter != nil; iter = iter.Next {
+	for iter := from.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
-		character.Send(fmt.Sprintf("{W%s{W leaves %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[direction]))
+		character.Send(fmt.Sprintf("{W%s{W leaves %s.{x\r\n", ch.GetShortDescriptionUpper(character), ExitName[direction]))
 	}
 
 	exit.to.addCharacter(ch)
-	for iter := exit.to.characters.Head; iter != nil; iter = iter.Next {
+	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 		if character != ch {
-			character.Send(fmt.Sprintf("{W%s{W arrives from %s.{x\r\n", ch.getShortDescriptionUpper(character), ExitName[ReverseDirection[direction]]))
+			character.Send(fmt.Sprintf("{W%s{W arrives from %s.{x\r\n", ch.GetShortDescriptionUpper(character), ExitName[ReverseDirection[direction]]))
 		}
 	}
 
@@ -110,11 +110,11 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		return true
 	}
 
-	for iter := from.characters.Head; iter != nil; iter = iter.Next {
+	for iter := from.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 
 		if character.following == ch {
-			character.Send(fmt.Sprintf("{WYou follow %s{W.{x\r\n", ch.getShortDescription(character)))
+			character.Send(fmt.Sprintf("{WYou follow %s{W.{x\r\n", ch.GetShortDescription(character)))
 			character.move(direction, true)
 		}
 	}
@@ -145,7 +145,7 @@ func do_follow(ch *Character, arguments string) {
 	}
 
 	if target == ch && ch.following != nil {
-		ch.Send(fmt.Sprintf("You stop following %s{x.\r\n", ch.following.getShortDescription(ch)))
+		ch.Send(fmt.Sprintf("You stop following %s{x.\r\n", ch.following.GetShortDescription(ch)))
 		ch.following = nil
 		return
 	}
@@ -155,7 +155,7 @@ func do_follow(ch *Character, arguments string) {
 		return
 	}
 
-	ch.Send(fmt.Sprintf("You start following %s{x.\r\n", target.getShortDescription(ch)))
+	ch.Send(fmt.Sprintf("You start following %s{x.\r\n", target.GetShortDescription(ch)))
 	ch.following = target
 }
 

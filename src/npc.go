@@ -49,7 +49,7 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.id,
+	err := row.Scan(&ch.Id,
 		&ch.name,
 		&ch.shortDescription,
 		&ch.longDescription,

@@ -12,7 +12,7 @@ import (
 )
 
 func (game *Game) characterUpdate() {
-	for iter := game.characters.Head; iter != nil; iter = iter.Next {
+	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		ch := iter.Value.(*Character)
 
 		if ch.casting != nil {
@@ -24,7 +24,7 @@ func (game *Game) characterUpdate() {
 func (game *Game) Update() {
 	game.InvokeNamedEventHandlersWithContextAndArguments("gameUpdate", game.vm.ToValue(game))
 
-	for iter := game.characters.Head; iter != nil; iter = iter.Next {
+	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		ch := iter.Value.(*Character)
 
 		ch.onUpdate()
@@ -32,7 +32,7 @@ func (game *Game) Update() {
 }
 
 func (game *Game) ZoneUpdate() {
-	for iter := game.zones.Head; iter != nil; iter = iter.Next {
+	for iter := game.Zones.Head; iter != nil; iter = iter.Next {
 		zone := iter.Value.(*Zone)
 
 		if time.Since(zone.lastReset).Minutes() > float64(zone.resetFrequency) {

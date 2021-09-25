@@ -32,7 +32,7 @@ type Room struct {
 
 	objects    *LinkedList
 	resets     *LinkedList
-	characters *LinkedList
+	Characters *LinkedList `json:"characters"`
 
 	exit map[uint]*Exit
 }
@@ -52,13 +52,13 @@ func (room *Room) removeObject(obj *ObjectInstance) {
 }
 
 func (room *Room) addCharacter(ch *Character) {
-	room.characters.Insert(ch)
+	room.Characters.Insert(ch)
 
 	ch.Room = room
 }
 
 func (room *Room) removeCharacter(ch *Character) {
-	room.characters.Remove(ch)
+	room.Characters.Remove(ch)
 	ch.Room = nil
 }
 
@@ -77,7 +77,7 @@ func (room *Room) listObjectsToCharacter(ch *Character) {
 func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 	var output strings.Builder
 
-	for iter := room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
 		if rch != ch {
@@ -119,7 +119,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	room = &Room{}
 	room.resets = NewLinkedList()
 	room.objects = NewLinkedList()
-	room.characters = NewLinkedList()
+	room.Characters = NewLinkedList()
 	room.exit = make(map[uint]*Exit)
 	err := row.Scan(&room.Id, &zoneId, &room.name, &room.description)
 
@@ -131,7 +131,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 		return nil, err
 	}
 
-	for iter := game.zones.Head; iter != nil; iter = iter.Next {
+	for iter := game.Zones.Head; iter != nil; iter = iter.Next {
 		zone := iter.Value.(*Zone)
 
 		if zone.id == zoneId {

@@ -95,10 +95,10 @@ func (game *Game) ResetRoom(room *Room) {
 		case ResetTypeMobile:
 			count := 0
 
-			for iter := room.characters.Head; iter != nil; iter = iter.Next {
+			for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 				rch := iter.Value.(*Character)
 
-				if rch.id == reset.value0 {
+				if rch.Id == reset.value0 {
 					count++
 				}
 			}
@@ -116,7 +116,7 @@ func (game *Game) ResetRoom(room *Room) {
 			if mobile != nil {
 				room.addCharacter(mobile)
 
-				game.characters.Insert(mobile)
+				game.Characters.Insert(mobile)
 			}
 
 		default:
@@ -124,7 +124,7 @@ func (game *Game) ResetRoom(room *Room) {
 		}
 	}
 
-	for iter := room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 		character.onZoneUpdate()
 
@@ -151,7 +151,7 @@ func (game *Game) ResetZone(zone *Zone) {
 func (game *Game) LoadZones() error {
 	log.Printf("Loading zones.\r\n")
 
-	game.zones = NewLinkedList()
+	game.Zones = NewLinkedList()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -181,10 +181,10 @@ func (game *Game) LoadZones() error {
 			continue
 		}
 
-		game.zones.Insert(zone)
+		game.Zones.Insert(zone)
 	}
 
-	log.Printf("Loaded %d zones from database.\r\n", game.zones.Count)
+	log.Printf("Loaded %d zones from database.\r\n", game.Zones.Count)
 	return nil
 }
 
@@ -227,7 +227,7 @@ func (game *Game) LoadResets() error {
 			continue
 		}
 
-		for iter := game.zones.Head; iter != nil; iter = iter.Next {
+		for iter := game.Zones.Head; iter != nil; iter = iter.Next {
 			zone := iter.Value.(*Zone)
 
 			if zone.id == zoneId {

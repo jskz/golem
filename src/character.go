@@ -104,7 +104,7 @@ type Character struct {
 	casting   *CastingContext `json:"casting"`
 	following *Character
 
-	id int `json:"id"`
+	Id int `json:"id"`
 
 	name             string `json:"name"`
 	shortDescription string `json:"shortDescription"`
@@ -141,6 +141,10 @@ type Character struct {
 	Luck         int `json:"luck"`
 
 	temporaryHash string
+}
+
+func (ch *Character) IsEqual(och *Character) bool {
+	return och == ch
 }
 
 func (ch *Character) experienceRequiredForLevel(level int) int {
@@ -213,7 +217,7 @@ func (ch *Character) Finalize() error {
 		return err
 	}
 
-	ch.id = int(userId)
+	ch.Id = int(userId)
 
 	limbo, err := ch.game.LoadRoomIndex(RoomLimbo)
 	if err != nil {
@@ -261,7 +265,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.id)
+	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.Id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -287,7 +291,7 @@ func (ch *Character) attachObject(obj *ObjectInstance) error {
 		player_character_object(player_character_id, object_instance_id)
 	VALUES
 		(?, ?)
-	`, ch.id, obj.id)
+	`, ch.Id, obj.id)
 	if err != nil {
 		return err
 	}
@@ -302,7 +306,7 @@ func (ch *Character) detachObject(obj *ObjectInstance) error {
 		WHERE
 			player_character_id = ?
 		AND
-			object_instance_id = ?`, ch.id, obj.id)
+			object_instance_id = ?`, ch.Id, obj.id)
 	if err != nil {
 		return err
 	}
@@ -398,7 +402,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			object_instances.id = player_character_object.object_instance_id
 		WHERE
 			player_character_object.player_character_id = ?
-	`, ch.id)
+	`, ch.Id)
 	if err != nil {
 		return err
 	}
@@ -523,7 +527,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.id, &ch.name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.practices, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
+	err := row.Scan(&ch.Id, &ch.name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.practices, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -687,7 +691,7 @@ func (ch *Character) getMaxCarryWeight() float64 {
 	return 200.0
 }
 
-func (ch *Character) getShortDescription(viewer *Character) string {
+func (ch *Character) GetShortDescription(viewer *Character) string {
 	if ch.flags&CHAR_IS_PLAYER != 0 {
 		return ch.name
 	}
@@ -695,8 +699,8 @@ func (ch *Character) getShortDescription(viewer *Character) string {
 	return ch.shortDescription
 }
 
-func (ch *Character) getShortDescriptionUpper(viewer *Character) string {
-	var short string = ch.getShortDescription(viewer)
+func (ch *Character) GetShortDescriptionUpper(viewer *Character) string {
+	var short string = ch.GetShortDescription(viewer)
 
 	if short == "" {
 		return ""
@@ -710,10 +714,10 @@ func (ch *Character) getShortDescriptionUpper(viewer *Character) string {
 func (ch *Character) getLongDescription(viewer *Character) string {
 	if ch.Fighting != nil {
 		if viewer == ch.Fighting {
-			return fmt.Sprintf("%s is here, fighting you!", ch.getShortDescriptionUpper(viewer))
+			return fmt.Sprintf("%s is here, fighting you!", ch.GetShortDescriptionUpper(viewer))
 		}
 
-		return fmt.Sprintf("%s is here, fighting %s.", ch.getShortDescriptionUpper(viewer), ch.Fighting.getShortDescription(viewer))
+		return fmt.Sprintf("%s is here, fighting %s.", ch.GetShortDescriptionUpper(viewer), ch.Fighting.GetShortDescription(viewer))
 	}
 
 	if ch.flags&CHAR_IS_PLAYER != 0 {
@@ -790,7 +794,7 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 		return nil
 	}
 
-	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
 		nameParts := strings.Split(rch.name, " ")
@@ -806,7 +810,7 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 
 func (game *Game) Broadcast(message string) {
 	log.Printf("Broadcast: %s\r\n", message)
-	for iter := game.characters.Head; iter != nil; iter = iter.Next {
+	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		ch := iter.Value.(*Character)
 
 		ch.Send(message)
@@ -816,7 +820,7 @@ func (game *Game) Broadcast(message string) {
 func NewCharacter() *Character {
 	character := &Character{}
 
-	character.id = -1
+	character.Id = -1
 	character.wizard = false
 	character.afk = nil
 	character.job = nil

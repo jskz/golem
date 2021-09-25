@@ -93,12 +93,12 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	return obj, nil
 }
 
-func (obj *ObjectInstance) getShortDescription(viewer *Character) string {
+func (obj *ObjectInstance) GetShortDescription(viewer *Character) string {
 	return obj.shortDescription
 }
 
-func (obj *ObjectInstance) getShortDescriptionUpper(viewer *Character) string {
-	var short string = obj.getShortDescription(viewer)
+func (obj *ObjectInstance) GetShortDescriptionUpper(viewer *Character) string {
+	var short string = obj.GetShortDescription(viewer)
 
 	if short == "" {
 		return ""
@@ -172,7 +172,7 @@ func (ch *Character) showObjectList(objects *LinkedList) {
 	for iter := objects.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
-		output.WriteString(fmt.Sprintf("%s\r\n", obj.getShortDescriptionUpper(ch)))
+		output.WriteString(fmt.Sprintf("%s\r\n", obj.GetShortDescriptionUpper(ch)))
 	}
 
 	ch.Send(output.String())

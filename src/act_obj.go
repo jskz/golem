@@ -58,11 +58,11 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 
 	switch obj.itemType {
 	case ItemTypeContainer:
-		output.WriteString(fmt.Sprintf("%s can hold up to %d items and %d lbs.\r\n", obj.getShortDescriptionUpper(ch), obj.value0, obj.value1))
+		output.WriteString(fmt.Sprintf("%s can hold up to %d items and %d lbs.\r\n", obj.GetShortDescriptionUpper(ch), obj.value0, obj.value1))
 	}
 
 	if obj.contents.Count > 0 {
-		output.WriteString(fmt.Sprintf("%s contains the following items:\r\n", obj.getShortDescriptionUpper(ch)))
+		output.WriteString(fmt.Sprintf("%s contains the following items:\r\n", obj.GetShortDescriptionUpper(ch)))
 		ch.Send(output.String())
 
 		ch.showObjectList(obj.contents)
@@ -85,7 +85,7 @@ func do_equipment(ch *Character, arguments string) {
 		} else {
 			obj := ch.equipment[i]
 
-			objectDescription.WriteString(obj.getShortDescription(ch))
+			objectDescription.WriteString(obj.GetShortDescription(ch))
 
 			/* TODO: item flags - glowing, humming, etc? Append extra details here. */
 		}
@@ -106,7 +106,7 @@ func do_inventory(ch *Character, arguments string) {
 	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
-		output.WriteString(fmt.Sprintf("{x    %s\r\n", obj.getShortDescription(ch)))
+		output.WriteString(fmt.Sprintf("{x    %s\r\n", obj.GetShortDescription(ch)))
 
 		count++
 	}
@@ -177,7 +177,7 @@ func do_take(ch *Character, arguments string) {
 	outString := fmt.Sprintf("\r\n%s{x takes %s{x.\r\n", ch.name, found.shortDescription)
 
 	if ch.Room != nil {
-		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 			rch := iter.Value.(*Character)
 
 			if rch != ch {
@@ -235,15 +235,15 @@ func do_give(ch *Character, arguments string) {
 		target.addObject(found)
 	}
 
-	ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", found.getShortDescription(ch), target.getShortDescription(ch)))
-	target.Send(fmt.Sprintf("%s{x gives you %s{x.\r\n", ch.getShortDescriptionUpper(target), found.getShortDescription(target)))
+	ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", found.GetShortDescription(ch), target.GetShortDescription(ch)))
+	target.Send(fmt.Sprintf("%s{x gives you %s{x.\r\n", ch.GetShortDescriptionUpper(target), found.GetShortDescription(target)))
 
 	if ch.Room != nil {
-		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 			rch := iter.Value.(*Character)
 
 			if rch != ch && rch != target {
-				rch.Send(fmt.Sprintf("\r\n%s{x gives %s{x to %s{x.\r\n", ch.getShortDescriptionUpper(rch), found.getShortDescription(rch), target.getShortDescription(rch)))
+				rch.Send(fmt.Sprintf("\r\n%s{x gives %s{x to %s{x.\r\n", ch.GetShortDescriptionUpper(rch), found.GetShortDescription(rch), target.GetShortDescription(rch)))
 			}
 		}
 	}
@@ -283,7 +283,7 @@ func do_drop(ch *Character, arguments string) {
 	outString := fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.name, found.shortDescription)
 
 	if ch.Room != nil {
-		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 			rch := iter.Value.(*Character)
 
 			if rch != ch {

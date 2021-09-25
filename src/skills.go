@@ -178,7 +178,7 @@ func (ch *Character) LoadPlayerSkills() error {
 			job_skill.id = pc_skill_proficiency.player_character_id
 		WHERE
 			pc_skill_proficiency.player_character_id = ?
-	`, ch.id)
+	`, ch.Id)
 	if err != nil {
 		return err
 	}

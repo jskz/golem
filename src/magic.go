@@ -93,10 +93,10 @@ func do_cast(ch *Character, arguments string) {
 	}
 
 	ch.Send("{WYou start uttering the words of the spell...{x\r\n")
-	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 		if character != ch {
-			character.Send(fmt.Sprintf("\r\n{W%s{W begins casting a spell...{x\r\n", ch.getShortDescriptionUpper(character)))
+			character.Send(fmt.Sprintf("\r\n{W%s{W begins casting a spell...{x\r\n", ch.GetShortDescriptionUpper(character)))
 		}
 	}
 }

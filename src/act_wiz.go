@@ -37,7 +37,7 @@ func do_zones(ch *Character, arguments string) {
 		"Reset Freq.",
 		"Min. Since"))
 
-	for iter := ch.game.zones.Head; iter != nil; iter = iter.Next {
+	for iter := ch.game.Zones.Head; iter != nil; iter = iter.Next {
 		zone := iter.Value.(*Zone)
 
 		minutesSinceZoneReset := int(time.Since(zone.lastReset).Minutes())
@@ -59,10 +59,10 @@ func do_mem(ch *Character, arguments string) {
 	var output strings.Builder
 
 	output.WriteString("{YUsage statistics:\r\n")
-	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Characters", ch.game.characters.Count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Characters", ch.game.Characters.Count))
 	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Jobs", Jobs.Count))
 	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Races", Races.Count))
-	output.WriteString(fmt.Sprintf("%-15s %-6d{x\r\n", "Zones", ch.game.zones.Count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d{x\r\n", "Zones", ch.game.Zones.Count))
 
 	ch.Send(output.String())
 }
@@ -70,9 +70,9 @@ func do_mem(ch *Character, arguments string) {
 func do_mlist(ch *Character, arguments string) {
 	var output strings.Builder
 
-	output.WriteString(fmt.Sprintf("Displaying all %d character instances in the world:\r\n", ch.game.characters.Count))
+	output.WriteString(fmt.Sprintf("Displaying all %d character instances in the world:\r\n", ch.game.Characters.Count))
 
-	for iter := ch.game.characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.game.Characters.Head; iter != nil; iter = iter.Next {
 		wch := iter.Value.(*Character)
 
 		if wch.flags&CHAR_IS_PLAYER != 0 {
@@ -82,7 +82,7 @@ func do_mlist(ch *Character, arguments string) {
 				output.WriteString(fmt.Sprintf("{G%s@DISCONNECTED{x\r\n", wch.name))
 			}
 		} else {
-			output.WriteString(fmt.Sprintf("%s{x (id#%d)\r\n", wch.getShortDescriptionUpper(ch), wch.id))
+			output.WriteString(fmt.Sprintf("%s{x (id#%d)\r\n", wch.GetShortDescriptionUpper(ch), wch.Id))
 		}
 	}
 
@@ -94,13 +94,13 @@ func do_purge(ch *Character, arguments string) {
 		return
 	}
 
-	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 		if rch == ch || rch.client != nil || rch.flags&CHAR_IS_PLAYER != 0 {
 			continue
 		}
 
-		ch.Room.characters.Remove(rch)
+		ch.Room.Characters.Remove(rch)
 	}
 
 	for {
@@ -119,7 +119,7 @@ func do_peace(ch *Character, arguments string) {
 		return
 	}
 
-	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
 		rch.flags &= ^CHAR_AGGRESSIVE
@@ -150,10 +150,10 @@ func do_goto(ch *Character, arguments string) {
 	}
 
 	if ch.Room != nil {
-		for iter := room.characters.Head; iter != nil; iter = iter.Next {
+		for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 			character := iter.Value.(*Character)
 			if character != ch {
-				character.Send(fmt.Sprintf("\r\n{W%s{W disappears in a puff of smoke.{x\r\n", ch.getShortDescriptionUpper(character)))
+				character.Send(fmt.Sprintf("\r\n{W%s{W disappears in a puff of smoke.{x\r\n", ch.GetShortDescriptionUpper(character)))
 			}
 		}
 
@@ -162,10 +162,10 @@ func do_goto(ch *Character, arguments string) {
 
 	room.addCharacter(ch)
 
-	for iter := room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 		if character != ch {
-			character.Send(fmt.Sprintf("\r\n{W%s{W appears in a puff of smoke.{x\r\n", ch.getShortDescriptionUpper(character)))
+			character.Send(fmt.Sprintf("\r\n{W%s{W appears in a puff of smoke.{x\r\n", ch.GetShortDescriptionUpper(character)))
 		}
 	}
 

@@ -29,9 +29,9 @@ type Game struct {
 
 	eventHandlers map[string]*LinkedList
 
-	characters *LinkedList `json:"characters"`
+	Characters *LinkedList `json:"characters"`
 	Fights     *LinkedList `json:"fights"`
-	zones      *LinkedList `json:"zones"`
+	Zones      *LinkedList `json:"zones"`
 
 	clients map[*Client]bool
 	skills  map[uint]*Skill
@@ -57,7 +57,7 @@ func NewGame() (*Game, error) {
 	game.shutdownRequest = make(chan bool)
 	game.clientMessage = make(chan ClientTextMessage)
 
-	game.characters = NewLinkedList()
+	game.Characters = NewLinkedList()
 	game.Fights = NewLinkedList()
 
 	/* Initialize services we'll inject elsewhere through the game instance. */

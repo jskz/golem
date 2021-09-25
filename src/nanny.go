@@ -316,12 +316,12 @@ func (game *Game) nanny(client *Client, message string) {
 	case ConnectionStateMessageOfTheDay:
 		client.connectionState = ConnectionStatePlaying
 
-		game.characters.Insert(client.character)
+		game.Characters.Insert(client.character)
 
 		if client.character.Room != nil {
 			client.character.Room.addCharacter(client.character)
 
-			for iter := client.character.Room.characters.Head; iter != nil; iter = iter.Next {
+			for iter := client.character.Room.Characters.Head; iter != nil; iter = iter.Next {
 				character := iter.Value.(*Character)
 
 				if character != client.character {

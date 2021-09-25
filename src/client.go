@@ -247,7 +247,7 @@ func (client *Client) closeConnection() {
 }
 
 func (game *Game) checkReconnect(client *Client, name string) bool {
-	for iter := game.characters.Head; iter != nil; iter = iter.Next {
+	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		ch := iter.Value.(*Character)
 
 		if ch.flags&CHAR_IS_PLAYER != 0 && ch.name == name {
@@ -261,11 +261,11 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 			ch.Send("{MReconnecting to a session in progress.{x\r\n")
 
 			if ch.Room != nil {
-				for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+				for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 					character := iter.Value.(*Character)
 
 					if character != ch {
-						character.Send(fmt.Sprintf("\r\n%s{x has reconnected.\r\n", ch.getShortDescriptionUpper(character)))
+						character.Send(fmt.Sprintf("\r\n%s{x has reconnected.\r\n", ch.GetShortDescriptionUpper(character)))
 					}
 				}
 			}

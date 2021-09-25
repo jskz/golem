@@ -30,9 +30,9 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj := &ObjectInstance{game: game}
 
 	obj.parentId = 1
-	obj.description = fmt.Sprintf("The slain corpse of %s.", ch.getShortDescription(ch))
-	obj.shortDescription = fmt.Sprintf("the corpse of %s", ch.getShortDescription(ch))
-	obj.longDescription = fmt.Sprintf("The corpse of %s is lying here.", ch.getShortDescription(ch))
+	obj.description = fmt.Sprintf("The slain corpse of %s.", ch.GetShortDescription(ch))
+	obj.shortDescription = fmt.Sprintf("the corpse of %s", ch.GetShortDescription(ch))
+	obj.longDescription = fmt.Sprintf("The corpse of %s is lying here.", ch.GetShortDescription(ch))
 	obj.name = fmt.Sprintf("corpse %s", ch.name)
 	obj.itemType = "container"
 
@@ -54,19 +54,19 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 
 	if display && ch != nil {
 		if ch.Room != nil && target.Room != nil && target.Room == ch.Room {
-			for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 				character := iter.Value.(*Character)
 				if character != ch && character != target {
 					character.Send(fmt.Sprintf("{G%s{G hits %s{G for %d damage.{x\r\n",
-						ch.getShortDescriptionUpper(character),
-						target.getShortDescription(character),
+						ch.GetShortDescriptionUpper(character),
+						target.GetShortDescription(character),
 						amount))
 				}
 			}
 		}
 
-		ch.Send(fmt.Sprintf("{GYou hit %s{G for %d damage.{x\r\n", target.getShortDescription(ch), amount))
-		target.Send(fmt.Sprintf("{Y%s{Y hits you for %d damage.{x\r\n", ch.getShortDescriptionUpper(target), amount))
+		ch.Send(fmt.Sprintf("{GYou hit %s{G for %d damage.{x\r\n", target.GetShortDescription(ch), amount))
+		target.Send(fmt.Sprintf("{Y%s{Y hits you for %d damage.{x\r\n", ch.GetShortDescriptionUpper(target), amount))
 	}
 
 	target.health -= amount
@@ -86,9 +86,9 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 			target.Fighting = nil
 			target.Combat = nil
 
-			for iter := room.characters.Head; iter != nil; iter = iter.Next {
+			for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 				character := iter.Value.(*Character)
-				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.getShortDescriptionUpper(character)))
+				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.GetShortDescriptionUpper(character)))
 
 				if character.Fighting == target {
 					character.Fighting = nil
@@ -114,7 +114,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 					ch.gainExperience(int(exp))
 				}
 
-				game.characters.Remove(target)
+				game.Characters.Remove(target)
 			}
 		}
 	}
@@ -163,11 +163,11 @@ func do_flee(ch *Character, arguments string) {
 		ch.Send("{RYou panic and attempt to flee, but can't get away!{x\r\n")
 
 		/* Announce player's failed flee attempt to others in the room */
-		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 			rch := iter.Value.(*Character)
 
 			if rch != ch {
-				output := fmt.Sprintf("\r\n{R%s{R panics and attempts to flee, but can't get away!{x\r\n", ch.getShortDescriptionUpper(rch))
+				output := fmt.Sprintf("\r\n{R%s{R panics and attempts to flee, but can't get away!{x\r\n", ch.GetShortDescriptionUpper(rch))
 				rch.Send(output)
 			}
 		}
@@ -181,11 +181,11 @@ func do_flee(ch *Character, arguments string) {
 	ch.Send(fmt.Sprintf("{RYou panic and flee %s!{x\r\n", ExitName[chosenEscape.direction]))
 
 	/* Announce player's departure to all other players in the current room */
-	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
 		if rch != ch {
-			output := fmt.Sprintf("\r\n{R%s{R has fled %s!{x\r\n", ch.getShortDescriptionUpper(rch), ExitName[chosenEscape.direction])
+			output := fmt.Sprintf("\r\n{R%s{R has fled %s!{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[chosenEscape.direction])
 			rch.Send(output)
 		}
 	}
@@ -193,16 +193,16 @@ func do_flee(ch *Character, arguments string) {
 	ch.Fighting = nil
 	ch.Combat = nil
 
-	ch.Room.characters.Remove(ch)
+	ch.Room.Characters.Remove(ch)
 	ch.Room = chosenEscape.to
-	chosenEscape.to.characters.Insert(ch)
+	chosenEscape.to.Characters.Insert(ch)
 
 	/* Announce player's arrival to all other players in the new room */
-	for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
 		if rch != ch {
-			output := fmt.Sprintf("\r\n{W%s{W arrives from %s.{x\r\n", ch.getShortDescriptionUpper(rch), ExitName[ReverseDirection[chosenEscape.direction]])
+			output := fmt.Sprintf("\r\n{W%s{W arrives from %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[ReverseDirection[chosenEscape.direction]])
 			rch.Send(output)
 		}
 	}
@@ -248,16 +248,16 @@ func do_kill(ch *Character, arguments string) {
 		target.Combat = combat
 	}
 
-	ch.Send(fmt.Sprintf("\r\n{GYou begin attacking %s{G!{x\r\n", target.getShortDescription(ch)))
-	target.Send(fmt.Sprintf("\r\n{G%s{G begins attacking you!{x\r\n", ch.getShortDescriptionUpper(target)))
+	ch.Send(fmt.Sprintf("\r\n{GYou begin attacking %s{G!{x\r\n", target.GetShortDescription(ch)))
+	target.Send(fmt.Sprintf("\r\n{G%s{G begins attacking you!{x\r\n", ch.GetShortDescriptionUpper(target)))
 
 	if ch.Room != nil && target.Room != nil && target.Room == ch.Room {
-		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 			character := iter.Value.(*Character)
 			if character != ch && character != target {
 				character.Send(fmt.Sprintf("{G%s{G begins attacking %s{G!{x\r\n",
-					ch.getShortDescriptionUpper(character),
-					target.getShortDescription(character)))
+					ch.GetShortDescriptionUpper(character),
+					target.GetShortDescription(character)))
 			}
 		}
 	}

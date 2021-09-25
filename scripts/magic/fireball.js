@@ -5,8 +5,24 @@
  * Authors:
  *     James Skarzinskas <james@jskarzin.org>
  */
-function spell_fireball(ch) {
-    ch.send("Fireball spell!\r\n");
+function spell_fireball(ch, args) {
+    const target = ch.findCharacterInRoom(args);
+
+    if(!target || !ch.room || !target.room || target.room.id !== ch.room.id) {
+        ch.send("Your target isn't here.\r\n");
+        return;
+    }
+
+    for(let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+        const rch = iter.value;
+
+        if(!rch.isEqual(target)) {
+            rch.send("{R" + target.getShortDescriptionUpper(rch) + " bursts into flames!{x\r\n");
+        }
+    }
+
+    target.send("{RYou are enveloped in flames!{x\r\n");
+    Golem.game.damage(ch, target, false, 20, Golem.Combat.DamageTypeExotic);
 }
 
 Golem.registerSpellHandler('fireball', spell_fireball);

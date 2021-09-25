@@ -54,7 +54,7 @@ func do_say(ch *Character, arguments string) {
 	output := buf.String()
 
 	if ch.Room != nil {
-		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 			rch := iter.Value.(*Character)
 
 			if rch != ch {
@@ -92,17 +92,17 @@ func do_quit(ch *Character, arguments string) {
 	ch.Save()
 
 	if ch.Room != nil {
-		for iter := ch.Room.characters.Head; iter != nil; iter = iter.Next {
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 			character := iter.Value.(*Character)
 
 			if character != ch {
-				character.Send(fmt.Sprintf("{W%s{W has quit the game.{x\r\n", ch.getShortDescriptionUpper(character)))
+				character.Send(fmt.Sprintf("{W%s{W has quit the game.{x\r\n", ch.GetShortDescriptionUpper(character)))
 			}
 		}
 
 		ch.Room.removeCharacter(ch)
 	}
 
-	ch.game.characters.Remove(ch)
+	ch.game.Characters.Remove(ch)
 	ch.client.conn.Close()
 }
