@@ -6,6 +6,11 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function spell_fireball(ch, args) {
+    if(!args.length) {
+        ch.send("This spell requires a target.\r\n");
+        return;
+    }
+
     const target = ch.findCharacterInRoom(args);
 
     if(!target || !ch.room || !target.room || target.room.id !== ch.room.id) {

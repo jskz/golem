@@ -6,7 +6,6 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function spell_armor(ch) {
-    ch.send("Armor spell!\r\n");
 }
 
 Golem.registerSpellHandler('armor', spell_armor);

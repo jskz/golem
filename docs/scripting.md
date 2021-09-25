@@ -10,6 +10,7 @@ The **Golem** global provides access to the following properties:
 | --- | --- | --- | ----------- | --- | 
 | Method | broadcast | `message`: **String** | Sends `message` to all connected and in-game players, without a filter. | ```Golem.broadcast("The sky is falling; the server is shutting down!\r\n");```
 | Method | registerPlayerCommand | `command`: **String**, `callback`: function(`ch`: **Character**, `args`: **String**) | Registers a player interpreter command `command` if a system default does not exist.  If a scripted `command` already exists, its callback is overriden.  The callback is executed with the calling player character handle and any command arguments unsplit. | `Golem.registerPlayerCommand('echo', function(ch, args) { ch.send("Your arguments: " + args + "\r\n"); });`
+| Method | registerSpellHandler | `spell`: **String**, `callback`: function(`ch`: **Character**, `args`: **String**) | Registers or overwrites the callback handler for a specific spell, if that spell is defined.  *This API will be subject to major change.* | `Golem.registerSpellHandler('cure light', function(ch, args) { Golem.game.damage(null, ch, false, -(~~(Math.random() * 5) + 5), Golem.Combat.DamageTypeExotic); ch.send("{WYou feel a little bit better.{x\r\n"); });`
 | Field | game: **Game** |  | Provides access to many global gameplay session values and utility methods.   Refer Game section. | `Golem.game.fights.head.value.participants` 
 
 ## Game
@@ -30,6 +31,7 @@ PCs and NPCs both share a common Character data type with the following properti
 | Type |  Name | Arguments | Description | Example
 | --- | --- | --- | --- | ---
 | Method | send | `message`: **String** | Sends `message` exclusively to this character instance. | ```ch.send("Hello world!\r\n");```
+| Method | findCharacterInRoom: **Character**? |  `name`: **String** | Tries to find a character by name in the same room as this character, may return **null**. | `const target = ch.findCharacterInRoom('monster');`
 
 ## Combat
 
