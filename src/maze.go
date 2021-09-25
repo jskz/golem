@@ -136,17 +136,22 @@ func (cell *MazeCell) setWall(wall bool) {
 }
 
 func (game *Game) doMazeTesting() {
-	maze := game.NewMaze(30, 30)
+	/* Generate a five-floor dungeon every runtime to test the algorithms */
+	dungeon := game.GenerateDungeon(5)
 
-	maze.generatePrimMaze()
-	maze.print()
-	maze.reify()
-
-	/* Hardcode an exit from limbo into the test maze */
+	/* Hardcode an exit from limbo into the first floor of the test dungeon */
 	limbo, err := game.LoadRoomIndex(RoomLimbo)
 	if err != nil {
 		log.Println(err)
 	}
+
+	if len(dungeon.floors) < 1 {
+		log.Printf("Failed to generate dungeons, cannot link to limbo; aborting maze testing.\r\n")
+		return
+	}
+
+	maze := dungeon.floors[0]
+	maze.print()
 
 	limbo.exit[DirectionDown] = &Exit{
 		id:        0,
@@ -213,6 +218,7 @@ func (maze *MazeGrid) reify() {
 						exit := &Exit{}
 						exit.to = to
 						exit.direction = uint(direction)
+
 						room.exit[exit.direction] = exit
 					}
 				}
@@ -231,6 +237,8 @@ func (maze *MazeGrid) print() {
 			} else {
 				if x == maze.entryX && y == maze.entryY {
 					output.WriteString("*")
+				} else if x == maze.endX && y == maze.endY {
+					output.WriteString("X")
 				} else {
 					output.WriteString(" ")
 				}
