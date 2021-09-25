@@ -146,6 +146,49 @@ func do_close(ch *Character, arguments string) {
 		ch.Send("Close what?\r\n")
 		return
 	}
+
+	args := strings.ToLower(arguments)
+	var exit *Exit = nil
+
+	if args == "n" || args == "north" {
+		exit = ch.Room.getExit(DirectionNorth)
+	} else if args == "e" || args == "east" {
+		exit = ch.Room.getExit(DirectionEast)
+	} else if args == "s" || args == "south" {
+		exit = ch.Room.getExit(DirectionSouth)
+	} else if args == "w" || args == "west" {
+		exit = ch.Room.getExit(DirectionWest)
+	} else if args == "u" || args == "up" {
+		exit = ch.Room.getExit(DirectionUp)
+	} else if args == "d" || args == "down" {
+		exit = ch.Room.getExit(DirectionDown)
+	} else {
+		ch.Send("Close what?\r\n")
+		return
+	}
+
+	if exit == nil {
+		ch.Send("You can't close that.\r\n")
+		return
+	}
+
+	if exit.flags&EXIT_CLOSED != 0 {
+		ch.Send("It's already closed'.\r\n")
+		return
+	}
+
+	exit.flags |= EXIT_CLOSED
+	exit.to.exit[ReverseDirection[exit.direction]].flags |= EXIT_CLOSED
+
+	ch.Send("You close the door.\r\n")
+
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+
+		if rch != ch {
+			rch.Send(fmt.Sprintf("{W%s{W closes the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.direction]))
+		}
+	}
 }
 
 func do_open(ch *Character, arguments string) {
