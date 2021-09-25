@@ -1,4 +1,4 @@
-# Roadmap
+# 1.0 Roadmap
 
 This will be a working document to track major feature development goals for each milestone release towards a 1.0 of a scope manageable with clearly defined chunks in my limited spare time.
 
@@ -50,6 +50,7 @@ This will be a working document to track major feature development goals for eac
 - [ ] Gameplay development and balancing: experience curves and enchantment tweaks for races and jobs
 - [ ] Extra commands and UX for gameplay: combat experience, leveling/healing/item consumption gameplay loop considerations: "is it fun to hack-and-slash and navigate this as a game?"
 - [ ] Gameplay and content development: Ensure that each player job choice has at least ten unique skills and/or spells available by the hero level (50)
+- [ ] Socials: flavour text commands for socializing in-room like grin, nod, laugh
 
 ## 0.9 Tying It All Together Milestones
 
