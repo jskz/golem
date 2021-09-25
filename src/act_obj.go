@@ -162,7 +162,7 @@ func do_take(ch *Character, arguments string) {
 		err := ch.attachObject(found)
 		if err != nil {
 			log.Println(err)
-			ch.Send("A strange force prevented you from taking that.\r\n")
+			ch.Send("A strange force prevents you from taking that.\r\n")
 			return
 		}
 
@@ -204,7 +204,7 @@ func do_give(ch *Character, arguments string) {
 		return
 	}
 
-	var target *Character = ch.findCharacterInRoom(args[1])
+	var target *Character = ch.FindCharacterInRoom(args[1])
 	if target == nil {
 		ch.Send("No such person here.\r\n")
 		return
@@ -218,7 +218,7 @@ func do_give(ch *Character, arguments string) {
 	if ch.flags&CHAR_IS_PLAYER != 0 {
 		err := ch.detachObject(found)
 		if err != nil {
-			ch.Send("A strange force prevented you from releasing your grip.\r\n")
+			ch.Send("A strange force prevents you from releasing your grip.\r\n")
 			return
 		}
 
@@ -228,7 +228,7 @@ func do_give(ch *Character, arguments string) {
 	if target.flags&CHAR_IS_PLAYER != 0 {
 		err := target.attachObject(found)
 		if err != nil {
-			ch.Send("A strange force prevented you from releasing your grip.\r\n")
+			ch.Send("A strange force prevents you from releasing your grip.\r\n")
 			return
 		}
 
@@ -268,7 +268,7 @@ func do_drop(ch *Character, arguments string) {
 	if ch.flags&CHAR_IS_PLAYER != 0 {
 		err := ch.detachObject(found)
 		if err != nil {
-			ch.Send("A strange force prevented you from releasing your grip.\r\n")
+			ch.Send("A strange force prevents you from releasing your grip.\r\n")
 			return
 		}
 

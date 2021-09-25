@@ -779,7 +779,7 @@ func (ch *Character) findObjectOnSelf(argument string) *ObjectInstance {
 	return nil
 }
 
-func (ch *Character) findCharacterInRoom(argument string) *Character {
+func (ch *Character) FindCharacterInRoom(argument string) *Character {
 	processed := strings.ToLower(argument)
 
 	if processed == "self" {

@@ -132,7 +132,7 @@ func do_follow(ch *Character, arguments string) {
 		return
 	}
 
-	var target *Character = ch.findCharacterInRoom(arguments)
+	var target *Character = ch.FindCharacterInRoom(arguments)
 
 	if target == nil {
 		ch.Send("No such target.  Follow who?\r\n")

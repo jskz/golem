@@ -225,7 +225,7 @@ func do_kill(ch *Character, arguments string) {
 		return
 	}
 
-	var target *Character = ch.findCharacterInRoom(arguments)
+	var target *Character = ch.FindCharacterInRoom(arguments)
 
 	if target == ch || target == nil {
 		ch.Send("No such target.  Attack who?\r\n")
