@@ -193,6 +193,8 @@ func do_open(ch *Character, arguments string) {
 	}
 
 	exit.flags &= ^EXIT_CLOSED
+	exit.to.exit[ReverseDirection[exit.direction]].flags &= ^EXIT_CLOSED
+
 	ch.Send("You open the door.\r\n")
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
