@@ -98,7 +98,7 @@ func (game *Game) ResetRoom(room *Room) {
 			for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 				rch := iter.Value.(*Character)
 
-				if rch.Id == reset.value0 {
+				if rch.flags&CHAR_IS_PLAYER == 0 && rch.Id == reset.value0 {
 					count++
 				}
 			}
