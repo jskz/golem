@@ -184,7 +184,13 @@ func do_look(ch *Character, arguments string) {
 	var lookCompassOutput map[uint]string = make(map[uint]string)
 	for k := uint(0); k < DirectionMax; k++ {
 		if ch.Room.exit[k] != nil {
-			lookCompassOutput[k] = fmt.Sprintf("{Y%s", ExitCompassName[k])
+			if ch.Room.exit[k].flags&EXIT_CLOSED != 0 && ch.Room.exit[k].flags&EXIT_LOCKED != 0 {
+				lookCompassOutput[k] = "{R#"
+			} else if ch.Room.exit[k].flags&EXIT_CLOSED != 0 {
+				lookCompassOutput[k] = "{M#"
+			} else {
+				lookCompassOutput[k] = fmt.Sprintf("{Y%s", ExitCompassName[k])
+			}
 		} else {
 			lookCompassOutput[k] = "{D-"
 		}
