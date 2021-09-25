@@ -54,7 +54,7 @@ func do_cast(ch *Character, arguments string) {
 		return
 	}
 
-	args := strings.Split(arguments, " ")
+	arg, arguments := oneArgument(arguments)
 
 	if ch.casting != nil {
 		ch.Send("You are already in the middle of casting another spell!\r\n")
@@ -65,7 +65,7 @@ func do_cast(ch *Character, arguments string) {
 		return
 	}
 
-	spell := args[0]
+	spell := arg
 	var found *Skill = ch.game.FindSkillByName(spell)
 	if found == nil || found.skillType != SkillTypeSpell {
 		ch.Send("You have no knowledge of that spell, try another.\r\n")
@@ -74,7 +74,7 @@ func do_cast(ch *Character, arguments string) {
 
 	ch.casting = &CastingContext{
 		casting:    found,
-		arguments:  strings.Join(args[1:], " "),
+		arguments:  arguments,
 		startedAt:  time.Now(),
 		complexity: 3,
 	}
