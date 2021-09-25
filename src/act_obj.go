@@ -140,6 +140,7 @@ func do_remove(ch *Character, arguments string) {
 
 func do_take(ch *Character, arguments string) {
 	var firstArgument string = ""
+	var secondArgument string = ""
 
 	if len(arguments) < 1 {
 		ch.Send("Take what?\r\n")
@@ -151,6 +152,46 @@ func do_take(ch *Character, arguments string) {
 	}
 
 	firstArgument, arguments = oneArgument(arguments)
+	secondArgument, _ = oneArgument(arguments)
+
+	if secondArgument != "" {
+		/* Trying to take the object "firstArgument" from within the object "secondArgument" */
+		var takingFrom *ObjectInstance = ch.findObjectInRoom(secondArgument)
+		if takingFrom == nil {
+			takingFrom = ch.findObjectOnSelf(secondArgument)
+			if takingFrom == nil {
+				ch.Send("No such item found.\r\n")
+				return
+			}
+		}
+
+		var takingObj *ObjectInstance = takingFrom.findObjectInSelf(ch, firstArgument)
+		if takingObj == nil {
+			ch.Send(fmt.Sprintf("No such item found in %s.\r\n", takingFrom.GetShortDescription(ch)))
+			return
+		}
+
+		err := ch.attachObject(takingObj)
+		if err != nil {
+			ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+			return
+		}
+
+		takingFrom.removeObject(takingObj)
+		ch.addObject(takingObj)
+
+		ch.Send(fmt.Sprintf("You take %s{x from %s{x.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+			rch := iter.Value.(*Character)
+
+			if rch != ch {
+				rch.Send(fmt.Sprintf("%s{x takes %s{x from %s{x.\r\n", ch.GetShortDescriptionUpper(rch), takingObj.GetShortDescription(rch), takingFrom.GetShortDescription(rch)))
+			}
+		}
+
+		return
+	}
+
 	var found *ObjectInstance = ch.findObjectInRoom(firstArgument)
 	if found == nil {
 		ch.Send("No such item found.\r\n")
