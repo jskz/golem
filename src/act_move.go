@@ -173,7 +173,7 @@ func do_close(ch *Character, arguments string) {
 	}
 
 	if exit.flags&EXIT_CLOSED != 0 {
-		ch.Send("It's already closed'.\r\n")
+		ch.Send("It's already closed.\r\n")
 		return
 	}
 
@@ -188,6 +188,11 @@ func do_close(ch *Character, arguments string) {
 		if rch != ch {
 			rch.Send(fmt.Sprintf("{W%s{W closes the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.direction]))
 		}
+	}
+
+	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
+		character := iter.Value.(*Character)
+		character.Send(fmt.Sprintf("{WThe %s door closes.{x\r\n", ExitName[ReverseDirection[exit.direction]]))
 	}
 }
 
@@ -246,6 +251,11 @@ func do_open(ch *Character, arguments string) {
 		if rch != ch {
 			rch.Send(fmt.Sprintf("{W%s{W opens the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.direction]))
 		}
+	}
+
+	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
+		character := iter.Value.(*Character)
+		character.Send(fmt.Sprintf("{WThe %s door closes.{x\r\n", ExitName[ReverseDirection[exit.direction]]))
 	}
 }
 
