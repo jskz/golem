@@ -47,6 +47,18 @@ func init() {
 	WearLocations[WearLocationHeld] = "<held>                "
 }
 
+func (ch *Character) examineCharacter(other *Character) {
+	if other.flags&CHAR_IS_PLAYER == 0 {
+		ch.Send(fmt.Sprintf("{G%s{x\r\n", other.description))
+	}
+
+	if other.inventory.Count > 0 {
+		ch.Send(fmt.Sprintf("%s is carrying the following items:\r\n", other.GetShortDescriptionUpper(ch)))
+		ch.showObjectList(other.inventory)
+		return
+	}
+}
+
 func (ch *Character) examineObject(obj *ObjectInstance) {
 	var output strings.Builder
 

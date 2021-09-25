@@ -179,6 +179,11 @@ func do_look(ch *Character, arguments string) {
 			ch.examineObject(obj)
 			return
 		}
+
+		var foundCh *Character = ch.FindCharacterInRoom(arguments)
+		if foundCh != nil {
+			ch.examineCharacter(foundCh)
+		}
 	}
 
 	var lookCompassOutput map[uint]string = make(map[uint]string)
