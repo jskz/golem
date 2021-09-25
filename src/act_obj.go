@@ -284,9 +284,9 @@ func do_give(ch *Character, arguments string) {
 			ch.Send("A strange force prevents you from releasing your grip.\r\n")
 			return
 		}
-
-		target.addObject(found)
 	}
+
+	target.addObject(found)
 
 	ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", found.GetShortDescription(ch), target.GetShortDescription(ch)))
 	target.Send(fmt.Sprintf("%s{x gives you %s{x.\r\n", ch.GetShortDescriptionUpper(target), found.GetShortDescription(target)))
