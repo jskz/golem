@@ -152,13 +152,13 @@ func (game *Game) doMazeTesting() {
 		id:        0,
 		direction: DirectionDown,
 		to:        maze.grid[maze.entryX][maze.entryY].room,
-		flags:     0,
+		flags:     EXIT_CLOSED,
 	}
 	maze.grid[maze.entryX][maze.entryY].room.exit[DirectionUp] = &Exit{
 		id:        0,
 		direction: DirectionUp,
 		to:        limbo,
-		flags:     0,
+		flags:     EXIT_CLOSED,
 	}
 }
 
