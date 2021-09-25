@@ -14,8 +14,10 @@ package main
  * floor, overarching theme, etc.
  */
 type Dungeon struct {
-	game   *Game
-	floors []*MazeGrid
+	game     *Game
+	floors   []*MazeGrid
+	entrance *Room
+	abyss    *Room
 }
 
 func (game *Game) GenerateDungeon(floorCount int) *Dungeon {
@@ -26,8 +28,32 @@ func (game *Game) GenerateDungeon(floorCount int) *Dungeon {
 	const dungeonWidth = 30
 	const dungeonHeight = 30
 
+	var previousFloorExit *Room = nil
+
 	for i := 0; i < floorCount; i++ {
 		floor := game.NewMaze(dungeonWidth, dungeonHeight)
+		floor.reify() /* Ensure the floor's rooms exist before we start populating them */
+
+		if previousFloorExit != nil {
+			/* Dig a two-way closed door exit between this room and the "end" of the previous floor */
+			previousFloorExit.exit[DirectionDown] = &Exit{
+				id:        0,
+				direction: DirectionDown,
+				to:        floor.grid[floor.entryX][floor.entryY].room,
+				flags:     EXIT_IS_DOOR | EXIT_CLOSED,
+			}
+
+			floor.grid[floor.entryX][floor.entryY].room.exit[DirectionUp] = &Exit{
+				id:        0,
+				direction: DirectionDown,
+				to:        floor.grid[floor.entryX][floor.entryY].room,
+				flags:     EXIT_IS_DOOR | EXIT_CLOSED,
+			}
+		}
+
+		/* Find a sufficiently expensive path from the floor's entry point to the entry point of the next floor */
+
+		/* previousFloorExit = ... */
 
 		dungeon.floors = append(dungeon.floors, floor)
 	}
