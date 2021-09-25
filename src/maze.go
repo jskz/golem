@@ -185,7 +185,7 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 func (maze *MazeGrid) reify() {
 	for y := 0; y < maze.height; y++ {
 		for x := 0; x < maze.width; x++ {
-			if !maze.grid[x][y].wall {
+			if !maze.grid[x][y].wall && maze.grid[x][y].room != nil {
 				room := maze.createRoom(x, y)
 
 				for direction := DirectionNorth; direction < DirectionUp; direction++ {
