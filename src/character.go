@@ -741,6 +741,27 @@ func (ch *Character) removeObject(obj *ObjectInstance) {
 	obj.carriedBy = nil
 }
 
+func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *ObjectInstance {
+	processed := strings.ToLower(argument)
+
+	if ch.Room == nil || len(processed) < 1 || obj.contents == nil || obj.contents.Count < 1 {
+		return nil
+	}
+
+	for iter := obj.contents.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		nameParts := strings.Split(obj.name, " ")
+		for _, part := range nameParts {
+			if strings.Compare(strings.ToLower(part), processed) == 0 {
+				return obj
+			}
+		}
+	}
+
+	return nil
+}
+
 func (ch *Character) findObjectInRoom(argument string) *ObjectInstance {
 	processed := strings.ToLower(argument)
 
