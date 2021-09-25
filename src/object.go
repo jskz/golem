@@ -162,6 +162,14 @@ func (container *ObjectInstance) addObject(obj *ObjectInstance) {
 	obj.inRoom = nil
 }
 
+func (container *ObjectInstance) removeObject(obj *ObjectInstance) {
+	container.contents.Remove(obj)
+
+	obj.inside = nil
+	obj.carriedBy = nil
+	obj.inRoom = nil
+}
+
 func (ch *Character) showObjectList(objects *LinkedList) {
 	var output strings.Builder
 
