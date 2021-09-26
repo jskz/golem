@@ -12,8 +12,47 @@ import (
 	"strings"
 )
 
+var TerrainTable map[int]*Terrain
 var Jobs *LinkedList
 var Races *LinkedList
+
+func (game *Game) LoadTerrain() {
+	log.Printf("Loading terrain types.\r\n")
+
+	TerrainTable = make(map[int]*Terrain)
+
+	rows, err := game.db.Query(`
+		SELECT
+			id,
+			name,
+			map_glyph,
+			movement_cost,
+			flags
+		FROM
+			terrain
+		WHERE
+			deleted_at IS NULL
+	`)
+	if err != nil {
+		return
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		terrain := &Terrain{}
+
+		err := rows.Scan(&terrain.id, &terrain.name, &terrain.mapGlyph, terrain.movementCost, terrain.flags)
+		if err != nil {
+			log.Printf("Unable to scan terrain: %v.\r\n", err)
+			continue
+		}
+
+		TerrainTable[terrain.id] = terrain
+	}
+
+	log.Printf("Loaded %d terrain types from database.\r\n", len(TerrainTable))
+}
 
 func (game *Game) LoadRaceTable() {
 	log.Printf("Loading races.\r\n")

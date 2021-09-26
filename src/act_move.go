@@ -56,6 +56,20 @@ const (
 	EXIT_HIDDEN  = 1 << 3
 )
 
+const (
+	TERRAIN_IMPASSABLE    = 1
+	TERRAIN_SHALLOW_WATER = 1 << 1
+	TERRAIN_DEEP_WATER    = 1 << 2
+)
+
+type Terrain struct {
+	id           int
+	name         string
+	mapGlyph     string
+	movementCost int
+	flags        int
+}
+
 type Exit struct {
 	id        uint
 	direction uint

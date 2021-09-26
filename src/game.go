@@ -99,6 +99,7 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
+	game.LoadTerrain()
 	game.LoadRaceTable()
 	game.LoadJobTable()
 

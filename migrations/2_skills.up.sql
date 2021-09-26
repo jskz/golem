@@ -3,6 +3,10 @@ CREATE TABLE skills (
 
     `name` VARCHAR(255) NOT NULL UNIQUE,
     `type` ENUM('skill', 'spell', 'passive'),
+    
+    /* Timestamps */
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id)
 );
@@ -16,6 +20,10 @@ CREATE TABLE job_skill (
 
     `complexity` BIGINT NOT NULL,
     `cost` BIGINT NOT NULL,
+    
+    /* Timestamps */
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id),
     FOREIGN KEY (job_id) REFERENCES jobs(id),
@@ -29,6 +37,10 @@ CREATE TABLE pc_skill_proficiency (
     `skill_id` BIGINT NOT NULL,
 
     `proficiency` INT NOT NULL,
+
+    /* Timestamps */
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id),
     FOREIGN KEY (player_character_id) REFERENCES player_characters(id),
