@@ -16,22 +16,21 @@ import "log"
  * floor, overarching theme, etc.
  */
 type Dungeon struct {
-	game     *Game
-	floors   []*MazeGrid
-	entrance *Room
-	abyss    *Room
+	game     *Game       `json:"game"`
+	floors   []*MazeGrid `json:"floors"`
+	entrance *Room       `json:"entrance"`
+	abyss    *Room       `json:"abyss"`
 }
 
-func (game *Game) GenerateDungeon(floorCount int) *Dungeon {
+func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeight int) *Dungeon {
 	dungeon := &Dungeon{game: game}
 	dungeon.floors = make([]*MazeGrid, 0)
 
-	/* Do not have to be constants */
-	const dungeonWidth = 30
-	const dungeonHeight = 30
+	if floorCount < 1 {
+		return nil
+	}
 
 	var previousFloorExit *Room = nil
-
 	log.Printf("Generating a %d floor dungeon of dimensions %dx%d\r\n", floorCount, dungeonWidth, dungeonHeight)
 
 	for i := 0; i < floorCount; i++ {
@@ -80,6 +79,9 @@ func (game *Game) GenerateDungeon(floorCount int) *Dungeon {
 						floor.endY = y
 
 						previousFloorExit = floor.grid[x][y].room
+
+						/* The "abyss" is the deepest room in the dungeon's deepest floor */
+						dungeon.abyss = previousFloorExit
 					}
 				}
 			}
@@ -94,5 +96,6 @@ func (game *Game) GenerateDungeon(floorCount int) *Dungeon {
 		dungeon.floors = append(dungeon.floors, floor)
 	}
 
+	dungeon.entrance = dungeon.floors[0].grid[dungeon.floors[0].entryX][dungeon.floors[0].entryY].room
 	return dungeon
 }

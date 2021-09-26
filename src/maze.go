@@ -96,8 +96,8 @@ func (cell *MazeCell) getAdjacentCells(wall bool, distance int) *LinkedList {
 
 /* Dig a maze using Prim's algorithm */
 func (maze *MazeGrid) generatePrimMaze() {
-	maze.entryX = rand.Intn(maze.width - 1)
-	maze.entryY = rand.Intn(maze.height - 1)
+	maze.entryX = rand.Intn(maze.width-2) + 1
+	maze.entryY = rand.Intn(maze.height-2) + 1
 
 	var entryPoint *MazeCell = maze.grid[maze.entryX][maze.entryY]
 
@@ -137,7 +137,7 @@ func (cell *MazeCell) setWall(wall bool) {
 
 func (game *Game) doMazeTesting() {
 	/* Generate a five-floor dungeon every runtime to test the algorithms */
-	dungeon := game.GenerateDungeon(5)
+	dungeon := game.GenerateDungeon(5, 30, 30)
 
 	/* Hardcode an exit from limbo into the first floor of the test dungeon */
 	limbo, err := game.LoadRoomIndex(RoomLimbo)
@@ -151,7 +151,7 @@ func (game *Game) doMazeTesting() {
 	}
 
 	maze := dungeon.floors[0]
-	maze.print()
+	// maze.print()
 
 	limbo.exit[DirectionDown] = &Exit{
 		id:        0,
