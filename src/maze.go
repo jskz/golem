@@ -8,7 +8,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"strings"
@@ -184,7 +183,6 @@ func (game *Game) doMazeTesting() {
 			flags:     EXIT_IS_DOOR | EXIT_CLOSED,
 		}
 	}()
-
 }
 
 func (maze *MazeGrid) createRoom(x int, y int) *Room {
@@ -247,18 +245,29 @@ func (maze *MazeGrid) reify() {
 	}
 }
 
-func (maze *MazeGrid) print() {
+func (ch *Character) CreateMazeMap() string {
 	var output strings.Builder
+
+	if ch.Room == nil || !ch.Room.virtual || ch.Room.cell == nil {
+		return ""
+	}
+
+	var maze *MazeGrid = ch.Room.cell.grid
+	if maze == nil {
+		return ""
+	}
 
 	for y := 0; y < maze.height; y++ {
 		for x := 0; x < maze.width; x++ {
 			if maze.grid[x][y].wall {
 				output.WriteString("#")
 			} else {
-				if x == maze.entryX && y == maze.entryY {
-					output.WriteString("*")
+				if x == ch.Room.cell.x && y == ch.Room.cell.y {
+					output.WriteString("@")
+				} else if x == maze.entryX && y == maze.entryY {
+					output.WriteString("^")
 				} else if x == maze.endX && y == maze.endY {
-					output.WriteString("X")
+					output.WriteString("v")
 				} else {
 					output.WriteString(" ")
 				}
@@ -268,5 +277,5 @@ func (maze *MazeGrid) print() {
 		output.WriteString("\r\n")
 	}
 
-	fmt.Println(output.String())
+	return output.String()
 }
