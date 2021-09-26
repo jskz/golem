@@ -12,6 +12,7 @@ import (
 	"log"
 	"math/rand"
 	"strings"
+	"sync"
 )
 
 type MazeCell struct {
@@ -136,35 +137,54 @@ func (cell *MazeCell) setWall(wall bool) {
 }
 
 func (game *Game) doMazeTesting() {
-	/* Generate a five-floor dungeon every runtime to test the algorithms */
-	dungeon := game.GenerateDungeon(5, 30, 30)
-
 	/* Hardcode an exit from limbo into the first floor of the test dungeon */
 	limbo, err := game.LoadRoomIndex(RoomLimbo)
 	if err != nil {
 		log.Println(err)
 	}
 
-	if len(dungeon.floors) < 1 {
-		log.Printf("Failed to generate dungeons, cannot link to limbo; aborting maze testing.\r\n")
-		return
-	}
-
-	maze := dungeon.floors[0]
-	// maze.print()
-
+	/* Exit will be self-referential and locked until the maze is done generating */
 	limbo.exit[DirectionDown] = &Exit{
 		id:        0,
 		direction: DirectionDown,
-		to:        maze.grid[maze.entryX][maze.entryY].room,
-		flags:     EXIT_IS_DOOR | EXIT_CLOSED,
-	}
-	maze.grid[maze.entryX][maze.entryY].room.exit[DirectionUp] = &Exit{
-		id:        0,
-		direction: DirectionUp,
 		to:        limbo,
-		flags:     EXIT_IS_DOOR | EXIT_CLOSED,
+		flags:     EXIT_IS_DOOR | EXIT_CLOSED | EXIT_LOCKED,
 	}
+
+	go func() {
+		var dungeon *Dungeon
+
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+
+		go func() {
+			/* Generate a five-floor dungeon every runtime to test the algorithms */
+			dungeon = game.GenerateDungeon(5, 30, 30)
+
+			wg.Done()
+		}()
+
+		wg.Wait()
+
+		if dungeon == nil || len(dungeon.floors) < 1 {
+			log.Printf("Dungeon generation attempt aborting.\r\n")
+			return
+		}
+
+		maze := dungeon.floors[0]
+
+		/* Unlock the entrance */
+		limbo.exit[DirectionDown].to = maze.grid[maze.entryX][maze.entryY].room
+		limbo.exit[DirectionDown].flags &= ^EXIT_LOCKED
+
+		maze.grid[maze.entryX][maze.entryY].room.exit[DirectionUp] = &Exit{
+			id:        0,
+			direction: DirectionUp,
+			to:        limbo,
+			flags:     EXIT_IS_DOOR | EXIT_CLOSED,
+		}
+	}()
+
 }
 
 func (maze *MazeGrid) createRoom(x int, y int) *Room {
