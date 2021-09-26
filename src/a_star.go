@@ -128,7 +128,7 @@ func (maze *MazeGrid) findPathAStar(start *MazeCell, end *MazeCell) []*MazeAStar
 					current = current.previous
 				}
 			} else {
-				neighbours := currentNode.cell.getAdjacentCells(false, 1)
+				neighbours := currentNode.cell.getAdjacentCells(false, 1, false)
 				for iter := neighbours.Head; iter != nil; iter = iter.Next {
 					neighbour := iter.Value.(*MazeCell)
 

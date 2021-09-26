@@ -30,10 +30,9 @@ func (game *Game) LoadTerrain() {
 			flags
 		FROM
 			terrain
-		WHERE
-			deleted_at IS NULL
 	`)
 	if err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -42,7 +41,7 @@ func (game *Game) LoadTerrain() {
 	for rows.Next() {
 		terrain := &Terrain{}
 
-		err := rows.Scan(&terrain.id, &terrain.name, &terrain.mapGlyph, terrain.movementCost, terrain.flags)
+		err := rows.Scan(&terrain.id, &terrain.name, &terrain.mapGlyph, &terrain.movementCost, &terrain.flags)
 		if err != nil {
 			log.Printf("Unable to scan terrain: %v.\r\n", err)
 			continue

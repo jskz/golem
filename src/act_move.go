@@ -13,13 +13,17 @@ import (
 )
 
 const (
-	DirectionNorth = 0
-	DirectionEast  = 1
-	DirectionSouth = 2
-	DirectionWest  = 3
-	DirectionUp    = 4
-	DirectionDown  = 5
-	DirectionMax   = 6
+	DirectionNorth     = 0
+	DirectionEast      = 1
+	DirectionSouth     = 2
+	DirectionWest      = 3
+	DirectionUp        = 4
+	DirectionDown      = 5
+	DirectionNortheast = 6
+	DirectionSoutheast = 7
+	DirectionSouthwest = 8
+	DirectionNorthwest = 9
+	DirectionMax       = 10
 )
 
 var ExitName = map[uint]string{
@@ -60,6 +64,14 @@ const (
 	TERRAIN_IMPASSABLE    = 1
 	TERRAIN_SHALLOW_WATER = 1 << 1
 	TERRAIN_DEEP_WATER    = 1 << 2
+)
+
+const (
+	TerrainTypeCaveWall      = 1
+	TerrainTypeCaveDeepWall1 = 2
+	TerrainTypeCaveDeepWall2 = 3
+	TerrainTypeCaveDeepWall3 = 4
+	TerrainTypeCaveTunnel    = 5
 )
 
 type Terrain struct {
