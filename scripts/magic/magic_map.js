@@ -8,12 +8,15 @@
 function spell_magic_map(ch, args) {
     const map = ch.createMazeMap();
     const mapLines = map.split(/\r\n|\r|\n/);
-    const mapWidthRequired = mapLines[0].length;
+    const firstMapLineWithoutColourCodes = mapLines[0].replace(/{\w/gi, '');
+    const mapWidthRequired = firstMapLineWithoutColourCodes.length;
+
+    ch.send("{MA luminous ethereal scroll appears in front of you!{x\r\n\r\n")
     
     let output = "{Y  ,-" + "-".repeat(mapWidthRequired) + "-.\r\n"
         + " (_\\ " + " ".repeat(mapWidthRequired) + " \\\r\n"
         + mapLines
-            .filter(line => line.length === mapWidthRequired)
+            .filter(line => line.replace(/{\w/gi, '').length === mapWidthRequired)
             .map((line) => "   |{x " + line + " {Y|\r\n")
             .join("")
         + "  _| " + " ".repeat(mapWidthRequired) + " |\r\n"

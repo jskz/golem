@@ -851,7 +851,7 @@ func NewCharacter() *Character {
 	character.race = nil
 	character.Room = nil
 	character.practices = 0
-	character.pageSize = 4096
+	character.pageSize = 13684
 	character.position = PositionDead
 	character.pages = make([][]byte, 1)
 	character.pages[0] = make([]byte, character.pageSize)

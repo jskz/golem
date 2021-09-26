@@ -260,16 +260,16 @@ func (ch *Character) CreateMazeMap() string {
 	for y := 0; y < maze.height; y++ {
 		for x := 0; x < maze.width; x++ {
 			if maze.grid[x][y].wall {
-				output.WriteString("#")
+				output.WriteString("{D#")
 			} else {
 				if x == ch.Room.cell.x && y == ch.Room.cell.y {
-					output.WriteString("@")
+					output.WriteString("{Y@")
 				} else if x == maze.entryX && y == maze.entryY {
-					output.WriteString("^")
+					output.WriteString("{M^")
 				} else if x == maze.endX && y == maze.endY {
-					output.WriteString("v")
+					output.WriteString("{Mv")
 				} else {
-					output.WriteString(" ")
+					output.WriteString("{c.")
 				}
 			}
 		}
