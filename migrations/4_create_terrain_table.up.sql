@@ -15,6 +15,8 @@ CREATE TABLE terrain (
 
 INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (1, 'cave-wall', '{D#', -1, 0);
 INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (2, 'cave-deep-wall-1', ' ', -1, 0);
-INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (3, 'cave-deep-wall-2', '{yx', -1, 0);
-INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (4, 'cave-deep-wall-3', '{y=', -1, 0);
-INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (5, 'cave-tunnel', '{c.', 2, 0);
+INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (3, 'cave-deep-wall-2', '{D:', -1, 0);
+INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (4, 'cave-deep-wall-3', '{y.', -1, 0);
+INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (5, 'cave-deep-wall-4', '{D.', -1, 0);
+INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (6, 'cave-deep-wall-5', '{y:', -1, 0);
+INSERT INTO terrain(id, name, map_glyph, movement_cost, flags) VALUES (7, 'cave-tunnel', '{c.', 2, 0);

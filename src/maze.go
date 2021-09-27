@@ -56,6 +56,10 @@ func (game *Game) NewMaze(width int, height int) *MazeGrid {
 				wall:    true,
 				terrain: TerrainTypeCaveDeepWall1,
 			}
+
+			if rand.Intn(10) > 7 && x >= 1 && y >= 1 && x <= maze.width-1 && y <= maze.height-1 {
+				maze.grid[x][y].terrain = TerrainTypeCaveDeepWall1 + rand.Intn(4)
+			}
 		}
 	}
 
@@ -127,8 +131,8 @@ func (cell *MazeCell) setAdjacentCellsTerrainType(wall bool, distance int, terra
 
 /* Dig a maze using Prim's algorithm */
 func (maze *MazeGrid) generatePrimMaze() {
-	maze.entryX = rand.Intn(maze.width-2) + 1
-	maze.entryY = rand.Intn(maze.height-2) + 1
+	maze.entryX = rand.Intn(maze.width-3) + 2
+	maze.entryY = rand.Intn(maze.height-3) + 2
 
 	var entryPoint *MazeCell = maze.grid[maze.entryX][maze.entryY]
 
@@ -198,7 +202,7 @@ func (game *Game) doMazeTesting() {
 
 		go func() {
 			/* Generate a five-floor dungeon every runtime to test the algorithms */
-			dungeon = game.GenerateDungeon(4, 31, 31)
+			dungeon = game.GenerateDungeon(4, 32, 32)
 
 			wg.Done()
 		}()

@@ -71,7 +71,9 @@ const (
 	TerrainTypeCaveDeepWall1 = 2
 	TerrainTypeCaveDeepWall2 = 3
 	TerrainTypeCaveDeepWall3 = 4
-	TerrainTypeCaveTunnel    = 5
+	TerrainTypeCaveDeepWall4 = 5
+	TerrainTypeCaveDeepWall5 = 6
+	TerrainTypeCaveTunnel    = 7
 )
 
 type Terrain struct {
