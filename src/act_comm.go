@@ -83,7 +83,11 @@ func do_ooc(ch *Character, arguments string) {
 }
 
 func do_save(ch *Character, arguments string) {
-	ch.Save()
+	result := ch.Save()
+	if !result {
+		ch.Send("A strange force prevents you from saving.\r\n")
+		return
+	}
 
 	ch.Send("Saved.\r\n")
 }
