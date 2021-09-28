@@ -4,7 +4,7 @@ This will be a working document to track major feature development goals for eac
 
 ## 0.1 Milestones
 
-- [ ] Simplify the system versus local configuration paths
+- [x] Simplify the system versus local configuration paths
 - [x] README: Refactor requirements and setup sections as multi-section and qualify "Docker-based Setup" subsection
 - [x] Serialization for persistent lists of object instances: upserting object instances and syncing with detach the appropriate relation
 - [ ] If output overflows, instead of gameplay prompt, page to a reasonable (configurable, default telnet window size?) output limit and append a next/previous and cursor read % prompt
