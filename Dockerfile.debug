@@ -13,11 +13,9 @@ RUN go mod download
 
 COPY migrations /migrations
 COPY src/*.go ./
-COPY etc/greeting.ansi /greeting.ansi
-COPY etc/motd.ansi /motd.ansi
-COPY etc/death.ansi /death.ansi
+COPY etc /app/etc
 
-RUN go build -gcflags="all=-N -l" -o /golem
+RUN go build -gcflags="all=-N -l" -o /app/golem
 
 VOLUME /etc
 VOLUME /scripts

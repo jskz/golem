@@ -9,15 +9,13 @@ RUN go mod download
 
 COPY migrations /migrations
 COPY src/*.go ./
-COPY etc/greeting.ansi /greeting.ansi
-COPY etc/motd.ansi /motd.ansi
-COPY etc/death.ansi /death.ansi
+COPY etc /app/etc
 
-RUN go build -o /golem
+RUN go build -o /app/golem
 
 VOLUME /etc
 VOLUME /scripts
 
 EXPOSE 8080
 
-CMD [ "/golem" ]
+CMD [ "./golem" ]

@@ -13,9 +13,6 @@ import (
 	"log"
 )
 
-const SystemDefaultConfigPath = "/etc/golem/config.json"
-const ConfigPath = "etc/config.json"
-
 var Config *AppConfiguration
 
 /* Structure corresponding to JSON configuration file */
@@ -49,19 +46,8 @@ func init() {
 		},
 	}
 
-	/* Attempt read of system default JSON file */
-	configBytes, err := ioutil.ReadFile(SystemDefaultConfigPath)
-	if err != nil {
-		log.Printf("Warning: failed to read system config file: %v.\r\n", err)
-	} else {
-		err = json.Unmarshal(configBytes, Config)
-		if err != nil {
-			panic("Malformed config file.")
-		}
-	}
-
 	/* Attempt read of config JSON file */
-	configBytes, err = ioutil.ReadFile(ConfigPath)
+	configBytes, err := ioutil.ReadFile("etc/config.json")
 	if err != nil {
 		log.Printf("Warning: failed to read local config file: %v.\r\n", err)
 	} else {
@@ -72,21 +58,21 @@ func init() {
 	}
 
 	/* Read greeting */
-	Config.greeting, err = ioutil.ReadFile("/greeting.ansi")
+	Config.greeting, err = ioutil.ReadFile("etc/greeting.ansi")
 	if err != nil {
 		log.Printf("Warning: failed to read greeting ANSI file: %v.\r\n", err)
 		Config.greeting = []byte(string(""))
 	}
 
 	/* Read MOTD */
-	Config.motd, err = ioutil.ReadFile("/motd.ansi")
+	Config.motd, err = ioutil.ReadFile("etc/motd.ansi")
 	if err != nil {
 		log.Printf("Warning: failed to read MOTD ANSI file: %v.\r\n", err)
 		Config.motd = []byte(string(""))
 	}
 
 	/* Read death ANSI */
-	Config.death, err = ioutil.ReadFile("/death.ansi")
+	Config.death, err = ioutil.ReadFile("etc/death.ansi")
 	if err != nil {
 		log.Printf("Warning: failed to read death ANSI file: %v.\r\n", err)
 		Config.death = []byte(string(""))
