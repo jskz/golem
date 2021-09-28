@@ -37,7 +37,7 @@ This will be a working document to track major feature development goals for eac
 ## 0.6 Plane Development Milestones
 
 - [ ] Create a new model `plane` representing a 2D array by dimensions and a blob of integer terrain pivots.  The data structure for a plane may evolve towards a quadtree but until post-1.0 will remain simple
-- [ ] Create a new model `terrain` to store information about unique terrain types: name, a glyph used to represent that terrain type in a 2D map, movement cost to traverse a unit of this terrain type, etc.
+- [x] Create a new model `terrain` to store information about unique terrain types: name, a glyph used to represent that terrain type in a 2D map, movement cost to traverse a unit of this terrain type, etc.
 - [ ] Allow players to navigate a plane-based virtual room, like maze-based virtual rooms, with an ANSI art representation of the nearby landscape
 - [ ] Allow for a mechanism by which each app startup will generate (preset or random?) varied `Dungeon` instances and then create virtual exits between chosen planes
 
