@@ -169,7 +169,7 @@ func (game *Game) Run() {
 		case <-processOutputTicker.C:
 			for client := range game.clients {
 				if client.character != nil {
-					if client.character.outputCursor > 0 {
+					if client.character.outputHead > 0 {
 						client.displayPrompt()
 					}
 

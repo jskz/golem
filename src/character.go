@@ -8,6 +8,8 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"database/sql"
 	"fmt"
@@ -95,6 +97,7 @@ type Character struct {
 
 	output       []byte
 	outputCursor int
+	outputHead   int
 
 	Room      *Room           `json:"room"`
 	Combat    *Combat         `json:"combat"`
@@ -565,6 +568,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 
 func (ch *Character) clearOutputBuffer() {
 	ch.output = make([]byte, 32768)
+	ch.outputHead = 0
 	ch.outputCursor = 0
 }
 
@@ -573,7 +577,46 @@ func (ch *Character) flushOutput() {
 		recover()
 	}()
 
-	ch.client.send <- ch.output
+	var page bytes.Buffer
+	var lines []string
+
+	scan := bufio.NewScanner(strings.NewReader(string(ch.output)))
+	scan.Split(func(data []byte, eof bool) (advance int, token []byte, err error) {
+		if eof && len(data) == 0 {
+			return 0, nil, nil
+		}
+
+		if i := bytes.IndexByte(data, '\n'); i >= 0 {
+			if len(data) > 0 && data[len(data)-1] == '\r' {
+				return i + 1, data[0 : len(data)-1], nil
+			}
+
+			return i + 1, data[0:i], nil
+		}
+
+		if eof {
+			if len(data) > 0 && data[len(data)-1] == '\r' {
+				return len(data), data[:len(data)-1], nil
+			}
+
+			return len(data), data, nil
+		}
+
+		return 0, nil, nil
+	})
+
+	for scan.Scan() {
+		lines = append(lines, scan.Text())
+	}
+
+	for _, p := range lines {
+		page.Write([]byte(p))
+		page.WriteString("\r\n")
+	}
+
+	ch.client.send <- page.Bytes()
+	ch.outputHead = 0
+	ch.outputCursor = 0
 	ch.clearOutputBuffer()
 }
 
@@ -630,8 +673,8 @@ func (ch *Character) Write(data []byte) (n int, err error) {
 		return len(data), nil
 	}
 
-	copy(ch.output[ch.outputCursor:ch.outputCursor+len(data)], data[:])
-	ch.outputCursor = ch.outputCursor + len(data)
+	copy(ch.output[ch.outputHead:ch.outputHead+len(data)], data[:])
+	ch.outputHead = ch.outputHead + len(data)
 
 	return len(data), nil
 }

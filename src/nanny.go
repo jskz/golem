@@ -28,9 +28,11 @@ func (client *Client) displayPrompt() {
 
 	var prompt bytes.Buffer
 
-	/*
-	 * TODO: if the character's paging cursor is in a page less than the top page, instead display pager info.
-	 */
+	if client.character.outputCursor > 0 && client.character.outputCursor < client.character.outputHead {
+		client.send <- []byte("[ Press return to continue ]\r\n")
+		return
+	}
+
 	healthPercentage := client.character.health * 100 / client.character.maxHealth
 	manaPercentage := client.character.mana * 100 / client.character.maxMana
 	staminaPercentage := client.character.stamina * 100 / client.character.maxStamina
