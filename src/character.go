@@ -579,6 +579,7 @@ func (ch *Character) flushOutput() {
 
 	var page bytes.Buffer
 	var lines []string
+	var maxLines int = 10 /* only for dev, increase once finished! */
 
 	scan := bufio.NewScanner(strings.NewReader(string(ch.output)))
 	scan.Split(func(data []byte, eof bool) (advance int, token []byte, err error) {
@@ -609,14 +610,22 @@ func (ch *Character) flushOutput() {
 		lines = append(lines, scan.Text())
 	}
 
-	for _, p := range lines {
-		page.Write([]byte(p))
-		page.WriteString("\r\n")
+	for index := ch.outputCursor; index < len(lines); index++ {
+		page.Write([]byte(lines[index]))
+		page.Write([]byte("\r\n"))
+
+		if index-ch.outputCursor > maxLines {
+			ch.client.send <- page.Bytes()
+			ch.outputCursor = index
+			return
+		}
 	}
 
-	ch.client.send <- page.Bytes()
-	ch.outputHead = 0
-	ch.outputCursor = 0
+	buf := page.Bytes()
+	if buf[0] != 0 {
+		ch.client.send <- page.Bytes()
+	}
+
 	ch.clearOutputBuffer()
 }
 
