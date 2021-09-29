@@ -10,7 +10,6 @@ package main
 import (
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -94,9 +93,8 @@ type Character struct {
 
 	equipment []*ObjectInstance
 
-	pages      [][]byte
-	pageSize   int
-	pageCursor int
+	output       []byte
+	outputCursor int
 
 	Room      *Room           `json:"room"`
 	Combat    *Combat         `json:"combat"`
@@ -566,9 +564,8 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 }
 
 func (ch *Character) clearOutputBuffer() {
-	ch.pages = make([][]byte, 1)
-	ch.pages[0] = make([]byte, ch.pageSize)
-	ch.pageCursor = 0
+	ch.output = make([]byte, 32768)
+	ch.outputCursor = 0
 }
 
 func (ch *Character) flushOutput() {
@@ -576,10 +573,7 @@ func (ch *Character) flushOutput() {
 		recover()
 	}()
 
-	for _, page := range ch.pages {
-		ch.client.send <- page
-	}
-
+	ch.client.send <- ch.output
 	ch.clearOutputBuffer()
 }
 
@@ -636,16 +630,8 @@ func (ch *Character) Write(data []byte) (n int, err error) {
 		return len(data), nil
 	}
 
-	if len(data)+ch.pageCursor > ch.pageSize {
-		return 0, errors.New("overflowed client buffer")
-	}
-
-	/*
-	 * This will need to be rewritten; we need to divide the data length by the page size, then
-	 * drain the data by chunks.  This is currently only "coincidentally working."
-	 */
-	copy(ch.pages[ch.pageCursor/ch.pageSize][ch.pageCursor:ch.pageCursor+len(data)], data[:])
-	ch.pageCursor = ch.pageCursor + len(data)
+	copy(ch.output[ch.outputCursor:ch.outputCursor+len(data)], data[:])
+	ch.outputCursor = ch.outputCursor + len(data)
 
 	return len(data), nil
 }
@@ -851,11 +837,9 @@ func NewCharacter() *Character {
 	character.race = nil
 	character.Room = nil
 	character.practices = 0
-	character.pageSize = 13684
 	character.position = PositionDead
-	character.pages = make([][]byte, 1)
-	character.pages[0] = make([]byte, character.pageSize)
-	character.pageCursor = 0
+	character.output = make([]byte, 32768)
+	character.outputCursor = 0
 
 	character.name = UnauthenticatedUsername
 	character.client = nil
