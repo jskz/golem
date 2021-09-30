@@ -8,9 +8,10 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"database/sql"
-	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -94,9 +95,11 @@ type Character struct {
 
 	equipment []*ObjectInstance
 
-	pages      [][]byte
-	pageSize   int
-	pageCursor int
+	output       []byte
+	outputCursor int
+	outputHead   int
+	outputLines  int
+	inputCursor  int
 
 	Room      *Room           `json:"room"`
 	Combat    *Combat         `json:"combat"`
@@ -566,21 +569,81 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 }
 
 func (ch *Character) clearOutputBuffer() {
-	ch.pages = make([][]byte, 1)
-	ch.pages[0] = make([]byte, ch.pageSize)
-	ch.pageCursor = 0
+	ch.output = make([]byte, 32768)
+	ch.outputHead = 0
+	ch.outputCursor = 0
+	ch.inputCursor = DefaultMaxLines
 }
 
 func (ch *Character) flushOutput() {
-	defer func() {
-		recover()
-	}()
-
-	for _, page := range ch.pages {
-		ch.client.send <- page
+	if ch.output[0] == 0 {
+		return
 	}
 
-	ch.clearOutputBuffer()
+	var page bytes.Buffer
+	var lines []string
+	var maxLines int = DefaultMaxLines
+
+	scan := bufio.NewScanner(strings.NewReader(string(ch.output)))
+	scan.Split(func(data []byte, eof bool) (advance int, token []byte, err error) {
+		if eof && len(data) == 0 {
+			return 0, nil, nil
+		}
+
+		if i := bytes.IndexByte(data, '\n'); i >= 0 {
+			if len(data) > 0 && data[len(data)-1] == '\r' {
+				return i + 1, data[0 : len(data)-1], nil
+			}
+
+			return i + 1, data[0:i], nil
+		}
+
+		if eof {
+			if len(data) > 0 && data[len(data)-1] == '\r' {
+				return len(data), data[:len(data)-1], nil
+			}
+
+			return len(data), data, nil
+		}
+
+		return 0, nil, nil
+	})
+
+	for scan.Scan() {
+		lines = append(lines, scan.Text())
+	}
+
+	ch.outputLines = len(lines)
+	if ch.outputLines <= 1 {
+		return
+	}
+
+	if len(lines) <= maxLines {
+		ch.client.send <- ch.output
+		ch.clearOutputBuffer()
+		return
+	}
+
+	for index := ch.outputCursor; index <= ch.inputCursor; index++ {
+		if index >= len(lines) {
+			ch.client.send <- page.Bytes()
+			ch.clearOutputBuffer()
+			return
+		}
+
+		if index-ch.outputCursor >= maxLines {
+			ch.client.send <- page.Bytes()
+			ch.outputCursor += maxLines
+
+			amount := ch.outputCursor * 100 / ch.outputLines
+
+			ch.client.send <- []byte(fmt.Sprintf("[ Press return to continue (%d%%) ]\r\n", amount))
+			return
+		}
+
+		page.Write([]byte(lines[index]))
+		page.Write([]byte("\r\n"))
+	}
 }
 
 func (ch *Character) gainExperience(experience int) {
@@ -636,16 +699,8 @@ func (ch *Character) Write(data []byte) (n int, err error) {
 		return len(data), nil
 	}
 
-	if len(data)+ch.pageCursor > ch.pageSize {
-		return 0, errors.New("overflowed client buffer")
-	}
-
-	/*
-	 * This will need to be rewritten; we need to divide the data length by the page size, then
-	 * drain the data by chunks.  This is currently only "coincidentally working."
-	 */
-	copy(ch.pages[ch.pageCursor/ch.pageSize][ch.pageCursor:ch.pageCursor+len(data)], data[:])
-	ch.pageCursor = ch.pageCursor + len(data)
+	copy(ch.output[ch.outputHead:ch.outputHead+len(data)], data[:])
+	ch.outputHead = ch.outputHead + len(data)
 
 	return len(data), nil
 }
@@ -851,11 +906,11 @@ func NewCharacter() *Character {
 	character.race = nil
 	character.Room = nil
 	character.practices = 0
-	character.pageSize = 13684
 	character.position = PositionDead
-	character.pages = make([][]byte, 1)
-	character.pages[0] = make([]byte, character.pageSize)
-	character.pageCursor = 0
+	character.output = make([]byte, 32768)
+	character.outputCursor = 0
+	character.inputCursor = DefaultMaxLines
+	character.outputHead = 0
 
 	character.name = UnauthenticatedUsername
 	character.client = nil

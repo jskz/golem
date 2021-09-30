@@ -17,6 +17,7 @@ import (
 )
 
 const JoinedGameFlavourText = "{WYou have entered the world of Golem.{x"
+const DefaultMaxLines = 40
 
 /* Bust a prompt! */
 func (client *Client) displayPrompt() {
@@ -27,10 +28,10 @@ func (client *Client) displayPrompt() {
 	}
 
 	var prompt bytes.Buffer
+	if client.character.outputCursor >= 40 && client.character.inputCursor >= 40 {
+		return
+	}
 
-	/*
-	 * TODO: if the character's paging cursor is in a page less than the top page, instead display pager info.
-	 */
 	healthPercentage := client.character.health * 100 / client.character.maxHealth
 	manaPercentage := client.character.mana * 100 / client.character.maxMana
 	staminaPercentage := client.character.stamina * 100 / client.character.maxStamina

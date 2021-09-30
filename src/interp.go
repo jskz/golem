@@ -109,6 +109,18 @@ func (ch *Character) Interpret(input string) bool {
 		recover()
 	}()
 
+	if ch.outputCursor > 0 && ch.inputCursor < ch.outputHead {
+		/* If any input, abort the paging */
+		if input != "" {
+			ch.clearOutputBuffer()
+			ch.client.displayPrompt()
+			return true
+		}
+
+		ch.inputCursor += 10
+		return true
+	}
+
 	words := strings.Split(input, " ")
 	if len(words) < 1 {
 		return false
