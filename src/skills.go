@@ -57,6 +57,16 @@ func (game *Game) FindSkillByName(name string) *Skill {
 	return nil
 }
 
+func (ch *Character) FindProficiencyByName(name string) *Proficiency {
+	for _, skill := range ch.game.skills {
+		if skill.name == name {
+			return ch.skills[skill.id]
+		}
+	}
+
+	return nil
+}
+
 func do_skills(ch *Character, arguments string) {
 	var output strings.Builder
 	var count int = 0

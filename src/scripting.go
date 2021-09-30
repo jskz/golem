@@ -152,6 +152,8 @@ func (game *Game) InitScripting() error {
 		return game.vm.ToValue(handler)
 	}))
 
+	obj.Set("createEffect", game.vm.ToValue(game.createEffect))
+
 	obj.Set("registerSkillHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		skillName := name.String()
 

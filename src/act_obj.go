@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"strings"
 )
 
@@ -52,10 +53,13 @@ func (ch *Character) examineCharacter(other *Character) {
 		ch.Send(fmt.Sprintf("{G%s{x\r\n", other.description))
 	}
 
-	if other.inventory.Count > 0 {
-		ch.Send(fmt.Sprintf("{Y%s{Y is carrying the following items:{x\r\n", other.GetShortDescriptionUpper(ch)))
-		ch.showObjectList(other.inventory)
-		return
+	peek := ch.FindProficiencyByName("peek")
+	if peek != nil && rand.Intn(100) < peek.proficiency {
+		if other.inventory.Count > 0 {
+			ch.Send(fmt.Sprintf("{Y%s{Y is carrying the following items:{x\r\n", other.GetShortDescriptionUpper(ch)))
+			ch.showObjectList(other.inventory)
+			return
+		}
 	}
 }
 

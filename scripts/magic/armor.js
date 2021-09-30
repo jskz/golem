@@ -6,6 +6,15 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function spell_armor(ch) {
+    Golem.createEffect(function() {
+        ch.defense += 5;
+        ch.send("{WThe air suddenly hardens around you!{x\r\n");
+
+        return function() {
+            ch.defense -= 5;
+            ch.send("{DYour magical armor has worn off.{x\r\n");
+        };
+    });
 }
 
 Golem.registerSpellHandler('armor', spell_armor);

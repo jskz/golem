@@ -143,6 +143,8 @@ type Character struct {
 	Charisma     int `json:"charisma"`
 	Luck         int `json:"luck"`
 
+	Defense int
+
 	temporaryHash string
 }
 
@@ -919,6 +921,7 @@ func NewCharacter() *Character {
 	character.inventory = NewLinkedList()
 	character.skills = make(map[uint]*Proficiency)
 
+	character.Defense = 0
 	character.Strength = 10
 	character.Dexterity = 10
 	character.Intelligence = 10
