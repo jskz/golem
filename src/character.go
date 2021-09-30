@@ -98,6 +98,8 @@ type Character struct {
 	output       []byte
 	outputCursor int
 	outputHead   int
+	outputLines  int
+	inputCursor  int
 
 	Room      *Room           `json:"room"`
 	Combat    *Combat         `json:"combat"`
@@ -570,16 +572,17 @@ func (ch *Character) clearOutputBuffer() {
 	ch.output = make([]byte, 32768)
 	ch.outputHead = 0
 	ch.outputCursor = 0
+	ch.inputCursor = DefaultMaxLines
 }
 
 func (ch *Character) flushOutput() {
-	defer func() {
-		recover()
-	}()
+	if ch.output[0] == 0 {
+		return
+	}
 
 	var page bytes.Buffer
 	var lines []string
-	var maxLines int = 10 /* only for dev, increase once finished! */
+	var maxLines int = DefaultMaxLines
 
 	scan := bufio.NewScanner(strings.NewReader(string(ch.output)))
 	scan.Split(func(data []byte, eof bool) (advance int, token []byte, err error) {
@@ -610,23 +613,37 @@ func (ch *Character) flushOutput() {
 		lines = append(lines, scan.Text())
 	}
 
-	for index := ch.outputCursor; index < len(lines); index++ {
-		page.Write([]byte(lines[index]))
-		page.Write([]byte("\r\n"))
+	ch.outputLines = len(lines)
+	if ch.outputLines <= 1 {
+		return
+	}
 
-		if index-ch.outputCursor > maxLines {
+	if len(lines) <= maxLines {
+		ch.client.send <- ch.output
+		ch.clearOutputBuffer()
+		return
+	}
+
+	for index := ch.outputCursor; index <= ch.inputCursor; index++ {
+		if index >= len(lines) {
 			ch.client.send <- page.Bytes()
-			ch.outputCursor = index
+			ch.clearOutputBuffer()
 			return
 		}
-	}
 
-	buf := page.Bytes()
-	if buf[0] != 0 {
-		ch.client.send <- page.Bytes()
-	}
+		if index-ch.outputCursor >= maxLines {
+			ch.client.send <- page.Bytes()
+			ch.outputCursor += maxLines
 
-	ch.clearOutputBuffer()
+			amount := ch.outputCursor * 100 / ch.outputLines
+
+			ch.client.send <- []byte(fmt.Sprintf("[ Press return to continue (%d%%) ]\r\n", amount))
+			return
+		}
+
+		page.Write([]byte(lines[index]))
+		page.Write([]byte("\r\n"))
+	}
 }
 
 func (ch *Character) gainExperience(experience int) {
@@ -892,6 +909,8 @@ func NewCharacter() *Character {
 	character.position = PositionDead
 	character.output = make([]byte, 32768)
 	character.outputCursor = 0
+	character.inputCursor = DefaultMaxLines
+	character.outputHead = 0
 
 	character.name = UnauthenticatedUsername
 	character.client = nil

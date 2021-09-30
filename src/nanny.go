@@ -17,6 +17,7 @@ import (
 )
 
 const JoinedGameFlavourText = "{WYou have entered the world of Golem.{x"
+const DefaultMaxLines = 40
 
 /* Bust a prompt! */
 func (client *Client) displayPrompt() {
@@ -27,9 +28,7 @@ func (client *Client) displayPrompt() {
 	}
 
 	var prompt bytes.Buffer
-
-	if client.character.outputCursor > 0 && client.character.outputCursor < client.character.outputHead {
-		client.send <- []byte("[ Press return to continue ]\r\n")
+	if client.character.outputCursor >= 40 && client.character.inputCursor >= 40 {
 		return
 	}
 
