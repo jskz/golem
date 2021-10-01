@@ -13,6 +13,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/dop251/goja"
 )
@@ -20,6 +21,38 @@ import (
 type EventHandler struct {
 	name     string
 	callback goja.Callable
+}
+
+type ScriptTimer struct {
+	createdAt time.Time
+	callback  goja.Callable
+	delay     int64
+}
+
+func (game *Game) setTimeout(cb goja.Callable, delay int64) goja.Value {
+	defer func() {
+		recover()
+	}()
+
+	timer := &ScriptTimer{}
+	timer.createdAt = time.Now()
+	timer.callback = cb
+	timer.delay = delay
+	game.ScriptTimers.Insert(timer)
+
+	return game.vm.ToValue(timer)
+}
+
+func (game *Game) scriptTimersUpdate() {
+	for iter := game.ScriptTimers.Head; iter != nil; iter = iter.Next {
+		effect := iter.Value.(*ScriptTimer)
+
+		if time.Since(effect.createdAt).Milliseconds() > effect.delay {
+			effect.callback(game.vm.ToValue(effect))
+			game.ScriptTimers.Remove(effect)
+			break
+		}
+	}
 }
 
 func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, this goja.Value, arguments ...goja.Value) ([]goja.Value, []error) {
@@ -152,8 +185,6 @@ func (game *Game) InitScripting() error {
 		return game.vm.ToValue(handler)
 	}))
 
-	obj.Set("createEffect", game.vm.ToValue(game.createEffect))
-
 	obj.Set("registerSkillHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		skillName := name.String()
 
@@ -188,6 +219,7 @@ func (game *Game) InitScripting() error {
 
 	obj.Set("Combat", combatObj)
 	game.vm.Set("Golem", obj)
+	game.vm.Set("setTimeout", game.vm.ToValue(game.setTimeout))
 
 	err := game.LoadScripts()
 	if err != nil {

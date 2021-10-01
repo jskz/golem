@@ -29,10 +29,10 @@ type Game struct {
 
 	eventHandlers map[string]*LinkedList
 
-	Characters *LinkedList `json:"characters"`
-	Fights     *LinkedList `json:"fights"`
-	Zones      *LinkedList `json:"zones"`
-	Effects    *LinkedList `json:"effects"`
+	Characters   *LinkedList `json:"characters"`
+	Fights       *LinkedList `json:"fights"`
+	Zones        *LinkedList `json:"zones"`
+	ScriptTimers *LinkedList `json:"scriptTimers"`
 
 	clients map[*Client]bool
 	skills  map[uint]*Skill
@@ -60,7 +60,7 @@ func NewGame() (*Game, error) {
 
 	game.Characters = NewLinkedList()
 	game.Fights = NewLinkedList()
-	game.Effects = NewLinkedList()
+	game.ScriptTimers = NewLinkedList()
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
 	game.db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true&parseTime=true",
@@ -141,7 +141,7 @@ func (game *Game) Run() {
 	processCombatTicker := time.NewTicker(2 * time.Second)
 
 	/* Handle effect updates */
-	processEffectsTicker := time.NewTicker(1 * time.Second)
+	processScriptTimersTicker := time.NewTicker(1 * time.Second)
 
 	/* Handle frequent character update logic */
 	processCharacterUpdateTicker := time.NewTicker(2 * time.Second)
@@ -169,8 +169,8 @@ func (game *Game) Run() {
 		case <-processCharacterUpdateTicker.C:
 			game.characterUpdate()
 
-		case <-processEffectsTicker.C:
-			game.effectsUpdate()
+		case <-processScriptTimersTicker.C:
+			game.scriptTimersUpdate()
 
 		case <-processCombatTicker.C:
 			game.combatUpdate()
