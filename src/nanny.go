@@ -17,7 +17,7 @@ import (
 )
 
 const JoinedGameFlavourText = "{WYou have entered the world of Golem.{x"
-const DefaultMaxLines = 40
+const DefaultMaxLines = 50
 
 /* Bust a prompt! */
 func (client *Client) displayPrompt() {
@@ -28,7 +28,7 @@ func (client *Client) displayPrompt() {
 	}
 
 	var prompt bytes.Buffer
-	if client.character.outputCursor >= 40 && client.character.inputCursor >= 40 {
+	if client.character.outputCursor >= DefaultMaxLines && client.character.inputCursor >= DefaultMaxLines {
 		return
 	}
 
