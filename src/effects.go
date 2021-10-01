@@ -7,27 +7,57 @@
  */
 package main
 
-import "github.com/dop251/goja"
+import (
+	"time"
+
+	"github.com/dop251/goja"
+)
 
 type Effect struct {
-	handler  goja.Callable
-	callback goja.Callable
+	createdAt time.Time
+	handler   goja.Callable
+	callback  goja.Callable
+	delay     int64
 }
 
 func (game *Game) createEffect(fn goja.Callable) goja.Value {
+	defer func() {
+		recover()
+	}()
+
 	result, err := fn(game.vm.ToValue(game), nil)
 	if err != nil {
 		return game.vm.ToValue(nil)
 	}
 
-	f, res := goja.AssertFunction(result)
+	obj := result.ToObject(game.vm)
+	cb := obj.Get("0")
+	delay := obj.Get("1").ToInteger()
+
+	f, res := goja.AssertFunction(cb)
 	if !res {
 		return game.vm.ToValue(nil)
 	}
 
 	effect := &Effect{}
+	effect.createdAt = time.Now()
 	effect.handler = fn
 	effect.callback = f
+	effect.delay = delay
 
-	return game.vm.ToValue(nil)
+	game.Effects.Insert(effect)
+
+	return game.vm.ToValue(effect)
+}
+
+func (game *Game) effectsUpdate() {
+	for iter := game.Effects.Head; iter != nil; iter = iter.Next {
+		effect := iter.Value.(*Effect)
+
+		if time.Since(effect.createdAt).Milliseconds() > effect.delay {
+			effect.callback(game.vm.ToValue(effect))
+			game.Effects.Remove(effect)
+			break
+		}
+	}
 }

@@ -10,10 +10,10 @@ function spell_armor(ch) {
         ch.defense += 5;
         ch.send("{WThe air suddenly hardens around you!{x\r\n");
 
-        return function() {
+        return [function() {
             ch.defense -= 5;
             ch.send("{DYour magical armor has worn off.{x\r\n");
-        };
+        }, 5000];
     });
 }
 
