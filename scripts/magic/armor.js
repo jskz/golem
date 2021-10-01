@@ -13,7 +13,7 @@ function spell_armor(ch) {
         return [function() {
             ch.defense -= 5;
             ch.send("{DYour magical armor has worn off.{x\r\n");
-        }, 5000];
+        }, 120000];
     });
 }
 
