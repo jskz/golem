@@ -15,36 +15,19 @@ import (
 
 type Effect struct {
 	createdAt time.Time
-	handler   goja.Callable
 	callback  goja.Callable
 	delay     int64
 }
 
-func (game *Game) createEffect(fn goja.Callable) goja.Value {
+func (game *Game) createEffect(cb goja.Callable, delay int64) goja.Value {
 	defer func() {
 		recover()
 	}()
 
-	result, err := fn(game.vm.ToValue(game), nil)
-	if err != nil {
-		return game.vm.ToValue(nil)
-	}
-
-	obj := result.ToObject(game.vm)
-	cb := obj.Get("0")
-	delay := obj.Get("1").ToInteger()
-
-	f, res := goja.AssertFunction(cb)
-	if !res {
-		return game.vm.ToValue(nil)
-	}
-
 	effect := &Effect{}
 	effect.createdAt = time.Now()
-	effect.handler = fn
-	effect.callback = f
+	effect.callback = cb
 	effect.delay = delay
-
 	game.Effects.Insert(effect)
 
 	return game.vm.ToValue(effect)
