@@ -108,5 +108,13 @@ func do_quit(ch *Character, arguments string) {
 	}
 
 	ch.game.Characters.Remove(ch)
-	ch.client.conn.Close()
+	ch.client.connectionState = ConnectionStateNone
+	ch.Send("{WLeaving for the real world...{x\r\n")
+
+	go func() {
+		/* Allow output to flush */
+		<-time.After(500 * time.Millisecond)
+		ch.client.close <- true
+		ch.client.conn.Close()
+	}()
 }

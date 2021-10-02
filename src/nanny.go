@@ -27,6 +27,10 @@ func (client *Client) displayPrompt() {
 		return
 	}
 
+	if client.connectionState == ConnectionStateNone {
+		return
+	}
+
 	var prompt bytes.Buffer
 	if client.character.outputCursor >= DefaultMaxLines && client.character.inputCursor >= DefaultMaxLines {
 		return
@@ -95,14 +99,13 @@ func (game *Game) nanny(client *Client, message string) {
 		output.WriteString("[ Press return to continue ]")
 
 	case ConnectionStateName:
-		log.Printf("Guest attempting to login with name: %s\r\n", message)
-
-		name := strings.Title(strings.ToLower(message))
-
+		name := strings.Title(strings.ToLower(strings.TrimSpace(message)))
 		if !game.IsValidPCName(name) {
 			output.WriteString("Invalid name, please try another.\r\n\r\nBy what name do you wish to be known? ")
 			break
 		}
+
+		log.Printf("Guest attempting to login with name: %s\r\n", name)
 
 		character, room, err := game.FindPlayerByName(name)
 		if err != nil {
@@ -115,6 +118,7 @@ func (game *Game) nanny(client *Client, message string) {
 			client.character.client = client
 			output.WriteString("Password: ")
 			client.character.Room = room
+			log.Println(room)
 			client.connectionState = ConnectionStatePassword
 			break
 		}
