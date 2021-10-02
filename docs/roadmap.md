@@ -41,7 +41,7 @@ This will be a working document to track major feature development goals for eac
 - [ ] Allow players to navigate a plane-based virtual room, like maze-based virtual rooms, with an ANSI art representation of the nearby landscape
 - [ ] Allow for a mechanism by which each app startup will generate (preset or random?) varied `Dungeon` instances and then create virtual exits between chosen planes
 
-## 0.7 Plane-based Content Development Milestones
+## 0.7 Procedural Content Development Milestones
 
 - [ ] Procedural object instance generation for "ephemeral" items that do not have prototype objects, only instances; string tables will suffice for 1.0
 - [ ] Procedural NPC monster instance generation for similar creature Character instances to populate generated maze zones
@@ -52,6 +52,7 @@ This will be a working document to track major feature development goals for eac
 - [ ] Extra commands and UX for gameplay: combat experience, leveling/healing/item consumption gameplay loop considerations: "is it fun to hack-and-slash and navigate this as a game?"
 - [ ] Gameplay and content development: Ensure that each player job choice has at least ten unique skills and/or spells available by the hero level (50)
 - [ ] Socials: flavour text commands for socializing in-room like grin, nod, laugh
+- [ ] Enforcement: bans on username and host (IP? allow covering prefix with single ban?)
 
 ## 0.9 Tying It All Together Milestones
 
