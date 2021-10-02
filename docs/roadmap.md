@@ -51,6 +51,7 @@ This will be a working document to track major feature development goals for eac
 - [ ] Gameplay development and balancing: experience curves and enchantment tweaks for races and jobs
 - [ ] Extra commands and UX for gameplay: combat experience, leveling/healing/item consumption gameplay loop considerations: "is it fun to hack-and-slash and navigate this as a game?"
 - [ ] Gameplay and content development: Ensure that each player job choice has at least ten unique skills and/or spells available by the hero level (50)
+- [ ] Death mechanic: forced out-of-body "ghost timer" for a player between respawns; define that experience
 - [ ] Socials: flavour text commands for socializing in-room like grin, nod, laugh
 - [ ] Enforcement: bans on username and host (IP? allow covering prefix with single ban?)
 
