@@ -31,6 +31,7 @@ type Game struct {
 
 	Characters   *LinkedList `json:"characters"`
 	Fights       *LinkedList `json:"fights"`
+	Planes       *LinkedList `json:"planes"`
 	Zones        *LinkedList `json:"zones"`
 	ScriptTimers *LinkedList `json:"scriptTimers"`
 
@@ -61,6 +62,7 @@ func NewGame() (*Game, error) {
 	game.Characters = NewLinkedList()
 	game.Fights = NewLinkedList()
 	game.ScriptTimers = NewLinkedList()
+	game.Planes = NewLinkedList()
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
 	game.db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true&parseTime=true",
