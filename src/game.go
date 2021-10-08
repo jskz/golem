@@ -124,6 +124,11 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
+	err = game.LoadPlanes()
+	if err != nil {
+		return nil, err
+	}
+
 	err = game.InitScripting()
 	if err != nil {
 		return nil, err
