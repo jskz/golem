@@ -23,7 +23,15 @@ type Plane struct {
 	PlaneType  string `json:"planeType"`
 	SourceType string `json:"sourceType"`
 
-	Maze *MazeGrid `json:"maze"`
+	Maze    *MazeGrid   `json:"maze"`
+	Portals *LinkedList `json:"portals"`
+}
+
+type Portal struct {
+	Id         int    `json:"id"`
+	PortalType string `json:"portalType"`
+	Room       *Room  `json:"room"`
+	Plane      *Plane `json:"plane"`
 }
 
 /* plane_type ENUM values */
@@ -38,6 +46,12 @@ const (
 	SourceTypeVoid       = "void"
 	SourceTypeBlob       = "blob"
 	SourceTypeProcedural = "procedural"
+)
+
+/* portal_type ENUM values */
+const (
+	PortalTypeFixed      = "fixed"
+	PortalTypeProcedural = "procedural"
 )
 
 func (game *Game) LoadPlanes() error {
@@ -65,6 +79,7 @@ func (game *Game) LoadPlanes() error {
 
 	for rows.Next() {
 		plane := &Plane{}
+		plane.Portals = NewLinkedList()
 
 		var zoneId int = 0
 

@@ -24,6 +24,7 @@ CREATE TABLE portals (
 
     `room_id` BIGINT NOT NULL,
     `plane_id` BIGINT NOT NULL,
+    `portal_type` ENUM('fixed', 'procedural') NOT NULL DEFAULT 'procedural',
 
     `x` INT DEFAULT NULL,
     `y` INT DEFAULT NULL,
