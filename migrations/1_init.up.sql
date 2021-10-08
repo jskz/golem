@@ -273,7 +273,7 @@ CREATE TABLE player_character_object (
 );
 
 /* Seed data */
-INSERT INTO zones(id, name, low, high, reset_message, reset_frequency) VALUES (1, 'Limbo', 1, 1000, '{DYou hear a faint rumbling in the distance.{x', 15);
+INSERT INTO zones(id, name, low, high, reset_message, reset_frequency) VALUES (1, 'Limbo', 1, 8192, '{DYou hear a faint rumbling in the distance.{x', 15);
 
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 0);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 0);

@@ -7,22 +7,37 @@
  */
 package main
 
-import "log"
+import (
+	"errors"
+	"log"
+	"sync"
+)
 
 type Plane struct {
+	Zone       *Zone  `json:"zone"`
 	Id         int    `json:"id"`
 	Name       string `json:"name"`
 	Width      int    `json:"width"`
 	Height     int    `json:"height"`
+	Depth      int    `json:"depth"`
 	PlaneType  string `json:"planeType"`
 	SourceType string `json:"sourceType"`
+
+	Maze *MazeGrid `json:"maze"`
 }
 
-/* Plane type ENUM values */
+/* plane_type ENUM values */
 const (
 	PlaneTypeVoid       = "void"
 	PlaneTypeMaze       = "maze"
 	PlaneTypeWilderness = "wilderness"
+)
+
+/* source_type ENUM values */
+const (
+	SourceTypeVoid       = "void"
+	SourceTypeBlob       = "blob"
+	SourceTypeProcedural = "procedural"
 )
 
 func (game *Game) LoadPlanes() error {
@@ -31,9 +46,11 @@ func (game *Game) LoadPlanes() error {
 	rows, err := game.db.Query(`
 		SELECT
 			id,
+			zone_id,
 			name,
 			width,
 			height,
+			depth,
 			plane_type,
 			source_type
 		FROM
@@ -48,10 +65,87 @@ func (game *Game) LoadPlanes() error {
 
 	for rows.Next() {
 		plane := &Plane{}
-		err := rows.Scan(&plane.Id, &plane.Name, &plane.Width, &plane.Height, &plane.PlaneType, &plane.SourceType)
+
+		var zoneId int = 0
+
+		err := rows.Scan(&plane.Id, &zoneId, &plane.Name, &plane.Width, &plane.Height, &plane.Depth, &plane.PlaneType, &plane.SourceType)
 		if err != nil {
 			log.Printf("Unable to scan plane: %v.\r\n", err)
 			return err
+		}
+
+		for iter := game.Zones.Head; iter != nil; iter = iter.Next {
+			zone := iter.Value.(*Zone)
+
+			if zone.id == zoneId {
+				plane.Zone = zone
+			}
+		}
+
+		if plane.Zone == nil {
+			return errors.New("trying to load plane with a bad zone")
+		}
+
+		switch plane.PlaneType {
+		case PlaneTypeMaze:
+			switch plane.SourceType {
+			case SourceTypeProcedural:
+				log.Printf("Generating maze with dimensions %dx%dx%d for plane %d.\r\n", plane.Width, plane.Height, plane.Depth, plane.Id)
+
+				/*
+				 * TODO: copied from previous maze test, allow a plane entrance coordinate or location on the model?
+				 *
+				 * Hardcode an exit from limbo into the first floor of the test dungeon
+				 */
+				limbo, err := game.LoadRoomIndex(RoomLimbo)
+				if err != nil {
+					log.Println(err)
+				}
+
+				/* Exit will be self-referential and locked until the maze is done generating */
+				limbo.exit[DirectionDown] = &Exit{
+					id:        0,
+					direction: DirectionDown,
+					to:        limbo,
+					flags:     EXIT_IS_DOOR | EXIT_CLOSED | EXIT_LOCKED,
+				}
+
+				go func() {
+					var dungeon *Dungeon
+
+					wg := sync.WaitGroup{}
+					wg.Add(1)
+
+					go func() {
+						dungeon = game.GenerateDungeon(plane.Depth, plane.Width, plane.Height)
+						wg.Done()
+					}()
+
+					wg.Wait()
+
+					if dungeon == nil || len(dungeon.floors) < 1 {
+						log.Printf("Dungeon generation attempt aborting.\r\n")
+						return
+					}
+
+					maze := dungeon.floors[0]
+
+					/* Unlock the entrance */
+					limbo.exit[DirectionDown].to = maze.grid[maze.entryX][maze.entryY].room
+					limbo.exit[DirectionDown].flags &= ^EXIT_LOCKED
+
+					maze.grid[maze.entryX][maze.entryY].room.exit[DirectionUp] = &Exit{
+						id:        0,
+						direction: DirectionUp,
+						to:        limbo,
+						flags:     EXIT_IS_DOOR | EXIT_CLOSED,
+					}
+				}()
+			default:
+				return errors.New("unimplemented maze source type")
+			}
+		default:
+			return errors.New("unimplemented plane type")
 		}
 
 		game.Planes.Insert(plane)

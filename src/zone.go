@@ -14,7 +14,7 @@ import (
 )
 
 type Zone struct {
-	id uint
+	id int
 
 	name string
 	low  uint
@@ -217,7 +217,7 @@ func (game *Game) LoadResets() error {
 	for rows.Next() {
 		reset := &Reset{}
 
-		var zoneId uint
+		var zoneId int
 		var roomId uint
 		var resetType string
 

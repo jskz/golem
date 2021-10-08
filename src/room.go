@@ -118,7 +118,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 			deleted_at IS NULL
 	`, index)
 
-	var zoneId uint
+	var zoneId int
 
 	room = &Room{game: game}
 	room.resets = NewLinkedList()
