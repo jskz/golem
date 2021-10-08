@@ -14,13 +14,9 @@ function onCombatUpdate() {
         for(let i = 0; i < combat.participants.length; i++) {
             const vch = combat.participants[i];
 
-            if(vch.room === null
-            || vch.fighting.room === null
-            || vch.room.id != vch.fighting.room.id) {
+            if(vch.room === null) {
                 continue;
             }
-
-            found = true;
 
             let attackerRounds = 1,
                 dexterityBonusRounds = parseInt((vch.dexterity - 10) / 4);
@@ -30,9 +26,13 @@ function onCombatUpdate() {
             for(let r = 0; r < attackerRounds; r++) {
                 let victim = vch.fighting;
 
-                if(!victim) {
+                if(!victim 
+                || victim.room === null 
+                || vch.room.id != victim.room.id) {
                     break;
                 }
+
+                found = true;
 
                 let damage = ~~(Math.random() * 2);
 
