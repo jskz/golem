@@ -48,8 +48,6 @@ function onCombatUpdate() {
                 /* Check victim dodge skill */
                 const victimDodgeProficiency = victim.findProficiencyByName('dodge');
                 if(victimDodgeProficiency) {
-                    vch.send("Victim has dodge proficiency ...\r\n" + unarmedCombatProficiency.proficiency);
-                    victim.send("You have dodge proficiency ...\r\n" + unarmedCombatProficiency.proficiency);
                     if(Math.random() < (unarmedCombatProficiency.proficiency / 100) / 5) {
                         vch.send(victim.getShortDescriptionUpper(vch) + " dodges out of the way of your attack!\r\n");
                         victim.send("You dodge an attack by " + vch.getShortDescription(victim) + "!\r\n");
