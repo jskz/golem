@@ -13,6 +13,8 @@ import (
 	"fmt"
 	"log"
 	"strings"
+
+	"github.com/dop251/goja"
 )
 
 /* Fixed location IDs */
@@ -20,6 +22,8 @@ const RoomLimbo = 1
 const RoomDeveloperLounge = 2
 
 type Room struct {
+	game *Game
+
 	Id   uint `json:"id"`
 	zone *Zone
 
@@ -89,7 +93,7 @@ func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 }
 
 func (game *Game) NewRoom() *Room {
-	room := &Room{}
+	room := &Room{game: game}
 
 	return room
 }
@@ -116,7 +120,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 
 	var zoneId uint
 
-	room = &Room{}
+	room = &Room{game: game}
 	room.resets = NewLinkedList()
 	room.objects = NewLinkedList()
 	room.Characters = NewLinkedList()
@@ -191,4 +195,37 @@ func (game *Game) FixExits() error {
 	}
 
 	return nil
+}
+
+/*
+ * Utility method for the scripting engine to broadcast within a room using a filter fn
+ */
+func (room *Room) Broadcast(message string, filter goja.Callable) {
+	var recipients []*Character = make([]*Character, 0)
+
+	/* Collect characters in room for which filter(rch) == true */
+	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
+		var result bool = false
+
+		rch := iter.Value.(*Character)
+
+		if filter != nil {
+			val, err := filter(room.game.vm.ToValue(rch))
+			if err != nil {
+				log.Printf("Room.Broadcast failed: %v\r\n", err)
+				break
+			}
+
+			result = val.ToBoolean()
+		}
+
+		if result || filter == nil {
+			recipients = append(recipients, rch)
+		}
+	}
+
+	/* Send message to gathered users */
+	for _, rcpt := range recipients {
+		rcpt.Send(message)
+	}
 }
