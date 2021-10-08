@@ -9,7 +9,7 @@ This will be a working document to track major feature development goals for eac
 - [x] Serialization for persistent lists of object instances: upserting object instances and syncing with detach the appropriate relation
 - [x] If output overflows, instead of gameplay prompt, page to a reasonable (configurable, default telnet window size?) output limit and append a next/previous and cursor read % prompt
 - [x] Create a `Dungeon` data type for instancing multi-level mazes with metadata and reasonably "difficult" start/end goals representing passages to the next maze floor
-- [ ] Gameplay: implement completely an initially available job-unique skill for job, and another job-unique skill available after the 5th level (8 specials total)
+- [x] Gameplay: implement completely an initially available job-unique skill for job, and another job-unique skill available after the 5th level (8 specials total)
 
 ## 0.2 Milestones
 
