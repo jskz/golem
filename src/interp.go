@@ -128,12 +128,20 @@ func (ch *Character) Interpret(input string) bool {
 
 	/* Extract the command and shift it out of the input words */
 	command, words := strings.ToLower(words[0]), words[1:]
+	rest := strings.TrimSpace(strings.Join(words, " "))
 
 	val, ok := CommandTable[command]
 	if !ok || (ok && ch.level < val.MinimumLevel) {
 		/* Send a no such command if there was any command text */
 		if len(command) > 0 {
-			ch.Send(fmt.Sprintf("{RAlas, there is no such command: %s{x\r\n", command))
+			/* As a fallback, see if this command matches any proficiency which has a registered handler. */
+			prof := ch.FindProficiencyByName(command)
+			if prof == nil || prof.proficiency <= 0 || ch.game.skills[prof.skillId].handler == nil {
+				ch.Send(fmt.Sprintf("{RAlas, there is no such command: %s{x\r\n", command))
+				return false
+			}
+
+			(*ch.game.skills[prof.skillId].handler)(ch.game.vm.ToValue(prof), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(rest))
 		} else {
 			/* We'll still want a prompt on no input */
 			ch.Send("\r\n")
@@ -142,9 +150,6 @@ func (ch *Character) Interpret(input string) bool {
 
 		return false
 	}
-
-	rest := strings.Join(words, " ")
-
 	/* Call the command func with the remaining command words joined. */
 	if val.Scripted {
 		val.Callback(ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(rest))

@@ -5,8 +5,13 @@
  * Authors:
  *     James Skarzinskas <james@jskarzin.org>
  */
-function do_bash(ch) {
-    ch.send("Bash handler!\r\n");
+function do_bash(ch, args) {
+    if(!args.length) {
+        ch.send("Bash who?\r\n");
+        return;
+    }
+
+    ch.send("Bash handler executed with arguments: " + args + "\r\n");
 }
 
 Golem.registerSkillHandler('bash', do_bash);
