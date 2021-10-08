@@ -156,8 +156,6 @@ func (game *Game) Run() {
 	processZoneUpdateTicker := time.NewTicker(1 * time.Minute)
 	game.ZoneUpdate()
 
-	game.doMazeTesting()
-
 	for {
 		select {
 		case <-processUpdateTicker.C:
