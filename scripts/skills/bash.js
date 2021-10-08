@@ -6,12 +6,15 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function do_bash(ch, args) {
-    if(!args.length) {
+    let victim = ch.fighting !== null 
+        ? ch.fighting
+        : ch.findCharacterInRoom(args);
+    if(!victim) {
         ch.send("Bash who?\r\n");
         return;
     }
 
-    ch.send("Bash handler executed with arguments: " + args + "\r\n");
+    ch.send("You bash into " + victim.getShortDescription(ch) + ", sending them flying!\r\n");
 }
 
 Golem.registerSkillHandler('bash', do_bash);
