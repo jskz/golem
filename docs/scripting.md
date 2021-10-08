@@ -33,6 +33,12 @@ PCs and NPCs both share a common Character data type with the following properti
 | Method | send | `message`: **String** | Sends `message` exclusively to this character instance. | ```ch.send("Hello world!\r\n");```
 | Method | findCharacterInRoom: **Character**? |  `name`: **String** | Tries to find a character by name in the same room as this character, may return **null**. | `const target = ch.findCharacterInRoom('monster');`
 
+## Room
+
+| Type |  Name | Arguments | Description | Example
+| --- | --- | --- | --- | ---
+| Method | broadcast | `message`: **String**, *`filter`*?: function(`ch`: **Character**) = **null** | Sends `message` to characters in room for which `filter(ch) === true` or all characters if filter is **null**. | ```ch.room.broadcast("Message to other people in this room", rch => !rch.isEqual(ch));```
+
 ## Combat
 
 | Type |  Name | Arguments | Description
