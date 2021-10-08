@@ -1,7 +1,7 @@
 CREATE TABLE planes (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `zone_id` BIGINT NOT NULL,
     `name` VARCHAR(255) NOT NULL UNIQUE,
-    `zone_id` INT,
 
     `plane_type` ENUM('void', 'maze', 'wilderness') NOT NULL DEFAULT 'void',
     `source_type` ENUM('void', 'blob', 'procedural') NOT NULL DEFAULT 'void',
@@ -15,7 +15,7 @@ CREATE TABLE planes (
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id),
-    FOREIGN KEY (zone_id) REFERENCES zones(id),
+    FOREIGN KEY (zone_id) REFERENCES zones(id)
 );
 
-INSERT INTO planes(id, name, plane_type, source_type, width, height) VALUES (1, 'limbo-maze', 'maze', 50, 50);
+INSERT INTO planes(id, zone_id, name, plane_type, source_type, width, height) VALUES (1, 1, 'limbo-maze', 'maze', 'procedural', 50, 50);
