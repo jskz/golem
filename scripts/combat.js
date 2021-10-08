@@ -30,7 +30,14 @@ function onCombatUpdate() {
 
             for(let r = 0; r < attackerRounds; r++) {
                 let damage = ~~(Math.random() * 2);
+
                 damage += ~~(Math.random() * (vch.strength / 3));
+
+                const unarmedCombatProficiency = vch.findProficiencyByName('unarmed combat');
+                if(unarmedCombatProficiency) {
+                    /* +1 damage to unarmed base damage for every 10% of unarmed combat proficiency */
+                    damage += Math.floor(unarmedCombatProficiency.proficiency / 10);
+                }
 
                 this.damage(vch, vch.fighting, true, damage, Golem.Combat.DamageTypeBash);
             }

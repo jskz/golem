@@ -54,7 +54,7 @@ func (ch *Character) examineCharacter(other *Character) {
 	}
 
 	peek := ch.FindProficiencyByName("peek")
-	if peek != nil && rand.Intn(100) < peek.proficiency {
+	if peek != nil && rand.Intn(100) < peek.Proficiency {
 		if other.inventory.Count > 0 {
 			ch.Send(fmt.Sprintf("{Y%s{Y is carrying the following items:{x\r\n", other.GetShortDescriptionUpper(ch)))
 			ch.showObjectList(other.inventory)

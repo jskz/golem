@@ -29,12 +29,12 @@ const (
 )
 
 type Proficiency struct {
-	id          uint
-	skillId     uint
-	proficiency int
-	level       int
-	complexity  int
-	cost        int
+	Id          uint `json:"id"`
+	SkillId     uint `json:"skillId"`
+	Proficiency int  `json:"proficiency"`
+	Level       int  `json:"level"`
+	Complexity  int  `json:"complexity"`
+	Cost        int  `json:"cost"`
 }
 
 func (game *Game) RegisterSkillHandler(name string, fn goja.Callable) goja.Value {
@@ -80,7 +80,7 @@ func do_skills(ch *Character, arguments string) {
 
 		count++
 
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.Proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")
@@ -108,7 +108,7 @@ func do_practice(ch *Character, arguments string) {
 	for id, proficiency := range ch.skills {
 		count++
 
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.Proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")
@@ -198,12 +198,12 @@ func (ch *Character) LoadPlayerSkills() error {
 	for rows.Next() {
 		proficiency := &Proficiency{}
 
-		err := rows.Scan(&proficiency.id, &proficiency.skillId, &proficiency.proficiency, &proficiency.level, &proficiency.complexity, &proficiency.cost)
+		err := rows.Scan(&proficiency.Id, &proficiency.SkillId, &proficiency.Proficiency, &proficiency.Level, &proficiency.Complexity, &proficiency.Cost)
 		if err != nil {
 			return err
 		}
 
-		ch.skills[proficiency.id] = proficiency
+		ch.skills[proficiency.Id] = proficiency
 	}
 
 	return nil

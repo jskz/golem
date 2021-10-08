@@ -78,18 +78,18 @@ func do_cast(ch *Character, arguments string) {
 		return
 	}
 
-	if prof.cost > ch.mana {
+	if prof.Cost > ch.mana {
 		ch.Send("You do not have enough mana to cast that spell.\r\n")
 		return
 	}
 
-	ch.mana -= prof.cost
+	ch.mana -= prof.Cost
 
 	ch.casting = &CastingContext{
 		casting:    found,
 		arguments:  arguments,
 		startedAt:  time.Now(),
-		complexity: prof.complexity,
+		complexity: prof.Complexity,
 	}
 
 	ch.Send("{WYou start uttering the words of the spell...{x\r\n")
@@ -114,7 +114,7 @@ func do_spells(ch *Character, arguments string) {
 
 		count++
 
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.proficiency))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.Proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")

@@ -136,12 +136,12 @@ func (ch *Character) Interpret(input string) bool {
 		if len(command) > 0 {
 			/* As a fallback, see if this command matches any proficiency which has a registered handler. */
 			prof := ch.FindProficiencyByName(command)
-			if prof == nil || prof.proficiency <= 0 || ch.game.skills[prof.skillId].handler == nil {
+			if prof == nil || prof.Proficiency <= 0 || ch.game.skills[prof.SkillId].handler == nil {
 				ch.Send(fmt.Sprintf("{RAlas, there is no such command: %s{x\r\n", command))
 				return false
 			}
 
-			(*ch.game.skills[prof.skillId].handler)(ch.game.vm.ToValue(prof), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(rest))
+			(*ch.game.skills[prof.SkillId].handler)(ch.game.vm.ToValue(prof), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(rest))
 		} else {
 			/* We'll still want a prompt on no input */
 			ch.Send("\r\n")
