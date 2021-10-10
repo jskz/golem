@@ -155,7 +155,7 @@ func do_group(ch *Character, arguments string) {
 	if target == nil {
 		ch.Send("They aren't here.\r\n")
 		return
-	} else if target == ch {
+	} else if target == ch && ch.Leader == ch {
 		ch.Send("{WYou disband your group.{x\r\n")
 
 		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
@@ -168,6 +168,20 @@ func do_group(ch *Character, arguments string) {
 			}
 		}
 
+		return
+	} else if target == ch && ch.Leader != ch {
+		ch.Send(fmt.Sprintf("{WYou leave %s{W's group.{x\r\n", ch.Leader.GetShortDescription(ch)))
+
+		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
+			gch := iter.Value.(*Character)
+
+			if gch != ch {
+				gch.Send(fmt.Sprintf("{W%s{W leaves the group.{x\r\n", ch.GetShortDescriptionUpper(gch)))
+			}
+		}
+
+		ch.Leader.Group.Remove(ch)
+		ch.Group = nil
 		return
 	}
 
