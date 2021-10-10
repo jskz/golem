@@ -120,4 +120,26 @@ func do_quit(ch *Character, arguments string) {
 }
 
 func do_group(ch *Character, arguments string) {
+	if len(arguments) < 1 {
+		if ch.Group == nil || ch.Leader == nil {
+			ch.Send("You aren't currently in a group.\r\n")
+			return
+		}
+
+		var output strings.Builder
+
+		output.WriteString(fmt.Sprintf("%s's group:\r\n", ch.Leader.GetShortDescriptionUpper(ch)))
+
+		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
+			gch := iter.Value.(*Character)
+
+			output.WriteString(fmt.Sprintf("%s\r\n", gch.GetShortDescriptionUpper(ch)))
+		}
+
+		ch.Send(output.String())
+		return
+	}
+
+	arg, arguments := oneArgument(arguments)
+	ch.Send(fmt.Sprintf("You typed group with argument: %s\r\n", arg))
 }
