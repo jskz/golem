@@ -33,6 +33,7 @@ func init() {
 
 	/* act_comm.go */
 	CommandTable["afk"] = Command{Name: "afk", CmdFunc: do_afk}
+	CommandTable["group"] = Command{Name: "group", CmdFunc: do_group}
 	CommandTable["ooc"] = Command{Name: "ooc", CmdFunc: do_ooc}
 	CommandTable["say"] = Command{Name: "say", CmdFunc: do_say}
 	CommandTable["save"] = Command{Name: "save", CmdFunc: do_save}

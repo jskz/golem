@@ -156,7 +156,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	for iter := from.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 
-		if character.following == ch {
+		if character.Following == ch {
 			character.Send(fmt.Sprintf("{WYou follow %s{W.{x\r\n", ch.GetShortDescription(character)))
 			character.move(direction, true)
 		}
@@ -305,24 +305,24 @@ func do_follow(ch *Character, arguments string) {
 		return
 	}
 
-	if target == ch && ch.following == nil {
+	if target == ch && ch.Following == nil {
 		ch.Send("You are already following yourself.\r\n")
 		return
 	}
 
-	if target == ch && ch.following != nil {
-		ch.Send(fmt.Sprintf("You stop following %s{x.\r\n", ch.following.GetShortDescription(ch)))
-		ch.following = nil
+	if target == ch && ch.Following != nil {
+		ch.Send(fmt.Sprintf("You stop following %s{x.\r\n", ch.Following.GetShortDescription(ch)))
+		ch.Following = nil
 		return
 	}
 
-	if ch.following != nil {
+	if ch.Following != nil {
 		ch.Send("You are already following somebody else.  Follow yourself first.\r\n")
 		return
 	}
 
 	ch.Send(fmt.Sprintf("You start following %s{x.\r\n", target.GetShortDescription(ch)))
-	ch.following = target
+	ch.Following = target
 }
 
 func do_north(ch *Character, arguments string) {

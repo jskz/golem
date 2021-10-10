@@ -118,3 +118,6 @@ func do_quit(ch *Character, arguments string) {
 		ch.client.conn.Close()
 	}()
 }
+
+func do_group(ch *Character, arguments string) {
+}

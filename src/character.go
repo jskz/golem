@@ -101,11 +101,14 @@ type Character struct {
 	outputLines  int
 	inputCursor  int
 
-	Room      *Room           `json:"room"`
-	Combat    *Combat         `json:"combat"`
-	Fighting  *Character      `json:"fighting"`
-	casting   *CastingContext `json:"casting"`
-	following *Character
+	Room     *Room           `json:"room"`
+	Combat   *Combat         `json:"combat"`
+	Fighting *Character      `json:"fighting"`
+	casting  *CastingContext `json:"casting"`
+
+	Following *Character
+	Leader    *Character
+	Group     *LinkedList
 
 	Id int `json:"id"`
 
