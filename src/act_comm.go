@@ -121,25 +121,80 @@ func do_quit(ch *Character, arguments string) {
 
 func do_group(ch *Character, arguments string) {
 	if len(arguments) < 1 {
-		if ch.Group == nil || ch.Leader == nil {
+		if ch.Group == nil {
 			ch.Send("You aren't currently in a group.\r\n")
 			return
 		}
 
 		var output strings.Builder
 
-		output.WriteString(fmt.Sprintf("%s's group:\r\n", ch.Leader.GetShortDescriptionUpper(ch)))
+		output.WriteString(fmt.Sprintf("{W%s{W's group:{x\r\n", ch.Leader.GetShortDescriptionUpper(ch)))
 
 		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
 			gch := iter.Value.(*Character)
 
-			output.WriteString(fmt.Sprintf("%s\r\n", gch.GetShortDescriptionUpper(ch)))
+			output.WriteString(fmt.Sprintf("[%2d %-8s] %-14s %5d/%5dhp %5d/%5dm %5d/%5dst\r\n",
+				gch.level,
+				gch.job.DisplayName,
+				gch.GetShortDescriptionUpper(ch),
+				gch.health,
+				gch.maxHealth,
+				gch.mana,
+				gch.maxMana,
+				gch.stamina,
+				gch.maxStamina))
 		}
 
 		ch.Send(output.String())
 		return
 	}
 
-	arg, arguments := oneArgument(arguments)
-	ch.Send(fmt.Sprintf("You typed group with argument: %s\r\n", arg))
+	arg, _ := oneArgument(arguments)
+	target := ch.FindCharacterInRoom(arg)
+
+	if target == nil {
+		ch.Send("They aren't here.\r\n")
+		return
+	} else if target == ch {
+		ch.Send("{WYou disband your group.{x\r\n")
+
+		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
+			gch := iter.Value.(*Character)
+			gch.Group = nil
+			gch.Leader = nil
+
+			if gch != ch {
+				gch.Send(fmt.Sprintf("{W%s{W disbanded the group.{x\r\n", ch.GetShortDescriptionUpper(gch)))
+			}
+		}
+
+		return
+	}
+
+	if target.Following != ch {
+		ch.Send("They aren't following you.\r\n")
+		return
+	}
+
+	if ch.Group == nil {
+		ch.Group = NewLinkedList()
+		ch.Group.Insert(ch)
+		ch.Leader = ch
+	}
+
+	if ch.Group.Contains(target) {
+		ch.Send(fmt.Sprintf("{WYou remove %s{W from your group.{x\r\n", target.GetShortDescription(ch)))
+		target.Send(fmt.Sprintf("{W%s{W removes you from their group.{x\r\n", ch.GetShortDescriptionUpper(target)))
+
+		ch.Group.Remove(target)
+		target.Leader = nil
+	} else {
+		ch.Send(fmt.Sprintf("{W%s{W joins your group.{x\r\n", target.GetShortDescriptionUpper(ch)))
+		target.Send(fmt.Sprintf("{WYou join %s{W's group.{x\r\n", ch.GetShortDescription(target)))
+
+		ch.Group.Insert(target)
+
+		target.Leader = ch
+		target.Group = ch.Group
+	}
 }
