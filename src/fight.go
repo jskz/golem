@@ -112,9 +112,19 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 				target.health = target.maxHealth / 8
 				do_look(target, "")
 			} else {
-				exp := target.experience
+				exp := int(target.experience)
 				if ch != nil {
-					ch.gainExperience(int(exp))
+					if ch.Group != nil {
+						groupExperience := exp / ch.Group.Count
+
+						for iter := ch.Group.Head; iter != nil; iter = iter.Next {
+							gch := iter.Value.(*Character)
+
+							gch.gainExperience(groupExperience)
+						}
+					} else {
+						ch.gainExperience(int(exp))
+					}
 				}
 
 				game.Characters.Remove(target)
