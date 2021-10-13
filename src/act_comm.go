@@ -96,8 +96,12 @@ func do_quit(ch *Character, arguments string) {
 	ch.Save()
 
 	/* If this character is leading a group, disband it */
-	if ch.Group != nil && ch.Leader == ch {
-		ch.DisbandGroup()
+	if ch.Group != nil {
+		if ch.Leader == ch {
+			ch.DisbandGroup()
+		} else {
+			ch.Leader.Group.Remove(ch)
+		}
 	}
 
 	if ch.Room != nil {
