@@ -56,6 +56,19 @@ function onCombatUpdate() {
                 }
 
                 this.damage(vch, victim, true, damage, Golem.Combat.DamageTypeBash);
+
+                if(victim && victim.group !== null) {
+                    for(let iter = victim.gch.head; iter != null; iter = gch.next) {
+                        const gch = iter.value;
+
+                        if(!gch.fighting) {
+                            gch.send('{WYou start attacking ' + ch.getShortDescription(gch) + '{W defense of ' + victim.getShortDescriptionUpper(gch) + '{W!{x');
+                            gch.fighting = ch;
+                            gch.combat = ch.combat;
+                            gch.combat.insert(gch);
+                        }
+                    }
+                }
             }
         }
 
