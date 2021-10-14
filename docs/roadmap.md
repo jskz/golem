@@ -17,7 +17,7 @@ This will be a working document to track major feature development goals for eac
 - [ ] Clean up the inconsistent title case method and field naming stemming from the scripting field mapper change
 - [x] Extend to scripting and entities a timer-based "effects" model for behaviours like buffs/enchantments on equipment or spellcasting, permanent or with expiration
 - [ ] Implement a few NPC flags for behaviours: stay in an area, move, aggressive/hostile towards PCs, etc.
-- [ ] Groups: forming and unforming groups with other players (and NPCs), interaction commands/combat mechanics/experience splitting
+- [x] Groups: forming and unforming groups with other players (and NPCs), interaction commands/combat mechanics/experience splitting
 
 ## 0.3 Telnet Done Right Milestones
 
