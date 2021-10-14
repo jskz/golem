@@ -62,7 +62,7 @@ function onCombatUpdate() {
                         const gch = iter.value;
 
                         if(!gch.fighting) {
-                            gch.send('{WYou start attacking ' + ch.getShortDescription(gch) + '{W defense of ' + victim.getShortDescriptionUpper(gch) + '{W!{x');
+                            gch.send('{WYou start attacking ' + ch.getShortDescription(gch) + '{W in defense of ' + victim.getShortDescriptionUpper(gch) + '{W!{x');
                             gch.fighting = ch;
                             gch.combat = ch.combat;
                             gch.combat.insert(gch);
