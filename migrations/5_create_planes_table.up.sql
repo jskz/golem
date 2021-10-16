@@ -19,20 +19,4 @@ CREATE TABLE planes (
     FOREIGN KEY (zone_id) REFERENCES zones(id)
 );
 
-CREATE TABLE portals (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
-
-    `room_id` BIGINT NOT NULL,
-    `plane_id` BIGINT NOT NULL,
-    `portal_type` ENUM('fixed', 'procedural') NOT NULL DEFAULT 'procedural',
-
-    `x` INT DEFAULT NULL,
-    `y` INT DEFAULT NULL,
-    `direction` INT NOT NULL,
-
-    FOREIGN KEY (room_id) REFERENCES room(id),
-    FOREIGN KEY (plane_id) REFERENCES planes(id)
-);
-
 INSERT INTO planes(id, zone_id, name, plane_type, source_type, width, height, depth) VALUES (1, 1, 'limbo-maze', 'maze', 'procedural', 32, 32, 4);
-INSERT INTO portals(id, room_id, plane_id, direction) VALUES (1, 1, 1, 5);
