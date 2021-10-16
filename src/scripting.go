@@ -85,7 +85,7 @@ func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, t
 }
 
 func (game *Game) LoadScripts() error {
-	const ScriptDirectory = "/scripts"
+	const ScriptDirectory = "scripts"
 
 	return game.LoadScriptsFromDirectory(ScriptDirectory)
 }
