@@ -88,7 +88,7 @@ func NewGame() (*Game, error) {
 	/* Attempt new migrations at startup */
 	driver, _ := mysql.WithInstance(game.db, &mysql.Config{})
 	m, err := migrate.NewWithDatabaseInstance(
-		"file:///migrations",
+		"file://migrations",
 		"mysql",
 		driver,
 	)
