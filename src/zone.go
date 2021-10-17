@@ -254,6 +254,7 @@ func (game *Game) LoadResets() error {
 				reset.room = room
 
 				room.resets.Insert(reset)
+
 				resetCount++
 			}
 		}

@@ -122,7 +122,6 @@ func (game *Game) nanny(client *Client, message string) {
 			client.character.client = client
 			output.WriteString("Password: ")
 			client.character.Room = room
-			log.Println(room)
 			client.connectionState = ConnectionStatePassword
 			break
 		}

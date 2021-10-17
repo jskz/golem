@@ -478,7 +478,6 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			}
 
 			obj.addObject(containedObj)
-			log.Println(containedObj)
 		}
 	}
 

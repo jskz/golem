@@ -71,7 +71,9 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 
 	switch obj.itemType {
 	case ItemTypeContainer:
-		output.WriteString(fmt.Sprintf("%s{c can hold up to {C%d{c items and {C%d{c lbs.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.value0, obj.value1))
+		output.WriteString(fmt.Sprintf("{C%s{c can hold up to {C%d{c items and {C%d{c lbs.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.value0, obj.value1))
+	default:
+		break
 	}
 
 	if obj.contents.Count > 0 {
