@@ -198,6 +198,12 @@ func do_flee(ch *Character, arguments string) {
 		rch := iter.Value.(*Character)
 
 		if rch != ch {
+			/* If they were fighting this player, then this is a good time to stop their participation in the fight and let it dispose */
+			if rch.Fighting == ch {
+				rch.Fighting = nil
+				rch.Combat = nil
+			}
+
 			output := fmt.Sprintf("\r\n{R%s{R has fled %s!{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[chosenEscape.direction])
 			rch.Send(output)
 		}
