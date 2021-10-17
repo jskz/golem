@@ -13,6 +13,7 @@ This will be a working document to track major feature development goals for eac
 
 ## 0.2 Milestones
 
+- [x] Host a persistent pre-alpha instance and welcome limited testing: `mud.jskarzin.org:4000`
 - [x] Exit flags: closing and opening doors, movement obstruction
 - [ ] Clean up the inconsistent title case method and field naming stemming from the scripting field mapper change
 - [x] Extend to scripting and entities a timer-based "effects" model for behaviours like buffs/enchantments on equipment or spellcasting, permanent or with expiration
@@ -62,4 +63,4 @@ This will be a working document to track major feature development goals for eac
 
 ## 1.0 Release Milestones
 
-- [ ] Open instance of the server to alpha testing and tag the most recent master commit as 1.0 when a stranger first joins the game
+- [ ] TBD
