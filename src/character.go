@@ -194,11 +194,11 @@ func (ch *Character) onZoneUpdate() {
 func (ch *Character) onUpdate() {
 	/* Regen, script hooks, etc. */
 	if ch.health < ch.maxHealth {
-		ch.health = int(math.Min(float64(ch.maxHealth), float64(ch.health+10)))
+		ch.health = int(math.Min(float64(ch.maxHealth), float64(ch.health+3)))
 	}
 
 	if ch.stamina < ch.maxStamina {
-		ch.stamina = int(math.Min(float64(ch.maxStamina), float64(ch.stamina+15)))
+		ch.stamina = int(math.Min(float64(ch.maxStamina), float64(ch.stamina+40)))
 	}
 }
 
