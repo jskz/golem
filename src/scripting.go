@@ -211,14 +211,10 @@ func (game *Game) InitScripting() error {
 		return game.vm.ToValue(scriptedCommand)
 	}))
 
-	roomConstantsObj := game.vm.NewObject()
-
 	roomFlagsConstantsObj := game.vm.NewObject()
 	roomFlagsConstantsObj.Set("RoomPersistent", ROOM_PERSISTENT)
 	roomFlagsConstantsObj.Set("RoomVirtual", ROOM_VIRTUAL)
 	roomFlagsConstantsObj.Set("RoomSafe", ROOM_SAFE)
-
-	roomConstantsObj.Set("RoomFlags", roomFlagsConstantsObj)
 
 	combatObj := game.vm.NewObject()
 	combatObj.Set("DamageTypeBash", game.vm.ToValue(DamageTypeBash))
@@ -226,7 +222,9 @@ func (game *Game) InitScripting() error {
 	combatObj.Set("DamageTypeStab", game.vm.ToValue(DamageTypeStab))
 	combatObj.Set("DamageTypeExotic", game.vm.ToValue(DamageTypeExotic))
 
+	obj.Set("RoomFlags", roomFlagsConstantsObj)
 	obj.Set("Combat", combatObj)
+
 	game.vm.Set("Golem", obj)
 	game.vm.Set("setTimeout", game.vm.ToValue(game.setTimeout))
 
