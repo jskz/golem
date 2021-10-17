@@ -210,8 +210,9 @@ CREATE TABLE objects (
     `short_description` VARCHAR(255) NOT NULL,
     `long_description` VARCHAR(255) NOT NULL,
     `description` TEXT,
+    `flags` INT,
 
-    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture') NOT NULL DEFAULT 'protoplasm',
+    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign') NOT NULL DEFAULT 'protoplasm',
     `value_1` INT,
     `value_2` INT,
     `value_3` INT,
@@ -236,6 +237,7 @@ CREATE TABLE object_instances (
     `short_description` VARCHAR(255) NOT NULL,
     `long_description` VARCHAR(255) NOT NULL,
     `description` TEXT,
+    `flags` INT,
 
     `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture') NOT NULL DEFAULT 'protoplasm',
 
@@ -282,7 +284,7 @@ INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (4, 1, 'Featurel
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (5, 1, 'Featureless Corridor in Space', 'Flickering torches in the void serve as guideposts marking lanes throughout the astral void, linking discrete spaces.', 4);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (6, 1, 'A Cell', 'A foul stink fills the musty, stale air of a prison cell profaned by unspeakable experiments.', 0);
 
-INSERT INTO objects(id, zone_id, name, short_description, long_description, description, item_type) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!', 'protoplasm');
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!', 0, 'protoplasm');
 
 /* developer office <-> limbo */
 INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 3);

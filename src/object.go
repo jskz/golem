@@ -23,6 +23,7 @@ type Object struct {
 	shortDescription string
 	longDescription  string
 	description      string
+	flags            int
 
 	value0 int
 	value1 int
@@ -45,6 +46,7 @@ type ObjectInstance struct {
 	shortDescription string
 	longDescription  string
 	description      string
+	flags            int
 
 	value0 int
 	value1 int
@@ -61,6 +63,12 @@ const (
 	ItemTypeWeapon    = "weapon"
 	ItemTypeLight     = "light"
 	ItemTypeFurniture = "furniture"
+	ItemTypeSign      = "sign"
+)
+
+const (
+	ITEM_TAKE   = 1
+	ITEM_WEAPON = 1 << 1
 )
 
 func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
@@ -71,6 +79,7 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 			short_description,
 			long_description,
 			description,
+			flags,
 			item_type
 		FROM
 			objects
@@ -81,7 +90,7 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	`, index)
 
 	obj := &Object{}
-	err := row.Scan(&obj.id, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.itemType)
+	err := row.Scan(&obj.id, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.flags, &obj.itemType)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -135,10 +144,10 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 
 	result, err := obj.game.db.Exec(`
 		INSERT INTO
-			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, item_type, value_1, value_2, value_3, value_4)
+			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4)
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, obj.parentId, insideObjectInstanceId, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.itemType, obj.value0, obj.value1, obj.value2, obj.value3)
+	`, obj.parentId, insideObjectInstanceId, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.flags, obj.itemType, obj.value0, obj.value1, obj.value2, obj.value3)
 	if err != nil {
 		log.Printf("Failed to finalize new object: %v.\r\n", err)
 		return err
