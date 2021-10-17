@@ -187,6 +187,11 @@ func do_take(ch *Character, arguments string) {
 			return
 		}
 
+		if takingObj.flags&ITEM_TAKE == 0 {
+			ch.Send(fmt.Sprintf("You are unable to take %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+			return
+		}
+
 		err := ch.attachObject(takingObj)
 		if err != nil {
 			ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
