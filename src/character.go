@@ -18,6 +18,7 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/dop251/goja"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -889,12 +890,32 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 	return nil
 }
 
-func (game *Game) Broadcast(message string) {
-	log.Printf("Broadcast: %s\r\n", message)
+func (game *Game) Broadcast(message string, filter goja.Callable) {
+	var recipients []*Character = make([]*Character, 0)
+
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
+		var result bool = false
+
 		ch := iter.Value.(*Character)
 
-		ch.Send(message)
+		if filter != nil {
+			val, err := filter(game.vm.ToValue(ch))
+			if err != nil {
+				log.Printf("Room.Broadcast failed: %v\r\n", err)
+				break
+			}
+
+			result = val.ToBoolean()
+		}
+
+		if result || filter == nil {
+			recipients = append(recipients, ch)
+		}
+	}
+
+	/* Send message to gathered users */
+	for _, rcpt := range recipients {
+		rcpt.Send(message)
 	}
 }
 
