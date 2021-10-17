@@ -275,13 +275,34 @@ CREATE TABLE player_character_object (
 /* Seed data */
 INSERT INTO zones(id, name, low, high, reset_message, reset_frequency) VALUES (1, 'Limbo', 1, 8192, '{DYou hear a faint rumbling in the distance.{x', 15);
 
-INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 4);
-INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 4);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void, the central nexus of starlit lanes through the heavens before time.', 4);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Office of the Developer', 'An empty room with a lawnchair and a bust of Beethoven wearing sunglasses.', 4);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (3, 1, 'Featureless Corridor in Space', 'Flickering torches in the void serve as guideposts marking lanes throughout the astral void, linking discrete spaces.', 4);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (4, 1, 'Featureless Corridor in Space', 'Flickering torches in the void serve as guideposts marking lanes throughout the astral void, linking discrete spaces.', 4);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (5, 1, 'Featureless Corridor in Space', 'Flickering torches in the void serve as guideposts marking lanes throughout the astral void, linking discrete spaces.', 4);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (6, 1, 'A Cell', 'A foul stink fills the musty, stale air of a prison cell profaned by unspeakable experiments.', 0);
 
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, item_type) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!', 'protoplasm');
 
-INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 0);
-INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (2, 2, 1, 2, 0);
+/* developer office <-> limbo */
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 3);
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (2, 2, 1, 2, 3);
+
+/* limbo <-> corridor central */
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (3, 1, 3, 2, 0);
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (4, 3, 1, 0, 0);
+
+/* corridor central <-> corridor west */
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (5, 3, 4, 3, 0);
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (6, 4, 3, 1, 0);
+
+/* corridor central <-> corridor east */
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (7, 3, 5, 1, 0);
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (8, 5, 3, 3, 0);
+
+/* corridor east <-south-> monster cell A */
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (9, 5, 6, 2, 3);
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (10, 6, 5, 0, 3);
 
 /* Races */
 INSERT INTO
@@ -322,6 +343,11 @@ VALUES
  * VALUES
  *    (1, 1, 2, 'mobile', 1, 1, 1, 1);
  */
+
+INSERT INTO
+    resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
+VALUES
+    (1, 1, 6, 'mobile', 1, 3, 1, 1);
 CREATE INDEX index_pc_username ON player_characters(username);
 CREATE INDEX index_race_name ON races(name);
 CREATE INDEX index_job_name ON jobs(name);
