@@ -13,8 +13,8 @@ COPY migrations /app/migrations
 
 RUN go build -o /app/golem
 
-VOLUME etc
-VOLUME scripts
+VOLUME ./etc
+VOLUME ./scripts
 
 EXPOSE 8080
 
