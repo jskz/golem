@@ -312,7 +312,7 @@ func do_follow(ch *Character, arguments string) {
 
 	if target == ch && ch.Following != nil {
 		ch.Send(fmt.Sprintf("{WYou stop following %s{W.{x\r\n", ch.Following.GetShortDescription(ch)))
-		target.Send(fmt.Sprintf("{W%s{W stops following you.{x", ch.GetShortDescriptionUpper(target)))
+		ch.Following.Send(fmt.Sprintf("{W%s{W stops following you.{x", ch.GetShortDescriptionUpper(ch.Following)))
 		ch.Following = nil
 		return
 	}
