@@ -197,7 +197,8 @@ func (game *Game) Run() {
 		case client := <-game.register:
 			game.clients[client] = true
 
-			log.Printf("New connection from %s\r\n", client.conn.RemoteAddr().String())
+			out := fmt.Sprintf("Network: new connection from %s\r\n", client.conn.RemoteAddr().String())
+			log.Print(out)
 
 			client.connectionState = ConnectionStateName
 

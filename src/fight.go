@@ -228,6 +228,11 @@ func do_kill(ch *Character, arguments string) {
 		return
 	}
 
+	if ch.Room.flags&ROOM_SAFE != 0 {
+		ch.Send("{WYou cannot do that here.{x\r\n")
+		return
+	}
+
 	if ch.Fighting != nil {
 		ch.Send("You are already fighting somebody else!\r\n")
 		return

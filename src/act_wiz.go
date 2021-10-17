@@ -14,6 +14,10 @@ import (
 	"time"
 )
 
+func (ch *Character) isAdmin() bool {
+	return ch.level == LevelAdmin
+}
+
 func do_exec(ch *Character, arguments string) {
 	if ch.client != nil {
 		value, err := ch.game.vm.RunString(arguments)

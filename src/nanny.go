@@ -44,8 +44,13 @@ func (client *Client) displayPrompt() {
 	currentManaColour := SeverityColourFromPercentage(manaPercentage)
 	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
 
+	prompt.WriteString("\r\n")
+	if client.character.Room != nil && client.character.Room.flags&ROOM_SAFE != 0 {
+		prompt.WriteString(client.TranslateColourCodes("{W[SAFE]"))
+	}
+
 	prompt.WriteString(
-		client.TranslateColourCodes(fmt.Sprintf("\r\n{w[%s%d{w/{G%d{ghp %s%d{w/{G%d{gm %s%d{w/{G%d{gst{w]{x ",
+		client.TranslateColourCodes(fmt.Sprintf("{w[%s%d{w/{G%d{ghp %s%d{w/{G%d{gm %s%d{w/{G%d{gst{w]{x ",
 			currentHealthColour,
 			client.character.health,
 			client.character.maxHealth,

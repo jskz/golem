@@ -21,6 +21,13 @@ import (
 const RoomLimbo = 1
 const RoomDeveloperLounge = 2
 
+/* Room flag types */
+const (
+	ROOM_PERSISTENT = 1
+	ROOM_VIRTUAL    = 1 << 1
+	ROOM_SAFE       = 1 << 2
+)
+
 type Room struct {
 	game *Game
 
@@ -109,7 +116,8 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 			id,
 			zone_id,
 			name,
-			description
+			description,
+			flags
 		FROM
 			rooms
 		WHERE
@@ -125,7 +133,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	room.objects = NewLinkedList()
 	room.Characters = NewLinkedList()
 	room.exit = make(map[uint]*Exit)
-	err := row.Scan(&room.Id, &zoneId, &room.name, &room.description)
+	err := row.Scan(&room.Id, &zoneId, &room.name, &room.description, &room.flags)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

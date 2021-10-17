@@ -202,9 +202,17 @@ func do_look(ch *Character, arguments string) {
 		}
 	}
 
+	var roomFlagDescriptionColour string = ""
+	var roomFlagDescription string = ""
+
+	if ch.Room.flags&ROOM_SAFE != 0 {
+		roomFlagDescriptionColour = "{W"
+		roomFlagDescription = "This is a sanctuary."
+	}
+
 	buf.WriteString(fmt.Sprintf("\r\n{Y  %-50s {D-      %s{D      -\r\n", ch.Room.name, lookCompassOutput[DirectionNorth]))
 	buf.WriteString(fmt.Sprintf("{D(--------------------------------------------------) %s{D <-%s{D-{w({W*{w){D-%s{D-> %s\r\n", lookCompassOutput[DirectionWest], lookCompassOutput[DirectionUp], lookCompassOutput[DirectionDown], lookCompassOutput[DirectionEast]))
-	buf.WriteString(fmt.Sprintf("{D                                                     {D-      %s{D      -\r\n", lookCompassOutput[DirectionSouth]))
+	buf.WriteString(fmt.Sprintf("{D  %s%-50s {D-      %s{D      -\r\n", roomFlagDescriptionColour, roomFlagDescription, lookCompassOutput[DirectionSouth]))
 	buf.WriteString(fmt.Sprintf("{w  %s{x\r\n", ch.Room.description))
 
 	if len(ch.Room.exit) > 0 {

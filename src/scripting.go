@@ -211,6 +211,15 @@ func (game *Game) InitScripting() error {
 		return game.vm.ToValue(scriptedCommand)
 	}))
 
+	roomConstantsObj := game.vm.NewObject()
+
+	roomFlagsConstantsObj := game.vm.NewObject()
+	roomFlagsConstantsObj.Set("RoomPersistent", ROOM_PERSISTENT)
+	roomFlagsConstantsObj.Set("RoomVirtual", ROOM_VIRTUAL)
+	roomFlagsConstantsObj.Set("RoomSafe", ROOM_SAFE)
+
+	roomConstantsObj.Set("RoomFlags", roomFlagsConstantsObj)
+
 	combatObj := game.vm.NewObject()
 	combatObj.Set("DamageTypeBash", game.vm.ToValue(DamageTypeBash))
 	combatObj.Set("DamageTypeSlash", game.vm.ToValue(DamageTypeSlash))

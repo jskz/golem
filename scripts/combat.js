@@ -32,6 +32,10 @@ function onCombatUpdate() {
                     break;
                 }
 
+                if(victim.room.flags & Golem.RoomFlags.RoomSafe) {
+                    break;
+                }
+
                 found = true;
 
                 let damage = ~~(Math.random() * 2);
