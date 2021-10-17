@@ -111,7 +111,6 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		log.Printf("Guest attempting to login with name: %s\r\n", name)
-
 		character, room, err := game.FindPlayerByName(name)
 		if err != nil {
 			panic(err)

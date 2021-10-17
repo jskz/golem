@@ -71,6 +71,7 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	 * based on factors like: perks/skills RE: lore knowledge, stats, luck, is admin, etc.
 	 */
 	output.WriteString(fmt.Sprintf("Object '%s' is type %s.\r\n", obj.name, obj.itemType))
+	output.WriteString(fmt.Sprintf("%s{x\r\n", obj.description))
 
 	switch obj.itemType {
 	case ItemTypeContainer:
