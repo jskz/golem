@@ -276,7 +276,7 @@ CREATE TABLE player_character_object (
 INSERT INTO zones(id, name, low, high, reset_message, reset_frequency) VALUES (1, 'Limbo', 1, 8192, '{DYou hear a faint rumbling in the distance.{x', 15);
 
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (1, 1, 'Limbo', 'Floating in an ethereal void.', 4);
-INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 0);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (2, 1, 'Developer Room', 'Another testing room.', 4);
 
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, item_type) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!', 'protoplasm');
 
@@ -313,12 +313,15 @@ INSERT INTO
 VALUES
     (1, 'test creature', 'a test creature', 'A test creature is here to test some development features.', 'Deeper description would be placed here.', 1, 1, 5, 1250, 15, 15, 100, 100, 100, 100, 12, 12, 12, 12, 12, 12, 10);
 
-/* Reset to place the test creature in the developer room */
-INSERT INTO
-    resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
-VALUES
-    (1, 1, 2, 'mobile', 1, 1, 1, 1);
-
+/*
+ * Example:
+ * Reset to place the test creature in the developer room
+ * 
+ * INSERT INTO
+ *    resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
+ * VALUES
+ *    (1, 1, 2, 'mobile', 1, 1, 1, 1);
+ */
 CREATE INDEX index_pc_username ON player_characters(username);
 CREATE INDEX index_race_name ON races(name);
 CREATE INDEX index_job_name ON jobs(name);

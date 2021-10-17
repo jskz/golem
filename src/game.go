@@ -24,6 +24,8 @@ import (
 )
 
 type Game struct {
+	startedAt time.Time
+
 	db *sql.DB
 	vm *goja.Runtime
 
@@ -50,7 +52,7 @@ func NewGame() (*Game, error) {
 	var err error
 
 	/* Create the game world instance and initialize variables & channels */
-	game := &Game{}
+	game := &Game{startedAt: time.Now()}
 
 	game.clients = make(map[*Client]bool)
 	game.register = make(chan *Client)

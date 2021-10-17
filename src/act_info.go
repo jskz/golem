@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 )
 
 /* List all commands available to the player in rows of 7 items. */
@@ -152,6 +153,15 @@ func do_who(ch *Character, arguments string) {
 	}
 
 	buf.WriteString(fmt.Sprintf("\r\n%d players online.\r\n", len(characters)))
+	ch.Send(buf.String())
+}
+
+func do_time(ch *Character, arguments string) {
+	var buf strings.Builder
+
+	buf.WriteString(fmt.Sprintf("{GThe current server time is: {g%s\r\n", time.Now().Format(time.RFC1123)))
+	buf.WriteString(fmt.Sprintf("{YServer has been up since:   {y%s{x\r\n", ch.game.startedAt.Format(time.RFC1123)))
+
 	ch.Send(buf.String())
 }
 
