@@ -214,6 +214,11 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
+	if found.flags&ITEM_TAKE == 0 {
+		ch.Send("You can't take that.\r\n")
+		return
+	}
+
 	/* TODO: Check if object can be taken, weight limits, etc */
 	if ch.flags&CHAR_IS_PLAYER != 0 {
 		err := ch.attachObject(found)
