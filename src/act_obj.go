@@ -66,20 +66,16 @@ func (ch *Character) examineCharacter(other *Character) {
 func (ch *Character) examineObject(obj *ObjectInstance) {
 	var output strings.Builder
 
-	/*
-	 * TODO: conditionally limit the amount of information revealed about the object
-	 * based on factors like: perks/skills RE: lore knowledge, stats, luck, is admin, etc.
-	 */
-	output.WriteString(fmt.Sprintf("Object '%s' is type %s.\r\n", obj.name, obj.itemType))
-	output.WriteString(fmt.Sprintf("%s{x\r\n", obj.description))
+	output.WriteString(fmt.Sprintf("{cObject {C'%s'{c is type {C%s{c.\r\n", obj.name, obj.itemType))
+	output.WriteString(fmt.Sprintf("{C%s{x\r\n", obj.description))
 
 	switch obj.itemType {
 	case ItemTypeContainer:
-		output.WriteString(fmt.Sprintf("%s can hold up to %d items and %d lbs.\r\n", obj.GetShortDescriptionUpper(ch), obj.value0, obj.value1))
+		output.WriteString(fmt.Sprintf("%s{c can hold up to {C%d{c items and {C%d{c lbs.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.value0, obj.value1))
 	}
 
 	if obj.contents.Count > 0 {
-		output.WriteString(fmt.Sprintf("%s contains the following items:\r\n", obj.GetShortDescriptionUpper(ch)))
+		output.WriteString(fmt.Sprintf("{C%s{c contains the following items:\r\n", obj.GetShortDescriptionUpper(ch)))
 		ch.Send(output.String())
 
 		ch.showObjectList(obj.contents)

@@ -239,7 +239,7 @@ CREATE TABLE object_instances (
     `description` TEXT,
     `flags` INT,
 
-    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture') NOT NULL DEFAULT 'protoplasm',
+    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign') NOT NULL DEFAULT 'protoplasm',
 
     `value_1` INT,
     `value_2` INT,
