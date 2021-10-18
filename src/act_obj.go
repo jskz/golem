@@ -180,8 +180,11 @@ func do_use(ch *Character, arguments string) {
 		return
 	}
 
-	script.tryEvaluate("onUse", ch.game.vm.ToValue(using), ch.game.vm.ToValue(ch))
-	return
+	_, err := script.tryEvaluate("onUse", ch.game.vm.ToValue(using), ch.game.vm.ToValue(ch))
+	if err != nil {
+		ch.Send("You can't use that.\r\n")
+		return
+	}
 }
 
 func do_take(ch *Character, arguments string) {
