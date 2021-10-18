@@ -8,6 +8,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -16,6 +17,7 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
+	"github.com/dop251/goja/parser"
 )
 
 type EventHandler struct {
@@ -27,6 +29,66 @@ type ScriptTimer struct {
 	createdAt time.Time
 	callback  goja.Callable
 	delay     int64
+}
+
+type Script struct {
+	id       uint   `json:"id"`
+	name     string `json:"name"`
+	script   string `json:"script"`
+	compiled *goja.Program
+}
+
+func (game *Game) DefaultSourceLoader(filename string) ([]byte, error) {
+	for _, script := range game.scripts {
+		if strings.Compare(strings.ToLower(filename), strings.ToLower(script.name)) == 0 {
+			return []byte(script.script), nil
+		}
+	}
+
+	return nil, errors.New("unable to find a script of that name")
+}
+
+func (game *Game) LoadScriptsFromDatabase() error {
+	game.scripts = make(map[uint]*Script)
+
+	rows, err := game.db.Query(`
+		SELECT
+			scripts.id,
+			scripts.name,
+			scripts.script
+		FROM
+			skills
+	`)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		script := &Script{}
+
+		err := rows.Scan(&script.id, &script.name, &script.script)
+		if err != nil {
+			log.Printf("Failed to load script from database: %v\r\n", err)
+			continue
+		}
+
+		source := "(function(exports, require, module) {" + script.script + "\n})"
+		parsed, err := goja.Parse(script.name, source, parser.WithSourceMapLoader(game.DefaultSourceLoader))
+		if err != nil {
+			return err
+		}
+
+		script.compiled, err = goja.CompileAST(parsed, false)
+		if err != nil {
+			return err
+		}
+
+		game.scripts[script.id] = script
+	}
+
+	return nil
 }
 
 func (game *Game) setTimeout(cb goja.Callable, delay int64) goja.Value {
@@ -91,7 +153,7 @@ func (game *Game) LoadScripts() error {
 }
 
 func (game *Game) LoadScriptsFromDirectory(directory string) error {
-	log.Printf(fmt.Sprintf("Loading scripts from directory %s:\r\n", directory))
+	log.Printf("Loading scripts from directory %s:\r\n", directory)
 	scripts, err := ioutil.ReadDir(directory)
 	if err != nil {
 		return err
@@ -112,7 +174,7 @@ func (game *Game) LoadScriptsFromDirectory(directory string) error {
 				return err
 			}
 		} else {
-			log.Printf(fmt.Sprintf("Loading script: %s\r\n", path))
+			log.Printf("Loading script: %s\r\n", path)
 			bytes, err := ioutil.ReadFile(path)
 			if err != nil {
 				return err
@@ -136,6 +198,11 @@ func do_reload(ch *Character, arguments string) {
 	if err != nil {
 		ch.Send(fmt.Sprintf("{RFailed reload: %s{x\r\n", err.Error()))
 		return
+	}
+
+	err = ch.game.LoadScriptsFromDatabase()
+	if err != nil {
+		ch.Send(fmt.Sprintf("{RFailed database reload: %s{x\r\n", err.Error()))
 	}
 
 	ch.Send("{GScripts reloaded.{x\r\n")
@@ -229,6 +296,11 @@ func (game *Game) InitScripting() error {
 	game.vm.Set("setTimeout", game.vm.ToValue(game.setTimeout))
 
 	err := game.LoadScripts()
+	if err != nil {
+		return err
+	}
+
+	err = game.LoadScriptsFromDatabase()
 	if err != nil {
 		return err
 	}

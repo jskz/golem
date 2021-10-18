@@ -38,6 +38,7 @@ type Game struct {
 	ScriptTimers *LinkedList `json:"scriptTimers"`
 
 	clients map[*Client]bool
+	scripts map[uint]*Script
 	skills  map[uint]*Skill
 	world   map[uint]*Room
 
