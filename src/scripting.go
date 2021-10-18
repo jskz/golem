@@ -57,7 +57,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			scripts.name,
 			scripts.script
 		FROM
-			skills
+			scripts
 	`)
 	if err != nil {
 		return err
@@ -88,6 +88,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		game.scripts[script.id] = script
 	}
 
+	log.Printf("Loaded %d scripts from database.\r\n", len(game.scripts))
 	return nil
 }
 
