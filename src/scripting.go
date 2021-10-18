@@ -85,6 +85,17 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			return err
 		}
 
+		res, err := game.vm.RunProgram(script.compiled)
+		if err != nil {
+			return err
+		}
+
+		_, ok := goja.AssertFunction(res)
+		if !ok {
+			log.Printf("Failed to execute script (%s) loaded from database.", script.name)
+			continue
+		}
+
 		game.scripts[script.id] = script
 	}
 
