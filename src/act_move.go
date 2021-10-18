@@ -139,6 +139,10 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		character.Send(fmt.Sprintf("{W%s{W leaves %s.{x\r\n", ch.GetShortDescriptionUpper(character), ExitName[direction]))
 	}
 
+	if from.script != nil {
+		from.script.tryEvaluate("onRoomLeave", ch.game.vm.ToValue(from), ch.game.vm.ToValue(ch))
+	}
+
 	exit.to.addCharacter(ch)
 	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
@@ -160,6 +164,10 @@ func (ch *Character) move(direction uint, follow bool) bool {
 			character.Send(fmt.Sprintf("{WYou follow %s{W.{x\r\n", ch.GetShortDescription(character)))
 			character.move(direction, true)
 		}
+	}
+
+	if exit.to.script != nil {
+		exit.to.script.tryEvaluate("onRoomEnter", ch.game.vm.ToValue(exit.to), ch.game.vm.ToValue(ch))
 	}
 
 	return true

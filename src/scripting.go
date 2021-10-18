@@ -51,6 +51,10 @@ func (game *Game) DefaultSourceLoader(filename string) ([]byte, error) {
 func (game *Game) LoadScriptsFromDatabase() error {
 	game.scripts = make(map[uint]*Script)
 
+	// game.mobileScripts = make(map[uint]*Script)
+	game.objectScripts = make(map[uint]*Script)
+	//game.roomScripts = make(map[uint]*Script)
+
 	rows, err := game.db.Query(`
 		SELECT
 			scripts.id,
@@ -111,6 +115,76 @@ func (game *Game) LoadScriptsFromDatabase() error {
 	}
 
 	log.Printf("Loaded %d scripts from database.\r\n", len(game.scripts))
+
+	log.Println("Loading object-script relations from database...")
+	rows, err = game.db.Query(`
+		SELECT
+			object_script.object_id,
+			object_script.script_id
+		FROM
+			object_script
+	`)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var objectId uint
+		var scriptId uint
+
+		err := rows.Scan(&objectId, &scriptId)
+		if err != nil {
+			return err
+		}
+
+		_, ok := game.scripts[scriptId]
+		if !ok {
+			log.Printf("Trying to relate object with script")
+			continue
+		}
+
+		game.objectScripts[objectId] = game.scripts[scriptId]
+	}
+
+	log.Println("Loading room-script relations from database...")
+	rows, err = game.db.Query(`
+		SELECT
+			room_script.room_id,
+			room_script.script_id
+		FROM
+			room_script
+	`)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var roomId uint
+		var scriptId uint
+
+		err := rows.Scan(&roomId, &scriptId)
+		if err != nil {
+			return err
+		}
+
+		_, ok := game.scripts[scriptId]
+		if !ok {
+			log.Printf("Trying to relate room with script")
+			continue
+		}
+
+		room, err := game.LoadRoomIndex(roomId)
+		if err != nil {
+			return err
+		}
+
+		room.script = game.scripts[scriptId]
+	}
+
 	return nil
 }
 
@@ -138,6 +212,21 @@ func (game *Game) scriptTimersUpdate() {
 			break
 		}
 	}
+}
+
+func (script *Script) tryEvaluate(methodName string, this goja.Value, arguments ...goja.Value) (goja.Value, error) {
+	v := script.exports.Get(methodName)
+	fn, ok := goja.AssertFunction(v)
+	if !ok {
+		return nil, errors.New(fmt.Sprintf("methodName not a function exported by script %s", script.name))
+	}
+
+	result, err := fn(this, arguments...)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, this goja.Value, arguments ...goja.Value) ([]goja.Value, []error) {

@@ -31,8 +31,9 @@ const (
 type Room struct {
 	game *Game
 
-	Id   uint `json:"id"`
-	zone *Zone
+	Id     uint `json:"id"`
+	zone   *Zone
+	script *Script
 
 	flags   int
 	virtual bool
