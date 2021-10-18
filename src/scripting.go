@@ -32,10 +32,10 @@ type ScriptTimer struct {
 }
 
 type Script struct {
-	id       uint   `json:"id"`
-	name     string `json:"name"`
-	script   string `json:"script"`
-	compiled *goja.Program
+	id      uint   `json:"id"`
+	name    string `json:"name"`
+	script  string `json:"script"`
+	exports *goja.Object
 }
 
 func (game *Game) DefaultSourceLoader(filename string) ([]byte, error) {
@@ -80,22 +80,33 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			return err
 		}
 
-		script.compiled, err = goja.CompileAST(parsed, false)
+		compiled, err := goja.CompileAST(parsed, false)
 		if err != nil {
 			return err
 		}
 
-		res, err := game.vm.RunProgram(script.compiled)
+		res, err := game.vm.RunProgram(compiled)
 		if err != nil {
 			return err
 		}
 
-		_, ok := goja.AssertFunction(res)
+		fn, ok := goja.AssertFunction(res)
 		if !ok {
 			log.Printf("Failed to execute script (%s) loaded from database.", script.name)
 			continue
 		}
 
+		module := game.vm.NewObject()
+		exports := game.vm.NewObject()
+		module.Set("exports", exports)
+
+		_, err = fn(exports, exports, nil, module)
+		if err != nil {
+			log.Printf("Failed to evaluate script (%s) loaded from database: %v\r\n", script.name, err)
+			continue
+		}
+
+		script.exports = module.ToObject(game.vm).Get("exports").ToObject(game.vm)
 		game.scripts[script.id] = script
 	}
 

@@ -895,6 +895,8 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 func (game *Game) Broadcast(message string, filter goja.Callable) {
 	var recipients []*Character = make([]*Character, 0)
 
+	log.Printf("System-wide broadcast: %s\r\n", message)
+
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		var result bool = false
 
