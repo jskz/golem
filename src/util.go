@@ -8,9 +8,42 @@
 package main
 
 import (
+	"bytes"
+	"io/ioutil"
+	"net/http"
 	"strings"
 	"unicode"
 )
+
+func SimpleGET(url string, data string) (string, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return "", err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
+
+func SimplePOST(url string, data string) (string, error) {
+	resp, err := http.Post(url,
+		"application/json",
+		bytes.NewBuffer([]byte(data)))
+	if err != nil {
+		return "", err
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+
+	return string(body), nil
+}
 
 func oneArgument(args string) (string, string) {
 	var buf strings.Builder

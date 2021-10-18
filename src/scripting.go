@@ -387,6 +387,7 @@ func (game *Game) InitScripting() error {
 		}
 
 		CommandTable[command] = scriptedCommand
+
 		return game.vm.ToValue(scriptedCommand)
 	}))
 
@@ -401,8 +402,13 @@ func (game *Game) InitScripting() error {
 	combatObj.Set("DamageTypeStab", game.vm.ToValue(DamageTypeStab))
 	combatObj.Set("DamageTypeExotic", game.vm.ToValue(DamageTypeExotic))
 
+	httpUtilityObj := game.vm.NewObject()
+	httpUtilityObj.Set("Get", game.vm.ToValue(SimpleGET))
+	httpUtilityObj.Set("Post", game.vm.ToValue(SimplePOST))
+
 	obj.Set("RoomFlags", roomFlagsConstantsObj)
 	obj.Set("Combat", combatObj)
+	obj.Set("HTTP", httpUtilityObj)
 
 	game.vm.Set("Golem", obj)
 	game.vm.Set("setTimeout", game.vm.ToValue(game.setTimeout))
