@@ -153,6 +153,37 @@ func do_remove(ch *Character, arguments string) {
 	ch.Send("Not yet implemented, try again soon!\r\n")
 }
 
+func do_use(ch *Character, arguments string) {
+	if len(arguments) < 1 {
+		ch.Send("Use what?\r\n")
+		return
+	}
+
+	if ch.Room == nil {
+		return
+	}
+
+	firstArgument, _ := oneArgument(arguments)
+	var using *ObjectInstance = ch.findObjectInRoom(firstArgument)
+	if using == nil {
+		using = ch.findObjectOnSelf(firstArgument)
+
+		if using == nil {
+			ch.Send("No such item found.\r\n")
+			return
+		}
+	}
+
+	script, ok := using.game.objectScripts[using.parentId]
+	if !ok {
+		ch.Send("You can't use that.\r\n")
+		return
+	}
+
+	script.tryEvaluate("onUse", ch.game.vm.ToValue(using), ch.game.vm.ToValue(ch))
+	return
+}
+
 func do_take(ch *Character, arguments string) {
 	var firstArgument string = ""
 	var secondArgument string = ""
