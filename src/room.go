@@ -75,15 +75,7 @@ func (room *Room) removeCharacter(ch *Character) {
 }
 
 func (room *Room) listObjectsToCharacter(ch *Character) {
-	var output strings.Builder
-
-	for iter := room.objects.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
-
-		output.WriteString(fmt.Sprintf("    {W%s{x\r\n", obj.longDescription))
-	}
-
-	ch.Send(output.String())
+	ch.listObjects(room.objects, true)
 }
 
 func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {

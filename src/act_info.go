@@ -9,10 +9,26 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"sort"
 	"strings"
 	"time"
 )
+
+func (ch *Character) examineCharacter(other *Character) {
+	if other.flags&CHAR_IS_PLAYER == 0 {
+		ch.Send(fmt.Sprintf("{G%s{x\r\n", other.description))
+	}
+
+	peek := ch.FindProficiencyByName("peek")
+	if peek != nil && rand.Intn(100) < peek.Proficiency {
+		if other.inventory.Count > 0 {
+			ch.Send(fmt.Sprintf("{Y%s{Y is carrying the following items:{x\r\n", other.GetShortDescriptionUpper(ch)))
+			ch.showObjectList(other.inventory)
+			return
+		}
+	}
+}
 
 /* List all commands available to the player in rows of 7 items. */
 func do_help(ch *Character, arguments string) {
@@ -170,7 +186,7 @@ func do_look(ch *Character, arguments string) {
 	var obj *ObjectInstance = nil
 
 	if ch.Room == nil {
-		ch.Send("{DYou look around into the void.  There's nothing here, yet!{x\r\n")
+		ch.Send("{DYou look around in the void.  There's nothing here, yet!{x\r\n")
 		return
 	}
 

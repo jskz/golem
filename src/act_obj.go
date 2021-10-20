@@ -10,7 +10,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"strings"
 )
 
@@ -48,19 +47,50 @@ func init() {
 	WearLocations[WearLocationHeld] = "<held>                "
 }
 
-func (ch *Character) examineCharacter(other *Character) {
-	if other.flags&CHAR_IS_PLAYER == 0 {
-		ch.Send(fmt.Sprintf("{G%s{x\r\n", other.description))
-	}
+func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool) {
+	var output strings.Builder
+	var inventory map[string]uint = make(map[string]uint)
 
-	peek := ch.FindProficiencyByName("peek")
-	if peek != nil && rand.Intn(100) < peek.Proficiency {
-		if other.inventory.Count > 0 {
-			ch.Send(fmt.Sprintf("{Y%s{Y is carrying the following items:{x\r\n", other.GetShortDescriptionUpper(ch)))
-			ch.showObjectList(other.inventory)
-			return
+	for iter := objects.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		var description string = obj.longDescription
+		if !longDescriptions {
+			description = obj.shortDescription
+		}
+
+		_, ok := inventory[description]
+		if !ok {
+			inventory[description] = 1
+		} else {
+			inventory[description]++
 		}
 	}
+
+	for iter := objects.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		var description string = obj.longDescription
+		if !longDescriptions {
+			description = obj.shortDescription
+		}
+
+		count, ok := inventory[description]
+		if !ok {
+			continue
+		}
+
+		if count > 1 {
+			output.WriteString(fmt.Sprintf("(%3d) %s{x\r\n", count, description))
+			delete(inventory, description)
+			continue
+		}
+
+		output.WriteString(fmt.Sprintf("      %s{x\r\n", description))
+		delete(inventory, description)
+	}
+
+	ch.Send(output.String())
 }
 
 func (ch *Character) examineObject(obj *ObjectInstance) {
@@ -112,27 +142,17 @@ func do_equipment(ch *Character, arguments string) {
 }
 
 func do_inventory(ch *Character, arguments string) {
-	var output strings.Builder
 	var count int = 0
 	var weightTotal float64 = 0.0
 
-	output.WriteString("\r\n{YYour current inventory:{x\r\n")
+	ch.Send("\r\n{YYour current inventory:{x\r\n")
+	ch.listObjects(ch.inventory, false)
 
-	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
-
-		output.WriteString(fmt.Sprintf("{x    %s\r\n", obj.GetShortDescription(ch)))
-
-		count++
-	}
-
-	output.WriteString(fmt.Sprintf("{xTotal: %d/%d items, %0.1f/%.1f lbs.\r\n",
+	ch.Send(fmt.Sprintf("{xTotal: %d/%d items, %0.1f/%.1f lbs.\r\n",
 		count,
 		ch.getMaxItemsInventory(),
 		weightTotal,
 		ch.getMaxCarryWeight()))
-
-	ch.Send(output.String())
 }
 
 func do_wear(ch *Character, arguments string) {
