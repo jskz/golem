@@ -146,6 +146,8 @@ CREATE TABLE mobiles (
     `race_id` BIGINT NOT NULL,
     `job_id` BIGINT NOT NULL,
 
+    `flags` INT NOT NULL DEFAULT 0,
+
     `level` INT NOT NULL,
     `experience` INT NOT NULL,
 
