@@ -10,6 +10,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/dop251/goja"
@@ -29,6 +30,8 @@ const (
 )
 
 type Proficiency struct {
+	Job *Job `json:"job"`
+
 	Id          uint `json:"id"`
 	SkillId     uint `json:"skillId"`
 	Proficiency int  `json:"proficiency"`
@@ -119,6 +122,10 @@ func do_practice(ch *Character, arguments string) {
 	ch.Send(output.String())
 }
 
+func (ch *Character) SaveSkills() error {
+	return nil
+}
+
 func (game *Game) LoadSkills() error {
 	game.skills = make(map[uint]*Skill)
 
@@ -175,6 +182,7 @@ func (ch *Character) LoadPlayerSkills() error {
 		SELECT
 			pc_skill_proficiency.id,
 			pc_skill_proficiency.skill_id,
+			pc_skill_proficiency.job_id,
 			pc_skill_proficiency.proficiency,
 
 			job_skill.level,
@@ -198,9 +206,24 @@ func (ch *Character) LoadPlayerSkills() error {
 	for rows.Next() {
 		proficiency := &Proficiency{}
 
-		err := rows.Scan(&proficiency.Id, &proficiency.SkillId, &proficiency.Proficiency, &proficiency.Level, &proficiency.Complexity, &proficiency.Cost)
+		var jobId uint = 0
+
+		err := rows.Scan(&proficiency.Id, &proficiency.SkillId, &jobId, &proficiency.Proficiency, &proficiency.Level, &proficiency.Complexity, &proficiency.Cost)
 		if err != nil {
 			return err
+		}
+
+		for iter := Jobs.Head; iter != nil; iter = iter.Next {
+			job := iter.Value.(*Job)
+
+			if job.Id == jobId {
+				proficiency.Job = job
+			}
+		}
+
+		if proficiency.Job == nil {
+			log.Printf("Failed to attach PC proficiency because its job ID did not exist.\r\n")
+			return nil
 		}
 
 		ch.skills[proficiency.Id] = proficiency
