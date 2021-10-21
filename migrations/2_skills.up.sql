@@ -35,6 +35,7 @@ CREATE TABLE pc_skill_proficiency (
 
     `player_character_id` BIGINT NOT NULL,
     `skill_id` BIGINT NOT NULL,
+    `job_id` BIGINT NOT NULL,
 
     `proficiency` INT NOT NULL,
 
@@ -44,6 +45,7 @@ CREATE TABLE pc_skill_proficiency (
 
     PRIMARY KEY (id),
     FOREIGN KEY (player_character_id) REFERENCES player_characters(id),
+    FOREIGN KEY (job_id) REFERENCES jobs(id),
     FOREIGN KEY (skill_id) REFERENCES skills(id)
 );
 
@@ -79,13 +81,13 @@ INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (10,
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (8, 3, 5, 1, 1, 20);
 
 /* Grant some skills mastered to the seed admin user as well */
-INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (1, 1, 1, 100);
-INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (2, 1, 2, 100);
-INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (3, 1, 3, 100);
-INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (4, 1, 4, 100);
-INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (5, 1, 5, 100);
-INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (6, 1, 6, 100);
-INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (7, 1, 7, 100);
-INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, proficiency) VALUES (8, 1, 8, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (1, 1, 1, 2, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (2, 1, 2, 1, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (3, 1, 3, 2, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (4, 1, 4, 4, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (5, 1, 5, 3, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (6, 1, 6, 1, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (7, 1, 7, 4, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (8, 1, 8, 4, 100);
 
 CREATE INDEX index_skill_name ON skills(name);
