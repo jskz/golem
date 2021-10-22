@@ -43,12 +43,12 @@ type JobSkill struct {
 type Proficiency struct {
 	Job *Job `json:"job"`
 
-	Id          uint `json:"id"`
-	SkillId     uint `json:"skillId"`
-	Proficiency int  `json:"proficiency"`
-	Level       int  `json:"level"`
-	Complexity  int  `json:"complexity"`
-	Cost        int  `json:"cost"`
+	Id          *uint `json:"id"`
+	SkillId     uint  `json:"skillId"`
+	Proficiency int   `json:"proficiency"`
+	Level       int   `json:"level"`
+	Complexity  int   `json:"complexity"`
+	Cost        int   `json:"cost"`
 }
 
 func (game *Game) RegisterSkillHandler(name string, fn goja.Callable) goja.Value {
@@ -82,9 +82,9 @@ func (game *Game) FindSkillByName(name string) *Skill {
 }
 
 func (ch *Character) FindProficiencyByName(name string) *Proficiency {
-	for _, skill := range ch.game.skills {
-		if skill.name == name {
-			return ch.skills[skill.id]
+	for _, skill := range ch.skills {
+		if ch.game.skills[skill.SkillId].name == name {
+			return ch.skills[skill.SkillId]
 		}
 	}
 
@@ -92,6 +92,30 @@ func (ch *Character) FindProficiencyByName(name string) *Proficiency {
 }
 
 func (ch *Character) syncJobSkills() error {
+	for iter := ch.job.Skills.Head; iter != nil; iter = iter.Next {
+		jobSkill := iter.Value.(*JobSkill)
+
+		if uint(jobSkill.Level) > ch.level {
+			continue
+		}
+
+		_, ok := ch.skills[jobSkill.Skill.id]
+		if !ok {
+			proficiency := &Proficiency{}
+
+			proficiency.SkillId = jobSkill.Skill.id
+			proficiency.Complexity = jobSkill.Complexity
+			proficiency.Level = jobSkill.Level
+			proficiency.Cost = jobSkill.Cost
+			proficiency.Proficiency = 0
+			proficiency.Id = nil
+
+			/* Try to create the pc_skill_proficiency relationship before finalizing this skill attach */
+
+			ch.skills[jobSkill.Skill.id] = proficiency
+		}
+	}
+
 	return nil
 }
 
@@ -251,7 +275,7 @@ func (ch *Character) LoadPlayerSkills() error {
 			return nil
 		}
 
-		ch.skills[proficiency.Id] = proficiency
+		ch.skills[*proficiency.Id] = proficiency
 	}
 
 	return nil
