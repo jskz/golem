@@ -140,7 +140,9 @@ func do_who(ch *Character, arguments string) {
 		var flagsString strings.Builder
 
 		if character.afk != nil {
-			flagsString.WriteString("{G[AFK]{x ")
+			afkMinutes := int(time.Since(character.afk.startedAt).Minutes())
+
+			flagsString.WriteString(fmt.Sprintf("{G[AFK %dm]{x ", afkMinutes))
 		}
 
 		jobDisplay := character.job.DisplayName
