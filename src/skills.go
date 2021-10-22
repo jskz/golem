@@ -107,6 +107,7 @@ func (ch *Character) syncJobSkills() error {
 			proficiency.Complexity = jobSkill.Complexity
 			proficiency.Level = jobSkill.Level
 			proficiency.Cost = jobSkill.Cost
+			proficiency.Job = jobSkill.Job
 			proficiency.Proficiency = 0
 
 			/* Try to create the pc_skill_proficiency relationship before finalizing this skill attach */
@@ -175,6 +176,12 @@ func do_practice(ch *Character, arguments string) {
 	output.WriteString("{WYou have knowledge of the following skills and spells:{x\r\n")
 
 	for id, proficiency := range ch.skills {
+		_, ok := ch.game.skills[id]
+		if !ok {
+			log.Printf("Player had a proficiency with a nonexistent id %d.\r\n", id)
+			continue
+		}
+
 		count++
 
 		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.Proficiency))
@@ -292,7 +299,7 @@ func (ch *Character) LoadPlayerSkills() error {
 			return nil
 		}
 
-		ch.skills[proficiency.Id] = proficiency
+		ch.skills[proficiency.SkillId] = proficiency
 	}
 
 	return nil

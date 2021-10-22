@@ -238,6 +238,30 @@ func (ch *Character) Finalize() error {
 	return nil
 }
 
+func (ch *Character) SavePlayerSkills() error {
+	var proficiencyValues strings.Builder
+
+	for _, proficiency := range ch.skills {
+		proficiencyValues.WriteString(fmt.Sprintf("(%d, %d, %d, %d, %d),", proficiency.Id, ch.Id, proficiency.SkillId, proficiency.Job.Id, proficiency.Proficiency))
+	}
+
+	proficiencyValuesString := strings.TrimRight(proficiencyValues.String(), ",")
+	_, err := ch.game.db.Exec(fmt.Sprintf(`
+	INSERT INTO
+		pc_skill_proficiency (id, player_character_id, skill_id, job_id, proficiency)
+	VALUES
+		%s
+	ON DUPLICATE KEY
+		UPDATE
+			proficiency = VALUES(proficiency)`,
+		proficiencyValuesString))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (ch *Character) Save() bool {
 	if ch.client == nil || ch.game == nil {
 		/* If somehow an NPC were to try to save, do not allow it. */
@@ -284,6 +308,12 @@ func (ch *Character) Save() bool {
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		log.Printf("Failed to retrieve number of rows affected: %v.\r\n", err)
+		return false
+	}
+
+	err = ch.SavePlayerSkills()
+	if err != nil {
+		log.Printf("Failed to save player proficiencies: %v.\r\n", err)
 		return false
 	}
 
