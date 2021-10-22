@@ -43,12 +43,12 @@ type JobSkill struct {
 type Proficiency struct {
 	Job *Job `json:"job"`
 
-	Id          *uint `json:"id"`
-	SkillId     uint  `json:"skillId"`
-	Proficiency int   `json:"proficiency"`
-	Level       int   `json:"level"`
-	Complexity  int   `json:"complexity"`
-	Cost        int   `json:"cost"`
+	Id          uint `json:"id"`
+	SkillId     uint `json:"skillId"`
+	Proficiency int  `json:"proficiency"`
+	Level       int  `json:"level"`
+	Complexity  int  `json:"complexity"`
+	Cost        int  `json:"cost"`
 }
 
 func (game *Game) RegisterSkillHandler(name string, fn goja.Callable) goja.Value {
@@ -108,10 +108,27 @@ func (ch *Character) syncJobSkills() error {
 			proficiency.Level = jobSkill.Level
 			proficiency.Cost = jobSkill.Cost
 			proficiency.Proficiency = 0
-			proficiency.Id = nil
 
 			/* Try to create the pc_skill_proficiency relationship before finalizing this skill attach */
+			res, err := ch.game.db.Exec(`
+			INSERT INTO
+				pc_skill_proficiency(player_character_id, skill_id, job_id, proficiency)
+			VALUES
+				(?, ?, ?, ?)
+			`, ch.Id, jobSkill.Skill.id, jobSkill.Job.Id, 0)
+			if err != nil {
+				return err
+			}
 
+			var insertId int64
+
+			insertId, err = res.LastInsertId()
+			if err != nil {
+				return err
+			}
+
+			/* We have successfully insert the PC proficiency, attach it in-memory and continue */
+			proficiency.Id = uint(insertId)
 			ch.skills[jobSkill.Skill.id] = proficiency
 		}
 	}
@@ -275,7 +292,7 @@ func (ch *Character) LoadPlayerSkills() error {
 			return nil
 		}
 
-		ch.skills[*proficiency.Id] = proficiency
+		ch.skills[proficiency.Id] = proficiency
 	}
 
 	return nil

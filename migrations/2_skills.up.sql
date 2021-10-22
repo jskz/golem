@@ -34,7 +34,7 @@ CREATE TABLE job_skill (
 );
 
 CREATE TABLE pc_skill_proficiency (
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
 
     `player_character_id` BIGINT NOT NULL,
     `skill_id` BIGINT NOT NULL,
