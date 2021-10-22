@@ -690,6 +690,11 @@ func (ch *Character) gainExperience(experience int) {
 				ch.Send(fmt.Sprintf("{YYou have advanced to level %d!\r\n{x", ch.level))
 				/* Any extra announce/log */
 
+				err := ch.syncJobSkills()
+				if err != nil {
+					log.Println(err)
+				}
+
 				continue
 			}
 

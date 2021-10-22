@@ -91,6 +91,10 @@ func (ch *Character) FindProficiencyByName(name string) *Proficiency {
 	return nil
 }
 
+func (ch *Character) syncJobSkills() error {
+	return nil
+}
+
 func do_skills(ch *Character, arguments string) {
 	var output strings.Builder
 	var count int = 0

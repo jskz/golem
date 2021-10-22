@@ -24,7 +24,7 @@ CREATE TABLE job_skill (
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-    
+
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,
 
@@ -39,7 +39,6 @@ CREATE TABLE pc_skill_proficiency (
     `player_character_id` BIGINT NOT NULL,
     `skill_id` BIGINT NOT NULL,
     `job_id` BIGINT NOT NULL,
-
     `proficiency` INT NOT NULL,
 
     /* Timestamps */
