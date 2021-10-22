@@ -266,9 +266,6 @@ func do_kill(ch *Character, arguments string) {
 
 	if target.Fighting == nil {
 		target.Fighting = ch
-	}
-
-	if target.Combat == nil {
 		target.Combat = combat
 	}
 

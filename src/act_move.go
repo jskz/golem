@@ -170,6 +170,18 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		exit.to.script.tryEvaluate("onRoomEnter", ch.game.vm.ToValue(exit.to), ch.game.vm.ToValue(ch))
 	}
 
+	/* Aggro check... */
+	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
+		character := iter.Value.(*Character)
+
+		if character != ch {
+			/* If the entering player is a PC, this is a hostile NPC, and that hostile NPC is not currently preoccupied with another combat, then let's rum	ble. */
+			if (ch.flags&CHAR_IS_PLAYER != 0) && (character.flags&CHAR_IS_PLAYER == 0) && (character.flags&CHAR_AGGRESSIVE != 0) {
+				do_kill(character, ch.name)
+			}
+		}
+	}
+
 	return true
 }
 
