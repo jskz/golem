@@ -695,6 +695,7 @@ func (ch *Character) gainExperience(experience int) {
 					log.Println(err)
 				}
 
+				ch.Save()
 				continue
 			}
 
