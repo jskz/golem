@@ -25,11 +25,12 @@ import (
 const UnauthenticatedUsername = "unnamed"
 
 type Job struct {
-	Id                         uint    `json:"id"`
-	Name                       string  `json:"name"`
-	DisplayName                string  `json:"display_name"`
-	Playable                   bool    `json:"playable"`
-	ExperienceRequiredModifier float64 `json:"experience_required_modifier"`
+	Id                         uint        `json:"id"`
+	Name                       string      `json:"name"`
+	DisplayName                string      `json:"display_name"`
+	Playable                   bool        `json:"playable"`
+	ExperienceRequiredModifier float64     `json:"experience_required_modifier"`
+	Skills                     *LinkedList `json:"skills"`
 }
 
 type Race struct {

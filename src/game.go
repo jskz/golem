@@ -117,6 +117,11 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
+	err = game.LoadJobSkills()
+	if err != nil {
+		return nil, err
+	}
+
 	game.world = make(map[uint]*Room)
 
 	err = game.LoadZones()

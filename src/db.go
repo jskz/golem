@@ -8,6 +8,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"strings"
 )
@@ -122,10 +123,63 @@ func (game *Game) LoadJobTable() {
 			continue
 		}
 
+		job.Skills = NewLinkedList()
 		Jobs.Insert(job)
 	}
 
 	log.Printf("Loaded %d jobs from database.\r\n", Jobs.Count)
+}
+
+/* Load job-skill relationships */
+func (game *Game) LoadJobSkills() error {
+	log.Printf("Loading job-skill relationships.\r\n")
+
+	rows, err := game.db.Query(`
+		SELECT
+			id,
+			job_id,
+			skill_id,
+			level,
+			complexity,
+			cost
+		FROM
+			job_skill
+		WHERE
+			deleted_at IS NULL
+	`)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		jobSkill := &JobSkill{}
+
+		var jobId uint = 0
+		var skillId uint = 0
+
+		err := rows.Scan(&jobSkill.Id, &jobId, &skillId, &jobSkill.Level, &jobSkill.Complexity, &jobSkill.Cost)
+		if err != nil {
+			log.Printf("Unable to scan job row: %v.\r\n", err)
+			continue
+		}
+
+		jobSkill.Job = FindJobByID(jobId)
+		if jobSkill.Job == nil {
+			return errors.New("failed to attach job during job-skill relations load")
+		}
+
+		jobSkill.Skill = game.FindSkillByID(skillId)
+		if jobSkill.Skill == nil {
+			return errors.New("failed to attach skill during job-skill relations load")
+		}
+
+		jobSkill.Job.Skills.Insert(jobSkill)
+	}
+
+	log.Printf("Loaded %d job-skill relations from database.\r\n", Jobs.Count)
+	return nil
 }
 
 /* Utility lookup methods */

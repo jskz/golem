@@ -29,6 +29,17 @@ const (
 	SkillTypePassive = 2
 )
 
+type JobSkill struct {
+	Id int `json:"id"`
+
+	Job   *Job   `json:"job"`
+	Skill *Skill `json:"skill"`
+
+	Level      int `json:"level"`
+	Complexity int `json:"complexity"`
+	Cost       int `json:"cost"`
+}
+
 type Proficiency struct {
 	Job *Job `json:"job"`
 
@@ -48,6 +59,16 @@ func (game *Game) RegisterSkillHandler(name string, fn goja.Callable) goja.Value
 
 	skill.handler = &fn
 	return game.vm.ToValue(skill)
+}
+
+func (game *Game) FindSkillByID(id uint) *Skill {
+	for _, skill := range game.skills {
+		if skill.id == id {
+			return skill
+		}
+	}
+
+	return nil
 }
 
 func (game *Game) FindSkillByName(name string) *Skill {

@@ -24,6 +24,9 @@ CREATE TABLE job_skill (
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    
+    `deleted_at` TIMESTAMP NULL DEFAULT NULL,
+    `deleted_by` BIGINT DEFAULT NULL,
 
     PRIMARY KEY (id),
     FOREIGN KEY (job_id) REFERENCES jobs(id),
