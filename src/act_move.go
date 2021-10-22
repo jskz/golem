@@ -176,7 +176,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 		if character != ch {
 			/* If the entering player is a PC, this is a hostile NPC, and that hostile NPC is not currently preoccupied with another combat, then let's rum	ble. */
-			if (ch.flags&CHAR_IS_PLAYER != 0) && (character.flags&CHAR_IS_PLAYER == 0) && (character.flags&CHAR_AGGRESSIVE != 0) {
+			if (ch.flags&CHAR_IS_PLAYER != 0) && (character.flags&CHAR_IS_PLAYER == 0) && (character.flags&CHAR_AGGRESSIVE != 0) && (character.Fighting == nil) {
 				do_kill(character, ch.name)
 			}
 		}
