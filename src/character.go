@@ -49,6 +49,9 @@ const (
 	CHAR_SENTINEL   = 1 << 1
 	CHAR_STAY_AREA  = 1 << 2
 	CHAR_AGGRESSIVE = 1 << 3
+	CHAR_TRAIN      = 1 << 4
+	CHAR_PRACTICE   = 1 << 5
+	CHAR_HEALER     = 1 << 6
 )
 
 const (

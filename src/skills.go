@@ -165,14 +165,56 @@ func do_skills(ch *Character, arguments string) {
 }
 
 func do_practice(ch *Character, arguments string) {
+	var firstArgument string = ""
 	var output strings.Builder
 	var count int = 0
 
-	/*
-	 * TODO: implement the has-arguments path where we can practice skills
-	 * TODO: group output items alphasorted by skill type, colourized
-	 * TBD: will train be a separate command, or do we practice attributes, too?
-	 */
+	firstArgument, _ = oneArgument(arguments)
+
+	if firstArgument != "" {
+		var trainerFound bool = false
+
+		if ch.Room == nil {
+			ch.Send("You can't practice here.\r\n")
+			return
+		}
+
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+			rch := iter.Value.(*Character)
+
+			if rch.flags&CHAR_PRACTICE != 0 {
+				trainerFound = true
+			}
+		}
+
+		if !trainerFound {
+			ch.Send("There is nobody here who can teach you.\r\n")
+			return
+		}
+
+		skill := ch.game.FindSkillByName(firstArgument)
+		if skill == nil {
+			ch.Send("You can't practice that.\r\n")
+			return
+		}
+
+		prof, ok := ch.skills[skill.id]
+		if !ok {
+			ch.Send("You can't practice that.\r\n")
+			return
+		}
+
+		if ch.practices < prof.Complexity {
+			ch.Send("You don't have enough practice sessions.\r\n")
+			return
+		}
+
+		ch.practices -= prof.Complexity
+		prof.Proficiency++
+		ch.Send(fmt.Sprintf("{WYou practice %s.{x\r\n", skill.name))
+		return
+	}
+
 	output.WriteString("{WYou have knowledge of the following skills and spells:{x\r\n")
 
 	for id, proficiency := range ch.skills {
