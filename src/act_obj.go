@@ -117,6 +117,36 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	ch.Send(output.String())
 }
 
+func (ch *Character) getEquipment(wearLocation int) *ObjectInstance {
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		if obj.WearLocation == wearLocation {
+			return obj
+		}
+	}
+
+	return nil
+}
+
+func (ch *Character) detachEquipment(obj *ObjectInstance, wearLocation int) bool {
+	if ch.getEquipment(wearLocation) == nil {
+		return false
+	}
+
+	obj.WearLocation = -1
+	return true
+}
+
+func (ch *Character) attachEquipment(obj *ObjectInstance, wearLocation int) bool {
+	if ch.getEquipment(wearLocation) != nil {
+		return false
+	}
+
+	obj.WearLocation = wearLocation
+	return true
+}
+
 func do_equipment(ch *Character, arguments string) {
 	var output strings.Builder
 
@@ -124,15 +154,12 @@ func do_equipment(ch *Character, arguments string) {
 
 	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
 		var objectDescription strings.Builder
+		var obj *ObjectInstance = ch.getEquipment(i)
 
-		if ch.equipment[i] == nil {
+		if obj == nil {
 			objectDescription.WriteString("nothing")
 		} else {
-			obj := ch.equipment[i]
-
 			objectDescription.WriteString(obj.GetShortDescription(ch))
-
-			/* TODO: item flags - glowing, humming, etc? Append extra details here. */
 		}
 
 		output.WriteString(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], objectDescription.String()))

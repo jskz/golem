@@ -240,6 +240,7 @@ CREATE TABLE object_instances (
     `long_description` VARCHAR(255) NOT NULL,
     `description` TEXT,
     `flags` INT,
+    `wear_location` INT DEFAULT -1,
 
     `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign') NOT NULL DEFAULT 'protoplasm',
 

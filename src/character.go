@@ -414,12 +414,13 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 				short_description = ?,
 				long_description = ?,
 				description = ?,
+				wear_location = ?,
 				flags = ?,
 				value_1 = ?,
 				value_2 = ?,
 				value_3 = ?,
 				value_4 = ?
-		`, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.flags, obj.value0, obj.value1, obj.value2, obj.value3)
+		`, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.WearLocation, obj.flags, obj.value0, obj.value1, obj.value2, obj.value3)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -446,6 +447,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			object_instances.description,
 			object_instances.flags,
 			object_instances.item_type,
+			object_instances.wear_location,
 			object_instances.value_1,
 			object_instances.value_2,
 			object_instances.value_3,
@@ -467,14 +469,15 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 
 	for rows.Next() {
 		obj := &ObjectInstance{
-			game:      game,
-			contents:  NewLinkedList(),
-			inside:    nil,
-			carriedBy: nil,
-			createdAt: time.Now(),
+			game:         game,
+			contents:     NewLinkedList(),
+			inside:       nil,
+			carriedBy:    nil,
+			createdAt:    time.Now(),
+			WearLocation: -1,
 		}
 
-		err = rows.Scan(&obj.id, &obj.parentId, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.flags, &obj.itemType, &obj.value0, &obj.value1, &obj.value2, &obj.value3)
+		err = rows.Scan(&obj.id, &obj.parentId, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.flags, &obj.itemType, &obj.WearLocation, &obj.value0, &obj.value1, &obj.value2, &obj.value3)
 		if err != nil {
 			return err
 		}
@@ -512,11 +515,12 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 
 		for rows.Next() {
 			containedObj := &ObjectInstance{
-				game:      game,
-				contents:  NewLinkedList(),
-				inside:    nil,
-				carriedBy: nil,
-				createdAt: time.Now(),
+				game:         game,
+				contents:     NewLinkedList(),
+				inside:       nil,
+				carriedBy:    nil,
+				createdAt:    time.Now(),
+				WearLocation: -1,
 			}
 
 			err = rows.Scan(&containedObj.id, &containedObj.parentId, &containedObj.name, &containedObj.shortDescription, &containedObj.longDescription, &containedObj.description, &containedObj.flags, &containedObj.itemType, &containedObj.value0, &containedObj.value1, &containedObj.value2, &containedObj.value3)

@@ -38,6 +38,7 @@ func (game *Game) createBlood(intensity int) *ObjectInstance {
 	obj.createdAt = time.Now()
 	obj.flags = ITEM_DECAYS | ITEM_DECAY_SILENTLY
 	obj.ttl = 5
+	obj.WearLocation = -1
 
 	return obj
 }
@@ -54,6 +55,7 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj.createdAt = time.Now()
 	obj.flags = ITEM_DECAYS
 	obj.ttl = 20
+	obj.WearLocation = -1
 
 	if ch.Flags&CHAR_IS_PLAYER == 0 {
 		obj.contents = NewLinkedList()
