@@ -14,17 +14,18 @@ import (
 )
 
 type Plane struct {
-	Game       *Game   `json:"game"`
-	Zone       *Zone   `json:"zone"`
-	Id         int     `json:"id"`
-	Flags      int     `json:"flags"`
-	Name       string  `json:"name"`
-	Width      int     `json:"width"`
-	Height     int     `json:"height"`
-	Depth      int     `json:"depth"`
-	PlaneType  string  `json:"planeType"`
-	SourceType string  `json:"sourceType"`
-	Scripts    *Script `json:"scripts"`
+	Game       *Game    `json:"game"`
+	Zone       *Zone    `json:"zone"`
+	Dungeon    *Dungeon `json:"dungeon"`
+	Id         int      `json:"id"`
+	Flags      int      `json:"flags"`
+	Name       string   `json:"name"`
+	Width      int      `json:"width"`
+	Height     int      `json:"height"`
+	Depth      int      `json:"depth"`
+	PlaneType  string   `json:"planeType"`
+	SourceType string   `json:"sourceType"`
+	Scripts    *Script  `json:"scripts"`
 
 	Maze    *MazeGrid   `json:"maze"`
 	Portals *LinkedList `json:"portals"`
@@ -105,6 +106,7 @@ func (plane *Plane) generate() error {
 
 				go func() {
 					dungeon = game.GenerateDungeon(plane.Depth, plane.Width, plane.Height)
+
 					wg.Done()
 				}()
 
@@ -115,6 +117,7 @@ func (plane *Plane) generate() error {
 					return
 				}
 
+				plane.Dungeon = dungeon
 				game.planeGenerationCompleted <- plane.Id
 
 				/* Unlock the entrance */

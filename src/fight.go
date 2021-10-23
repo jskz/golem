@@ -188,8 +188,8 @@ func do_flee(ch *Character, arguments string) {
 
 	var exits []*Exit = make([]*Exit, 0)
 
-	for _, exit := range ch.Room.exit {
-		if exit.to != nil && exit.flags&EXIT_CLOSED == 0 {
+	for _, exit := range ch.Room.Exit {
+		if exit.To != nil && exit.Flags&EXIT_CLOSED == 0 {
 			exits = append(exits, exit)
 		}
 	}
@@ -213,7 +213,7 @@ func do_flee(ch *Character, arguments string) {
 	var choice int = rand.Intn(len(exits))
 	var chosenEscape *Exit = exits[choice]
 
-	ch.Send(fmt.Sprintf("{RYou panic and flee %s!{x\r\n", ExitName[chosenEscape.direction]))
+	ch.Send(fmt.Sprintf("{RYou panic and flee %s!{x\r\n", ExitName[chosenEscape.Direction]))
 
 	/* Announce player's departure to all other players in the current room */
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
@@ -226,7 +226,7 @@ func do_flee(ch *Character, arguments string) {
 				rch.Combat = nil
 			}
 
-			output := fmt.Sprintf("\r\n{R%s{R has fled %s!{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[chosenEscape.direction])
+			output := fmt.Sprintf("\r\n{R%s{R has fled %s!{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[chosenEscape.Direction])
 			rch.Send(output)
 		}
 	}
@@ -235,15 +235,15 @@ func do_flee(ch *Character, arguments string) {
 	ch.Combat = nil
 
 	ch.Room.Characters.Remove(ch)
-	ch.Room = chosenEscape.to
-	chosenEscape.to.Characters.Insert(ch)
+	ch.Room = chosenEscape.To
+	chosenEscape.To.Characters.Insert(ch)
 
 	/* Announce player's arrival to all other players in the new room */
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
 		if rch != ch {
-			output := fmt.Sprintf("\r\n{W%s{W arrives from %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[ReverseDirection[chosenEscape.direction]])
+			output := fmt.Sprintf("\r\n{W%s{W arrives from %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[ReverseDirection[chosenEscape.Direction]])
 			rch.Send(output)
 		}
 	}

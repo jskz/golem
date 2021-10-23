@@ -217,10 +217,10 @@ func do_look(ch *Character, arguments string) {
 
 	var lookCompassOutput map[uint]string = make(map[uint]string)
 	for k := uint(0); k < DirectionMax; k++ {
-		if ch.Room.exit[k] != nil {
-			if ch.Room.exit[k].flags&EXIT_CLOSED != 0 && ch.Room.exit[k].flags&EXIT_LOCKED != 0 {
+		if ch.Room.Exit[k] != nil {
+			if ch.Room.Exit[k].Flags&EXIT_CLOSED != 0 && ch.Room.Exit[k].Flags&EXIT_LOCKED != 0 {
 				lookCompassOutput[k] = "{R#"
-			} else if ch.Room.exit[k].flags&EXIT_CLOSED != 0 {
+			} else if ch.Room.Exit[k].Flags&EXIT_CLOSED != 0 {
 				lookCompassOutput[k] = "{M#"
 			} else {
 				lookCompassOutput[k] = fmt.Sprintf("{Y%s", ExitCompassName[k])
@@ -243,13 +243,13 @@ func do_look(ch *Character, arguments string) {
 	buf.WriteString(fmt.Sprintf("{D  %s%-50s {D-      %s{D      -\r\n", roomFlagDescriptionColour, roomFlagDescription, lookCompassOutput[DirectionSouth]))
 	buf.WriteString(fmt.Sprintf("\r\n{w  %s{x\r\n", ch.Room.Description))
 
-	if len(ch.Room.exit) > 0 {
+	if len(ch.Room.Exit) > 0 {
 		var exitsString strings.Builder
 
 		for direction := uint(0); direction < DirectionMax; direction++ {
-			_, ok := ch.Room.exit[direction]
+			_, ok := ch.Room.Exit[direction]
 			if ok {
-				if ch.Room.exit[direction].flags&EXIT_CLOSED != 0 {
+				if ch.Room.Exit[direction].Flags&EXIT_CLOSED != 0 {
 					exitsString.WriteString("#")
 				}
 

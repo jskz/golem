@@ -77,22 +77,31 @@ const (
 )
 
 type Terrain struct {
-	id           int
-	name         string
-	mapGlyph     string
-	movementCost int
-	flags        int
+	id           int    `json:"id"`
+	name         string `json:"name"`
+	mapGlyph     string `json:"mapGlyph"`
+	movementCost int    `json:"movementCost"`
+	flags        int    `json:"flags"`
 }
 
 type Exit struct {
-	id        uint
-	direction uint
-	to        *Room
-	flags     int
+	Id        uint  `json:"id"`
+	Direction uint  `json:"direction"`
+	To        *Room `json:"to"`
+	Flags     int   `json:"flags"`
+}
+
+func (game *Game) NewExit(direction uint, to *Room, flags int) *Exit {
+	return &Exit{
+		Id:        0,
+		To:        to,
+		Direction: direction,
+		Flags:     flags,
+	}
 }
 
 func (room *Room) getExit(direction uint) *Exit {
-	return room.exit[direction]
+	return room.Exit[direction]
 }
 
 func (ch *Character) move(direction uint, follow bool) bool {
@@ -114,12 +123,12 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	}
 
 	exit := ch.Room.getExit(direction)
-	if exit == nil || exit.to == nil {
+	if exit == nil || exit.To == nil {
 		ch.Send("{RAlas, you cannot go that way.{x\r\n")
 		return false
 	}
 
-	if exit.flags&EXIT_CLOSED != 0 {
+	if exit.Flags&EXIT_CLOSED != 0 {
 		ch.Send("{RIt is closed.{x\r\n")
 		return false
 	}
@@ -143,8 +152,8 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		from.script.tryEvaluate("onRoomLeave", ch.game.vm.ToValue(from), ch.game.vm.ToValue(ch))
 	}
 
-	exit.to.addCharacter(ch)
-	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
+	exit.To.addCharacter(ch)
+	for iter := exit.To.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 		if character != ch {
 			character.Send(fmt.Sprintf("{W%s{W arrives from %s.{x\r\n", ch.GetShortDescriptionUpper(character), ExitName[ReverseDirection[direction]]))
@@ -153,7 +162,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	do_look(ch, "")
 
-	if exit.to == from {
+	if exit.To == from {
 		return true
 	}
 
@@ -166,12 +175,12 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		}
 	}
 
-	if exit.to.script != nil {
-		exit.to.script.tryEvaluate("onRoomEnter", ch.game.vm.ToValue(exit.to), ch.game.vm.ToValue(ch))
+	if exit.To.script != nil {
+		exit.To.script.tryEvaluate("onRoomEnter", ch.game.vm.ToValue(exit.To), ch.game.vm.ToValue(ch))
 	}
 
 	/* Aggro check... */
-	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
+	for iter := exit.To.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 
 		if character != ch {
@@ -216,18 +225,18 @@ func do_close(ch *Character, arguments string) {
 		return
 	}
 
-	if exit == nil || exit.flags&EXIT_IS_DOOR == 0 {
+	if exit == nil || exit.Flags&EXIT_IS_DOOR == 0 {
 		ch.Send("You can't close that.\r\n")
 		return
 	}
 
-	if exit.flags&EXIT_CLOSED != 0 {
+	if exit.Flags&EXIT_CLOSED != 0 {
 		ch.Send("It's already closed.\r\n")
 		return
 	}
 
-	exit.flags |= EXIT_CLOSED
-	exit.to.exit[ReverseDirection[exit.direction]].flags |= EXIT_CLOSED
+	exit.Flags |= EXIT_CLOSED
+	exit.To.Exit[ReverseDirection[exit.Direction]].Flags |= EXIT_CLOSED
 
 	ch.Send("You close the door.\r\n")
 
@@ -235,13 +244,13 @@ func do_close(ch *Character, arguments string) {
 		rch := iter.Value.(*Character)
 
 		if rch != ch {
-			rch.Send(fmt.Sprintf("{W%s{W closes the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.direction]))
+			rch.Send(fmt.Sprintf("{W%s{W closes the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.Direction]))
 		}
 	}
 
-	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
+	for iter := exit.To.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
-		character.Send(fmt.Sprintf("{WThe %s door closes.{x\r\n", ExitName[ReverseDirection[exit.direction]]))
+		character.Send(fmt.Sprintf("{WThe %s door closes.{x\r\n", ExitName[ReverseDirection[exit.Direction]]))
 	}
 }
 
@@ -276,21 +285,21 @@ func do_open(ch *Character, arguments string) {
 		return
 	}
 
-	if exit == nil || exit.flags&EXIT_IS_DOOR == 0 {
+	if exit == nil || exit.Flags&EXIT_IS_DOOR == 0 {
 		ch.Send("You can't open that.\r\n")
 		return
 	}
 
-	if exit.flags&EXIT_CLOSED == 0 {
+	if exit.Flags&EXIT_CLOSED == 0 {
 		ch.Send("It isn't closed.\r\n")
 		return
-	} else if exit.flags&EXIT_LOCKED != 0 {
+	} else if exit.Flags&EXIT_LOCKED != 0 {
 		ch.Send("It's locked.\r\n")
 		return
 	}
 
-	exit.flags &= ^EXIT_CLOSED
-	exit.to.exit[ReverseDirection[exit.direction]].flags &= ^EXIT_CLOSED
+	exit.Flags &= ^EXIT_CLOSED
+	exit.To.Exit[ReverseDirection[exit.Direction]].Flags &= ^EXIT_CLOSED
 
 	ch.Send("You open the door.\r\n")
 
@@ -298,13 +307,13 @@ func do_open(ch *Character, arguments string) {
 		rch := iter.Value.(*Character)
 
 		if rch != ch {
-			rch.Send(fmt.Sprintf("{W%s{W opens the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.direction]))
+			rch.Send(fmt.Sprintf("{W%s{W opens the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.Direction]))
 		}
 	}
 
-	for iter := exit.to.Characters.Head; iter != nil; iter = iter.Next {
+	for iter := exit.To.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
-		character.Send(fmt.Sprintf("{WThe %s door opens.{x\r\n", ExitName[ReverseDirection[exit.direction]]))
+		character.Send(fmt.Sprintf("{WThe %s door opens.{x\r\n", ExitName[ReverseDirection[exit.Direction]]))
 	}
 }
 

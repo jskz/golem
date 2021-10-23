@@ -13,50 +13,50 @@ import (
 )
 
 type MazeCell struct {
-	grid    *MazeGrid
-	room    *Room
-	terrain int
-	wall    bool
-	x       int
-	y       int
+	Grid    *MazeGrid `json:"grid"`
+	Room    *Room     `json:"room"`
+	Terrain int       `json:"terrain"`
+	Wall    bool      `json:"wall"`
+	X       int       `json:"x"`
+	Y       int       `json:"y"`
 }
 
 type MazeGrid struct {
-	game   *Game
-	grid   [][]*MazeCell
-	width  int
-	height int
-	entryX int
-	entryY int
-	endX   int
-	endY   int
+	game   *Game         `json:"game"`
+	Grid   [][]*MazeCell `json:"grid"`
+	width  int           `json:"width"`
+	height int           `json:"height"`
+	EntryX int           `json:"entryX"`
+	EntryY int           `json:"entryY"`
+	EndX   int           `json:"endX"`
+	EndY   int           `json:"endY"`
 }
 
 func (game *Game) NewMaze(width int, height int) *MazeGrid {
 	maze := &MazeGrid{
 		game:   game,
-		grid:   make([][]*MazeCell, width),
+		Grid:   make([][]*MazeCell, width),
 		width:  width,
 		height: height,
 	}
 
 	for i := 0; i < height; i++ {
-		maze.grid[i] = make([]*MazeCell, height)
+		maze.Grid[i] = make([]*MazeCell, height)
 	}
 
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-			maze.grid[x][y] = &MazeCell{
-				room:    nil,
-				grid:    maze,
-				x:       x,
-				y:       y,
-				wall:    true,
-				terrain: TerrainTypeCaveDeepWall1,
+			maze.Grid[x][y] = &MazeCell{
+				Room:    nil,
+				Grid:    maze,
+				X:       x,
+				Y:       y,
+				Wall:    true,
+				Terrain: TerrainTypeCaveDeepWall1,
 			}
 
 			if rand.Intn(10) > 7 && x >= 1 && y >= 1 && x <= maze.width-1 && y <= maze.height-1 {
-				maze.grid[x][y].terrain = TerrainTypeCaveDeepWall1 + rand.Intn(4)
+				maze.Grid[x][y].Terrain = TerrainTypeCaveDeepWall1 + rand.Intn(4)
 			}
 		}
 	}
@@ -77,38 +77,38 @@ func (cell *MazeCell) getAdjacentCells(wall bool, distance int, ordinals bool) *
 	}
 
 	for direction := DirectionNorth; direction < top; direction++ {
-		var translatedX int = cell.x
-		var translatedY int = cell.y
+		var translatedX int = cell.X
+		var translatedY int = cell.Y
 
 		switch direction {
 		case DirectionNorth:
-			translatedX = cell.x
-			translatedY = cell.y - distance
+			translatedX = cell.X
+			translatedY = cell.Y - distance
 		case DirectionEast:
-			translatedX = cell.x + distance
-			translatedY = cell.y
+			translatedX = cell.X + distance
+			translatedY = cell.Y
 		case DirectionSouth:
-			translatedX = cell.x
-			translatedY = cell.y + distance
+			translatedX = cell.X
+			translatedY = cell.Y + distance
 		case DirectionWest:
-			translatedX = cell.x - distance
-			translatedY = cell.y
+			translatedX = cell.X - distance
+			translatedY = cell.Y
 		case DirectionNortheast:
-			translatedX = cell.x + distance
-			translatedY = cell.y - distance
+			translatedX = cell.X + distance
+			translatedY = cell.Y - distance
 		case DirectionSoutheast:
-			translatedX = cell.x + distance
-			translatedY = cell.y + distance
+			translatedX = cell.X + distance
+			translatedY = cell.Y + distance
 		case DirectionSouthwest:
-			translatedX = cell.x - distance
-			translatedY = cell.y + distance
+			translatedX = cell.X - distance
+			translatedY = cell.Y + distance
 		case DirectionNorthwest:
-			translatedX = cell.x - distance
-			translatedY = cell.y - distance
+			translatedX = cell.X - distance
+			translatedY = cell.Y - distance
 		}
 
-		if cell.grid.isValidPosition(translatedX, translatedY) && cell.grid.grid[translatedX][translatedY].wall == wall {
-			list.Insert(cell.grid.grid[translatedX][translatedY])
+		if cell.Grid.isValidPosition(translatedX, translatedY) && cell.Grid.Grid[translatedX][translatedY].Wall == wall {
+			list.Insert(cell.Grid.Grid[translatedX][translatedY])
 		}
 	}
 
@@ -121,21 +121,21 @@ func (cell *MazeCell) setAdjacentCellsTerrainType(wall bool, distance int, terra
 	for iter := cells.Head; iter != nil; iter = iter.Next {
 		cell := iter.Value.(*MazeCell)
 
-		if cell.wall == wall {
-			cell.terrain = terrain
+		if cell.Wall == wall {
+			cell.Terrain = terrain
 		}
 	}
 }
 
 /* Dig a maze using Prim's algorithm */
 func (maze *MazeGrid) generatePrimMaze() {
-	maze.entryX = rand.Intn(maze.width-3) + 2
-	maze.entryY = rand.Intn(maze.height-3) + 2
+	maze.EntryX = rand.Intn(maze.width-3) + 2
+	maze.EntryY = rand.Intn(maze.height-3) + 2
 
-	var entryPoint *MazeCell = maze.grid[maze.entryX][maze.entryY]
+	var entryPoint *MazeCell = maze.Grid[maze.EntryX][maze.EntryY]
 
 	entryPoint.setWall(false)
-	entryPoint.terrain = TerrainTypeCaveTunnel
+	entryPoint.Terrain = TerrainTypeCaveTunnel
 
 	frontiers := entryPoint.getAdjacentCells(true, 2, false)
 
@@ -150,18 +150,18 @@ func (maze *MazeGrid) generatePrimMaze() {
 		if neighbours.Count > 0 {
 			neighbour := neighbours.GetRandomNode().Value.(*MazeCell)
 
-			passageX := (neighbour.x + f.x) / 2
-			passageY := (neighbour.y + f.y) / 2
+			passageX := (neighbour.X + f.X) / 2
+			passageY := (neighbour.Y + f.Y) / 2
 
 			f.setWall(false)
-			f.terrain = TerrainTypeCaveTunnel
-			maze.grid[passageX][passageY].setWall(false)
-			maze.grid[passageX][passageY].terrain = TerrainTypeCaveTunnel
+			f.Terrain = TerrainTypeCaveTunnel
+			maze.Grid[passageX][passageY].setWall(false)
+			maze.Grid[passageX][passageY].Terrain = TerrainTypeCaveTunnel
 			neighbour.setWall(false)
-			neighbour.terrain = TerrainTypeCaveTunnel
+			neighbour.Terrain = TerrainTypeCaveTunnel
 
 			f.setAdjacentCellsTerrainType(true, 1, TerrainTypeCaveWall)
-			maze.grid[passageX][passageY].setAdjacentCellsTerrainType(true, 1, TerrainTypeCaveWall)
+			maze.Grid[passageX][passageY].setAdjacentCellsTerrainType(true, 1, TerrainTypeCaveWall)
 			neighbour.setAdjacentCellsTerrainType(true, 1, TerrainTypeCaveWall)
 		}
 
@@ -174,33 +174,33 @@ func (maze *MazeGrid) generatePrimMaze() {
 }
 
 func (cell *MazeCell) setWall(wall bool) {
-	cell.wall = wall
+	cell.Wall = wall
 }
 
 func (maze *MazeGrid) createRoom(x int, y int) *Room {
-	if maze.grid[x][y].room != nil {
-		return maze.grid[x][y].room
+	if maze.Grid[x][y].Room != nil {
+		return maze.Grid[x][y].Room
 	}
 
 	room := maze.game.NewRoom()
 	room.Id = 0
 	room.zone = nil
 	room.virtual = true
-	room.cell = maze.grid[x][y]
+	room.cell = maze.Grid[x][y]
 	room.Name = "In the Underground"
 	room.Description = "You are deep within the dark dungeons of development."
-	room.exit = make(map[uint]*Exit)
+	room.Exit = make(map[uint]*Exit)
 	room.Characters = NewLinkedList()
 	room.objects = NewLinkedList()
 
-	maze.grid[x][y].room = room
+	maze.Grid[x][y].Room = room
 	return room
 }
 
 func (maze *MazeGrid) reify() {
 	for y := 0; y < maze.height; y++ {
 		for x := 0; x < maze.width; x++ {
-			if !maze.grid[x][y].wall {
+			if !maze.Grid[x][y].Wall {
 				room := maze.createRoom(x, y)
 
 				for direction := DirectionNorth; direction < DirectionUp; direction++ {
@@ -222,14 +222,14 @@ func (maze *MazeGrid) reify() {
 						translatedY = y
 					}
 
-					if maze.isValidPosition(translatedX, translatedY) && !maze.grid[translatedX][translatedY].wall {
+					if maze.isValidPosition(translatedX, translatedY) && !maze.Grid[translatedX][translatedY].Wall {
 						to := maze.createRoom(translatedX, translatedY)
 
 						exit := &Exit{}
-						exit.to = to
-						exit.direction = uint(direction)
+						exit.To = to
+						exit.Direction = uint(direction)
 
-						room.exit[exit.direction] = exit
+						room.Exit[exit.Direction] = exit
 					}
 				}
 			}
@@ -244,21 +244,21 @@ func (ch *Character) CreateMazeMap() string {
 		return ""
 	}
 
-	var maze *MazeGrid = ch.Room.cell.grid
+	var maze *MazeGrid = ch.Room.cell.Grid
 	if maze == nil {
 		return ""
 	}
 
 	for y := 0; y < maze.height; y++ {
 		for x := 0; x < maze.width; x++ {
-			if x == ch.Room.cell.x && y == ch.Room.cell.y {
+			if x == ch.Room.cell.X && y == ch.Room.cell.Y {
 				output.WriteString("{Y@")
-			} else if x == maze.entryX && y == maze.entryY {
+			} else if x == maze.EntryX && y == maze.EntryY {
 				output.WriteString("{M^")
-			} else if x == maze.endX && y == maze.endY {
+			} else if x == maze.EndX && y == maze.EndY {
 				output.WriteString("{Mv")
 			} else {
-				var terrain *Terrain = TerrainTable[maze.grid[x][y].terrain]
+				var terrain *Terrain = TerrainTable[maze.Grid[x][y].Terrain]
 
 				output.WriteString(terrain.mapGlyph)
 			}

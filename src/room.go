@@ -39,14 +39,14 @@ type Room struct {
 	virtual bool
 	cell    *MazeCell
 
-	Name        string
-	Description string
+	Name        string `json:"name"`
+	Description string `json:"description"`
 
 	objects    *LinkedList
 	resets     *LinkedList
 	Characters *LinkedList `json:"characters"`
 
-	exit map[uint]*Exit
+	Exit map[uint]*Exit `json:"exit"`
 }
 
 func (room *Room) addObject(obj *ObjectInstance) {
@@ -125,7 +125,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	room.resets = NewLinkedList()
 	room.objects = NewLinkedList()
 	room.Characters = NewLinkedList()
-	room.exit = make(map[uint]*Exit)
+	room.Exit = make(map[uint]*Exit)
 	err := row.Scan(&room.Id, &zoneId, &room.Name, &room.Description, &room.flags)
 
 	if err != nil {
@@ -181,8 +181,8 @@ func (game *Game) FixExits() error {
 		var roomId int
 		var toRoomId int
 
-		rows.Scan(&exit.id, &roomId, &toRoomId, &exit.direction, &exit.flags)
-		exit.to, err = game.LoadRoomIndex(uint(toRoomId))
+		rows.Scan(&exit.Id, &roomId, &toRoomId, &exit.Direction, &exit.Flags)
+		exit.To, err = game.LoadRoomIndex(uint(toRoomId))
 		if err != nil {
 			continue
 		}
@@ -192,7 +192,7 @@ func (game *Game) FixExits() error {
 			continue
 		}
 
-		from.exit[exit.direction] = exit
+		from.Exit[exit.Direction] = exit
 	}
 
 	return nil

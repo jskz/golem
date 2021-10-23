@@ -23,7 +23,7 @@ type MazeAStarVisit struct {
 
 /* Taxi cab distance because only cardinal directions for now :-) */
 func (maze *MazeGrid) heuristic(node *MazeCell, target *MazeCell) int {
-	d := math.Abs(float64(node.y-target.y)) + math.Abs(float64(node.x-target.x))
+	d := math.Abs(float64(node.Y-target.Y)) + math.Abs(float64(node.X-target.X))
 
 	return int(d)
 }
@@ -36,40 +36,40 @@ func do_path(ch *Character, arguments string) {
 
 	args := strings.Split(arguments, " ")
 	if len(args) < 2 {
-		ch.Send(fmt.Sprintf("Usage: path <x> <y>\r\nYour current position is (%d, %d).\r\n", ch.Room.cell.x, ch.Room.cell.y))
+		ch.Send(fmt.Sprintf("Usage: path <x> <y>\r\nYour current position is (%d, %d).\r\n", ch.Room.cell.X, ch.Room.cell.Y))
 		return
 	}
 
 	x, err := strconv.Atoi(args[0])
 	if err != nil {
-		ch.Send(fmt.Sprintf("Usage: path <x> <y>\r\nYour current position is (%d, %d).\r\n", ch.Room.cell.x, ch.Room.cell.y))
+		ch.Send(fmt.Sprintf("Usage: path <x> <y>\r\nYour current position is (%d, %d).\r\n", ch.Room.cell.X, ch.Room.cell.Y))
 		return
 	}
 
 	y, err := strconv.Atoi(args[1])
 	if err != nil {
-		ch.Send(fmt.Sprintf("Usage: path <x> <y>\r\nYour current position is (%d, %d).\r\n", ch.Room.cell.x, ch.Room.cell.y))
+		ch.Send(fmt.Sprintf("Usage: path <x> <y>\r\nYour current position is (%d, %d).\r\n", ch.Room.cell.X, ch.Room.cell.Y))
 		return
 	}
 
-	if !ch.Room.cell.grid.isValidPosition(x, y) {
+	if !ch.Room.cell.Grid.isValidPosition(x, y) {
 		ch.Send(fmt.Sprintf("Target (%d, %d) out of bounds.\r\n", x, y))
 		return
 	}
 
-	target := ch.Room.cell.grid.grid[x][y]
-	if target == nil || target.wall {
-		ch.Send(fmt.Sprintf("Bad cell or obstacle at (%d, %d).\r\n", target.x, target.y))
+	target := ch.Room.cell.Grid.Grid[x][y]
+	if target == nil || target.Wall {
+		ch.Send(fmt.Sprintf("Bad cell or obstacle at (%d, %d).\r\n", target.X, target.Y))
 		return
 	}
 
 	var output strings.Builder
 
-	pathNodes := ch.Room.cell.grid.findPathAStar(ch.Room.cell, target)
+	pathNodes := ch.Room.cell.Grid.findPathAStar(ch.Room.cell, target)
 
-	output.WriteString(fmt.Sprintf("{YPath from (%d, %d) to (%d, %d) in %d moves.{x\r\n", ch.Room.cell.x, ch.Room.cell.y, target.x, target.y, int(math.Max(0, float64(len(pathNodes)-1)))))
+	output.WriteString(fmt.Sprintf("{YPath from (%d, %d) to (%d, %d) in %d moves.{x\r\n", ch.Room.cell.X, ch.Room.cell.Y, target.X, target.Y, int(math.Max(0, float64(len(pathNodes)-1)))))
 	for r := len(pathNodes) - 1; r >= 0; r-- {
-		output.WriteString(fmt.Sprintf("{G(%d, %d){x\r\n", pathNodes[r].cell.x, pathNodes[r].cell.y))
+		output.WriteString(fmt.Sprintf("{G(%d, %d){x\r\n", pathNodes[r].cell.X, pathNodes[r].cell.Y))
 	}
 
 	ch.Send(output.String())
@@ -81,7 +81,7 @@ func (maze *MazeGrid) findPathAStar(start *MazeCell, end *MazeCell) []*MazeAStar
 
 	for y := 0; y < maze.height; y++ {
 		for x := 0; x < maze.width; x++ {
-			unvisited[maze.grid[x][y]] = &MazeAStarVisit{gScore: 1000000, fScore: 1000000, previous: nil, cell: maze.grid[x][y]}
+			unvisited[maze.Grid[x][y]] = &MazeAStarVisit{gScore: 1000000, fScore: 1000000, previous: nil, cell: maze.Grid[x][y]}
 		}
 	}
 

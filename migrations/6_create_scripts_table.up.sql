@@ -66,4 +66,32 @@ CREATE TABLE plane_script (
     FOREIGN KEY (script_id) REFERENCES scripts(id)
 );
 
+INSERT INTO 
+    scripts(id, name, script)
+VALUES (1, 'limbo-developer-maze', 
+"module.exports = {
+    onGenerate: function(plane) {
+        // Create a self-referential exit from limbo which is yet to be generated
+        const limbo = Golem.game.loadRoomIndex(Golem.KnownLocations.Limbo);
+
+        if(limbo) {
+            limbo.exit[Golem.Directions.DirectionDown] =
+            Golem.NewExit(Golem.Directions.DirectionDown, limbo, Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED | Golem.ExitFlags.EXIT_LOCKED);
+          
+	    module.exports.onGenerationComplete = (plane) => {
+                const dungeonFirstFloor = plane.dungeon.floors[0];
+                const dungeonGrid = dungeonFirstFloor.grid;
+                const dungeonEntrance = dungeonFirstFloor.grid[dungeonFirstFloor.entryX][dungeonFirstFloor.entryY].room;
+
+                // Tie the dungeon's entrance to limbo and unlock the trapdoor
+                limbo.exit[Golem.Directions.DirectionDown].to = dungeonEntrance;
+                dungeonEntrance.exit[Golem.Directions.DirectionUp] = Golem.NewExit(Golem.Directions.DirectionUp, limbo, Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED);
+		limbo.exit[Golem.Directions.DirectionDown].flags = Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED;
+            };
+        }
+    }
+}");
+
+INSERT INTO plane_script (id, plane_id, script_id) VALUES (1, 1, 1);
+
 CREATE INDEX index_script_name ON scripts(name);

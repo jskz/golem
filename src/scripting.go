@@ -424,10 +424,27 @@ func (game *Game) InitScripting() error {
 		return game.vm.ToValue(scriptedCommand)
 	}))
 
+	knownLocationsConstantsObj := game.vm.NewObject()
+	knownLocationsConstantsObj.Set("Limbo", RoomLimbo)
+	knownLocationsConstantsObj.Set("DeveloperLounge", RoomDeveloperLounge)
+
 	roomFlagsConstantsObj := game.vm.NewObject()
 	roomFlagsConstantsObj.Set("RoomPersistent", ROOM_PERSISTENT)
 	roomFlagsConstantsObj.Set("RoomVirtual", ROOM_VIRTUAL)
 	roomFlagsConstantsObj.Set("RoomSafe", ROOM_SAFE)
+
+	exitFlagsConstantsObj := game.vm.NewObject()
+	exitFlagsConstantsObj.Set("EXIT_IS_DOOR", EXIT_IS_DOOR)
+	exitFlagsConstantsObj.Set("EXIT_CLOSED", EXIT_CLOSED)
+	exitFlagsConstantsObj.Set("EXIT_LOCKED", EXIT_LOCKED)
+
+	directionsConstantsObj := game.vm.NewObject()
+	directionsConstantsObj.Set("DirectionNorth", DirectionNorth)
+	directionsConstantsObj.Set("DirectionEast", DirectionEast)
+	directionsConstantsObj.Set("DirectionSouth", DirectionSouth)
+	directionsConstantsObj.Set("DirectionWest", DirectionWest)
+	directionsConstantsObj.Set("DirectionUp", DirectionUp)
+	directionsConstantsObj.Set("DirectionDown", DirectionDown)
 
 	combatObj := game.vm.NewObject()
 	combatObj.Set("DamageTypeBash", game.vm.ToValue(DamageTypeBash))
@@ -439,9 +456,13 @@ func (game *Game) InitScripting() error {
 	httpUtilityObj.Set("Get", game.vm.ToValue(SimpleGET))
 	httpUtilityObj.Set("Post", game.vm.ToValue(SimplePOST))
 
+	obj.Set("KnownLocations", knownLocationsConstantsObj)
+	obj.Set("ExitFlags", exitFlagsConstantsObj)
 	obj.Set("RoomFlags", roomFlagsConstantsObj)
 	obj.Set("Combat", combatObj)
+	obj.Set("Directions", directionsConstantsObj)
 	obj.Set("HTTP", httpUtilityObj)
+	obj.Set("NewExit", game.vm.ToValue(game.NewExit))
 
 	game.vm.Set("Golem", obj)
 	game.vm.Set("setTimeout", game.vm.ToValue(game.setTimeout))

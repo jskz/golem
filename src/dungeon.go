@@ -40,32 +40,32 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 
 		if previousFloorExit != nil {
 			/* Dig a two-way closed door exit between this room and the "end" of the previous floor */
-			previousFloorExit.exit[DirectionDown] = &Exit{
-				id:        0,
-				direction: DirectionDown,
-				to:        floor.grid[floor.entryX][floor.entryY].room,
-				flags:     EXIT_IS_DOOR | EXIT_CLOSED,
+			previousFloorExit.Exit[DirectionDown] = &Exit{
+				Id:        0,
+				Direction: DirectionDown,
+				To:        floor.Grid[floor.EntryX][floor.EntryY].Room,
+				Flags:     EXIT_IS_DOOR | EXIT_CLOSED,
 			}
 
-			floor.grid[floor.entryX][floor.entryY].room.exit[DirectionUp] = &Exit{
-				id:        0,
-				direction: DirectionUp,
-				to:        previousFloorExit,
-				flags:     EXIT_IS_DOOR | EXIT_CLOSED,
+			floor.Grid[floor.EntryX][floor.EntryY].Room.Exit[DirectionUp] = &Exit{
+				Id:        0,
+				Direction: DirectionUp,
+				To:        previousFloorExit,
+				Flags:     EXIT_IS_DOOR | EXIT_CLOSED,
 			}
 		}
 
 		/* Find a sufficiently expensive path from the floor's entry point to the entry point of the next floor */
-		floor.endX = floor.entryX
-		floor.endY = floor.entryY
+		floor.EndX = floor.EntryX
+		floor.EndY = floor.EntryY
 
-		entryPoint := floor.grid[floor.entryX][floor.entryY]
+		entryPoint := floor.Grid[floor.EntryX][floor.EntryY]
 		fScore := 0
 
 		for y := 0; y < floor.height; y++ {
 			for x := 0; x < floor.width; x++ {
-				if !floor.grid[x][y].wall && floor.grid[x][y].room != nil {
-					nodes := floor.findPathAStar(entryPoint, floor.grid[x][y])
+				if !floor.Grid[x][y].Wall && floor.Grid[x][y].Room != nil {
+					nodes := floor.findPathAStar(entryPoint, floor.Grid[x][y])
 					difficulty := len(nodes) - 1
 
 					if difficulty < 0 {
@@ -75,10 +75,10 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 					if difficulty > fScore {
 						fScore = difficulty
 
-						floor.endX = x
-						floor.endY = y
+						floor.EndX = x
+						floor.EndY = y
 
-						previousFloorExit = floor.grid[x][y].room
+						previousFloorExit = floor.Grid[x][y].Room
 
 						/* The "abyss" is the deepest room in the dungeon's deepest floor */
 						dungeon.Abyss = previousFloorExit
@@ -87,15 +87,15 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 			}
 		}
 
-		if floor.endX == floor.entryX && floor.endY == floor.entryY {
+		if floor.EndX == floor.EntryX && floor.EndY == floor.EntryY {
 			log.Printf("Could not find a suitable maze path while generating a dungeon, aborting.\r\n")
 			break
 		}
 
-		log.Printf("Finished generating floor %d, start at (%d, %d) end at (%d, %d): %d difficulty.\r\n", i+1, floor.entryX, floor.entryY, floor.endX, floor.endY, fScore)
+		log.Printf("Finished generating floor %d, start at (%d, %d) end at (%d, %d): %d difficulty.\r\n", i+1, floor.EntryX, floor.EntryY, floor.EndX, floor.EndY, fScore)
 		dungeon.Floors = append(dungeon.Floors, floor)
 	}
 
-	dungeon.Entrance = dungeon.Floors[0].grid[dungeon.Floors[0].entryX][dungeon.Floors[0].entryY].room
+	dungeon.Entrance = dungeon.Floors[0].Grid[dungeon.Floors[0].EntryX][dungeon.Floors[0].EntryY].Room
 	return dungeon
 }
