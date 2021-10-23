@@ -248,6 +248,10 @@ func (ch *Character) Finalize() error {
 func (ch *Character) SavePlayerSkills() error {
 	var proficiencyValues strings.Builder
 
+	if len(ch.skills) == 0 {
+		return nil
+	}
+
 	for _, proficiency := range ch.skills {
 		proficiencyValues.WriteString(fmt.Sprintf("(%d, %d, %d, %d, %d),", proficiency.Id, ch.Id, proficiency.SkillId, proficiency.Job.Id, proficiency.Proficiency))
 	}
