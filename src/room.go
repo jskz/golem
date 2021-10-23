@@ -39,8 +39,8 @@ type Room struct {
 	virtual bool
 	cell    *MazeCell
 
-	name        string
-	description string
+	Name        string
+	Description string
 
 	objects    *LinkedList
 	resets     *LinkedList
@@ -126,7 +126,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	room.objects = NewLinkedList()
 	room.Characters = NewLinkedList()
 	room.exit = make(map[uint]*Exit)
-	err := row.Scan(&room.Id, &zoneId, &room.name, &room.description, &room.flags)
+	err := row.Scan(&room.Id, &zoneId, &room.Name, &room.Description, &room.flags)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

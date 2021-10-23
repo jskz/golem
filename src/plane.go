@@ -65,6 +65,10 @@ const (
 func (plane *Plane) generate() error {
 	game := plane.Game
 
+	if plane.Scripts != nil {
+		plane.Scripts.tryEvaluate("onGenerate", plane.Game.vm.ToValue(game), plane.Game.vm.ToValue(plane))
+	}
+
 	switch plane.PlaneType {
 	case PlaneTypeMaze:
 		switch plane.SourceType {
@@ -72,22 +76,26 @@ func (plane *Plane) generate() error {
 			log.Printf("Generating maze with dimensions %dx%dx%d for plane %d.\r\n", plane.Width, plane.Height, plane.Depth, plane.Id)
 
 			/*
-			 * TODO: copied from previous maze test, allow a plane entrance coordinate or location on the model?
-			 *
-			 * Hardcode an exit from limbo into the first floor of the test dungeon
-			 */
-			limbo, err := game.LoadRoomIndex(RoomLimbo)
-			if err != nil {
-				log.Println(err)
-			}
+				 * TODO: copied from previous maze test, allow a plane entrance coordinate or location on the model?
+				 *
+				 * Hardcode an exit from limbo into the first floor of the test dungeon
+				limbo, err := game.LoadRoomIndex(RoomLimbo)
+				if err != nil {
+					log.Println(err)
+				}
+
+			*/
 
 			/* Exit will be self-referential and locked until the maze is done generating */
-			limbo.exit[DirectionDown] = &Exit{
-				id:        0,
-				direction: DirectionDown,
-				to:        limbo,
-				flags:     EXIT_IS_DOOR | EXIT_CLOSED | EXIT_LOCKED,
-			}
+
+			/*
+				limbo.exit[DirectionDown] = &Exit{
+					id:        0,
+					direction: DirectionDown,
+					to:        limbo,
+					flags:     EXIT_IS_DOOR | EXIT_CLOSED | EXIT_LOCKED,
+				}
+			*/
 
 			go func() {
 				var dungeon *Dungeon
@@ -102,33 +110,32 @@ func (plane *Plane) generate() error {
 
 				wg.Wait()
 
-				if dungeon == nil || len(dungeon.floors) < 1 {
+				if dungeon == nil || len(dungeon.Floors) < 1 {
 					log.Printf("Dungeon generation attempt aborting.\r\n")
 					return
 				}
 
-				maze := dungeon.floors[0]
+				game.planeGenerationCompleted <- plane.Id
 
 				/* Unlock the entrance */
-				limbo.exit[DirectionDown].to = maze.grid[maze.entryX][maze.entryY].room
-				limbo.exit[DirectionDown].flags &= ^EXIT_LOCKED
+				/*
+					maze := dungeon.Floors[0]
+						limbo.exit[DirectionDown].to = maze.grid[maze.entryX][maze.entryY].room
+						limbo.exit[DirectionDown].flags &= ^EXIT_LOCKED
 
-				maze.grid[maze.entryX][maze.entryY].room.exit[DirectionUp] = &Exit{
-					id:        0,
-					direction: DirectionUp,
-					to:        limbo,
-					flags:     EXIT_IS_DOOR | EXIT_CLOSED,
-				}
+						maze.grid[maze.entryX][maze.entryY].room.exit[DirectionUp] = &Exit{
+							id:        0,
+							direction: DirectionUp,
+							to:        limbo,
+							flags:     EXIT_IS_DOOR | EXIT_CLOSED,
+						}
+				*/
 			}()
 		default:
 			return errors.New("unimplemented maze source type")
 		}
 	default:
 		return errors.New("unimplemented plane type")
-	}
-
-	if plane.Scripts != nil {
-		plane.Scripts.tryEvaluate("onGenerationComplete", plane.Game.vm.ToValue(game), plane.Game.vm.ToValue(plane))
 	}
 
 	return nil

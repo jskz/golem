@@ -187,8 +187,8 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 	room.zone = nil
 	room.virtual = true
 	room.cell = maze.grid[x][y]
-	room.name = "In the Underground"
-	room.description = "You are deep within the dark dungeons of development."
+	room.Name = "In the Underground"
+	room.Description = "You are deep within the dark dungeons of development."
 	room.exit = make(map[uint]*Exit)
 	room.Characters = NewLinkedList()
 	room.objects = NewLinkedList()

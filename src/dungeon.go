@@ -16,15 +16,15 @@ import "log"
  * floor, overarching theme, etc.
  */
 type Dungeon struct {
-	game     *Game       `json:"game"`
-	floors   []*MazeGrid `json:"floors"`
-	entrance *Room       `json:"entrance"`
-	abyss    *Room       `json:"abyss"`
+	Game     *Game       `json:"game"`
+	Floors   []*MazeGrid `json:"floors"`
+	Entrance *Room       `json:"entrance"`
+	Abyss    *Room       `json:"abyss"`
 }
 
 func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeight int) *Dungeon {
-	dungeon := &Dungeon{game: game}
-	dungeon.floors = make([]*MazeGrid, 0)
+	dungeon := &Dungeon{Game: game}
+	dungeon.Floors = make([]*MazeGrid, 0)
 
 	if floorCount < 1 {
 		return nil
@@ -81,7 +81,7 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 						previousFloorExit = floor.grid[x][y].room
 
 						/* The "abyss" is the deepest room in the dungeon's deepest floor */
-						dungeon.abyss = previousFloorExit
+						dungeon.Abyss = previousFloorExit
 					}
 				}
 			}
@@ -93,9 +93,9 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 		}
 
 		log.Printf("Finished generating floor %d, start at (%d, %d) end at (%d, %d): %d difficulty.\r\n", i+1, floor.entryX, floor.entryY, floor.endX, floor.endY, fScore)
-		dungeon.floors = append(dungeon.floors, floor)
+		dungeon.Floors = append(dungeon.Floors, floor)
 	}
 
-	dungeon.entrance = dungeon.floors[0].grid[dungeon.floors[0].entryX][dungeon.floors[0].entryY].room
+	dungeon.Entrance = dungeon.Floors[0].grid[dungeon.Floors[0].entryX][dungeon.Floors[0].entryY].room
 	return dungeon
 }

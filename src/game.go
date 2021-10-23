@@ -49,6 +49,8 @@ type Game struct {
 	quitRequest     chan *Client
 	shutdownRequest chan bool
 	clientMessage   chan ClientTextMessage
+
+	planeGenerationCompleted chan int
 }
 
 func NewGame() (*Game, error) {
@@ -63,6 +65,7 @@ func NewGame() (*Game, error) {
 	game.quitRequest = make(chan *Client)
 	game.shutdownRequest = make(chan bool)
 	game.clientMessage = make(chan ClientTextMessage)
+	game.planeGenerationCompleted = make(chan int)
 
 	game.Characters = NewLinkedList()
 	game.Fights = NewLinkedList()
@@ -245,6 +248,14 @@ func (game *Game) Run() {
 			}
 
 			quit.conn.Close()
+
+		case planeId := <-game.planeGenerationCompleted:
+			plane := game.FindPlaneByID(planeId)
+			if plane != nil {
+				if plane.Scripts != nil {
+					plane.Scripts.tryEvaluate("onGenerationComplete", plane.Game.vm.ToValue(game), plane.Game.vm.ToValue(plane))
+				}
+			}
 
 		case <-game.shutdownRequest:
 			os.Exit(0)
