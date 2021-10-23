@@ -188,15 +188,13 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			plane_script.plane_id,
 			plane_script.script_id
 		FROM
-			room_script
+			plane_script
 	`)
 	if err != nil {
 		return err
 	}
 
 	defer rows.Close()
-
-	var count int = 0
 
 	for rows.Next() {
 		var planeId int
@@ -208,7 +206,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		}
 
 		plane := game.FindPlaneByID(planeId)
-		if plane != nil {
+		if plane == nil {
 			return errors.New("tried to load a plane_script for a nonexistent plane")
 		}
 
@@ -218,10 +216,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		}
 
 		plane.Scripts = game.scripts[scriptId]
-		count++
 	}
-
-	log.Printf("Loaded %d plane-script relations from database.\r\n", count)
 
 	return nil
 }
