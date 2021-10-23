@@ -182,6 +182,47 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		room.script = game.scripts[scriptId]
 	}
 
+	log.Println("Loading plane-script relations from database...")
+	rows, err = game.db.Query(`
+		SELECT
+			plane_script.plane_id,
+			plane_script.script_id
+		FROM
+			room_script
+	`)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	var count int = 0
+
+	for rows.Next() {
+		var planeId int
+		var scriptId uint
+
+		err := rows.Scan(&planeId, &scriptId)
+		if err != nil {
+			return err
+		}
+
+		plane := game.FindPlaneByID(planeId)
+		if plane != nil {
+			return errors.New("tried to load a plane_script for a nonexistent plane")
+		}
+
+		_, ok := game.scripts[scriptId]
+		if !ok {
+			return errors.New("tried to load a plane_script for a nonexistent script")
+		}
+
+		plane.Scripts = game.scripts[scriptId]
+		count++
+	}
+
+	log.Printf("Loaded %d plane-script relations from database.\r\n", count)
+
 	return nil
 }
 

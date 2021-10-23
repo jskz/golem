@@ -144,6 +144,17 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
+	/* Try to initialize each plane now that potential scripts have been attached */
+	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
+		plane := iter.Value.(*Plane)
+
+		log.Printf("Generating %s...\r\n", plane.Name)
+		err = plane.generate()
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	err = game.LoadResets()
 	if err != nil {
 		return nil, err
