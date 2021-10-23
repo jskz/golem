@@ -338,6 +338,7 @@ func (game *Game) nanny(client *Client, message string) {
 			}
 		}
 
+		do_time(client.character, "")
 		client.character.Send(fmt.Sprintf("%s\r\n", JoinedGameFlavourText))
 		err := client.character.syncJobSkills()
 		if err != nil {
