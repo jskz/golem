@@ -51,13 +51,13 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 	var jobId uint
 
 	err := row.Scan(&ch.Id,
-		&ch.name,
-		&ch.shortDescription,
-		&ch.longDescription,
-		&ch.description,
+		&ch.Name,
+		&ch.ShortDescription,
+		&ch.LongDescription,
+		&ch.Description,
 		&raceId,
 		&jobId,
-		&ch.flags,
+		&ch.Flags,
 		&ch.level,
 		&ch.experience,
 		&ch.health,

@@ -62,8 +62,8 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 		entryPoint := floor.Grid[floor.EntryX][floor.EntryY]
 		fScore := 0
 
-		for y := 0; y < floor.height; y++ {
-			for x := 0; x < floor.width; x++ {
+		for y := 0; y < floor.Height; y++ {
+			for x := 0; x < floor.Width; x++ {
 				if !floor.Grid[x][y].Wall && floor.Grid[x][y].Room != nil {
 					nodes := floor.findPathAStar(entryPoint, floor.Grid[x][y])
 					difficulty := len(nodes) - 1

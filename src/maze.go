@@ -22,10 +22,10 @@ type MazeCell struct {
 }
 
 type MazeGrid struct {
-	game   *Game         `json:"game"`
+	Game   *Game         `json:"game"`
 	Grid   [][]*MazeCell `json:"grid"`
-	width  int           `json:"width"`
-	height int           `json:"height"`
+	Width  int           `json:"width"`
+	Height int           `json:"height"`
 	EntryX int           `json:"entryX"`
 	EntryY int           `json:"entryY"`
 	EndX   int           `json:"endX"`
@@ -34,10 +34,10 @@ type MazeGrid struct {
 
 func (game *Game) NewMaze(width int, height int) *MazeGrid {
 	maze := &MazeGrid{
-		game:   game,
+		Game:   game,
 		Grid:   make([][]*MazeCell, width),
-		width:  width,
-		height: height,
+		Width:  width,
+		Height: height,
 	}
 
 	for i := 0; i < height; i++ {
@@ -55,7 +55,7 @@ func (game *Game) NewMaze(width int, height int) *MazeGrid {
 				Terrain: TerrainTypeCaveDeepWall1,
 			}
 
-			if rand.Intn(10) > 7 && x >= 1 && y >= 1 && x <= maze.width-1 && y <= maze.height-1 {
+			if rand.Intn(10) > 7 && x >= 1 && y >= 1 && x <= maze.Width-1 && y <= maze.Height-1 {
 				maze.Grid[x][y].Terrain = TerrainTypeCaveDeepWall1 + rand.Intn(4)
 			}
 		}
@@ -65,7 +65,7 @@ func (game *Game) NewMaze(width int, height int) *MazeGrid {
 }
 
 func (grid *MazeGrid) isValidPosition(x int, y int) bool {
-	return x >= 1 && x < grid.width-1 && y >= 1 && y < grid.height-1
+	return x >= 1 && x < grid.Width-1 && y >= 1 && y < grid.Height-1
 }
 
 func (cell *MazeCell) getAdjacentCells(wall bool, distance int, ordinals bool) *LinkedList {
@@ -129,8 +129,8 @@ func (cell *MazeCell) setAdjacentCellsTerrainType(wall bool, distance int, terra
 
 /* Dig a maze using Prim's algorithm */
 func (maze *MazeGrid) generatePrimMaze() {
-	maze.EntryX = rand.Intn(maze.width-3) + 2
-	maze.EntryY = rand.Intn(maze.height-3) + 2
+	maze.EntryX = rand.Intn(maze.Width-3) + 2
+	maze.EntryY = rand.Intn(maze.Height-3) + 2
 
 	var entryPoint *MazeCell = maze.Grid[maze.EntryX][maze.EntryY]
 
@@ -182,11 +182,11 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 		return maze.Grid[x][y].Room
 	}
 
-	room := maze.game.NewRoom()
+	room := maze.Game.NewRoom()
 	room.Id = 0
 	room.zone = nil
-	room.virtual = true
-	room.cell = maze.Grid[x][y]
+	room.Virtual = true
+	room.Cell = maze.Grid[x][y]
 	room.Name = "In the Underground"
 	room.Description = "You are deep within the dark dungeons of development."
 	room.Exit = make(map[uint]*Exit)
@@ -198,8 +198,8 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 }
 
 func (maze *MazeGrid) reify() {
-	for y := 0; y < maze.height; y++ {
-		for x := 0; x < maze.width; x++ {
+	for y := 0; y < maze.Height; y++ {
+		for x := 0; x < maze.Width; x++ {
 			if !maze.Grid[x][y].Wall {
 				room := maze.createRoom(x, y)
 
@@ -240,18 +240,18 @@ func (maze *MazeGrid) reify() {
 func (ch *Character) CreateMazeMap() string {
 	var output strings.Builder
 
-	if ch.Room == nil || !ch.Room.virtual || ch.Room.cell == nil {
+	if ch.Room == nil || !ch.Room.Virtual || ch.Room.Cell == nil {
 		return ""
 	}
 
-	var maze *MazeGrid = ch.Room.cell.Grid
+	var maze *MazeGrid = ch.Room.Cell.Grid
 	if maze == nil {
 		return ""
 	}
 
-	for y := 0; y < maze.height; y++ {
-		for x := 0; x < maze.width; x++ {
-			if x == ch.Room.cell.X && y == ch.Room.cell.Y {
+	for y := 0; y < maze.Height; y++ {
+		for x := 0; x < maze.Width; x++ {
+			if x == ch.Room.Cell.X && y == ch.Room.Cell.Y {
 				output.WriteString("{Y@")
 			} else if x == maze.EntryX && y == maze.EntryY {
 				output.WriteString("{M^")

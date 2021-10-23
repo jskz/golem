@@ -250,7 +250,7 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		ch := iter.Value.(*Character)
 
-		if ch.flags&CHAR_IS_PLAYER != 0 && ch.name == name {
+		if ch.Flags&CHAR_IS_PLAYER != 0 && ch.Name == name {
 			client.character = nil
 			ch.client = client
 

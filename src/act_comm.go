@@ -50,7 +50,7 @@ func do_say(ch *Character, arguments string) {
 
 	ch.Send(fmt.Sprintf("{CYou say \"%s{C\"{x\r\n", arguments))
 
-	buf.WriteString(fmt.Sprintf("\r\n{C%s says \"%s{C\"{x\r\n", ch.name, arguments))
+	buf.WriteString(fmt.Sprintf("\r\n{C%s says \"%s{C\"{x\r\n", ch.Name, arguments))
 	output := buf.String()
 
 	if ch.Room != nil {
@@ -72,7 +72,7 @@ func do_ooc(ch *Character, arguments string) {
 		return
 	}
 
-	buf.WriteString(fmt.Sprintf("\r\n{M[OOC] %s: %s{x\r\n", ch.name, arguments))
+	buf.WriteString(fmt.Sprintf("\r\n{M[OOC] %s: %s{x\r\n", ch.Name, arguments))
 	output := buf.String()
 
 	for client := range ch.game.clients {

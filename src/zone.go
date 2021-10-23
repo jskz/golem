@@ -99,7 +99,7 @@ func (game *Game) ResetRoom(room *Room) {
 			for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 				rch := iter.Value.(*Character)
 
-				if rch.flags&CHAR_IS_PLAYER == 0 && rch.Id == reset.value0 {
+				if rch.Flags&CHAR_IS_PLAYER == 0 && rch.Id == reset.value0 {
 					count++
 				}
 			}
@@ -115,7 +115,7 @@ func (game *Game) ResetRoom(room *Room) {
 			}
 
 			if mobile != nil {
-				room.addCharacter(mobile)
+				room.AddCharacter(mobile)
 
 				game.Characters.Insert(mobile)
 			}
@@ -129,7 +129,7 @@ func (game *Game) ResetRoom(room *Room) {
 		character := iter.Value.(*Character)
 		character.onZoneUpdate()
 
-		if room.zone.resetMessage != "" && character.flags&CHAR_IS_PLAYER != 0 {
+		if room.zone.resetMessage != "" && character.Flags&CHAR_IS_PLAYER != 0 {
 			character.Send(fmt.Sprintf("\r\n{x%s{x\r\n", room.zone.resetMessage))
 		}
 	}

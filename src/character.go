@@ -112,16 +112,16 @@ type Character struct {
 	Fighting *Character      `json:"fighting"`
 	casting  *CastingContext `json:"casting"`
 
-	Following *Character
-	Leader    *Character
-	Group     *LinkedList
+	Following *Character  `json:"following"`
+	Leader    *Character  `json:"leader"`
+	Group     *LinkedList `json:"group"`
 
 	Id int `json:"id"`
 
-	name             string `json:"name"`
-	shortDescription string `json:"shortDescription"`
-	longDescription  string `json:"longDescription"`
-	description      string `json:"description"`
+	Name             string `json:"name"`
+	ShortDescription string `json:"shortDescription"`
+	LongDescription  string `json:"longDescription"`
+	Description      string `json:"description"`
 
 	wizard     bool
 	job        *Job
@@ -132,7 +132,7 @@ type Character struct {
 
 	skills map[uint]*Proficiency
 
-	flags int
+	Flags int `json:"flags"`
 	afk   *AwayFromKeyboard
 
 	health     int
@@ -222,7 +222,7 @@ func (ch *Character) Finalize() error {
 			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
+	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -538,7 +538,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
  */
 func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	for client := range game.clients {
-		if client.connectionState == ConnectionStatePlaying && client.character != nil && client.character.name == username {
+		if client.connectionState == ConnectionStatePlaying && client.character != nil && client.character.Name == username {
 			return client.character, client.character.Room, nil
 		}
 	}
@@ -583,7 +583,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.Id, &ch.name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.practices, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
+	err := row.Scan(&ch.Id, &ch.Name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.practices, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -700,7 +700,7 @@ func (ch *Character) flushOutput() {
 }
 
 func (ch *Character) gainExperience(experience int) {
-	if ch.flags&CHAR_IS_PLAYER == 0 {
+	if ch.Flags&CHAR_IS_PLAYER == 0 {
 		return
 	}
 
@@ -806,11 +806,11 @@ func (ch *Character) getMaxCarryWeight() float64 {
 }
 
 func (ch *Character) GetShortDescription(viewer *Character) string {
-	if ch.flags&CHAR_IS_PLAYER != 0 {
-		return ch.name
+	if ch.Flags&CHAR_IS_PLAYER != 0 {
+		return ch.Name
 	}
 
-	return ch.shortDescription
+	return ch.ShortDescription
 }
 
 func (ch *Character) GetShortDescriptionUpper(viewer *Character) string {
@@ -834,11 +834,11 @@ func (ch *Character) getLongDescription(viewer *Character) string {
 		return fmt.Sprintf("%s is here, fighting %s.", ch.GetShortDescriptionUpper(viewer), ch.Fighting.GetShortDescription(viewer))
 	}
 
-	if ch.flags&CHAR_IS_PLAYER != 0 {
-		return fmt.Sprintf("%s is here.", ch.name)
+	if ch.Flags&CHAR_IS_PLAYER != 0 {
+		return fmt.Sprintf("%s is here.", ch.Name)
 	}
 
-	return ch.longDescription
+	return ch.LongDescription
 }
 
 func (ch *Character) addObject(obj *ObjectInstance) {
@@ -932,7 +932,7 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
-		nameParts := strings.Split(rch.name, " ")
+		nameParts := strings.Split(rch.Name, " ")
 		for _, part := range nameParts {
 			if strings.Compare(strings.ToLower(part), processed) == 0 {
 				return rch
@@ -981,7 +981,7 @@ func NewCharacter() *Character {
 	character.wizard = false
 	character.afk = nil
 	character.job = nil
-	character.flags = 0
+	character.Flags = 0
 	character.Fighting = nil
 	character.Combat = nil
 	character.race = nil
@@ -993,7 +993,7 @@ func NewCharacter() *Character {
 	character.inputCursor = DefaultMaxLines
 	character.outputHead = 0
 
-	character.name = UnauthenticatedUsername
+	character.Name = UnauthenticatedUsername
 	character.client = nil
 	character.level = 0
 	character.experience = 0

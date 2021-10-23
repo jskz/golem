@@ -45,7 +45,7 @@ func (client *Client) displayPrompt() {
 	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
 
 	prompt.WriteString("\r\n")
-	if client.character.Room != nil && client.character.Room.flags&ROOM_SAFE != 0 {
+	if client.character.Room != nil && client.character.Room.Flags&ROOM_SAFE != 0 {
 		prompt.WriteString(client.TranslateColourCodes("{W[SAFE]"))
 	}
 
@@ -79,7 +79,7 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character.Interpret(message)
 
 	case ConnectionStatePassword:
-		if !game.AttemptLogin(client.character.name, message) {
+		if !game.AttemptLogin(client.character.Name, message) {
 			client.connectionState = ConnectionStateName
 			client.character = nil
 
@@ -88,14 +88,14 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		for other := range game.clients {
-			if other != client && other.character != nil && other.character.name == client.character.name {
+			if other != client && other.character != nil && other.character.Name == client.character.Name {
 				delete(game.clients, other)
 
 				other.conn.Close()
 			}
 		}
 
-		if game.checkReconnect(client, client.character.name) {
+		if game.checkReconnect(client, client.character.Name) {
 			break
 		}
 
@@ -118,7 +118,7 @@ func (game *Game) nanny(client *Client, message string) {
 
 		if character != nil {
 			client.character = character
-			client.character.flags |= CHAR_IS_PLAYER
+			client.character.Flags |= CHAR_IS_PLAYER
 			client.character.client = client
 			output.WriteString("Password: ")
 			client.character.Room = room
@@ -129,9 +129,9 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character = NewCharacter()
 		client.character.game = game
 		client.character.client = client
-		client.character.name = name
+		client.character.Name = name
 		client.character.level = 1
-		client.character.flags |= CHAR_IS_PLAYER
+		client.character.Flags |= CHAR_IS_PLAYER
 		client.connectionState = ConnectionStateConfirmName
 
 		client.character.practices = 100
@@ -152,19 +152,19 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character.stamina = 100
 		client.character.maxStamina = 100
 
-		output.WriteString(fmt.Sprintf("No adventurer with that name exists.  Create %s? [y/N] ", client.character.name))
+		output.WriteString(fmt.Sprintf("No adventurer with that name exists.  Create %s? [y/N] ", client.character.Name))
 
 	case ConnectionStateConfirmName:
 		if !strings.HasPrefix(strings.ToLower(message), "y") {
 			client.connectionState = ConnectionStateName
-			client.character.name = UnauthenticatedUsername
+			client.character.Name = UnauthenticatedUsername
 			output.WriteString("\r\nBy what name do you wish to be known? ")
 			break
 		}
 
 		client.connectionState = ConnectionStateNewPassword
 
-		output.WriteString(fmt.Sprintf("Creating new character %s.\r\n", client.character.name))
+		output.WriteString(fmt.Sprintf("Creating new character %s.\r\n", client.character.Name))
 		output.WriteString("Please choose a password: ")
 
 	case ConnectionStateNewPassword:
@@ -327,13 +327,13 @@ func (game *Game) nanny(client *Client, message string) {
 		game.Characters.Insert(client.character)
 
 		if client.character.Room != nil {
-			client.character.Room.addCharacter(client.character)
+			client.character.Room.AddCharacter(client.character)
 
 			for iter := client.character.Room.Characters.Head; iter != nil; iter = iter.Next {
 				character := iter.Value.(*Character)
 
 				if character != client.character {
-					character.Send(fmt.Sprintf("{W%s has entered the game.{x\r\n", client.character.name))
+					character.Send(fmt.Sprintf("{W%s has entered the game.{x\r\n", client.character.Name))
 				}
 			}
 		}

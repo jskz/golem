@@ -16,8 +16,8 @@ import (
 )
 
 func (ch *Character) examineCharacter(other *Character) {
-	if other.flags&CHAR_IS_PLAYER == 0 {
-		ch.Send(fmt.Sprintf("{G%s{x\r\n", other.description))
+	if other.Flags&CHAR_IS_PLAYER == 0 {
+		ch.Send(fmt.Sprintf("{G%s{x\r\n", other.Description))
 	}
 
 	peek := ch.FindProficiencyByName("peek")
@@ -86,7 +86,7 @@ func do_score(ch *Character, arguments string) {
 	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
 
 	buf.WriteString("\r\n{D┌─ {WCharacter Information {D──────────────────┬─ {WStatistics{D ───────┐{x\r\n")
-	buf.WriteString(fmt.Sprintf("{D│ {CName:    {c%-13s                   {D│ Strength:       {M%2d{D │\r\n", ch.name, ch.Strength))
+	buf.WriteString(fmt.Sprintf("{D│ {CName:    {c%-13s                   {D│ Strength:       {M%2d{D │\r\n", ch.Name, ch.Strength))
 	if ch.level < LevelHero {
 		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d  {D[%8d exp. until next] {D│ Dexterity:      {M%2d{D │\r\n", ch.level, ch.experienceRequiredForLevel(int(ch.level+1))-int(ch.experience), ch.Dexterity))
 	} else {
@@ -157,14 +157,14 @@ func do_who(ch *Character, arguments string) {
 		if character.level >= LevelHero {
 			buf.WriteString(fmt.Sprintf("[%-15s] %s %s(%s)\r\n",
 				jobDisplay,
-				character.name,
+				character.Name,
 				flagsString.String(),
 				character.race.DisplayName))
 		} else {
 			buf.WriteString(fmt.Sprintf("[%3d][%-10s] %s %s(%s)\r\n",
 				character.level,
 				jobDisplay,
-				character.name,
+				character.Name,
 				flagsString.String(),
 				character.race.DisplayName))
 		}
@@ -233,7 +233,7 @@ func do_look(ch *Character, arguments string) {
 	var roomFlagDescriptionColour string = ""
 	var roomFlagDescription string = ""
 
-	if ch.Room.flags&ROOM_SAFE != 0 {
+	if ch.Room.Flags&ROOM_SAFE != 0 {
 		roomFlagDescriptionColour = "{W"
 		roomFlagDescription = "This is a sanctuary."
 	}

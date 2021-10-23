@@ -35,9 +35,9 @@ type Room struct {
 	zone   *Zone
 	script *Script
 
-	flags   int
-	virtual bool
-	cell    *MazeCell
+	Flags   int       `json:"flags"`
+	Virtual bool      `json:"virtual"`
+	Cell    *MazeCell `json:"cell"`
 
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -63,7 +63,7 @@ func (room *Room) removeObject(obj *ObjectInstance) {
 	obj.inRoom = nil
 }
 
-func (room *Room) addCharacter(ch *Character) {
+func (room *Room) AddCharacter(ch *Character) {
 	room.Characters.Insert(ch)
 
 	ch.Room = room
@@ -126,7 +126,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	room.objects = NewLinkedList()
 	room.Characters = NewLinkedList()
 	room.Exit = make(map[uint]*Exit)
-	err := row.Scan(&room.Id, &zoneId, &room.Name, &room.Description, &room.flags)
+	err := row.Scan(&room.Id, &zoneId, &room.Name, &room.Description, &room.Flags)
 
 	if err != nil {
 		if err == sql.ErrNoRows {

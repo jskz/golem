@@ -79,11 +79,11 @@ func do_mlist(ch *Character, arguments string) {
 	for iter := ch.game.Characters.Head; iter != nil; iter = iter.Next {
 		wch := iter.Value.(*Character)
 
-		if wch.flags&CHAR_IS_PLAYER != 0 {
+		if wch.Flags&CHAR_IS_PLAYER != 0 {
 			if wch.client != nil {
-				output.WriteString(fmt.Sprintf("{G%s@%s{x\r\n", wch.name, wch.client.conn.RemoteAddr().String()))
+				output.WriteString(fmt.Sprintf("{G%s@%s{x\r\n", wch.Name, wch.client.conn.RemoteAddr().String()))
 			} else {
-				output.WriteString(fmt.Sprintf("{G%s@DISCONNECTED{x\r\n", wch.name))
+				output.WriteString(fmt.Sprintf("{G%s@DISCONNECTED{x\r\n", wch.Name))
 			}
 		} else {
 			output.WriteString(fmt.Sprintf("%s{x (id#%d)\r\n", wch.GetShortDescriptionUpper(ch), wch.Id))
@@ -100,7 +100,7 @@ func do_purge(ch *Character, arguments string) {
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
-		if rch == ch || rch.client != nil || rch.flags&CHAR_IS_PLAYER != 0 {
+		if rch == ch || rch.client != nil || rch.Flags&CHAR_IS_PLAYER != 0 {
 			continue
 		}
 
@@ -126,7 +126,7 @@ func do_peace(ch *Character, arguments string) {
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
-		rch.flags &= ^CHAR_AGGRESSIVE
+		rch.Flags &= ^CHAR_AGGRESSIVE
 		rch.Fighting = nil
 		rch.Combat = nil
 	}
@@ -164,7 +164,7 @@ func do_goto(ch *Character, arguments string) {
 		ch.Room.removeCharacter(ch)
 	}
 
-	room.addCharacter(ch)
+	room.AddCharacter(ch)
 
 	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)

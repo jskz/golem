@@ -32,7 +32,7 @@ function onCombatUpdate() {
                     break;
                 }
 
-                if(victim.room.flags & Golem.RoomFlags.RoomSafe) {
+                if(victim.room.flags & Golem.RoomFlags.ROOM_SAFE) {
                     break;
                 }
 

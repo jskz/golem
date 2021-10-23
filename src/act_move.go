@@ -152,7 +152,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		from.script.tryEvaluate("onRoomLeave", ch.game.vm.ToValue(from), ch.game.vm.ToValue(ch))
 	}
 
-	exit.To.addCharacter(ch)
+	exit.To.AddCharacter(ch)
 	for iter := exit.To.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 		if character != ch {
@@ -185,8 +185,8 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 		if character != ch {
 			/* If the entering player is a PC, this is a hostile NPC, and that hostile NPC is not currently preoccupied with another combat, then let's rum	ble. */
-			if (ch.flags&CHAR_IS_PLAYER != 0) && (character.flags&CHAR_IS_PLAYER == 0) && (character.flags&CHAR_AGGRESSIVE != 0) && (character.Fighting == nil) {
-				do_kill(character, ch.name)
+			if (ch.Flags&CHAR_IS_PLAYER != 0) && (character.Flags&CHAR_IS_PLAYER == 0) && (character.Flags&CHAR_AGGRESSIVE != 0) && (character.Fighting == nil) {
+				do_kill(character, ch.Name)
 			}
 		}
 	}

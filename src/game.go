@@ -234,7 +234,7 @@ func (game *Game) Run() {
 			delete(game.clients, client)
 
 			if client.character != nil {
-				log.Printf("Lost connection with %s@%s.\r\n", client.character.name, client.conn.RemoteAddr().String())
+				log.Printf("Lost connection with %s@%s.\r\n", client.character.Name, client.conn.RemoteAddr().String())
 
 				client.character.client = nil
 				break

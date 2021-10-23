@@ -183,7 +183,7 @@ func do_practice(ch *Character, arguments string) {
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 			rch := iter.Value.(*Character)
 
-			if rch.flags&CHAR_PRACTICE != 0 {
+			if rch.Flags&CHAR_PRACTICE != 0 {
 				trainerFound = true
 			}
 		}

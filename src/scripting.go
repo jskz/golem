@@ -428,10 +428,14 @@ func (game *Game) InitScripting() error {
 	knownLocationsConstantsObj.Set("Limbo", RoomLimbo)
 	knownLocationsConstantsObj.Set("DeveloperLounge", RoomDeveloperLounge)
 
+	charFlagsConstantsObj := game.vm.NewObject()
+	charFlagsConstantsObj.Set("CHAR_AGGRESSIVE", CHAR_AGGRESSIVE)
+	charFlagsConstantsObj.Set("CHAR_PRACTICE", CHAR_PRACTICE)
+
 	roomFlagsConstantsObj := game.vm.NewObject()
-	roomFlagsConstantsObj.Set("RoomPersistent", ROOM_PERSISTENT)
-	roomFlagsConstantsObj.Set("RoomVirtual", ROOM_VIRTUAL)
-	roomFlagsConstantsObj.Set("RoomSafe", ROOM_SAFE)
+	roomFlagsConstantsObj.Set("ROOM_PERSISTENT", ROOM_PERSISTENT)
+	roomFlagsConstantsObj.Set("ROOM_VIRTUAL", ROOM_VIRTUAL)
+	roomFlagsConstantsObj.Set("ROOM_SAFE", ROOM_SAFE)
 
 	exitFlagsConstantsObj := game.vm.NewObject()
 	exitFlagsConstantsObj.Set("EXIT_IS_DOOR", EXIT_IS_DOOR)
@@ -459,6 +463,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("KnownLocations", knownLocationsConstantsObj)
 	obj.Set("ExitFlags", exitFlagsConstantsObj)
 	obj.Set("RoomFlags", roomFlagsConstantsObj)
+	obj.Set("CharFlags", charFlagsConstantsObj)
 	obj.Set("Combat", combatObj)
 	obj.Set("Directions", directionsConstantsObj)
 	obj.Set("HTTP", httpUtilityObj)

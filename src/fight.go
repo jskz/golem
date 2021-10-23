@@ -49,13 +49,13 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj.description = fmt.Sprintf("The slain corpse of %s.", ch.GetShortDescription(ch))
 	obj.shortDescription = fmt.Sprintf("the corpse of %s", ch.GetShortDescription(ch))
 	obj.longDescription = fmt.Sprintf("The corpse of %s is lying here.", ch.GetShortDescription(ch))
-	obj.name = fmt.Sprintf("corpse %s", ch.name)
+	obj.name = fmt.Sprintf("corpse %s", ch.Name)
 	obj.itemType = "container"
 	obj.createdAt = time.Now()
 	obj.flags = ITEM_DECAYS
 	obj.ttl = 20
 
-	if ch.flags&CHAR_IS_PLAYER == 0 {
+	if ch.Flags&CHAR_IS_PLAYER == 0 {
 		obj.contents = NewLinkedList()
 		obj.contents.Tail = ch.inventory.Tail
 		obj.contents.Head = ch.inventory.Head
@@ -120,7 +120,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 				}
 			}
 
-			if target.flags&CHAR_IS_PLAYER != 0 {
+			if target.Flags&CHAR_IS_PLAYER != 0 {
 				target.Send("{RYou have been slain!{D\r\n")
 				target.Send(string(Config.death))
 				target.Send("{x\r\n")
@@ -130,7 +130,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 					return true
 				}
 
-				limbo.addCharacter(target)
+				limbo.AddCharacter(target)
 				target.health = target.maxHealth / 8
 				do_look(target, "")
 			} else {
@@ -256,7 +256,7 @@ func do_kill(ch *Character, arguments string) {
 		return
 	}
 
-	if ch.Room.flags&ROOM_SAFE != 0 {
+	if ch.Room.Flags&ROOM_SAFE != 0 {
 		ch.Send("{WYou cannot do that here.{x\r\n")
 		return
 	}
