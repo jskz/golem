@@ -100,8 +100,6 @@ type Character struct {
 
 	inventory *LinkedList
 
-	equipment []*ObjectInstance
-
 	output       []byte
 	outputCursor int
 	outputHead   int
@@ -1017,6 +1015,5 @@ func NewCharacter() *Character {
 	character.Charisma = 10
 	character.Luck = 10
 
-	character.equipment = make([]*ObjectInstance, WearLocationMax)
 	return character
 }
