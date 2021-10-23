@@ -71,10 +71,11 @@ const (
 )
 
 const (
-	ITEM_TAKE     = 1
-	ITEM_WEAPON   = 1 << 1
-	ITEM_WEARABLE = 1 << 2
-	ITEM_DECAYS   = 1 << 3
+	ITEM_TAKE           = 1
+	ITEM_WEAPON         = 1 << 1
+	ITEM_WEARABLE       = 1 << 2
+	ITEM_DECAYS         = 1 << 3
+	ITEM_DECAY_SILENTLY = 1 << 4
 )
 
 func (game *Game) LoadObjectIndex(index uint) (*Object, error) {

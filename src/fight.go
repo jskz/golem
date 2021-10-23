@@ -26,6 +26,22 @@ const (
 	DamageTypeExotic = 3
 )
 
+func (game *Game) createBlood(intensity int) *ObjectInstance {
+	obj := &ObjectInstance{game: game}
+
+	obj.parentId = 1
+	obj.description = fmt.Sprintf("{rA puddle of blood has spilled here.{x")
+	obj.shortDescription = fmt.Sprintf("a puddle of blood")
+	obj.longDescription = fmt.Sprintf("{rThere is a puddle of blood here.")
+	obj.name = "blood puddle"
+	obj.itemType = ItemTypeNone
+	obj.createdAt = time.Now()
+	obj.flags = ITEM_DECAYS | ITEM_DECAY_SILENTLY
+	obj.ttl = 5
+
+	return obj
+}
+
 func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj := &ObjectInstance{game: game}
 
@@ -88,6 +104,9 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 			corpse := game.createCorpse(target)
 			room.removeCharacter(target)
 			room.addObject(corpse)
+
+			blood := game.createBlood(1)
+			room.addObject(blood)
 
 			target.Fighting = nil
 			target.Combat = nil

@@ -139,10 +139,12 @@ func (game *Game) ResetRoom(room *Room) {
 
 		/* Remove the obj after its ttl time in minutes, if the ITEM_DECAYS flag is set */
 		if obj.flags&ITEM_DECAYS != 0 && int(time.Since(obj.createdAt).Minutes()) > obj.ttl {
-			for innerIter := room.Characters.Head; innerIter != nil; innerIter = innerIter.Next {
-				rch := innerIter.Value.(*Character)
+			if obj.flags&ITEM_DECAY_SILENTLY == 0 {
+				for innerIter := room.Characters.Head; innerIter != nil; innerIter = innerIter.Next {
+					rch := innerIter.Value.(*Character)
 
-				rch.Send(fmt.Sprintf("{D%s{D crumbles into dust.{x\r\n", obj.GetShortDescriptionUpper(rch)))
+					rch.Send(fmt.Sprintf("{D%s{D crumbles into dust.{x\r\n", obj.GetShortDescriptionUpper(rch)))
+				}
 			}
 
 			/* If the object is a container, try to transfer all of its contents to the room */
