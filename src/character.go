@@ -201,6 +201,10 @@ func (ch *Character) onUpdate() {
 		ch.health = int(math.Min(float64(ch.maxHealth), float64(ch.health+3)))
 	}
 
+	if ch.mana < ch.maxMana {
+		ch.mana = int(math.Min(float64(ch.maxMana), float64(ch.mana+7)))
+	}
+
 	if ch.stamina < ch.maxStamina {
 		ch.stamina = int(math.Min(float64(ch.maxStamina), float64(ch.stamina+40)))
 	}

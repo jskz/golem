@@ -61,26 +61,26 @@ INSERT INTO skills(id, name, type) VALUES (7, 'cure light', 'spell');
 INSERT INTO skills(id, name, type) VALUES (8, 'magic map', 'spell');
 
 /* Grant unarmed combat as a seed skill for all four base jobs with varying complexity and cost */
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (1, 1, 2, 1, 1, 1);
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (2, 2, 2, 2, 2, 2);
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (3, 3, 2, 3, 5, 5);
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (4, 4, 2, 4, 5, 5);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (1, 1, 2, 1, 1, 50);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (2, 2, 2, 2, 2, 50);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (3, 3, 2, 3, 5, 50);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (4, 4, 2, 4, 5, 50);
 
 /* Warrior defaults: bash, dodge */
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (5, 1, 6, 1, 5, 20);
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (11, 1, 1, 20, 10, 10);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (5, 1, 6, 1, 5, 50);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (11, 1, 1, 20, 10, 50);
 
 /* Thief defaults: peek, dodge */
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (6, 2, 3, 1, 5, 5);
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (12, 2, 1, 5, 5, 5);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (6, 2, 3, 1, 5, 50);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (12, 2, 1, 5, 5, 50);
 
 /* Cleric defaults: armor, cure light, magic map */
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (7, 4, 4, 1, 1, 20);
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (9, 4, 7, 1, 1, 20);
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (10, 4, 8, 5, 1, 20);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (7, 4, 4, 1, 1, 50);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (9, 4, 7, 1, 1, 50);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (10, 4, 8, 5, 1, 50);
 
 /* Mage defaults: fireball */
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (8, 3, 5, 1, 1, 20);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (8, 3, 5, 1, 5, 50);
 
 /* Grant some skills mastered to the seed admin user as well */
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (1, 1, 1, 2, 100);

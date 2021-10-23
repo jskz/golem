@@ -27,7 +27,7 @@ function spell_fireball(ch, args) {
     }
 
     target.send("{RYou are enveloped in flames!{x\r\n");
-    Golem.game.damage(ch, target, false, 20, Golem.Combat.DamageTypeExotic);
+    Golem.game.damage(ch, target, false, 25, Golem.Combat.DamageTypeExotic);
 }
 
 Golem.registerSpellHandler('fireball', spell_fireball);

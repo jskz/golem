@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/dop251/goja"
@@ -217,16 +218,36 @@ func do_practice(ch *Character, arguments string) {
 
 	output.WriteString("{WYou have knowledge of the following skills and spells:{x\r\n")
 
-	for id, proficiency := range ch.skills {
-		_, ok := ch.game.skills[id]
+	var skills []string = []string{}
+	var proficiencies map[string]int = make(map[string]int)
+
+	for _, proficiency := range ch.skills {
+		found := false
+
+		_, ok := ch.game.skills[proficiency.SkillId]
 		if !ok {
-			log.Printf("Player had a proficiency with a nonexistent id %d.\r\n", id)
+			log.Printf("Player had a proficiency with a nonexistent id %d.\r\n", proficiency.SkillId)
 			continue
 		}
 
+		for _, c := range skills {
+			if c == ch.game.skills[proficiency.SkillId].name {
+				found = true
+			}
+		}
+
+		if !found {
+			skills = append(skills, ch.game.skills[proficiency.SkillId].name)
+			proficiencies[ch.game.skills[proficiency.SkillId].name] = proficiency.Proficiency
+		}
+	}
+
+	sort.Strings(skills)
+
+	for _, proficiency := range skills {
 		count++
 
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.Proficiency))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", proficiency, proficiencies[proficiency]))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")
