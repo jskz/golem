@@ -129,8 +129,8 @@ func (ch *Character) getEquipment(wearLocation int) *ObjectInstance {
 	return nil
 }
 
-func (ch *Character) detachEquipment(obj *ObjectInstance, wearLocation int) bool {
-	if ch.getEquipment(wearLocation) == nil {
+func (ch *Character) detachEquipment(obj *ObjectInstance) bool {
+	if ch.getEquipment(obj.WearLocation) == nil {
 		return false
 	}
 
@@ -188,7 +188,17 @@ func do_wear(ch *Character, arguments string) {
 		return
 	}
 
-	ch.Send("Not yet implemented, try again soon!\r\n")
+	firstArgument, _ := oneArgument(arguments)
+
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		if obj.WearLocation == -1 {
+			if strings.Contains(obj.name, firstArgument) {
+				// get the appropriate wear location ... ch.attachEquipment(obj, )
+			}
+		}
+	}
 }
 
 func do_remove(ch *Character, arguments string) {
@@ -197,7 +207,28 @@ func do_remove(ch *Character, arguments string) {
 		return
 	}
 
-	ch.Send("Not yet implemented, try again soon!\r\n")
+	firstArgument, _ := oneArgument(arguments)
+
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		if obj.WearLocation != -1 {
+			if strings.Contains(obj.name, firstArgument) {
+				ch.detachEquipment(obj)
+				ch.Send(fmt.Sprintf("You remove %s{x.\r\n", obj.GetShortDescription(ch)))
+
+				for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+					rch := roomOthersIter.Value.(*Character)
+
+					if !rch.IsEqual(ch) {
+						rch.Send(fmt.Sprintf("%s{x removes %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+					}
+				}
+
+				return
+			}
+		}
+	}
 }
 
 func do_use(ch *Character, arguments string) {
