@@ -70,27 +70,92 @@ INSERT INTO
     scripts(id, name, script)
 VALUES (1, 'limbo-developer-maze', 
 "module.exports = {
-    onGenerate: function(plane) {
+    onGenerate: function (plane) {
         // Create a self-referential exit from limbo which is yet to be generated
         const limbo = Golem.game.loadRoomIndex(Golem.KnownLocations.Limbo);
 
-        if(limbo) {
-            limbo.exit[Golem.Directions.DirectionDown] =
-            Golem.NewExit(Golem.Directions.DirectionDown, limbo, Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED | Golem.ExitFlags.EXIT_LOCKED);
-          
-	    module.exports.onGenerationComplete = (plane) => {
+        function populateDungeon(dungeon) {
+            for (let z = 0; z < dungeon.floors.length; z++) {
+                for (let y = 0; y < dungeon.floors[z].grid.length; y++) {
+                    for (let x = 0; x < dungeon.floors[z].grid[y].length; x++) {
+                        const cell = dungeon.floors[z].grid[x][y];
+                        if (!cell.wall) {
+                            const chanceToSpawnCreature = ~~(
+                                Math.random() * 100
+                            );
+
+                            if (chanceToSpawnCreature > 90) {
+                                const baseMobile =
+                                    Golem.game.loadMobileIndex(1);
+
+                                try {
+                                    if (baseMobile && cell.room) {
+                                        baseMobile.name =
+                                            'aggressive slime angry agitate agitated';
+                                        baseMobile.shortDescription =
+                                            'an agitated slime';
+                                        baseMobile.longDescription =
+                                            'An angry slime has festered to the point of open hostility in the dungeon.';
+                                        baseMobile.description =
+                                            'This angry slime has one big chip on its gelatinous shoulder.';
+                                        baseMobile.dexterity = 15;
+                                        baseMobile.health = 100;
+                                        baseMobile.maxHealth = 100;
+                                        baseMobile.strength = 20;
+                                        baseMobile.flags =
+                                            Golem.CharFlags.CHAR_AGGRESSIVE;
+
+                                        cell.room.addCharacter(baseMobile);
+                                        Golem.game.characters.insert(
+                                            baseMobile
+                                        );
+                                    }
+                                } catch (err) {
+                                    Golem.game.broadcast(err.toString());
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (limbo) {
+            limbo.exit[Golem.Directions.DirectionDown] = Golem.NewExit(
+                Golem.Directions.DirectionDown,
+                limbo,
+                Golem.ExitFlags.EXIT_IS_DOOR |
+                    Golem.ExitFlags.EXIT_CLOSED |
+                    Golem.ExitFlags.EXIT_LOCKED
+            );
+
+            module.exports.onGenerationComplete = (plane) => {
                 const dungeonFirstFloor = plane.dungeon.floors[0];
-                const dungeonGrid = dungeonFirstFloor.grid;
-                const dungeonEntrance = dungeonFirstFloor.grid[dungeonFirstFloor.entryX][dungeonFirstFloor.entryY].room;
+                const dungeonEntrance =
+                    dungeonFirstFloor.grid[dungeonFirstFloor.entryX][
+                        dungeonFirstFloor.entryY
+                    ].room;
+
+                dungeonEntrance.flags =
+                    Golem.RoomFlags.ROOM_VIRTUAL | Golem.RoomFlags.ROOM_SAFE;
 
                 // Tie the dungeon's entrance to limbo and unlock the trapdoor
                 limbo.exit[Golem.Directions.DirectionDown].to = dungeonEntrance;
-                dungeonEntrance.exit[Golem.Directions.DirectionUp] = Golem.NewExit(Golem.Directions.DirectionUp, limbo, Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED);
-		limbo.exit[Golem.Directions.DirectionDown].flags = Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED;
+                dungeonEntrance.exit[Golem.Directions.DirectionUp] =
+                    Golem.NewExit(
+                        Golem.Directions.DirectionUp,
+                        limbo,
+                        Golem.ExitFlags.EXIT_IS_DOOR |
+                            Golem.ExitFlags.EXIT_CLOSED
+                    );
+                limbo.exit[Golem.Directions.DirectionDown].flags =
+                    Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED;
+
+                populateDungeon(plane.dungeon);
             };
         }
-    }
-}");
+    },
+};");
 
 INSERT INTO plane_script (id, plane_id, script_id) VALUES (1, 1, 1);
 

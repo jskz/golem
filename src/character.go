@@ -128,21 +128,21 @@ type Character struct {
 	job    *Job
 	race   *Race
 
-	Level      uint
-	Experience uint
-	Practices  int
+	Level      uint `json:"level"`
+	Experience uint `json:"experience"`
+	Practices  int  `json:"practices"`
 
 	skills map[uint]*Proficiency
 
 	Flags int `json:"flags"`
 	afk   *AwayFromKeyboard
 
-	Health     int
-	MaxHealth  int
-	Mana       int
-	MaxMana    int
-	Stamina    int
-	MaxStamina int
+	Health     int `json:"health"`
+	MaxHealth  int `json:"maxHealth"`
+	Mana       int `json:"mana"`
+	MaxMana    int `json:"maxMana"`
+	Stamina    int `json:"stamina"`
+	MaxStamina int `json:"maxStamina"`
 
 	Position int
 
