@@ -28,6 +28,17 @@ func (ch *Character) onCastingUpdate() {
 
 	if sinceCastingFinished.Seconds() >= 0 {
 		ch.Send("\r\n{WYou finish casting the magic spell.{x\r\n")
+
+		if ch.Room != nil {
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				rch := iter.Value.(*Character)
+
+				if !rch.IsEqual(ch) {
+					rch.Send(fmt.Sprintf("\r\n{W%s{W finishes casting their magic spell.{W{x.\r\n", ch.GetShortDescriptionUpper(rch)))
+				}
+			}
+		}
+
 		if ch.casting.casting.handler != nil {
 			fn := *ch.casting.casting.handler
 

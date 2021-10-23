@@ -265,7 +265,7 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 					character := iter.Value.(*Character)
 
 					if character != ch {
-						character.Send(fmt.Sprintf("\r\n%s{x has reconnected.\r\n", ch.GetShortDescriptionUpper(character)))
+						character.Send(fmt.Sprintf("\r\n{M%s has reconnected.{x\r\n", ch.GetShortDescriptionUpper(character)))
 					}
 				}
 			}
