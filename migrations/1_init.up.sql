@@ -285,6 +285,7 @@ INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (3, 1, 'Featurel
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (4, 1, 'Featureless Corridor in Space', 'Flickering torches in the void serve as guideposts marking lanes throughout the astral void, linking discrete spaces.', 4);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (5, 1, 'Featureless Corridor in Space', 'Flickering torches in the void serve as guideposts marking lanes throughout the astral void, linking discrete spaces.', 4);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (6, 1, 'A Cell', 'A foul stink fills the musty, stale air of a prison cell profaned by unspeakable experiments.', 0);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (7, 1, 'Training Room', 'Part library, part study, part workshop, this chamber has been set aside for all pursuits of self-mastery.', 4);
 
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!', 0, 'protoplasm');
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (2, 1, 'sign post signpost', 'a signpost', 'A signpost hangs in the aether beside a foreboding trapdoor.', "{YWelcome to Golem!{x\r\n\r\n{CThis pre-alpha MUD is in active development.\r\n\r\nBeneath this safe zone welcome lobby is a test dungeon with multiple floors\r\nwhose mazes are regenerated each reboot.\r\n\r\nFind updates and information on development at https://github.com/jskz/golem\r\n\r\n{WProblems? {wFeel free to {Wcontact{w the developer at {Wjames@jskarzin.org{w.{x", 0, 'sign');
@@ -308,6 +309,10 @@ INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (8, 5, 3, 3,
 /* corridor east <-south-> monster cell A */
 INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (9, 5, 6, 2, 3);
 INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (10, 6, 5, 0, 3);
+
+/* corridor west <-> training room */
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (11, 4, 7, 2, 3);
+INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (12, 7, 4, 0, 3);
 
 /* Races */
 INSERT INTO
@@ -340,14 +345,23 @@ VALUES
     (1, 'animated animate slime', 'an animated slime', 'An animated slime languidly oozes here.', 'Despite its benign appearance, this puddle of ooze seems poised to strike.', 1, 1, 5, 1250, 15, 15, 100, 100, 100, 100, 12, 12, 12, 12, 12, 12, 10);
 
 INSERT INTO
-    resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
+    mobiles(id, name, short_description, long_description, description, flags, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 VALUES
-    (1, 1, 6, 'mobile', 1, 3, 1, 1);
+    (2, 'guild master guildmaster', 'the guildmaster', 'The guildmaster waits patiently to counsel and guide.', 'An inviting figure gestures to loosen your assumptions and practice your fundamentals.', 32, 1, 1, 50, 1250, 15, 15, 100, 100, 100, 100, 12, 12, 12, 12, 12, 12, 10);
 
 INSERT INTO
     resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
 VALUES
-    (2, 1, 1, 'object', 2, 1, 1, 1);
+    (1, 1, 6, 'mobile', 1, 3, 1, 1);
+INSERT INTO
+    resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
+VALUES
+    (2, 1, 7, 'mobile', 2, 3, 1, 1);
+
+INSERT INTO
+    resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
+VALUES
+    (3, 1, 1, 'object', 2, 1, 1, 1);
 
 CREATE INDEX index_pc_username ON player_characters(username);
 CREATE INDEX index_race_name ON races(name);

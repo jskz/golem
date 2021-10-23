@@ -211,7 +211,7 @@ func do_practice(ch *Character, arguments string) {
 
 		ch.practices -= prof.Complexity
 		prof.Proficiency++
-		ch.Send(fmt.Sprintf("{WYou practice %s.{x\r\n", skill.name))
+		ch.Send(fmt.Sprintf("{WYou practice %s!{x\r\n", skill.name))
 		return
 	}
 
