@@ -108,10 +108,6 @@ func init() {
 }
 
 func (ch *Character) Interpret(input string) bool {
-	defer func() {
-		recover()
-	}()
-
 	if ch.outputCursor > 0 && ch.inputCursor < ch.outputHead {
 		/* If any input, abort the paging */
 		if input != "" {
