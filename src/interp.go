@@ -120,7 +120,7 @@ func (ch *Character) Interpret(input string) bool {
 			return true
 		}
 
-		ch.inputCursor += 10
+		ch.inputCursor += DefaultMaxLines
 		return true
 	}
 
