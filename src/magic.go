@@ -34,7 +34,7 @@ func (ch *Character) onCastingUpdate() {
 				rch := iter.Value.(*Character)
 
 				if !rch.IsEqual(ch) {
-					rch.Send(fmt.Sprintf("\r\n{W%s{W finishes casting their magic spell.{W{x.\r\n", ch.GetShortDescriptionUpper(rch)))
+					rch.Send(fmt.Sprintf("\r\n{W%s{W finishes casting their magic spell.{W{x\r\n", ch.GetShortDescriptionUpper(rch)))
 				}
 			}
 		}
