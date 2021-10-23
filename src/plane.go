@@ -127,6 +127,10 @@ func (plane *Plane) generate() error {
 		return errors.New("unimplemented plane type")
 	}
 
+	if plane.Scripts != nil {
+		plane.Scripts.tryEvaluate("onGenerationComplete", plane.Game.vm.ToValue(game), plane.Game.vm.ToValue(plane))
+	}
+
 	return nil
 }
 

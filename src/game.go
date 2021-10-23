@@ -149,6 +149,7 @@ func NewGame() (*Game, error) {
 		plane := iter.Value.(*Plane)
 
 		log.Printf("Generating %s...\r\n", plane.Name)
+
 		err = plane.generate()
 		if err != nil {
 			return nil, err
