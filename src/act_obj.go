@@ -106,7 +106,7 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 		break
 	}
 
-	if obj.contents.Count > 0 {
+	if obj.contents != nil && obj.contents.Count > 0 {
 		output.WriteString(fmt.Sprintf("{C%s{c contains the following items:\r\n", obj.GetShortDescriptionUpper(ch)))
 		ch.Send(output.String())
 
