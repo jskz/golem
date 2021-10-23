@@ -35,6 +35,9 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj.longDescription = fmt.Sprintf("The corpse of %s is lying here.", ch.GetShortDescription(ch))
 	obj.name = fmt.Sprintf("corpse %s", ch.name)
 	obj.itemType = "container"
+	obj.createdAt = time.Now()
+	obj.flags = ITEM_DECAYS
+	obj.ttl = 20
 
 	if ch.flags&CHAR_IS_PLAYER == 0 {
 		obj.contents = NewLinkedList()

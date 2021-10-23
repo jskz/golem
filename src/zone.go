@@ -87,6 +87,7 @@ func (game *Game) ResetRoom(room *Room) {
 					value1:           objIndex.value1,
 					value2:           objIndex.value2,
 					value3:           objIndex.value3,
+					createdAt:        time.Now(),
 				}
 
 				room.addObject(obj)
@@ -130,6 +131,21 @@ func (game *Game) ResetRoom(room *Room) {
 
 		if room.zone.resetMessage != "" && character.flags&CHAR_IS_PLAYER != 0 {
 			character.Send(fmt.Sprintf("\r\n{x%s{x\r\n", room.zone.resetMessage))
+		}
+	}
+
+	for iter := room.objects.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		if obj.flags&ITEM_DECAYS != 0 && int(time.Since(obj.createdAt).Minutes()) > obj.ttl {
+			for innerIter := room.Characters.Head; innerIter != nil; innerIter = innerIter.Next {
+				rch := innerIter.Value.(*Character)
+
+				rch.Send(fmt.Sprintf("{D%s{D crumbles into dust.{x\r\n", obj.GetShortDescriptionUpper(rch)))
+			}
+
+			room.removeObject(obj)
+			break
 		}
 	}
 }

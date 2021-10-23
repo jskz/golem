@@ -16,6 +16,7 @@ import (
 	"log"
 	"math"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/dop251/goja"
@@ -468,6 +469,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			contents:  NewLinkedList(),
 			inside:    nil,
 			carriedBy: nil,
+			createdAt: time.Now(),
 		}
 
 		err = rows.Scan(&obj.id, &obj.parentId, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.flags, &obj.itemType, &obj.value0, &obj.value1, &obj.value2, &obj.value3)
@@ -512,6 +514,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 				contents:  NewLinkedList(),
 				inside:    nil,
 				carriedBy: nil,
+				createdAt: time.Now(),
 			}
 
 			err = rows.Scan(&containedObj.id, &containedObj.parentId, &containedObj.name, &containedObj.shortDescription, &containedObj.longDescription, &containedObj.description, &containedObj.flags, &containedObj.itemType, &containedObj.value0, &containedObj.value1, &containedObj.value2, &containedObj.value3)

@@ -50,10 +50,7 @@ func (game *Game) DefaultSourceLoader(filename string) ([]byte, error) {
 
 func (game *Game) LoadScriptsFromDatabase() error {
 	game.scripts = make(map[uint]*Script)
-
-	// game.mobileScripts = make(map[uint]*Script)
 	game.objectScripts = make(map[uint]*Script)
-	//game.roomScripts = make(map[uint]*Script)
 
 	rows, err := game.db.Query(`
 		SELECT
