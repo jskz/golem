@@ -52,4 +52,18 @@ CREATE TABLE room_script (
     FOREIGN KEY (script_id) REFERENCES scripts(id)
 );
 
+CREATE TABLE plane_script (
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `plane_id` BIGINT NOT NULL,
+    `script_id` BIGINT NOT NULL,
+
+    /* Timestamps */
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (plane_id) REFERENCES planes(id),
+    FOREIGN KEY (script_id) REFERENCES scripts(id)
+);
+
 CREATE INDEX index_script_name ON scripts(name);
