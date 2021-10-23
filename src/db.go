@@ -153,6 +153,8 @@ func (game *Game) LoadJobSkills() error {
 
 	defer rows.Close()
 
+	var results int = 0
+
 	for rows.Next() {
 		jobSkill := &JobSkill{}
 
@@ -176,9 +178,10 @@ func (game *Game) LoadJobSkills() error {
 		}
 
 		jobSkill.Job.Skills.Insert(jobSkill)
+		results++
 	}
 
-	log.Printf("Loaded %d job-skill relations from database.\r\n", Jobs.Count)
+	log.Printf("Loaded %d job-skill relations from database.\r\n", results)
 	return nil
 }
 
