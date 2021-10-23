@@ -157,15 +157,15 @@ func do_group(ch *Character, arguments string) {
 			gch := iter.Value.(*Character)
 
 			output.WriteString(fmt.Sprintf("[%2d %-8s] %-14s %5d/%5dhp %5d/%5dm %5d/%5dst\r\n",
-				gch.level,
+				gch.Level,
 				gch.job.DisplayName,
 				gch.GetShortDescriptionUpper(ch),
-				gch.health,
-				gch.maxHealth,
-				gch.mana,
-				gch.maxMana,
-				gch.stamina,
-				gch.maxStamina))
+				gch.Health,
+				gch.MaxHealth,
+				gch.Mana,
+				gch.MaxMana,
+				gch.Stamina,
+				gch.MaxStamina))
 		}
 
 		ch.Send(output.String())

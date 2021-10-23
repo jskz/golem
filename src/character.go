@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"strings"
 	"time"
 	"unicode"
@@ -123,26 +124,27 @@ type Character struct {
 	LongDescription  string `json:"longDescription"`
 	Description      string `json:"description"`
 
-	wizard     bool
-	job        *Job
-	race       *Race
-	level      uint
-	experience uint
-	practices  int
+	wizard bool
+	job    *Job
+	race   *Race
+
+	Level      uint
+	Experience uint
+	Practices  int
 
 	skills map[uint]*Proficiency
 
 	Flags int `json:"flags"`
 	afk   *AwayFromKeyboard
 
-	health     int
-	maxHealth  int
-	mana       int
-	maxMana    int
-	stamina    int
-	maxStamina int
+	Health     int
+	MaxHealth  int
+	Mana       int
+	MaxMana    int
+	Stamina    int
+	MaxStamina int
 
-	position int
+	Position int
 
 	Strength     int `json:"strength"`
 	Dexterity    int `json:"dexterity"`
@@ -198,16 +200,16 @@ func (ch *Character) onZoneUpdate() {
 
 func (ch *Character) onUpdate() {
 	/* Regen, script hooks, etc. */
-	if ch.health < ch.maxHealth {
-		ch.health = int(math.Min(float64(ch.maxHealth), float64(ch.health+3)))
+	if ch.Health < ch.MaxHealth {
+		ch.Health = int(math.Min(float64(ch.MaxHealth), float64(ch.Health+3)))
 	}
 
-	if ch.mana < ch.maxMana {
-		ch.mana = int(math.Min(float64(ch.maxMana), float64(ch.mana+7)))
+	if ch.Mana < ch.MaxMana {
+		ch.Mana = int(math.Min(float64(ch.MaxMana), float64(ch.Mana+7)))
 	}
 
-	if ch.stamina < ch.maxStamina {
-		ch.stamina = int(math.Min(float64(ch.maxStamina), float64(ch.stamina+40)))
+	if ch.Stamina < ch.MaxStamina {
+		ch.Stamina = int(math.Min(float64(ch.MaxStamina), float64(ch.Stamina+40)))
 	}
 }
 
@@ -222,7 +224,7 @@ func (ch *Character) Finalize() error {
 			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
+	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.Level, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -311,7 +313,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.level, ch.experience, ch.practices, ch.health, ch.maxHealth, ch.mana, ch.maxMana, ch.stamina, ch.maxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.Id)
+	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.Level, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.Id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -583,7 +585,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.Id, &ch.Name, &ch.wizard, &roomId, &raceId, &jobId, &ch.level, &ch.experience, &ch.practices, &ch.health, &ch.maxHealth, &ch.mana, &ch.maxMana, &ch.stamina, &ch.maxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
+	err := row.Scan(&ch.Id, &ch.Name, &ch.wizard, &roomId, &raceId, &jobId, &ch.Level, &ch.Experience, &ch.Practices, &ch.Health, &ch.MaxHealth, &ch.Mana, &ch.MaxMana, &ch.Stamina, &ch.MaxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -704,35 +706,37 @@ func (ch *Character) gainExperience(experience int) {
 		return
 	}
 
-	if ch.level < LevelHero {
+	if ch.Level < LevelHero {
 		ch.Send(fmt.Sprintf("{WYou gained %d experience points.{x\r\n", experience))
-		ch.experience = ch.experience + uint(experience)
+		ch.Experience = ch.Experience + uint(experience)
 
 		/* If we gain enough experience to level up multiple times */
 		for {
-			if ch.level >= LevelHero {
+			if ch.Level >= LevelHero {
 				break
 			}
 
-			tnl := uint(ch.experienceRequiredForLevel(int(ch.level + 1)))
+			tnl := uint(ch.experienceRequiredForLevel(int(ch.Level + 1)))
 
-			if ch.experience > tnl {
-				ch.level = ch.level + 1
+			if ch.Experience > tnl {
+				ch.Level = ch.Level + 1
 
 				/* Calculate stat gains, skill points, etc... */
 				healthGain := 20
 				manaGain := 20
 				staminaGain := 20
+				practicesGain := rand.Intn(10)
 
-				ch.maxHealth += healthGain
-				ch.health += healthGain
-				ch.maxMana += manaGain
-				ch.mana += manaGain
-				ch.maxStamina += staminaGain
-				ch.stamina += staminaGain
+				ch.MaxHealth += healthGain
+				ch.Health += healthGain
+				ch.MaxMana += manaGain
+				ch.Mana += manaGain
+				ch.MaxStamina += staminaGain
+				ch.Stamina += staminaGain
+				ch.Practices += practicesGain
 
-				ch.Send(fmt.Sprintf("{YYou have advanced to level %d!\r\n{x", ch.level))
-				/* Any extra announce/log */
+				ch.Send(fmt.Sprintf("{YYou have advanced to level %d!\r\n{x", ch.Level))
+				ch.Send(fmt.Sprintf("{WOh yeah! You gained %d hp, %d mana, %d stamina, and %d practice sessions.{x\r\n", healthGain, manaGain, staminaGain, practicesGain))
 
 				err := ch.syncJobSkills()
 				if err != nil {
@@ -986,8 +990,8 @@ func NewCharacter() *Character {
 	character.Combat = nil
 	character.race = nil
 	character.Room = nil
-	character.practices = 0
-	character.position = PositionDead
+	character.Practices = 0
+	character.Position = PositionDead
 	character.output = make([]byte, 32768)
 	character.outputCursor = 0
 	character.inputCursor = DefaultMaxLines
@@ -995,8 +999,8 @@ func NewCharacter() *Character {
 
 	character.Name = UnauthenticatedUsername
 	character.client = nil
-	character.level = 0
-	character.experience = 0
+	character.Level = 0
+	character.Experience = 0
 	character.inventory = NewLinkedList()
 	character.skills = make(map[uint]*Proficiency)
 

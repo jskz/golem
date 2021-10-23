@@ -36,9 +36,9 @@ func (client *Client) displayPrompt() {
 		return
 	}
 
-	healthPercentage := client.character.health * 100 / client.character.maxHealth
-	manaPercentage := client.character.mana * 100 / client.character.maxMana
-	staminaPercentage := client.character.stamina * 100 / client.character.maxStamina
+	healthPercentage := client.character.Health * 100 / client.character.MaxHealth
+	manaPercentage := client.character.Mana * 100 / client.character.MaxMana
+	staminaPercentage := client.character.Stamina * 100 / client.character.MaxStamina
 
 	currentHealthColour := SeverityColourFromPercentage(healthPercentage)
 	currentManaColour := SeverityColourFromPercentage(manaPercentage)
@@ -52,14 +52,14 @@ func (client *Client) displayPrompt() {
 	prompt.WriteString(
 		client.TranslateColourCodes(fmt.Sprintf("{w[%s%d{w/{G%d{ghp %s%d{w/{G%d{gm %s%d{w/{G%d{gst{w]{x ",
 			currentHealthColour,
-			client.character.health,
-			client.character.maxHealth,
+			client.character.Health,
+			client.character.MaxHealth,
 			currentManaColour,
-			client.character.mana,
-			client.character.maxMana,
+			client.character.Mana,
+			client.character.MaxMana,
 			currentStaminaColour,
-			client.character.stamina,
-			client.character.maxStamina)))
+			client.character.Stamina,
+			client.character.MaxStamina)))
 	client.character.Write(prompt.Bytes())
 }
 
@@ -130,11 +130,11 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character.game = game
 		client.character.client = client
 		client.character.Name = name
-		client.character.level = 1
+		client.character.Level = 1
 		client.character.Flags |= CHAR_IS_PLAYER
 		client.connectionState = ConnectionStateConfirmName
 
-		client.character.practices = 100
+		client.character.Practices = 100
 		client.character.Strength = 10
 		client.character.Dexterity = 10
 		client.character.Intelligence = 10
@@ -143,14 +143,14 @@ func (game *Game) nanny(client *Client, message string) {
 		client.character.Charisma = 10
 		client.character.Luck = 10
 
-		client.character.health = 20
-		client.character.maxHealth = 20
+		client.character.Health = 20
+		client.character.MaxHealth = 20
 
-		client.character.mana = 100
-		client.character.maxMana = 100
+		client.character.Mana = 100
+		client.character.MaxMana = 100
 
-		client.character.stamina = 100
-		client.character.maxStamina = 100
+		client.character.Stamina = 100
+		client.character.MaxStamina = 100
 
 		output.WriteString(fmt.Sprintf("No adventurer with that name exists.  Create %s? [y/N] ", client.character.Name))
 

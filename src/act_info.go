@@ -54,7 +54,7 @@ func do_help(ch *Character, arguments string) {
 	sort.Strings(commands)
 
 	for _, command := range commands {
-		if ch.level <= CommandTable[command].MinimumLevel || CommandTable[command].Hidden {
+		if ch.Level <= CommandTable[command].MinimumLevel || CommandTable[command].Hidden {
 			continue
 		}
 
@@ -77,9 +77,9 @@ func do_help(ch *Character, arguments string) {
 func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	healthPercentage := ch.health * 100 / ch.maxHealth
-	manaPercentage := ch.mana * 100 / ch.maxMana
-	staminaPercentage := ch.stamina * 100 / ch.maxStamina
+	healthPercentage := ch.Health * 100 / ch.MaxHealth
+	manaPercentage := ch.Mana * 100 / ch.MaxMana
+	staminaPercentage := ch.Stamina * 100 / ch.MaxStamina
 
 	currentHealthColour := SeverityColourFromPercentage(healthPercentage)
 	currentManaColour := SeverityColourFromPercentage(manaPercentage)
@@ -87,30 +87,30 @@ func do_score(ch *Character, arguments string) {
 
 	buf.WriteString("\r\n{D┌─ {WCharacter Information {D──────────────────┬─ {WStatistics{D ───────┐{x\r\n")
 	buf.WriteString(fmt.Sprintf("{D│ {CName:    {c%-13s                   {D│ Strength:       {M%2d{D │\r\n", ch.Name, ch.Strength))
-	if ch.level < LevelHero {
-		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d  {D[%8d exp. until next] {D│ Dexterity:      {M%2d{D │\r\n", ch.level, ch.experienceRequiredForLevel(int(ch.level+1))-int(ch.experience), ch.Dexterity))
+	if ch.Level < LevelHero {
+		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d  {D[%8d exp. until next] {D│ Dexterity:      {M%2d{D │\r\n", ch.Level, ch.experienceRequiredForLevel(int(ch.Level+1))-int(ch.Experience), ch.Dexterity))
 	} else {
-		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d                             {D│ Dexterity:      {M%2d{D │\r\n", ch.level, ch.Dexterity))
+		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d                             {D│ Dexterity:      {M%2d{D │\r\n", ch.Level, ch.Dexterity))
 	}
 	buf.WriteString(fmt.Sprintf("{D│ {CRace:    {c%-21s           {D│ Intelligence:   {M%2d{D │\r\n", ch.race.DisplayName, ch.Intelligence))
 	buf.WriteString(fmt.Sprintf("{D│ {CJob:     {c%-21s           {D│ Wisdom:         {M%2d{D │\r\n", ch.job.DisplayName, ch.Wisdom))
 	buf.WriteString(fmt.Sprintf("{D│ {CHealth:  {c%s%-20s                {D│ Constitution:   {M%2d{D │\r\n",
 		currentHealthColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
-			ch.health,
-			ch.maxHealth),
+			ch.Health,
+			ch.MaxHealth),
 		ch.Constitution))
 	buf.WriteString(fmt.Sprintf("{D│ {CMana:    {c%s%-18s                  {D│ Charisma:       {M%2d{D │\r\n",
 		currentManaColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
-			ch.mana,
-			ch.maxMana),
+			ch.Mana,
+			ch.MaxMana),
 		ch.Charisma))
 	buf.WriteString(fmt.Sprintf("{D│ {CStamina: {c%s%-21s               {D│ Luck:           {M%2d{D │\r\n",
 		currentStaminaColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
-			ch.stamina,
-			ch.maxStamina),
+			ch.Stamina,
+			ch.MaxStamina),
 		ch.Luck))
 	buf.WriteString("{D└──────────────────────────────────────────┴────────────────────┘{x\r\n")
 
@@ -133,7 +133,7 @@ func do_who(ch *Character, arguments string) {
 	}
 
 	sort.Slice(characters, func(i int, j int) bool {
-		return characters[i].level > characters[j].level
+		return characters[i].Level > characters[j].Level
 	})
 
 	for _, character := range characters {
@@ -146,15 +146,15 @@ func do_who(ch *Character, arguments string) {
 		}
 
 		jobDisplay := character.job.DisplayName
-		if character.level == LevelAdmin {
+		if character.Level == LevelAdmin {
 			jobDisplay = " Administrator"
-		} else if character.level > LevelHero {
+		} else if character.Level > LevelHero {
 			jobDisplay = "   Immortal   "
-		} else if character.level == LevelHero {
+		} else if character.Level == LevelHero {
 			jobDisplay = "     Hero     "
 		}
 
-		if character.level >= LevelHero {
+		if character.Level >= LevelHero {
 			buf.WriteString(fmt.Sprintf("[%-15s] %s %s(%s)\r\n",
 				jobDisplay,
 				character.Name,
@@ -162,7 +162,7 @@ func do_who(ch *Character, arguments string) {
 				character.race.DisplayName))
 		} else {
 			buf.WriteString(fmt.Sprintf("[%3d][%-10s] %s %s(%s)\r\n",
-				character.level,
+				character.Level,
 				jobDisplay,
 				character.Name,
 				flagsString.String(),

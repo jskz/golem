@@ -133,12 +133,12 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		return false
 	}
 
-	if ch.stamina-MovementCost < 0 {
+	if ch.Stamina-MovementCost < 0 {
 		ch.Send("{DYou are too exhausted to move!{x\r\n")
 		return false
 	}
 
-	ch.stamina -= MovementCost
+	ch.Stamina -= MovementCost
 
 	/* Is the exit closed, etc. */
 	from := ch.Room

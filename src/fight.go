@@ -91,13 +91,13 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 		target.Send(fmt.Sprintf("{Y%s{Y hits you for %d damage.{x\r\n", ch.GetShortDescriptionUpper(target), amount))
 	}
 
-	target.health -= amount
+	target.Health -= amount
 
-	if target.health > target.maxHealth {
-		target.health = target.maxHealth
+	if target.Health > target.MaxHealth {
+		target.Health = target.MaxHealth
 	}
 
-	if target.health <= 0 {
+	if target.Health <= 0 {
 		if target.Room != nil {
 			room := target.Room
 
@@ -131,10 +131,10 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 				}
 
 				limbo.AddCharacter(target)
-				target.health = target.maxHealth / 8
+				target.Health = target.MaxHealth / 8
 				do_look(target, "")
 			} else {
-				exp := int(target.experience)
+				exp := int(target.Experience)
 				if ch != nil {
 					if ch.Group != nil {
 						groupExperience := exp / ch.Group.Count

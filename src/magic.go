@@ -89,12 +89,12 @@ func do_cast(ch *Character, arguments string) {
 		return
 	}
 
-	if prof.Cost > ch.mana {
+	if prof.Cost > ch.Mana {
 		ch.Send("You do not have enough mana to cast that spell.\r\n")
 		return
 	}
 
-	ch.mana -= prof.Cost
+	ch.Mana -= prof.Cost
 
 	ch.casting = &CastingContext{
 		casting:    found,

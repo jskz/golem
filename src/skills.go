@@ -96,7 +96,7 @@ func (ch *Character) syncJobSkills() error {
 	for iter := ch.job.Skills.Head; iter != nil; iter = iter.Next {
 		jobSkill := iter.Value.(*JobSkill)
 
-		if uint(jobSkill.Level) > ch.level {
+		if uint(jobSkill.Level) > ch.Level {
 			continue
 		}
 
@@ -205,12 +205,12 @@ func do_practice(ch *Character, arguments string) {
 			return
 		}
 
-		if ch.practices < prof.Complexity {
+		if ch.Practices < prof.Complexity {
 			ch.Send("You don't have enough practice sessions.\r\n")
 			return
 		}
 
-		ch.practices -= prof.Complexity
+		ch.Practices -= prof.Complexity
 		prof.Proficiency++
 		ch.Send(fmt.Sprintf("{WYou practice %s!{x\r\n", skill.name))
 		return
@@ -254,7 +254,7 @@ func do_practice(ch *Character, arguments string) {
 		}
 	}
 
-	output.WriteString(fmt.Sprintf("\r\nYou have %d practice sessions.\r\n", ch.practices))
+	output.WriteString(fmt.Sprintf("\r\nYou have %d practice sessions.\r\n", ch.Practices))
 	ch.Send(output.String())
 }
 

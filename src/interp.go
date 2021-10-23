@@ -130,7 +130,7 @@ func (ch *Character) Interpret(input string) bool {
 	rest := strings.TrimSpace(strings.Join(words, " "))
 
 	val, ok := CommandTable[command]
-	if !ok || (ok && ch.level < val.MinimumLevel) {
+	if !ok || (ok && ch.Level < val.MinimumLevel) {
 		/* Send a no such command if there was any command text */
 		if len(command) > 0 {
 			/* As a fallback, see if this command matches any proficiency which has a registered handler. */

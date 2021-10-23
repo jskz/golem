@@ -15,7 +15,7 @@ import (
 )
 
 func (ch *Character) isAdmin() bool {
-	return ch.level == LevelAdmin
+	return ch.Level == LevelAdmin
 }
 
 func do_exec(ch *Character, arguments string) {
