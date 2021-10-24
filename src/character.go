@@ -317,7 +317,7 @@ func (ch *Character) Save() bool {
 		return false
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	_, err = result.RowsAffected()
 	if err != nil {
 		log.Printf("Failed to retrieve number of rows affected: %v.\r\n", err)
 		return false
@@ -329,7 +329,13 @@ func (ch *Character) Save() bool {
 		return false
 	}
 
-	return rowsAffected == 1
+	err = ch.game.SavePlayerInventory(ch)
+	if err != nil {
+		log.Printf("Failed to save player inventory: %v.\r\n", err)
+		return false
+	}
+
+	return true
 }
 
 func (ch *Character) attachObject(obj *ObjectInstance) error {

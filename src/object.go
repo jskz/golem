@@ -78,6 +78,17 @@ const (
 	ITEM_WEARABLE       = 1 << 2
 	ITEM_DECAYS         = 1 << 3
 	ITEM_DECAY_SILENTLY = 1 << 4
+	ITEM_WEAR_HELD      = 1 << 5
+	ITEM_WEAR_HEAD      = 1 << 6
+	ITEM_WEAR_TORSO     = 1 << 7
+	ITEM_WEAR_BODY      = 1 << 8
+	ITEM_WEAR_NECK      = 1 << 9
+	ITEM_WEAR_LEGS      = 1 << 10
+	ITEM_WEAR_HANDS     = 1 << 11
+	ITEM_WEAR_SHIELD    = 1 << 12
+	ITEM_WEAR_ARMS      = 1 << 13
+	ITEM_WEAR_WAIST     = 1 << 14
+	ITEM_WEAR_FEET      = 1 << 15
 )
 
 func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
