@@ -109,7 +109,7 @@ type Character struct {
 	Room     *Room           `json:"room"`
 	Combat   *Combat         `json:"combat"`
 	Fighting *Character      `json:"fighting"`
-	casting  *CastingContext `json:"casting"`
+	Casting  *CastingContext `json:"casting"`
 
 	Following *Character  `json:"following"`
 	Leader    *Character  `json:"leader"`

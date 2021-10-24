@@ -138,7 +138,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 				target.Mana = 1
 				target.Stamina = 1
 
-				target.casting = nil
+				target.Casting = nil
 				do_look(target, "")
 			} else {
 				exp := int(target.Experience)
@@ -188,7 +188,7 @@ func do_flee(ch *Character, arguments string) {
 		return
 	}
 
-	if ch.casting != nil {
+	if ch.Casting != nil {
 		ch.Send("{RYou are too concentrated on casting a magical spell to flee from combat.{x\r\n")
 		return
 	}

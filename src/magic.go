@@ -23,7 +23,7 @@ type CastingContext struct {
 }
 
 func (ch *Character) onCastingUpdate() {
-	finishedCastingAt := ch.casting.startedAt.Add(time.Duration(ch.casting.complexity) * time.Second)
+	finishedCastingAt := ch.Casting.startedAt.Add(time.Duration(ch.Casting.complexity) * time.Second)
 	sinceCastingFinished := time.Since(finishedCastingAt)
 
 	if sinceCastingFinished.Seconds() >= 0 {
@@ -39,13 +39,13 @@ func (ch *Character) onCastingUpdate() {
 			}
 		}
 
-		if ch.casting.casting.handler != nil {
-			fn := *ch.casting.casting.handler
+		if ch.Casting.casting.handler != nil {
+			fn := *ch.Casting.casting.handler
 
-			fn(ch.game.vm.ToValue(ch.casting), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch.casting.arguments))
+			fn(ch.game.vm.ToValue(ch.Casting), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch.Casting.arguments))
 		}
 
-		ch.casting = nil
+		ch.Casting = nil
 	}
 }
 
@@ -67,7 +67,7 @@ func do_cast(ch *Character, arguments string) {
 
 	arg, arguments := oneArgument(arguments)
 
-	if ch.casting != nil {
+	if ch.Casting != nil {
 		ch.Send("You are already in the middle of casting another spell!\r\n")
 		return
 	}
@@ -96,7 +96,7 @@ func do_cast(ch *Character, arguments string) {
 
 	ch.Mana -= prof.Cost
 
-	ch.casting = &CastingContext{
+	ch.Casting = &CastingContext{
 		casting:    found,
 		arguments:  arguments,
 		startedAt:  time.Now(),

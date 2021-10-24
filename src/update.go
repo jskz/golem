@@ -15,7 +15,7 @@ func (game *Game) characterUpdate() {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		ch := iter.Value.(*Character)
 
-		if ch.casting != nil {
+		if ch.Casting != nil {
 			ch.onCastingUpdate()
 		}
 	}
