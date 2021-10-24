@@ -70,6 +70,9 @@ const (
 	ItemTypeLight     = "light"
 	ItemTypeFurniture = "furniture"
 	ItemTypeSign      = "sign"
+	ItemTypeTreasure  = "treasure"
+	ItemTypeReagent   = "reagent"
+	ItemTypeArtifact  = "artifact"
 )
 
 const (
