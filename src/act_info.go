@@ -164,16 +164,38 @@ func do_who(ch *Character, arguments string) {
 			jobDisplay = "     Hero     "
 		}
 
+		var locationString string = ""
+
+		if character.Room != nil {
+			/* Inherit the zone's who tag if we are in a room at all */
+			if character.Room.zone != nil {
+				locationString = character.Room.zone.whoDescription
+			}
+
+			/* Hardcoded locations */
+			if character.Room.Id == RoomLimbo {
+				locationString = "Limbo"
+			} else if character.Room.Id == RoomDeveloperLounge {
+				locationString = "Office"
+			}
+
+			if character.Room.Flags&ROOM_DUNGEON != 0 && character.Room.Cell != nil {
+				locationString = "Dungeon"
+			}
+		}
+
 		if character.Level >= LevelHero {
-			buf.WriteString(fmt.Sprintf("[%-15s] %s %s(%s)\r\n",
+			buf.WriteString(fmt.Sprintf("[%-15s][%-7s] %s %s(%s)\r\n",
 				jobDisplay,
+				locationString,
 				character.Name,
 				flagsString.String(),
 				character.race.DisplayName))
 		} else {
-			buf.WriteString(fmt.Sprintf("[%3d][%-10s] %s %s(%s)\r\n",
+			buf.WriteString(fmt.Sprintf("[%3d][%-10s][%-7s] %s %s(%s)\r\n",
 				character.Level,
 				jobDisplay,
+				locationString,
 				character.Name,
 				flagsString.String(),
 				character.race.DisplayName))

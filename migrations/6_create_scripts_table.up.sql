@@ -79,7 +79,9 @@ VALUES (1, 'limbo-developer-maze',
                 for (let y = 0; y < dungeon.floors[z].grid.length; y++) {
                     for (let x = 0; x < dungeon.floors[z].grid[y].length; x++) {
                         const cell = dungeon.floors[z].grid[x][y];
-                        if (!cell.wall) {
+                        if (!cell.wall && cell.room) {
+                            cell.room.flags = Golem.RoomFlags.ROOM_VIRTUAL | Golem.RoomFlags.ROOM_DUNGEON;
+
                             const chanceToSpawnCreature = ~~(
                                 Math.random() * 100
                             );
@@ -89,7 +91,7 @@ VALUES (1, 'limbo-developer-maze',
                                     Golem.game.loadMobileIndex(1);
 
                                 try {
-                                    if (baseMobile && cell.room) {
+                                    if (baseMobile) {
                                         baseMobile.name =
                                             'aggressive slime angry agitate agitated';
                                         baseMobile.shortDescription =
@@ -137,9 +139,6 @@ VALUES (1, 'limbo-developer-maze',
                         dungeonFirstFloor.entryY
                     ].room;
 
-                dungeonEntrance.flags =
-                    Golem.RoomFlags.ROOM_VIRTUAL | Golem.RoomFlags.ROOM_SAFE;
-
                 // Tie the dungeon's entrance to limbo and unlock the trapdoor
                 limbo.exit[Golem.Directions.DirectionDown].to = dungeonEntrance;
                 dungeonEntrance.exit[Golem.Directions.DirectionUp] =
@@ -153,6 +152,8 @@ VALUES (1, 'limbo-developer-maze',
                     Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED;
 
                 populateDungeon(plane.dungeon);
+                dungeonEntrance.flags =
+                    Golem.RoomFlags.ROOM_VIRTUAL | Golem.RoomFlags.ROOM_DUNGEON | Golem.RoomFlags.ROOM_SAFE;
             };
         }
     },

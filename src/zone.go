@@ -16,9 +16,10 @@ import (
 type Zone struct {
 	id int
 
-	name string
-	low  uint
-	high uint
+	name           string
+	whoDescription string
+	low            uint
+	high           uint
 
 	resetMessage   string
 	resetFrequency int
@@ -186,6 +187,7 @@ func (game *Game) LoadZones() error {
 		SELECT
 			id,
 			name,
+			who_description,
 			low,
 			high,
 			reset_message,
@@ -204,7 +206,7 @@ func (game *Game) LoadZones() error {
 	for rows.Next() {
 		zone := &Zone{}
 
-		err := rows.Scan(&zone.id, &zone.name, &zone.low, &zone.high, &zone.resetMessage, &zone.resetFrequency)
+		err := rows.Scan(&zone.id, &zone.name, &zone.whoDescription, &zone.low, &zone.high, &zone.resetMessage, &zone.resetFrequency)
 		if err != nil {
 			log.Printf("Unable to scan zone row: %v.\r\n", err)
 			continue

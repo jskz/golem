@@ -26,6 +26,7 @@ const (
 	ROOM_PERSISTENT = 1
 	ROOM_VIRTUAL    = 1 << 1
 	ROOM_SAFE       = 1 << 2
+	ROOM_DUNGEON    = 1 << 3
 )
 
 type Room struct {
