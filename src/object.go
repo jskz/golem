@@ -33,29 +33,31 @@ type Object struct {
 }
 
 type ObjectInstance struct {
-	game      *Game
-	contents  *LinkedList
-	inside    *ObjectInstance
-	inRoom    *Room
-	carriedBy *Character
+	game      *Game           `json:"game"`
+	contents  *LinkedList     `json:"contents"`
+	inside    *ObjectInstance `json:"inside"`
+	inRoom    *Room           `json:"inRoom"`
+	carriedBy *Character      `json:"carriedBy"`
 
-	id       uint
-	parentId uint
-	itemType string
+	id       uint   `json:"id"`
+	parentId uint   `json:"parentId"`
+	itemType string `json:"itemType"`
 
-	name             string
-	shortDescription string
-	longDescription  string
-	description      string
-	flags            int
+	name             string `json:"name"`
+	shortDescription string `json:"shortDescription"`
+	longDescription  string `json:"longDescription"`
+	description      string `json:"description"`
+	flags            int    `json:"flags"`
 
-	value0 int
-	value1 int
-	value2 int
-	value3 int
+	WearLocation int `json:"wearLocation"`
 
-	createdAt time.Time
-	ttl       int
+	value0 int `json:"value0"`
+	value1 int `json:"value1"`
+	value2 int `json:"value2"`
+	value3 int `json:"value3"`
+
+	createdAt time.Time `json:"createdAt"`
+	ttl       int       `json:"ttl"`
 }
 
 const (
@@ -76,6 +78,17 @@ const (
 	ITEM_WEARABLE       = 1 << 2
 	ITEM_DECAYS         = 1 << 3
 	ITEM_DECAY_SILENTLY = 1 << 4
+	ITEM_WEAR_HELD      = 1 << 5
+	ITEM_WEAR_HEAD      = 1 << 6
+	ITEM_WEAR_TORSO     = 1 << 7
+	ITEM_WEAR_BODY      = 1 << 8
+	ITEM_WEAR_NECK      = 1 << 9
+	ITEM_WEAR_LEGS      = 1 << 10
+	ITEM_WEAR_HANDS     = 1 << 11
+	ITEM_WEAR_SHIELD    = 1 << 12
+	ITEM_WEAR_ARMS      = 1 << 13
+	ITEM_WEAR_WAIST     = 1 << 14
+	ITEM_WEAR_FEET      = 1 << 15
 )
 
 func (game *Game) LoadObjectIndex(index uint) (*Object, error) {

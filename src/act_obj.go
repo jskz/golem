@@ -19,14 +19,15 @@ const (
 	WearLocationNeck    = 2
 	WearLocationArms    = 3
 	WearLocationTorso   = 4
-	WearLocationLegs    = 5
-	WearLocationHands   = 6
-	WearLocationShield  = 7
-	WearLocationBody    = 8
-	WearLocationWaist   = 9
-	WearLocationWielded = 10
-	WearLocationHeld    = 11
-	WearLocationMax     = 12
+	WearLocationHands   = 5
+	WearLocationShield  = 6
+	WearLocationBody    = 7
+	WearLocationWaist   = 8
+	WearLocationLegs    = 9
+	WearLocationFeet    = 10
+	WearLocationWielded = 11
+	WearLocationHeld    = 12
+	WearLocationMax     = 13
 )
 
 var WearLocations = make(map[int]string)
@@ -43,16 +44,21 @@ func init() {
 	WearLocations[WearLocationShield] = "<worn as shield>      "
 	WearLocations[WearLocationBody] = "<worn on body>        "
 	WearLocations[WearLocationWaist] = "<worn around waist>   "
+	WearLocations[WearLocationFeet] = "<worn on feet>        "
 	WearLocations[WearLocationWielded] = "<wielded>             "
 	WearLocations[WearLocationHeld] = "<held>                "
 }
 
-func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool) {
+func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hideEquipped bool) {
 	var output strings.Builder
 	var inventory map[string]uint = make(map[string]uint)
 
 	for iter := objects.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
+
+		if hideEquipped && obj.WearLocation != -1 {
+			continue
+		}
 
 		var description string = obj.longDescription
 		if !longDescriptions {
@@ -69,6 +75,10 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool) {
 
 	for iter := objects.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
+
+		if hideEquipped && obj.WearLocation != -1 {
+			continue
+		}
 
 		var description string = obj.longDescription
 		if !longDescriptions {
@@ -117,6 +127,36 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	ch.Send(output.String())
 }
 
+func (ch *Character) getEquipment(wearLocation int) *ObjectInstance {
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		if obj.WearLocation == wearLocation {
+			return obj
+		}
+	}
+
+	return nil
+}
+
+func (ch *Character) detachEquipment(obj *ObjectInstance) bool {
+	if ch.getEquipment(obj.WearLocation) == nil {
+		return false
+	}
+
+	obj.WearLocation = -1
+	return true
+}
+
+func (ch *Character) attachEquipment(obj *ObjectInstance, wearLocation int) bool {
+	if ch.getEquipment(wearLocation) != nil {
+		return false
+	}
+
+	obj.WearLocation = wearLocation
+	return true
+}
+
 func do_equipment(ch *Character, arguments string) {
 	var output strings.Builder
 
@@ -124,15 +164,12 @@ func do_equipment(ch *Character, arguments string) {
 
 	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
 		var objectDescription strings.Builder
+		var obj *ObjectInstance = ch.getEquipment(i)
 
-		if ch.equipment[i] == nil {
+		if obj == nil {
 			objectDescription.WriteString("nothing")
 		} else {
-			obj := ch.equipment[i]
-
 			objectDescription.WriteString(obj.GetShortDescription(ch))
-
-			/* TODO: item flags - glowing, humming, etc? Append extra details here. */
 		}
 
 		output.WriteString(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], objectDescription.String()))
@@ -146,7 +183,7 @@ func do_inventory(ch *Character, arguments string) {
 	var weightTotal float64 = 0.0
 
 	ch.Send("\r\n{YYour current inventory:{x\r\n")
-	ch.listObjects(ch.inventory, false)
+	ch.listObjects(ch.inventory, false, true)
 
 	ch.Send(fmt.Sprintf("{xTotal: %d/%d items, %0.1f/%.1f lbs.\r\n",
 		count,
@@ -161,7 +198,319 @@ func do_wear(ch *Character, arguments string) {
 		return
 	}
 
-	ch.Send("Not yet implemented, try again soon!\r\n")
+	firstArgument, _ := oneArgument(arguments)
+
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		if obj.WearLocation == -1 {
+			if strings.Contains(obj.name, firstArgument) {
+				if obj.flags&ITEM_WEAR_HELD != 0 {
+					wearing := ch.getEquipment(WearLocationHeld)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop holding %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't let go of %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationHeld) {
+						ch.Send(fmt.Sprintf("You hold %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x holds %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAPON != 0 {
+					wearing := ch.getEquipment(WearLocationWielded)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wielding %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wielding %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationWielded) {
+						ch.Send(fmt.Sprintf("You wield %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wields %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_BODY != 0 {
+					wearing := ch.getEquipment(WearLocationBody)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationBody) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_HEAD != 0 {
+					wearing := ch.getEquipment(WearLocationHead)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationHead) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_NECK != 0 {
+					wearing := ch.getEquipment(WearLocationNeck)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationNeck) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_TORSO != 0 {
+					wearing := ch.getEquipment(WearLocationTorso)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationTorso) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_ARMS != 0 {
+					wearing := ch.getEquipment(WearLocationArms)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationArms) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_HANDS != 0 {
+					wearing := ch.getEquipment(WearLocationHands)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationHands) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_WAIST != 0 {
+					wearing := ch.getEquipment(WearLocationWaist)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationWaist) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_SHIELD != 0 {
+					wearing := ch.getEquipment(WearLocationShield)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationShield) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_LEGS != 0 {
+					wearing := ch.getEquipment(WearLocationLegs)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationLegs) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				} else if obj.flags&ITEM_WEAR_FEET != 0 {
+					wearing := ch.getEquipment(WearLocationFeet)
+					if wearing != nil {
+						result := ch.detachEquipment(wearing)
+						if result {
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+						} else {
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							return
+						}
+					}
+
+					if ch.attachEquipment(obj, WearLocationFeet) {
+						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
+
+						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+							rch := roomOthersIter.Value.(*Character)
+
+							if !rch.IsEqual(ch) {
+								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+							}
+						}
+
+						return
+					}
+				}
+			}
+		}
+	}
+
+	ch.Send("You can't wear that.\r\n")
 }
 
 func do_remove(ch *Character, arguments string) {
@@ -170,7 +519,36 @@ func do_remove(ch *Character, arguments string) {
 		return
 	}
 
-	ch.Send("Not yet implemented, try again soon!\r\n")
+	firstArgument, _ := oneArgument(arguments)
+
+	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		if obj.WearLocation != -1 {
+			if strings.Contains(obj.name, firstArgument) {
+				result := ch.detachEquipment(obj)
+				if result {
+					ch.Send(fmt.Sprintf("You remove %s{x.\r\n", obj.GetShortDescription(ch)))
+
+					for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
+						rch := roomOthersIter.Value.(*Character)
+
+						if !rch.IsEqual(ch) {
+							rch.Send(fmt.Sprintf("%s{x removes %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+						}
+					}
+
+					return
+				}
+
+				ch.Send("A strange force prevents you from removing that.\r\n")
+				return
+			}
+		}
+	}
+
+	ch.Send("You aren't wearing that.\r\n")
+	return
 }
 
 func do_use(ch *Character, arguments string) {
