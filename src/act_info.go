@@ -15,10 +15,32 @@ import (
 	"time"
 )
 
+func (ch *Character) getHealthFeedback(viewer *Character) string {
+	healthPercentage := ch.Health * 100 / ch.MaxHealth
+
+	if healthPercentage >= 100 {
+		return fmt.Sprintf("{G%s{G is in perfect health.{x", ch.GetShortDescriptionUpper(viewer))
+	} else if healthPercentage >= 80 {
+		return fmt.Sprintf("{g%s{g is barely scratched.{x", ch.GetShortDescriptionUpper(viewer))
+	} else if healthPercentage >= 60 {
+		return fmt.Sprintf("{w%s{w has several cuts and scratches.{x", ch.GetShortDescriptionUpper(viewer))
+	} else if healthPercentage >= 40 {
+		return fmt.Sprintf("{Y%s{Y has quite a few wounds.{x", ch.GetShortDescriptionUpper(viewer))
+	} else if healthPercentage >= 25 {
+		return fmt.Sprintf("{M%s{M looks pretty hurt.{x", ch.GetShortDescriptionUpper(viewer))
+	} else if healthPercentage >= 10 {
+		return fmt.Sprintf("{R%s{R is in awful condition.{x", ch.GetShortDescriptionUpper(viewer))
+	} else {
+		return fmt.Sprintf("{D%s{D is about to die.{x", ch.GetShortDescriptionUpper(viewer))
+	}
+}
+
 func (ch *Character) examineCharacter(other *Character) {
 	if other.Flags&CHAR_IS_PLAYER == 0 {
 		ch.Send(fmt.Sprintf("{G%s{x\r\n", other.Description))
 	}
+
+	ch.Send(fmt.Sprintf("%s\r\n", other.getHealthFeedback(ch)))
 
 	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
 		var obj *ObjectInstance = other.getEquipment(i)
