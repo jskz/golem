@@ -220,6 +220,9 @@ func do_look(ch *Character, arguments string) {
 
 		var foundCh *Character = ch.FindCharacterInRoom(arguments)
 		if foundCh != nil {
+			ch.Send(fmt.Sprintf("{GYou look at %s{G.{x\r\n", foundCh.GetShortDescription(ch)))
+			foundCh.Send(fmt.Sprintf("{G%s{G looks at you.{x\r\n", ch.GetShortDescriptionUpper(foundCh)))
+
 			ch.examineCharacter(foundCh)
 			return
 		}
