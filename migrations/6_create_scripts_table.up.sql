@@ -102,6 +102,7 @@ VALUES (1, 'limbo-developer-maze',
                                         baseMobile.health = 100;
                                         baseMobile.maxHealth = 100;
                                         baseMobile.strength = 20;
+                                        baseMobile.experience = 6000;
                                         baseMobile.flags =
                                             Golem.CharFlags.CHAR_AGGRESSIVE;
 
