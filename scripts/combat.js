@@ -6,15 +6,15 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function onCombatUpdate() {
-    for(let iter = this.fights.head; iter != null; iter = iter.next) {
+    for (let iter = this.fights.head; iter != null; iter = iter.next) {
         const combat = iter.value;
-        
+
         let found = false;
 
-        for(let i = 0; i < combat.participants.length; i++) {
+        for (let i = 0; i < combat.participants.length; i++) {
             const vch = combat.participants[i];
 
-            if(vch.room === null) {
+            if (vch.room === null) {
                 continue;
             }
 
@@ -23,44 +23,71 @@ function onCombatUpdate() {
 
             attackerRounds += dexterityBonusRounds;
 
-            for(let r = 0; r < attackerRounds; r++) {
+            for (let r = 0; r < attackerRounds; r++) {
                 let victim = vch.fighting;
 
-                if(!victim 
-                || victim.room === null 
-                || vch.room.id != victim.room.id) {
+                if (
+                    !victim ||
+                    victim.room === null ||
+                    vch.room.id != victim.room.id
+                ) {
                     break;
                 }
 
-                if(victim.room.flags & Golem.RoomFlags.ROOM_SAFE) {
+                if (victim.room.flags & Golem.RoomFlags.ROOM_SAFE) {
                     break;
                 }
 
-                found = true;
+                try {
+                    found = true;
 
-                let damage = ~~(Math.random() * 2);
+                    let damage = ~~(Math.random() * 2);
 
-                damage += ~~(Math.random() * (vch.strength / 3));
+                    damage += ~~(Math.random() * (vch.strength / 3));
 
-                const unarmedCombatProficiency = vch.findProficiencyByName('unarmed combat');
-                /* TODO: check if wielding or not! ... weapon type profs.. */
-                if(unarmedCombatProficiency) {
-                    /* +1 damage to unarmed base damage for every 10% of unarmed combat proficiency */
-                    damage += Math.floor(unarmedCombatProficiency.proficiency / 10);
-                }
-
-                /* Check victim dodge skill */
-                const victimDodgeProficiency = victim.findProficiencyByName('dodge');
-                if(victimDodgeProficiency) {
-                    if(Math.random() < (unarmedCombatProficiency.proficiency / 100) / 5) {
-                        vch.send(victim.getShortDescriptionUpper(vch) + " dodges out of the way of your attack!\r\n");
-                        victim.send("You dodge an attack by " + vch.getShortDescription(victim) + "!\r\n");
-                        continue;
+                    const unarmedCombatProficiency =
+                        vch.findProficiencyByName("unarmed combat");
+                    /* TODO: check if wielding or not! ... weapon type profs.. */
+                    if (unarmedCombatProficiency) {
+                        /* +1 damage to unarmed base damage for every 10% of unarmed combat proficiency */
+                        damage += Math.floor(
+                            unarmedCombatProficiency.proficiency / 10
+                        );
                     }
+
+                    /* Check victim dodge skill */
+                    const victimDodgeProficiency =
+                        victim.findProficiencyByName("dodge");
+                    if (victimDodgeProficiency) {
+                        if (
+                            Math.random() <
+                            victimDodgeProficiency.proficiency / 100 / 5
+                        ) {
+                            vch.send(
+                                victim.getShortDescriptionUpper(vch) +
+                                    " dodges out of the way of your attack!\r\n"
+                            );
+                            victim.send(
+                                "You dodge an attack by " +
+                                    vch.getShortDescription(victim) +
+                                    "!\r\n"
+                            );
+                            continue;
+                        }
+                    }
+
+                    this.damage(
+                        vch,
+                        victim,
+                        true,
+                        damage,
+                        Golem.Combat.DamageTypeBash
+                    );
+                } catch (err) {
+                    Golem.game.broadcast(err.toString());
                 }
 
-                this.damage(vch, victim, true, damage, Golem.Combat.DamageTypeBash);
-/*
+                /*
                 if(victim && victim.group !== null) {
                     for(let iter = victim.gch.head; iter != null; iter = gch.next) {
                         const gch = iter.value;
@@ -77,11 +104,11 @@ function onCombatUpdate() {
             }
         }
 
-        if(!found) {
+        if (!found) {
             this.disposeCombat(combat);
             break;
         }
     }
 }
 
-Golem.registerEventHandler('combatUpdate', onCombatUpdate);
+Golem.registerEventHandler("combatUpdate", onCombatUpdate);
