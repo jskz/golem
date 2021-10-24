@@ -20,6 +20,16 @@ func (ch *Character) examineCharacter(other *Character) {
 		ch.Send(fmt.Sprintf("{G%s{x\r\n", other.Description))
 	}
 
+	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
+		var obj *ObjectInstance = other.getEquipment(i)
+
+		if obj == nil {
+			continue
+		}
+
+		ch.Send(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], obj.GetShortDescription(ch)))
+	}
+
 	peek := ch.FindProficiencyByName("peek")
 	if peek != nil && rand.Intn(100) < peek.Proficiency {
 		if other.inventory.Count > 0 {
