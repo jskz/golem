@@ -22,8 +22,6 @@ func (game *Game) characterUpdate() {
 }
 
 func (game *Game) Update() {
-	game.InvokeNamedEventHandlersWithContextAndArguments("gameUpdate", game.vm.ToValue(game))
-
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		ch := iter.Value.(*Character)
 
@@ -37,7 +35,6 @@ func (game *Game) ZoneUpdate() {
 
 		if time.Since(zone.lastReset).Minutes() > float64(zone.resetFrequency) {
 			game.ResetZone(zone)
-			game.InvokeNamedEventHandlersWithContextAndArguments("zoneUpdate", game.vm.ToValue(zone))
 		}
 	}
 }
