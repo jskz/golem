@@ -182,6 +182,12 @@ func do_group(ch *Character, arguments string) {
 		ch.DisbandGroup()
 		return
 	} else if target == ch && ch.Leader != ch {
+		if ch.Leader == nil {
+			ch.Send("{WYou leave the group.{x\r\n")
+			ch.Group = nil
+			return
+		}
+
 		ch.Send(fmt.Sprintf("{WYou leave %s{W's group.{x\r\n", ch.Leader.GetShortDescription(ch)))
 
 		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
