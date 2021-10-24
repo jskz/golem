@@ -116,6 +116,14 @@ func do_purge(ch *Character, arguments string) {
 	}
 
 	ch.Send("You have purged the contents of the room.\r\n")
+
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+
+		if !rch.IsEqual(ch) {
+			rch.Send(fmt.Sprintf("%s purges the contents of the room.\r\n", ch.GetShortDescriptionUpper(rch)))
+		}
+	}
 }
 
 func do_peace(ch *Character, arguments string) {

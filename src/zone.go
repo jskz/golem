@@ -117,7 +117,6 @@ func (game *Game) ResetRoom(room *Room) {
 
 			if mobile != nil {
 				room.AddCharacter(mobile)
-
 				game.Characters.Insert(mobile)
 			}
 

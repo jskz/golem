@@ -105,6 +105,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 
 			corpse := game.createCorpse(target)
 			room.removeCharacter(target)
+
 			room.addObject(corpse)
 
 			blood := game.createBlood(1)
@@ -240,9 +241,8 @@ func do_flee(ch *Character, arguments string) {
 	ch.Fighting = nil
 	ch.Combat = nil
 
-	ch.Room.Characters.Remove(ch)
-	ch.Room = chosenEscape.To
-	chosenEscape.To.Characters.Insert(ch)
+	ch.Room.removeCharacter(ch)
+	chosenEscape.To.AddCharacter(ch)
 
 	/* Announce player's arrival to all other players in the new room */
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
