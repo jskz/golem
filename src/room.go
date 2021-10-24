@@ -75,7 +75,7 @@ func (room *Room) removeCharacter(ch *Character) {
 }
 
 func (room *Room) listObjectsToCharacter(ch *Character) {
-	ch.listObjects(room.objects, true)
+	ch.listObjects(room.objects, true, false)
 }
 
 func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {

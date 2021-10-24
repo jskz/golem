@@ -88,6 +88,7 @@ func (game *Game) ResetRoom(room *Room) {
 					value2:           objIndex.value2,
 					value3:           objIndex.value3,
 					createdAt:        time.Now(),
+					WearLocation:     -1,
 				}
 
 				room.addObject(obj)
