@@ -23,10 +23,7 @@ type CastingContext struct {
 }
 
 func (ch *Character) onCastingUpdate() {
-	finishedCastingAt := ch.Casting.StartedAt.Add(time.Duration(ch.Casting.Complexity) * time.Second)
-	sinceCastingFinished := time.Since(finishedCastingAt)
-
-	if sinceCastingFinished.Seconds() >= 0 {
+	if int(time.Since(ch.Casting.StartedAt).Seconds()) > ch.Casting.Complexity {
 		ch.Send("\r\n{WYou finish casting the magic spell.{x\r\n")
 
 		if ch.Room != nil {
