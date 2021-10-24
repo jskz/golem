@@ -214,7 +214,7 @@ CREATE TABLE objects (
     `description` TEXT,
     `flags` INT,
 
-    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign') NOT NULL DEFAULT 'protoplasm',
+    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign', 'treasure', 'reagent', 'artifact') NOT NULL DEFAULT 'protoplasm',
     `value_1` INT,
     `value_2` INT,
     `value_3` INT,
