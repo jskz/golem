@@ -16,14 +16,14 @@ import (
 )
 
 type CastingContext struct {
-	casting    *Skill
-	arguments  string
-	startedAt  time.Time
-	complexity int
+	Casting    *Skill    `json:"casting"`
+	Arguments  string    `json:"arguments"`
+	StartedAt  time.Time `json:"startedAt"`
+	Complexity int       `json:"complexity"`
 }
 
 func (ch *Character) onCastingUpdate() {
-	finishedCastingAt := ch.Casting.startedAt.Add(time.Duration(ch.Casting.complexity) * time.Second)
+	finishedCastingAt := ch.Casting.StartedAt.Add(time.Duration(ch.Casting.Complexity) * time.Second)
 	sinceCastingFinished := time.Since(finishedCastingAt)
 
 	if sinceCastingFinished.Seconds() >= 0 {
@@ -39,10 +39,10 @@ func (ch *Character) onCastingUpdate() {
 			}
 		}
 
-		if ch.Casting.casting.handler != nil {
-			fn := *ch.Casting.casting.handler
+		if ch.Casting.Casting.handler != nil {
+			fn := *ch.Casting.Casting.handler
 
-			fn(ch.game.vm.ToValue(ch.Casting), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch.Casting.arguments))
+			fn(ch.game.vm.ToValue(ch.Casting), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch.Casting.Arguments))
 		}
 
 		ch.Casting = nil
@@ -97,10 +97,10 @@ func do_cast(ch *Character, arguments string) {
 	ch.Mana -= prof.Cost
 
 	ch.Casting = &CastingContext{
-		casting:    found,
-		arguments:  arguments,
-		startedAt:  time.Now(),
-		complexity: prof.Complexity,
+		Casting:    found,
+		Arguments:  arguments,
+		StartedAt:  time.Now(),
+		Complexity: prof.Complexity,
 	}
 
 	ch.Send("{WYou start uttering the words of the spell...{x\r\n")
