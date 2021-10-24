@@ -134,6 +134,10 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 
 				limbo.AddCharacter(target)
 				target.Health = target.MaxHealth / 8
+				target.Mana = 1
+				target.Stamina = 1
+
+				target.casting = nil
 				do_look(target, "")
 			} else {
 				exp := int(target.Experience)
