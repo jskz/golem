@@ -7,11 +7,11 @@
  */
 function spell_armor(ch) {
     ch.defense += 5;
-    ch.send("{WThe air suddenly hardens around you!{x\r\n");
+    ch.send('{WThe air suddenly hardens around you!{x\r\n');
 
-    setTimeout(function() {
+    setTimeout(function () {
         ch.defense -= 5;
-        ch.send("{DYour magical armor has worn off.{x\r\n");
+        ch.send('{DYour magical armor has worn off.{x\r\n');
     }, 5000);
 }
 

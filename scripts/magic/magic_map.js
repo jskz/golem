@@ -11,17 +11,28 @@ function spell_magic_map(ch, args) {
     const firstMapLineWithoutColourCodes = mapLines[0].replace(/{\w/gi, '');
     const mapWidthRequired = firstMapLineWithoutColourCodes.length;
 
-    ch.send("{MA luminous ethereal scroll appears in front of you!{x\r\n\r\n")
-    
-    let output = "{Y  ,-" + "-".repeat(mapWidthRequired) + "-.\r\n"
-        + " (_\\ " + " ".repeat(mapWidthRequired) + " \\\r\n"
-        + mapLines
-            .filter(line => line.replace(/{\w/gi, '').length === mapWidthRequired)
-            .map((line) => "   |{x " + line + " {Y|\r\n")
-            .join("")
-        + "  _| " + " ".repeat(mapWidthRequired) + " |\r\n"
-        + " (_/_" + "_".repeat(mapWidthRequired) + "_/{x\r\n";
-        
+    ch.send('{MA luminous ethereal scroll appears in front of you!{x\r\n\r\n');
+
+    let output =
+        '{Y  ,-' +
+        '-'.repeat(mapWidthRequired) +
+        '-.\r\n' +
+        ' (_\\ ' +
+        ' '.repeat(mapWidthRequired) +
+        ' \\\r\n' +
+        mapLines
+            .filter(
+                (line) => line.replace(/{\w/gi, '').length === mapWidthRequired
+            )
+            .map((line) => '   |{x ' + line + ' {Y|\r\n')
+            .join('') +
+        '  _| ' +
+        ' '.repeat(mapWidthRequired) +
+        ' |\r\n' +
+        ' (_/_' +
+        '_'.repeat(mapWidthRequired) +
+        '_/{x\r\n';
+
     ch.send(output);
 }
 

@@ -46,7 +46,7 @@ function onCombatUpdate() {
                     damage += ~~(Math.random() * (vch.strength / 3));
 
                     const unarmedCombatProficiency =
-                        vch.findProficiencyByName("unarmed combat");
+                        vch.findProficiencyByName('unarmed combat');
                     /* TODO: check if wielding or not! ... weapon type profs.. */
                     if (unarmedCombatProficiency) {
                         /* +1 damage to unarmed base damage for every 10% of unarmed combat proficiency */
@@ -57,7 +57,7 @@ function onCombatUpdate() {
 
                     /* Check victim dodge skill */
                     const victimDodgeProficiency =
-                        victim.findProficiencyByName("dodge");
+                        victim.findProficiencyByName('dodge');
                     if (victimDodgeProficiency) {
                         if (
                             Math.random() <
@@ -65,12 +65,12 @@ function onCombatUpdate() {
                         ) {
                             vch.send(
                                 victim.getShortDescriptionUpper(vch) +
-                                    " dodges out of the way of your attack!\r\n"
+                                    ' dodges out of the way of your attack!\r\n'
                             );
                             victim.send(
-                                "You dodge an attack by " +
+                                'You dodge an attack by ' +
                                     vch.getShortDescription(victim) +
-                                    "!\r\n"
+                                    '!\r\n'
                             );
                             continue;
                         }
@@ -111,4 +111,4 @@ function onCombatUpdate() {
     }
 }
 
-Golem.registerEventHandler("combatUpdate", onCombatUpdate);
+Golem.registerEventHandler('combatUpdate', onCombatUpdate);

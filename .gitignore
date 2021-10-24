@@ -1,6 +1,7 @@
 .*
 !.gitignore
 !.gitattributes
+!.prettierrc
 
 etc/config.json
 

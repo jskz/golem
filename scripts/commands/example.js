@@ -6,7 +6,7 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function do_example(ch) {
-    ch.send("Hello from an example command!\r\n");
+    ch.send('Hello from an example command!\r\n');
 }
 
 Golem.registerPlayerCommand('example', do_example);
