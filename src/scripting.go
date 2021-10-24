@@ -18,6 +18,7 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/dop251/goja/parser"
+	"github.com/getsentry/sentry-go"
 )
 
 type EventHandler struct {
@@ -469,7 +470,11 @@ func (game *Game) InitScripting() error {
 	obj.Set("HTTP", httpUtilityObj)
 	obj.Set("NewExit", game.vm.ToValue(game.NewExit))
 
+	sentryObj := game.vm.NewObject()
+	sentryObj.Set("captureMessage", game.vm.ToValue(sentry.CaptureMessage))
+
 	game.vm.Set("Golem", obj)
+	game.vm.Set("Sentry", sentryObj)
 	game.vm.Set("setTimeout", game.vm.ToValue(game.setTimeout))
 
 	err := game.LoadScripts()

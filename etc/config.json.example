@@ -1,5 +1,9 @@
 {
     "port": 4000,
+    "sentry": {
+        "enabled": false,
+        "dsn": ""
+    },
     "mysql": {
         "host": "mysql",
         "port": 3306,

@@ -11,6 +11,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"time"
+
+	"github.com/getsentry/sentry-go"
 )
 
 var Config *AppConfiguration
@@ -24,9 +27,15 @@ type AppMySQLConfiguration struct {
 	Database string `json:"database"`
 }
 
+type AppSentryConfiguration struct {
+	DSN     string `json:"dsn"`
+	Enabled bool   `json:"enabled"`
+}
+
 type AppConfiguration struct {
-	Port               int                   `json:"port"`
-	MySQLConfiguration AppMySQLConfiguration `json:"mysql"`
+	Port                int                    `json:"port"`
+	MySQLConfiguration  AppMySQLConfiguration  `json:"mysql"`
+	SentryConfiguration AppSentryConfiguration `json:"sentry"`
 
 	greeting []byte
 	motd     []byte
@@ -55,6 +64,19 @@ func init() {
 		if err != nil {
 			panic("Malformed config file.")
 		}
+	}
+
+	if Config.SentryConfiguration.Enabled {
+		err := sentry.Init(sentry.ClientOptions{
+			Dsn: Config.SentryConfiguration.DSN,
+		})
+
+		if err != nil {
+			log.Panicf("failed to initialize Sentry: %v.\r\n", err)
+		}
+
+		log.Printf("Enabled Sentry error reporting.\r\n")
+		defer sentry.Flush(5 * time.Second)
 	}
 
 	/* Read greeting */

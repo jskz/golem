@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/dop251/goja"
+	"github.com/getsentry/sentry-go"
 )
 
 type Command struct {
@@ -108,6 +109,30 @@ func init() {
 }
 
 func (ch *Character) Interpret(input string) bool {
+	if Config.SentryConfiguration.Enabled {
+		defer sentry.Recover()
+
+		sentry.ConfigureScope(func(scope *sentry.Scope) {
+			ctx := make(map[string]interface{})
+
+			ctx["name"] = ch.Name
+			ctx["id"] = ch.Id
+
+			if ch.client != nil && ch.client.conn != nil {
+				ctx["remote_address"] = ch.client.conn.RemoteAddr().String()
+			}
+
+			if ch.Room != nil {
+				ctx["room_id"] = ch.Room.Id
+				ctx["room_name"] = ch.Room.Name
+			}
+
+			ctx["input"] = input
+
+			scope.SetContext("actor", ctx)
+		})
+	}
+
 	if ch.outputCursor > 0 && ch.inputCursor < ch.outputHead {
 		/* If any input, abort the paging */
 		if input != "" {
