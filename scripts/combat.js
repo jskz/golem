@@ -63,14 +63,14 @@ function onCombatUpdate() {
                             Math.random() <
                             victimDodgeProficiency.proficiency / 100 / 5
                         ) {
-                            vch.send(
+                            vch.send('{D' +
                                 victim.getShortDescriptionUpper(vch) +
-                                    ' dodges out of the way of your attack!\r\n'
+                                    '{D dodges out of the way of your attack!{x\r\n'
                             );
                             victim.send(
-                                'You dodge an attack by ' +
+                                '{DYou dodge an attack by ' +
                                     vch.getShortDescription(victim) +
-                                    '!\r\n'
+                                    '{D!{x\r\n'
                             );
                             continue;
                         }
