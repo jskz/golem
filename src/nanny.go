@@ -99,6 +99,7 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
+		client.character.client = client
 		client.connectionState = ConnectionStateMessageOfTheDay
 		output.WriteString(string(Config.motd))
 		output.WriteString("[ Press return to continue ]")
@@ -119,7 +120,6 @@ func (game *Game) nanny(client *Client, message string) {
 		if character != nil {
 			client.character = character
 			client.character.Flags |= CHAR_IS_PLAYER
-			client.character.client = client
 			output.WriteString("Password: ")
 			client.character.Room = room
 			client.connectionState = ConnectionStatePassword
