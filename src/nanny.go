@@ -82,11 +82,11 @@ func (game *Game) nanny(client *Client, message string) {
 					ctx["room_id"] = client.character.Room.Id
 					ctx["room_name"] = client.character.Room.Name
 				}
-
-				ctx["input"] = message
-
-				scope.SetContext("client", ctx)
 			}
+
+			ctx["input"] = message
+
+			scope.SetContext("client", ctx)
 		})
 	}
 
