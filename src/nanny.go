@@ -73,10 +73,11 @@ func (game *Game) nanny(client *Client, message string) {
 		sentry.ConfigureScope(func(scope *sentry.Scope) {
 			ctx := make(map[string]interface{})
 
+			ctx["remote_address"] = client.conn.RemoteAddr().String()
+
 			if client.character != nil {
 				ctx["name"] = client.character.Name
 				ctx["id"] = client.character.Id
-				ctx["remote_address"] = client.conn.RemoteAddr().String()
 
 				if client.character.Room != nil {
 					ctx["room_id"] = client.character.Room.Id
