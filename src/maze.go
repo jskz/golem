@@ -184,14 +184,14 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 
 	room := maze.Game.NewRoom()
 	room.Id = 0
-	room.zone = nil
+	room.Zone = nil
 	room.Virtual = true
 	room.Cell = maze.Grid[x][y]
 	room.Name = "In the Underground"
 	room.Description = "You are deep within the dark dungeons of development."
 	room.Exit = make(map[uint]*Exit)
 	room.Characters = NewLinkedList()
-	room.objects = NewLinkedList()
+	room.Objects = NewLinkedList()
 
 	maze.Grid[x][y].Room = room
 	return room
@@ -260,7 +260,7 @@ func (ch *Character) CreateMazeMap() string {
 			} else {
 				var terrain *Terrain = TerrainTable[maze.Grid[x][y].Terrain]
 
-				output.WriteString(terrain.mapGlyph)
+				output.WriteString(terrain.MapGlyph)
 			}
 		}
 

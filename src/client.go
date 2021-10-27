@@ -252,7 +252,7 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 
 		if ch.Flags&CHAR_IS_PLAYER != 0 && ch.Name == name {
 			client.character = nil
-			ch.client = client
+			ch.Client = client
 
 			client.character = ch
 			client.connectionState = ConnectionStatePlaying

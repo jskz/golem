@@ -14,16 +14,16 @@ import (
 )
 
 type Zone struct {
-	id int
+	Id int `json:"id"`
 
-	name           string
-	whoDescription string
-	low            uint
-	high           uint
+	Name           string `json:"name"`
+	WhoDescription string `json:"whoDescription"`
+	Low            uint   `json:"low"`
+	High           uint   `json:"high"`
 
-	resetMessage   string
-	resetFrequency int
-	lastReset      time.Time
+	ResetMessage   string    `json:"resetMessage"`
+	ResetFrequency int       `json:"resetFrequency"`
+	LastReset      time.Time `json:"lastReset"`
 }
 
 const (
@@ -33,40 +33,40 @@ const (
 )
 
 type Reset struct {
-	id   uint
-	zone *Zone
-	room *Room
+	Id   uint
+	Zone *Zone
+	Room *Room
 
-	resetType uint
+	ResetType uint
 
-	value0 int
-	value1 int
-	value2 int
-	value3 int
+	Value0 int
+	Value1 int
+	Value2 int
+	Value3 int
 }
 
 func (game *Game) ResetRoom(room *Room) {
-	for iter := room.resets.Head; iter != nil; iter = iter.Next {
+	for iter := room.Resets.Head; iter != nil; iter = iter.Next {
 		reset := iter.Value.(*Reset)
 
-		switch reset.resetType {
+		switch reset.ResetType {
 		case ResetTypeObject:
 			count := 0
 
-			for iter := room.objects.Head; iter != nil; iter = iter.Next {
+			for iter := room.Objects.Head; iter != nil; iter = iter.Next {
 				obj := iter.Value.(*ObjectInstance)
 
-				if obj.parentId == uint(reset.value0) {
+				if obj.ParentId == uint(reset.Value0) {
 					count++
 				}
 			}
 
-			if count >= reset.value2 {
+			if count >= reset.Value2 {
 				break
 			}
 
 			/* Create a new object instance and place it in the room */
-			objIndex, err := game.LoadObjectIndex(uint(reset.value0))
+			objIndex, err := game.LoadObjectIndex(uint(reset.Value0))
 			if err != nil {
 				log.Printf("Failed to load object for reset: %v\r\n", err)
 				continue
@@ -74,21 +74,21 @@ func (game *Game) ResetRoom(room *Room) {
 
 			if objIndex != nil {
 				obj := &ObjectInstance{
-					game:             game,
-					parentId:         objIndex.id,
-					contents:         NewLinkedList(),
-					inside:           nil,
-					carriedBy:        nil,
-					name:             objIndex.name,
-					shortDescription: objIndex.shortDescription,
-					longDescription:  objIndex.longDescription,
-					description:      objIndex.description,
-					itemType:         objIndex.itemType,
-					value0:           objIndex.value0,
-					value1:           objIndex.value1,
-					value2:           objIndex.value2,
-					value3:           objIndex.value3,
-					createdAt:        time.Now(),
+					Game:             game,
+					ParentId:         objIndex.Id,
+					Contents:         NewLinkedList(),
+					Inside:           nil,
+					CarriedBy:        nil,
+					Name:             objIndex.Name,
+					ShortDescription: objIndex.ShortDescription,
+					LongDescription:  objIndex.LongDescription,
+					Description:      objIndex.Description,
+					ItemType:         objIndex.ItemType,
+					Value0:           objIndex.Value0,
+					Value1:           objIndex.Value1,
+					Value2:           objIndex.Value2,
+					Value3:           objIndex.Value3,
+					CreatedAt:        time.Now(),
 					WearLocation:     -1,
 				}
 
@@ -101,16 +101,16 @@ func (game *Game) ResetRoom(room *Room) {
 			for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 				rch := iter.Value.(*Character)
 
-				if rch.Flags&CHAR_IS_PLAYER == 0 && rch.Id == reset.value0 {
+				if rch.Flags&CHAR_IS_PLAYER == 0 && rch.Id == reset.Value0 {
 					count++
 				}
 			}
 
-			if count >= reset.value2 {
+			if count >= reset.Value2 {
 				break
 			}
 
-			mobile, err := game.LoadMobileIndex(uint(reset.value0))
+			mobile, err := game.LoadMobileIndex(uint(reset.Value0))
 			if err != nil {
 				log.Printf("Could not load mobile during reset: %v\r\n", err)
 				break
@@ -130,17 +130,17 @@ func (game *Game) ResetRoom(room *Room) {
 		character := iter.Value.(*Character)
 		character.onZoneUpdate()
 
-		if room.zone.resetMessage != "" && character.Flags&CHAR_IS_PLAYER != 0 {
-			character.Send(fmt.Sprintf("\r\n{x%s{x\r\n", room.zone.resetMessage))
+		if room.Zone.ResetMessage != "" && character.Flags&CHAR_IS_PLAYER != 0 {
+			character.Send(fmt.Sprintf("\r\n{x%s{x\r\n", room.Zone.ResetMessage))
 		}
 	}
 
-	for iter := room.objects.Head; iter != nil; iter = iter.Next {
+	for iter := room.Objects.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
 		/* Remove the obj after its ttl time in minutes, if the ITEM_DECAYS flag is set */
-		if obj.flags&ITEM_DECAYS != 0 && int(time.Since(obj.createdAt).Minutes()) > obj.ttl {
-			if obj.flags&ITEM_DECAY_SILENTLY == 0 {
+		if obj.Flags&ITEM_DECAYS != 0 && int(time.Since(obj.CreatedAt).Minutes()) > obj.Ttl {
+			if obj.Flags&ITEM_DECAY_SILENTLY == 0 {
 				for innerIter := room.Characters.Head; innerIter != nil; innerIter = innerIter.Next {
 					rch := innerIter.Value.(*Character)
 
@@ -149,8 +149,8 @@ func (game *Game) ResetRoom(room *Room) {
 			}
 
 			/* If the object is a container, try to transfer all of its contents to the room */
-			if obj.itemType == ItemTypeContainer && obj.contents != nil {
-				for contentIter := obj.contents.Head; contentIter != nil; contentIter = contentIter.Next {
+			if obj.ItemType == ItemTypeContainer && obj.Contents != nil {
+				for contentIter := obj.Contents.Head; contentIter != nil; contentIter = contentIter.Next {
 					contentObj := contentIter.Value.(*ObjectInstance)
 
 					obj.removeObject(contentObj)
@@ -165,7 +165,7 @@ func (game *Game) ResetRoom(room *Room) {
 }
 
 func (game *Game) ResetZone(zone *Zone) {
-	for id := zone.low; id <= zone.high; id++ {
+	for id := zone.Low; id <= zone.High; id++ {
 		room, err := game.LoadRoomIndex(id)
 
 		if err != nil || room == nil {
@@ -175,7 +175,7 @@ func (game *Game) ResetZone(zone *Zone) {
 		game.ResetRoom(room)
 	}
 
-	zone.lastReset = time.Now()
+	zone.LastReset = time.Now()
 }
 
 func (game *Game) LoadZones() error {
@@ -206,7 +206,7 @@ func (game *Game) LoadZones() error {
 	for rows.Next() {
 		zone := &Zone{}
 
-		err := rows.Scan(&zone.id, &zone.name, &zone.whoDescription, &zone.low, &zone.high, &zone.resetMessage, &zone.resetFrequency)
+		err := rows.Scan(&zone.Id, &zone.Name, &zone.WhoDescription, &zone.Low, &zone.High, &zone.ResetMessage, &zone.ResetFrequency)
 		if err != nil {
 			log.Printf("Unable to scan zone row: %v.\r\n", err)
 			continue
@@ -252,7 +252,7 @@ func (game *Game) LoadResets() error {
 		var roomId uint
 		var resetType string
 
-		err := rows.Scan(&reset.id, &zoneId, &roomId, &resetType, &reset.value0, &reset.value1, &reset.value2, &reset.value3)
+		err := rows.Scan(&reset.Id, &zoneId, &roomId, &resetType, &reset.Value0, &reset.Value1, &reset.Value2, &reset.Value3)
 		if err != nil {
 			log.Printf("Unable to scan reset row: %v.\r\n", err)
 			continue
@@ -261,7 +261,7 @@ func (game *Game) LoadResets() error {
 		for iter := game.Zones.Head; iter != nil; iter = iter.Next {
 			zone := iter.Value.(*Zone)
 
-			if zone.id == zoneId {
+			if zone.Id == zoneId {
 				room, err := game.LoadRoomIndex(roomId)
 				if err != nil {
 					return err
@@ -276,15 +276,15 @@ func (game *Game) LoadResets() error {
 
 				var ok bool
 
-				reset.resetType, ok = resetEnumToUintType[resetType]
+				reset.ResetType, ok = resetEnumToUintType[resetType]
 				if !ok {
 					break
 				}
 
-				reset.zone = zone
-				reset.room = room
+				reset.Zone = zone
+				reset.Room = room
 
-				room.resets.Insert(reset)
+				room.Resets.Insert(reset)
 
 				resetCount++
 			}

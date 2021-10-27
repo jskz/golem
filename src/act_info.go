@@ -54,9 +54,9 @@ func (ch *Character) examineCharacter(other *Character) {
 
 	peek := ch.FindProficiencyByName("peek")
 	if peek != nil && rand.Intn(100) < peek.Proficiency {
-		if other.inventory.Count > 0 {
+		if other.Inventory.Count > 0 {
 			ch.Send(fmt.Sprintf("{Y%s{Y is carrying the following items:{x\r\n", other.GetShortDescriptionUpper(ch)))
-			ch.listObjects(other.inventory, false, true)
+			ch.listObjects(other.Inventory, false, true)
 			return
 		}
 	}
@@ -124,8 +124,8 @@ func do_score(ch *Character, arguments string) {
 	} else {
 		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d                             {D│ Dexterity:      {M%2d{D │\r\n", ch.Level, ch.Dexterity))
 	}
-	buf.WriteString(fmt.Sprintf("{D│ {CRace:    {c%-21s           {D│ Intelligence:   {M%2d{D │\r\n", ch.race.DisplayName, ch.Intelligence))
-	buf.WriteString(fmt.Sprintf("{D│ {CJob:     {c%-21s           {D│ Wisdom:         {M%2d{D │\r\n", ch.job.DisplayName, ch.Wisdom))
+	buf.WriteString(fmt.Sprintf("{D│ {CRace:    {c%-21s           {D│ Intelligence:   {M%2d{D │\r\n", ch.Race.DisplayName, ch.Intelligence))
+	buf.WriteString(fmt.Sprintf("{D│ {CJob:     {c%-21s           {D│ Wisdom:         {M%2d{D │\r\n", ch.Job.DisplayName, ch.Wisdom))
 	buf.WriteString(fmt.Sprintf("{D│ {CHealth:  {c%s%-20s                {D│ Constitution:   {M%2d{D │\r\n",
 		currentHealthColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
@@ -158,7 +158,7 @@ func do_who(ch *Character, arguments string) {
 
 	characters := make([]*Character, 0)
 
-	for client := range ch.game.clients {
+	for client := range ch.Game.clients {
 		if client.character != nil && client.connectionState >= ConnectionStatePlaying {
 			characters = append(characters, client.character)
 		}
@@ -171,13 +171,13 @@ func do_who(ch *Character, arguments string) {
 	for _, character := range characters {
 		var flagsString strings.Builder
 
-		if character.afk != nil {
-			afkMinutes := int(time.Since(character.afk.startedAt).Minutes())
+		if character.Afk != nil {
+			afkMinutes := int(time.Since(character.Afk.startedAt).Minutes())
 
 			flagsString.WriteString(fmt.Sprintf("{G[AFK %dm]{x ", afkMinutes))
 		}
 
-		jobDisplay := character.job.DisplayName
+		jobDisplay := character.Job.DisplayName
 		if character.Level == LevelAdmin {
 			jobDisplay = " Administrator"
 		} else if character.Level > LevelHero {
@@ -190,8 +190,8 @@ func do_who(ch *Character, arguments string) {
 
 		if character.Room != nil {
 			/* Inherit the zone's who tag if we are in a room at all */
-			if character.Room.zone != nil {
-				locationString = character.Room.zone.whoDescription
+			if character.Room.Zone != nil {
+				locationString = character.Room.Zone.WhoDescription
 			}
 
 			/* Hardcoded locations */
@@ -212,7 +212,7 @@ func do_who(ch *Character, arguments string) {
 				locationString,
 				character.Name,
 				flagsString.String(),
-				character.race.DisplayName))
+				character.Race.DisplayName))
 		} else {
 			buf.WriteString(fmt.Sprintf("[%3d][%-10s][%-7s] %s %s(%s)\r\n",
 				character.Level,
@@ -220,7 +220,7 @@ func do_who(ch *Character, arguments string) {
 				locationString,
 				character.Name,
 				flagsString.String(),
-				character.race.DisplayName))
+				character.Race.DisplayName))
 		}
 	}
 
@@ -232,7 +232,7 @@ func do_time(ch *Character, arguments string) {
 	var buf strings.Builder
 
 	buf.WriteString(fmt.Sprintf("{GThe current server time is: {g%s\r\n", time.Now().Format(time.RFC1123)))
-	buf.WriteString(fmt.Sprintf("{YServer has been up since:   {y%s{x\r\n", ch.game.startedAt.Format(time.RFC1123)))
+	buf.WriteString(fmt.Sprintf("{YServer has been up since:   {y%s{x\r\n", ch.Game.startedAt.Format(time.RFC1123)))
 
 	ch.Send(buf.String())
 }

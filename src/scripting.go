@@ -338,15 +338,15 @@ func (game *Game) LoadScriptsFromDirectory(directory string) error {
 }
 
 func do_reload(ch *Character, arguments string) {
-	ch.game.InvokeNamedEventHandlersWithContextAndArguments("reload", ch.game.vm.ToValue(ch.game))
+	ch.Game.InvokeNamedEventHandlersWithContextAndArguments("reload", ch.Game.vm.ToValue(ch.Game))
 
-	err := ch.game.LoadScripts()
+	err := ch.Game.LoadScripts()
 	if err != nil {
 		ch.Send(fmt.Sprintf("{RFailed reload: %s{x\r\n", err.Error()))
 		return
 	}
 
-	err = ch.game.LoadScriptsFromDatabase()
+	err = ch.Game.LoadScriptsFromDatabase()
 	if err != nil {
 		ch.Send(fmt.Sprintf("{RFailed database reload: %s{x\r\n", err.Error()))
 	}
@@ -380,7 +380,7 @@ func (game *Game) InitScripting() error {
 
 	obj.Set("clearScriptedSkillHandlers", game.vm.ToValue(func() goja.Value {
 		for _, skill := range game.skills {
-			skill.handler = nil
+			skill.Handler = nil
 		}
 
 		return game.vm.ToValue(true)

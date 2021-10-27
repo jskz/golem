@@ -124,7 +124,7 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		client.character.client = client
+		client.character.Client = client
 		client.connectionState = ConnectionStateMessageOfTheDay
 		output.WriteString(string(Config.motd))
 		output.WriteString("[ Press return to continue ]")
@@ -152,8 +152,8 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		client.character = NewCharacter()
-		client.character.game = game
-		client.character.client = client
+		client.character.Game = game
+		client.character.Client = client
 		client.character.Name = name
 		client.character.Level = 1
 		client.character.Flags |= CHAR_IS_PLAYER
@@ -241,7 +241,7 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		client.character.race = race
+		client.character.Race = race
 		client.connectionState = ConnectionStateConfirmRace
 		output.WriteString(fmt.Sprintf("\r\nAre you sure you want to be a %s? [y/N] ", race.Name))
 
@@ -304,7 +304,7 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		client.character.job = job
+		client.character.Job = job
 		client.connectionState = ConnectionStateConfirmClass
 		output.WriteString(fmt.Sprintf("\r\nAre you sure you want to be a %s? [y/N] ", job.Name))
 

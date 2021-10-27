@@ -195,7 +195,7 @@ func (game *Game) LoadPlanes() error {
 		for iter := game.Zones.Head; iter != nil; iter = iter.Next {
 			zone := iter.Value.(*Zone)
 
-			if zone.id == zoneId {
+			if zone.Id == zoneId {
 				plane.Zone = zone
 			}
 		}

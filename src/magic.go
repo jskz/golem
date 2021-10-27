@@ -36,10 +36,10 @@ func (ch *Character) onCastingUpdate() {
 			}
 		}
 
-		if ch.Casting.Casting.handler != nil {
-			fn := *ch.Casting.Casting.handler
+		if ch.Casting.Casting.Handler != nil {
+			fn := *ch.Casting.Casting.Handler
 
-			fn(ch.game.vm.ToValue(ch.Casting), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch.Casting.Arguments))
+			fn(ch.Game.vm.ToValue(ch.Casting), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(ch.Casting.Arguments))
 		}
 
 		ch.Casting = nil
@@ -48,11 +48,11 @@ func (ch *Character) onCastingUpdate() {
 
 func (game *Game) RegisterSpellHandler(name string, fn goja.Callable) goja.Value {
 	spell := game.FindSkillByName(name)
-	if spell == nil || spell.skillType != SkillTypeSpell {
+	if spell == nil || spell.SkillType != SkillTypeSpell {
 		return game.vm.ToValue(nil)
 	}
 
-	spell.handler = &fn
+	spell.Handler = &fn
 	return game.vm.ToValue(spell)
 }
 
@@ -74,13 +74,13 @@ func do_cast(ch *Character, arguments string) {
 	}
 
 	spell := arg
-	var found *Skill = ch.game.FindSkillByName(spell)
-	if found == nil || found.skillType != SkillTypeSpell {
+	var found *Skill = ch.Game.FindSkillByName(spell)
+	if found == nil || found.SkillType != SkillTypeSpell {
 		ch.Send("You have no knowledge of that spell, try another.\r\n")
 		return
 	}
 
-	prof, ok := ch.skills[found.id]
+	prof, ok := ch.Skills[found.Id]
 	if !ok {
 		ch.Send("You have no knowledge of that spell, try another.\r\n")
 		return
@@ -115,14 +115,14 @@ func do_spells(ch *Character, arguments string) {
 
 	output.WriteString("{WYou have knowledge of the following spells:{x\r\n")
 
-	for id, proficiency := range ch.skills {
-		if ch.game.skills[id].skillType != SkillTypeSpell {
+	for id, proficiency := range ch.Skills {
+		if ch.Game.skills[id].SkillType != SkillTypeSpell {
 			continue
 		}
 
 		count++
 
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.Proficiency))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.Game.skills[id].Name, proficiency.Proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")

@@ -17,47 +17,47 @@ import (
 )
 
 type Object struct {
-	id       uint
-	itemType string
+	Id       uint
+	ItemType string
 
-	name             string
-	shortDescription string
-	longDescription  string
-	description      string
-	flags            int
+	Name             string
+	ShortDescription string
+	LongDescription  string
+	Description      string
+	Flags            int
 
-	value0 int
-	value1 int
-	value2 int
-	value3 int
+	Value0 int
+	Value1 int
+	Value2 int
+	Value3 int
 }
 
 type ObjectInstance struct {
-	game      *Game           `json:"game"`
-	contents  *LinkedList     `json:"contents"`
-	inside    *ObjectInstance `json:"inside"`
-	inRoom    *Room           `json:"inRoom"`
-	carriedBy *Character      `json:"carriedBy"`
+	Game      *Game           `json:"game"`
+	Contents  *LinkedList     `json:"contents"`
+	Inside    *ObjectInstance `json:"inside"`
+	InRoom    *Room           `json:"inRoom"`
+	CarriedBy *Character      `json:"carriedBy"`
 
-	id       uint   `json:"id"`
-	parentId uint   `json:"parentId"`
-	itemType string `json:"itemType"`
+	Id       uint   `json:"id"`
+	ParentId uint   `json:"parentId"`
+	ItemType string `json:"itemType"`
 
-	name             string `json:"name"`
-	shortDescription string `json:"shortDescription"`
-	longDescription  string `json:"longDescription"`
-	description      string `json:"description"`
-	flags            int    `json:"flags"`
+	Name             string `json:"name"`
+	ShortDescription string `json:"shortDescription"`
+	LongDescription  string `json:"longDescription"`
+	Description      string `json:"description"`
+	Flags            int    `json:"flags"`
 
 	WearLocation int `json:"wearLocation"`
 
-	value0 int `json:"value0"`
-	value1 int `json:"value1"`
-	value2 int `json:"value2"`
-	value3 int `json:"value3"`
+	Value0 int `json:"value0"`
+	Value1 int `json:"value1"`
+	Value2 int `json:"value2"`
+	Value3 int `json:"value3"`
 
-	createdAt time.Time `json:"createdAt"`
-	ttl       int       `json:"ttl"`
+	CreatedAt time.Time `json:"createdAt"`
+	Ttl       int       `json:"ttl"`
 }
 
 const (
@@ -113,7 +113,7 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	`, index)
 
 	obj := &Object{}
-	err := row.Scan(&obj.id, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.flags, &obj.itemType)
+	err := row.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -126,7 +126,7 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 }
 
 func (obj *ObjectInstance) GetShortDescription(viewer *Character) string {
-	return obj.shortDescription
+	return obj.ShortDescription
 }
 
 func (obj *ObjectInstance) GetShortDescriptionUpper(viewer *Character) string {
@@ -144,8 +144,8 @@ func (obj *ObjectInstance) GetShortDescriptionUpper(viewer *Character) string {
 func (obj *ObjectInstance) reify() error {
 	obj.Finalize(nil)
 
-	if obj.contents != nil && obj.contents.Count > 0 {
-		for iter := obj.contents.Head; iter != nil; iter = iter.Next {
+	if obj.Contents != nil && obj.Contents.Count > 0 {
+		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
 			containedObject := iter.Value.(*ObjectInstance)
 			containedObject.Finalize(obj)
 		}
@@ -155,22 +155,22 @@ func (obj *ObjectInstance) reify() error {
 }
 
 func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
-	if obj == nil || obj.id > 0 {
+	if obj == nil || obj.Id > 0 {
 		return nil
 	}
 
 	var insideObjectInstanceId *uint = nil
 
 	if container != nil {
-		insideObjectInstanceId = &container.id
+		insideObjectInstanceId = &container.Id
 	}
 
-	result, err := obj.game.db.Exec(`
+	result, err := obj.Game.db.Exec(`
 		INSERT INTO
 			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4)
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, obj.parentId, insideObjectInstanceId, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.flags, obj.itemType, obj.value0, obj.value1, obj.value2, obj.value3)
+	`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3)
 	if err != nil {
 		log.Printf("Failed to finalize new object: %v.\r\n", err)
 		return err
@@ -182,24 +182,24 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 		return err
 	}
 
-	obj.id = uint(objectInstanceId)
+	obj.Id = uint(objectInstanceId)
 	return nil
 }
 
 func (container *ObjectInstance) addObject(obj *ObjectInstance) {
-	container.contents.Insert(obj)
+	container.Contents.Insert(obj)
 
-	obj.inside = container
-	obj.carriedBy = nil
-	obj.inRoom = nil
+	obj.Inside = container
+	obj.CarriedBy = nil
+	obj.InRoom = nil
 }
 
 func (container *ObjectInstance) removeObject(obj *ObjectInstance) {
-	container.contents.Remove(obj)
+	container.Contents.Remove(obj)
 
-	obj.inside = nil
-	obj.carriedBy = nil
-	obj.inRoom = nil
+	obj.Inside = nil
+	obj.CarriedBy = nil
+	obj.InRoom = nil
 }
 
 func (ch *Character) showObjectList(objects *LinkedList) {

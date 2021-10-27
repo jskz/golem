@@ -15,7 +15,7 @@ This will be a working document to track major feature development goals for eac
 
 - [x] Host a persistent pre-alpha instance and welcome limited testing: `mud.jskarzin.org:4000`
 - [x] Exit flags: closing and opening doors, movement obstruction
-- [ ] Clean up the inconsistent title case method and field naming stemming from the scripting field mapper change
+- [x] Clean up the inconsistent title case method and field naming stemming from the scripting field mapper change
 - [x] Extend to scripting and entities a timer-based "effects" model for behaviours like buffs/enchantments on equipment or spellcasting, permanent or with expiration
 - [x] Implement a few NPC flags for behaviours: stay in an area, move, aggressive/hostile towards PCs, etc.
 - [x] Groups: forming and unforming groups with other players (and NPCs), interaction commands/combat mechanics/experience splitting
@@ -41,7 +41,7 @@ This will be a working document to track major feature development goals for eac
 - [x] Create a new model `plane` representing a 2D array by dimensions and a blob of integer terrain pivots.  The data structure for a plane may evolve towards a quadtree but until post-1.0 will remain simple
 - [x] Create a new model `terrain` to store information about unique terrain types: name, a glyph used to represent that terrain type in a 2D map, movement cost to traverse a unit of this terrain type, etc.
 - [ ] Allow players to navigate a plane-based virtual room, like maze-based virtual rooms, with an ANSI art representation of the nearby landscape
-- [ ] Allow for a mechanism by which each app startup will generate (preset or random?) varied `Dungeon` instances and then create virtual exits between chosen planes
+- [x] Allow for a mechanism by which each app startup will generate (preset or random?) varied `Dungeon` instances and then create virtual exits between chosen planes
 
 ## 0.7 Procedural Content Development Milestones
 

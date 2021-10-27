@@ -60,9 +60,9 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 			continue
 		}
 
-		var description string = obj.longDescription
+		var description string = obj.LongDescription
 		if !longDescriptions {
-			description = obj.shortDescription
+			description = obj.ShortDescription
 		}
 
 		_, ok := inventory[description]
@@ -80,9 +80,9 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 			continue
 		}
 
-		var description string = obj.longDescription
+		var description string = obj.LongDescription
 		if !longDescriptions {
-			description = obj.shortDescription
+			description = obj.ShortDescription
 		}
 
 		count, ok := inventory[description]
@@ -106,21 +106,21 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 func (ch *Character) examineObject(obj *ObjectInstance) {
 	var output strings.Builder
 
-	output.WriteString(fmt.Sprintf("{cObject {C'%s'{c is type {C%s{c.\r\n", obj.name, obj.itemType))
-	output.WriteString(fmt.Sprintf("{C%s{x\r\n", obj.description))
+	output.WriteString(fmt.Sprintf("{cObject {C'%s'{c is type {C%s{c.\r\n", obj.Name, obj.ItemType))
+	output.WriteString(fmt.Sprintf("{C%s{x\r\n", obj.Description))
 
-	switch obj.itemType {
+	switch obj.ItemType {
 	case ItemTypeContainer:
-		output.WriteString(fmt.Sprintf("{C%s{c can hold up to {C%d{c items and {C%d{c lbs.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.value0, obj.value1))
+		output.WriteString(fmt.Sprintf("{C%s{c can hold up to {C%d{c items and {C%d{c lbs.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value0, obj.Value1))
 	default:
 		break
 	}
 
-	if obj.contents != nil && obj.contents.Count > 0 {
+	if obj.Contents != nil && obj.Contents.Count > 0 {
 		output.WriteString(fmt.Sprintf("{C%s{c contains the following items:\r\n", obj.GetShortDescriptionUpper(ch)))
 		ch.Send(output.String())
 
-		ch.showObjectList(obj.contents)
+		ch.showObjectList(obj.Contents)
 		return
 	}
 
@@ -128,7 +128,7 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 }
 
 func (ch *Character) getEquipment(wearLocation int) *ObjectInstance {
-	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
 		if obj.WearLocation == wearLocation {
@@ -183,7 +183,7 @@ func do_inventory(ch *Character, arguments string) {
 	var weightTotal float64 = 0.0
 
 	ch.Send("\r\n{YYour current inventory:{x\r\n")
-	ch.listObjects(ch.inventory, false, true)
+	ch.listObjects(ch.Inventory, false, true)
 
 	ch.Send(fmt.Sprintf("{xTotal: %d/%d items, %0.1f/%.1f lbs.\r\n",
 		count,
@@ -200,12 +200,12 @@ func do_wear(ch *Character, arguments string) {
 
 	firstArgument, _ := oneArgument(arguments)
 
-	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
 		if obj.WearLocation == -1 {
-			if strings.Contains(obj.name, firstArgument) {
-				if obj.flags&ITEM_WEAR_HELD != 0 {
+			if strings.Contains(obj.Name, firstArgument) {
+				if obj.Flags&ITEM_WEAR_HELD != 0 {
 					wearing := ch.getEquipment(WearLocationHeld)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -230,7 +230,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAPON != 0 {
+				} else if obj.Flags&ITEM_WEAPON != 0 {
 					wearing := ch.getEquipment(WearLocationWielded)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -255,7 +255,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_BODY != 0 {
+				} else if obj.Flags&ITEM_WEAR_BODY != 0 {
 					wearing := ch.getEquipment(WearLocationBody)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -280,7 +280,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_HEAD != 0 {
+				} else if obj.Flags&ITEM_WEAR_HEAD != 0 {
 					wearing := ch.getEquipment(WearLocationHead)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -305,7 +305,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_NECK != 0 {
+				} else if obj.Flags&ITEM_WEAR_NECK != 0 {
 					wearing := ch.getEquipment(WearLocationNeck)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -330,7 +330,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_TORSO != 0 {
+				} else if obj.Flags&ITEM_WEAR_TORSO != 0 {
 					wearing := ch.getEquipment(WearLocationTorso)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -355,7 +355,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_ARMS != 0 {
+				} else if obj.Flags&ITEM_WEAR_ARMS != 0 {
 					wearing := ch.getEquipment(WearLocationArms)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -380,7 +380,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_HANDS != 0 {
+				} else if obj.Flags&ITEM_WEAR_HANDS != 0 {
 					wearing := ch.getEquipment(WearLocationHands)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -405,7 +405,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_WAIST != 0 {
+				} else if obj.Flags&ITEM_WEAR_WAIST != 0 {
 					wearing := ch.getEquipment(WearLocationWaist)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -430,7 +430,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_SHIELD != 0 {
+				} else if obj.Flags&ITEM_WEAR_SHIELD != 0 {
 					wearing := ch.getEquipment(WearLocationShield)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -455,7 +455,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_LEGS != 0 {
+				} else if obj.Flags&ITEM_WEAR_LEGS != 0 {
 					wearing := ch.getEquipment(WearLocationLegs)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -480,7 +480,7 @@ func do_wear(ch *Character, arguments string) {
 
 						return
 					}
-				} else if obj.flags&ITEM_WEAR_FEET != 0 {
+				} else if obj.Flags&ITEM_WEAR_FEET != 0 {
 					wearing := ch.getEquipment(WearLocationFeet)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
@@ -521,11 +521,11 @@ func do_remove(ch *Character, arguments string) {
 
 	firstArgument, _ := oneArgument(arguments)
 
-	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
 		if obj.WearLocation != -1 {
-			if strings.Contains(obj.name, firstArgument) {
+			if strings.Contains(obj.Name, firstArgument) {
 				result := ch.detachEquipment(obj)
 				if result {
 					ch.Send(fmt.Sprintf("You remove %s{x.\r\n", obj.GetShortDescription(ch)))
@@ -572,13 +572,13 @@ func do_use(ch *Character, arguments string) {
 		}
 	}
 
-	script, ok := using.game.objectScripts[using.parentId]
+	script, ok := using.Game.objectScripts[using.ParentId]
 	if !ok {
 		ch.Send("You can't use that.\r\n")
 		return
 	}
 
-	_, err := script.tryEvaluate("onUse", ch.game.vm.ToValue(using), ch.game.vm.ToValue(ch))
+	_, err := script.tryEvaluate("onUse", ch.Game.vm.ToValue(using), ch.Game.vm.ToValue(ch))
 	if err != nil {
 		ch.Send("You can't use that.\r\n")
 		return
@@ -618,7 +618,7 @@ func do_take(ch *Character, arguments string) {
 			return
 		}
 
-		if takingObj.flags&ITEM_TAKE == 0 {
+		if takingObj.Flags&ITEM_TAKE == 0 {
 			ch.Send(fmt.Sprintf("You are unable to take %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
 			return
 		}
@@ -650,7 +650,7 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
-	if found.flags&ITEM_TAKE == 0 {
+	if found.Flags&ITEM_TAKE == 0 {
 		ch.Send("You can't take that.\r\n")
 		return
 	}
@@ -671,8 +671,8 @@ func do_take(ch *Character, arguments string) {
 		ch.Room.removeObject(found)
 	}
 
-	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.shortDescription))
-	outString := fmt.Sprintf("\r\n%s{x takes %s{x.\r\n", ch.Name, found.shortDescription)
+	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.ShortDescription))
+	outString := fmt.Sprintf("\r\n%s{x takes %s{x.\r\n", ch.Name, found.ShortDescription)
 
 	if ch.Room != nil {
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
@@ -777,8 +777,8 @@ func do_drop(ch *Character, arguments string) {
 		ch.Room.addObject(found)
 	}
 
-	ch.Send(fmt.Sprintf("You drop %s{x.\r\n", found.shortDescription))
-	outString := fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.Name, found.shortDescription)
+	ch.Send(fmt.Sprintf("You drop %s{x.\r\n", found.ShortDescription))
+	outString := fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.Name, found.ShortDescription)
 
 	if ch.Room != nil {
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
