@@ -30,10 +30,11 @@ const (
 )
 
 type Room struct {
-	game *Game
+	Game *Game `json:"game"`
 
-	Id     uint `json:"id"`
-	zone   *Zone
+	Id   uint  `json:"id"`
+	Zone *Zone `json:"zone"`
+
 	script *Script
 
 	Flags   int       `json:"flags"`
@@ -43,25 +44,25 @@ type Room struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 
-	objects    *LinkedList
-	resets     *LinkedList
+	Objects    *LinkedList `json:"objects"`
+	Resets     *LinkedList `json:"resets"`
 	Characters *LinkedList `json:"characters"`
 
 	Exit map[uint]*Exit `json:"exit"`
 }
 
 func (room *Room) addObject(obj *ObjectInstance) {
-	room.objects.Insert(obj)
+	room.Objects.Insert(obj)
 
-	obj.inside = nil
-	obj.carriedBy = nil
-	obj.inRoom = room
+	obj.Inside = nil
+	obj.CarriedBy = nil
+	obj.InRoom = room
 }
 
 func (room *Room) removeObject(obj *ObjectInstance) {
-	room.objects.Remove(obj)
+	room.Objects.Remove(obj)
 
-	obj.inRoom = nil
+	obj.InRoom = nil
 }
 
 func (room *Room) AddCharacter(ch *Character) {
@@ -76,7 +77,7 @@ func (room *Room) removeCharacter(ch *Character) {
 }
 
 func (room *Room) listObjectsToCharacter(ch *Character) {
-	ch.listObjects(room.objects, true, false)
+	ch.listObjects(room.Objects, true, false)
 }
 
 func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
@@ -94,7 +95,7 @@ func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 }
 
 func (game *Game) NewRoom() *Room {
-	room := &Room{game: game}
+	room := &Room{Game: game}
 
 	return room
 }
@@ -122,9 +123,9 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 
 	var zoneId int
 
-	room = &Room{game: game}
-	room.resets = NewLinkedList()
-	room.objects = NewLinkedList()
+	room = &Room{Game: game}
+	room.Resets = NewLinkedList()
+	room.Objects = NewLinkedList()
 	room.Characters = NewLinkedList()
 	room.Exit = make(map[uint]*Exit)
 	err := row.Scan(&room.Id, &zoneId, &room.Name, &room.Description, &room.Flags)
@@ -140,12 +141,12 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	for iter := game.Zones.Head; iter != nil; iter = iter.Next {
 		zone := iter.Value.(*Zone)
 
-		if zone.id == zoneId {
-			room.zone = zone
+		if zone.Id == zoneId {
+			room.Zone = zone
 		}
 	}
 
-	if room.zone == nil {
+	if room.Zone == nil {
 		return nil, errors.New("trying to instance a room without a zone")
 	}
 
@@ -212,7 +213,7 @@ func (room *Room) Broadcast(message string, filter goja.Callable) {
 		rch := iter.Value.(*Character)
 
 		if filter != nil {
-			val, err := filter(room.game.vm.ToValue(rch))
+			val, err := filter(room.Game.vm.ToValue(rch))
 			if err != nil {
 				log.Printf("Room.Broadcast failed: %v\r\n", err)
 				break

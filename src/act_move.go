@@ -77,11 +77,11 @@ const (
 )
 
 type Terrain struct {
-	id           int    `json:"id"`
-	name         string `json:"name"`
-	mapGlyph     string `json:"mapGlyph"`
-	movementCost int    `json:"movementCost"`
-	flags        int    `json:"flags"`
+	Id           int    `json:"id"`
+	Name         string `json:"name"`
+	MapGlyph     string `json:"mapGlyph"`
+	MovementCost int    `json:"movementCost"`
+	Flags        int    `json:"flags"`
 }
 
 type Exit struct {
@@ -149,7 +149,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	}
 
 	if from.script != nil {
-		from.script.tryEvaluate("onRoomLeave", ch.game.vm.ToValue(from), ch.game.vm.ToValue(ch))
+		from.script.tryEvaluate("onRoomLeave", ch.Game.vm.ToValue(from), ch.Game.vm.ToValue(ch))
 	}
 
 	exit.To.AddCharacter(ch)
@@ -176,7 +176,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	}
 
 	if exit.To.script != nil {
-		exit.To.script.tryEvaluate("onRoomEnter", ch.game.vm.ToValue(exit.To), ch.game.vm.ToValue(ch))
+		exit.To.script.tryEvaluate("onRoomEnter", ch.Game.vm.ToValue(exit.To), ch.Game.vm.ToValue(ch))
 	}
 
 	/* Aggro check... */

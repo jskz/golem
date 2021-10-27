@@ -14,7 +14,7 @@ function onCombatUpdate() {
         for (let i = 0; i < combat.participants.length; i++) {
             const vch = combat.participants[i];
 
-            if (vch.room === null) {
+            if (vch.Room === null) {
                 continue;
             }
 
@@ -29,7 +29,7 @@ function onCombatUpdate() {
                 if (
                     !victim ||
                     victim.room === null ||
-                    vch.room.id != victim.room.id
+                    vch.Room.id != victim.room.id
                 ) {
                     break;
                 }

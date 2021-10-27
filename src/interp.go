@@ -112,7 +112,7 @@ func (ch *Character) Interpret(input string) bool {
 		/* If any input, abort the paging */
 		if input != "" {
 			ch.clearOutputBuffer()
-			ch.client.displayPrompt()
+			ch.Client.displayPrompt()
 			return true
 		}
 
@@ -135,12 +135,12 @@ func (ch *Character) Interpret(input string) bool {
 		if len(command) > 0 {
 			/* As a fallback, see if this command matches any proficiency which has a registered handler. */
 			prof := ch.FindProficiencyByName(command)
-			if prof == nil || prof.Proficiency <= 0 || ch.game.skills[prof.SkillId].handler == nil {
+			if prof == nil || prof.Proficiency <= 0 || ch.Game.skills[prof.SkillId].Handler == nil {
 				ch.Send(fmt.Sprintf("{RAlas, there is no such command: %s{x\r\n", command))
 				return false
 			}
 
-			(*ch.game.skills[prof.SkillId].handler)(ch.game.vm.ToValue(prof), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(rest))
+			(*ch.Game.skills[prof.SkillId].Handler)(ch.Game.vm.ToValue(prof), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(rest))
 		} else {
 			/* We'll still want a prompt on no input */
 			ch.Send("\r\n")
@@ -150,7 +150,7 @@ func (ch *Character) Interpret(input string) bool {
 	}
 	/* Call the command func with the remaining command words joined. */
 	if val.Scripted {
-		val.Callback(ch.game.vm.ToValue(ch), ch.game.vm.ToValue(ch), ch.game.vm.ToValue(rest))
+		val.Callback(ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(rest))
 		return true
 	}
 

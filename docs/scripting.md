@@ -37,7 +37,7 @@ PCs and NPCs both share a common Character data type with the following properti
 
 | Type |  Name | Arguments | Description | Example
 | --- | --- | --- | --- | ---
-| Method | broadcast | `message`: **String**, *`filter`*?: function(`ch`: **Character**) = **null** | Sends `message` to characters in room for which `filter(ch) === true` or all characters if filter is **null**. | ```ch.room.broadcast("Message to other people in this room", rch => !rch.isEqual(ch));```
+| Method | broadcast | `message`: **String**, *`filter`*?: function(`ch`: **Character**) = **null** | Sends `message` to characters in room for which `filter(ch) === true` or all characters if filter is **null**. | ```ch.Room.broadcast("Message to other people in this room", rch => !rch.isEqual(ch));```
 
 ## Combat
 

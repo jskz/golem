@@ -42,13 +42,13 @@ func (game *Game) LoadTerrain() {
 	for rows.Next() {
 		terrain := &Terrain{}
 
-		err := rows.Scan(&terrain.id, &terrain.name, &terrain.mapGlyph, &terrain.movementCost, &terrain.flags)
+		err := rows.Scan(&terrain.Id, &terrain.Name, &terrain.MapGlyph, &terrain.MovementCost, &terrain.Flags)
 		if err != nil {
 			log.Printf("Unable to scan terrain: %v.\r\n", err)
 			continue
 		}
 
-		TerrainTable[terrain.id] = terrain
+		TerrainTable[terrain.Id] = terrain
 	}
 
 	log.Printf("Loaded %d terrain types from database.\r\n", len(TerrainTable))

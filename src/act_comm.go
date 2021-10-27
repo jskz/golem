@@ -25,18 +25,18 @@ func do_afk(ch *Character, arguments string) {
 		reason = string(arguments)
 	}
 
-	if ch.afk != nil {
+	if ch.Afk != nil {
 		ch.Send("{GYou have returned from AFK.{x\r\n")
-		ch.afk = nil
+		ch.Afk = nil
 		return
 	}
 
-	ch.afk = &AwayFromKeyboard{
+	ch.Afk = &AwayFromKeyboard{
 		startedAt: time.Now(),
 		message:   string(reason),
 	}
 
-	ch.Send(fmt.Sprintf("{GYou are now AFK: %s{x\r\n", ch.afk.message))
+	ch.Send(fmt.Sprintf("{GYou are now AFK: %s{x\r\n", ch.Afk.message))
 }
 
 /* say will be room-specific */
@@ -75,7 +75,7 @@ func do_ooc(ch *Character, arguments string) {
 	buf.WriteString(fmt.Sprintf("\r\n{M[OOC] %s: %s{x\r\n", ch.Name, arguments))
 	output := buf.String()
 
-	for client := range ch.game.clients {
+	for client := range ch.Game.clients {
 		if client.character != nil && client.connectionState == ConnectionStatePlaying {
 			client.character.Send(output)
 		}
@@ -116,15 +116,15 @@ func do_quit(ch *Character, arguments string) {
 		ch.Room.removeCharacter(ch)
 	}
 
-	ch.game.Characters.Remove(ch)
-	ch.client.connectionState = ConnectionStateNone
+	ch.Game.Characters.Remove(ch)
+	ch.Client.connectionState = ConnectionStateNone
 	ch.Send("{WLeaving for the real world...{x\r\n")
 
 	go func() {
 		/* Allow output to flush */
 		<-time.After(500 * time.Millisecond)
-		ch.client.close <- true
-		ch.client.conn.Close()
+		ch.Client.close <- true
+		ch.Client.conn.Close()
 	}()
 }
 
@@ -158,7 +158,7 @@ func do_group(ch *Character, arguments string) {
 
 			output.WriteString(fmt.Sprintf("[%2d %-8s] %-14s %5d/%5dhp %5d/%5dm %5d/%5dst\r\n",
 				gch.Level,
-				gch.job.DisplayName,
+				gch.Job.DisplayName,
 				gch.GetShortDescriptionUpper(ch),
 				gch.Health,
 				gch.MaxHealth,

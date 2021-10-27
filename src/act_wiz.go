@@ -19,8 +19,8 @@ func (ch *Character) isAdmin() bool {
 }
 
 func do_exec(ch *Character, arguments string) {
-	if ch.client != nil {
-		value, err := ch.game.vm.RunString(arguments)
+	if ch.Client != nil {
+		value, err := ch.Game.vm.RunString(arguments)
 
 		if err != nil {
 			ch.Send(fmt.Sprintf("{R\r\nError: %s{x.\r\n", err.Error()))
@@ -41,17 +41,17 @@ func do_zones(ch *Character, arguments string) {
 		"Reset Freq.",
 		"Min. Since"))
 
-	for iter := ch.game.Zones.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Game.Zones.Head; iter != nil; iter = iter.Next {
 		zone := iter.Value.(*Zone)
 
-		minutesSinceZoneReset := int(time.Since(zone.lastReset).Minutes())
+		minutesSinceZoneReset := int(time.Since(zone.LastReset).Minutes())
 
 		output.WriteString(fmt.Sprintf("%-4d %-35s [%-5d-%-5d] %d/%d\r\n",
-			zone.id,
-			zone.name,
-			zone.low,
-			zone.high,
-			zone.resetFrequency,
+			zone.Id,
+			zone.Name,
+			zone.Low,
+			zone.High,
+			zone.ResetFrequency,
 			minutesSinceZoneReset))
 	}
 
@@ -63,10 +63,10 @@ func do_mem(ch *Character, arguments string) {
 	var output strings.Builder
 
 	output.WriteString("{YUsage statistics:\r\n")
-	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Characters", ch.game.Characters.Count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Characters", ch.Game.Characters.Count))
 	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Jobs", Jobs.Count))
 	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Races", Races.Count))
-	output.WriteString(fmt.Sprintf("%-15s %-6d{x\r\n", "Zones", ch.game.Zones.Count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d{x\r\n", "Zones", ch.Game.Zones.Count))
 
 	ch.Send(output.String())
 }
@@ -74,14 +74,14 @@ func do_mem(ch *Character, arguments string) {
 func do_mlist(ch *Character, arguments string) {
 	var output strings.Builder
 
-	output.WriteString(fmt.Sprintf("Displaying all %d character instances in the world:\r\n", ch.game.Characters.Count))
+	output.WriteString(fmt.Sprintf("Displaying all %d character instances in the world:\r\n", ch.Game.Characters.Count))
 
-	for iter := ch.game.Characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Game.Characters.Head; iter != nil; iter = iter.Next {
 		wch := iter.Value.(*Character)
 
 		if wch.Flags&CHAR_IS_PLAYER != 0 {
-			if wch.client != nil {
-				output.WriteString(fmt.Sprintf("{G%s@%s{x\r\n", wch.Name, wch.client.conn.RemoteAddr().String()))
+			if wch.Client != nil {
+				output.WriteString(fmt.Sprintf("{G%s@%s{x\r\n", wch.Name, wch.Client.conn.RemoteAddr().String()))
 			} else {
 				output.WriteString(fmt.Sprintf("{G%s@DISCONNECTED{x\r\n", wch.Name))
 			}
@@ -100,7 +100,7 @@ func do_purge(ch *Character, arguments string) {
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
-		if rch == ch || rch.client != nil || rch.Flags&CHAR_IS_PLAYER != 0 {
+		if rch == ch || rch.Client != nil || rch.Flags&CHAR_IS_PLAYER != 0 {
 			continue
 		}
 
@@ -108,11 +108,11 @@ func do_purge(ch *Character, arguments string) {
 	}
 
 	for {
-		if ch.Room.objects.Head == nil {
+		if ch.Room.Objects.Head == nil {
 			break
 		}
 
-		ch.Room.objects.Remove(ch.Room.objects.Head.Value)
+		ch.Room.Objects.Remove(ch.Room.Objects.Head.Value)
 	}
 
 	ch.Send("You have purged the contents of the room.\r\n")
@@ -127,7 +127,7 @@ func do_purge(ch *Character, arguments string) {
 }
 
 func do_peace(ch *Character, arguments string) {
-	if ch.Room == nil || ch.client == nil {
+	if ch.Room == nil || ch.Client == nil {
 		return
 	}
 
@@ -143,8 +143,8 @@ func do_peace(ch *Character, arguments string) {
 }
 
 func do_shutdown(ch *Character, arguments string) {
-	if ch.client != nil {
-		ch.game.shutdownRequest <- true
+	if ch.Client != nil {
+		ch.Game.shutdownRequest <- true
 	}
 }
 
@@ -155,7 +155,7 @@ func do_goto(ch *Character, arguments string) {
 		return
 	}
 
-	room, err := ch.game.LoadRoomIndex(uint(id))
+	room, err := ch.Game.LoadRoomIndex(uint(id))
 	if err != nil || room == nil {
 		ch.Send("No such room.\r\n")
 		return

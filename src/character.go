@@ -95,10 +95,10 @@ const (
  * connected through a session instance available via the client pointer.)
  */
 type Character struct {
-	game   *Game
-	client *Client
+	Game   *Game   `json:"game"`
+	Client *Client `json:"client"`
 
-	inventory *LinkedList
+	Inventory *LinkedList `json:"inventory"`
 
 	output       []byte
 	outputCursor int
@@ -122,18 +122,18 @@ type Character struct {
 	LongDescription  string `json:"longDescription"`
 	Description      string `json:"description"`
 
-	wizard bool
-	job    *Job
-	race   *Race
+	Wizard bool  `json:"wizard"`
+	Job    *Job  `json:"job"`
+	Race   *Race `json:"race"`
 
 	Level      uint `json:"level"`
 	Experience uint `json:"experience"`
 	Practices  int  `json:"practices"`
 
-	skills map[uint]*Proficiency
+	Skills map[uint]*Proficiency `json:"skills"`
 
-	Flags int `json:"flags"`
-	afk   *AwayFromKeyboard
+	Flags int               `json:"flags"`
+	Afk   *AwayFromKeyboard `json:"afk"`
 
 	Health     int `json:"health"`
 	MaxHealth  int `json:"maxHealth"`
@@ -164,8 +164,8 @@ func (ch *Character) IsEqual(och *Character) bool {
 func (ch *Character) experienceRequiredForLevel(level int) int {
 	required := int(500*(level*level) - (500 * level))
 
-	if ch.job != nil {
-		required = int(float64(required) * ch.job.ExperienceRequiredModifier)
+	if ch.Job != nil {
+		required = int(float64(required) * ch.Job.ExperienceRequiredModifier)
 	}
 
 	return required
@@ -212,17 +212,17 @@ func (ch *Character) onUpdate() {
 }
 
 func (ch *Character) Finalize() error {
-	if ch.client == nil || ch.game == nil {
+	if ch.Client == nil || ch.Game == nil {
 		/* If somehow an NPC were to try to save, do not allow it. */
 		return nil
 	}
 
-	result, err := ch.game.db.Exec(`
+	result, err := ch.Game.db.Exec(`
 		INSERT INTO
 			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.race.Id, ch.job.Id, ch.Level, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
+	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -237,7 +237,7 @@ func (ch *Character) Finalize() error {
 
 	ch.Id = int(userId)
 
-	limbo, err := ch.game.LoadRoomIndex(RoomLimbo)
+	limbo, err := ch.Game.LoadRoomIndex(RoomLimbo)
 	if err != nil {
 		return err
 	}
@@ -249,16 +249,16 @@ func (ch *Character) Finalize() error {
 func (ch *Character) SavePlayerSkills() error {
 	var proficiencyValues strings.Builder
 
-	if len(ch.skills) == 0 {
+	if len(ch.Skills) == 0 {
 		return nil
 	}
 
-	for _, proficiency := range ch.skills {
+	for _, proficiency := range ch.Skills {
 		proficiencyValues.WriteString(fmt.Sprintf("(%d, %d, %d, %d, %d),", proficiency.Id, ch.Id, proficiency.SkillId, proficiency.Job.Id, proficiency.Proficiency))
 	}
 
 	proficiencyValuesString := strings.TrimRight(proficiencyValues.String(), ",")
-	_, err := ch.game.db.Exec(fmt.Sprintf(`
+	_, err := ch.Game.db.Exec(fmt.Sprintf(`
 	INSERT INTO
 		pc_skill_proficiency (id, player_character_id, skill_id, job_id, proficiency)
 	VALUES
@@ -275,7 +275,7 @@ func (ch *Character) SavePlayerSkills() error {
 }
 
 func (ch *Character) Save() bool {
-	if ch.client == nil || ch.game == nil {
+	if ch.Client == nil || ch.Game == nil {
 		/* If somehow an NPC were to try to save, do not allow it. */
 		return false
 	}
@@ -284,7 +284,7 @@ func (ch *Character) Save() bool {
 	if ch.Room != nil {
 		roomId = ch.Room.Id
 	}
-	result, err := ch.game.db.Exec(`
+	result, err := ch.Game.db.Exec(`
 		UPDATE
 			player_characters
 		SET
@@ -311,7 +311,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.wizard, roomId, ch.race.Id, ch.job.Id, ch.Level, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.Id)
+	`, ch.Wizard, roomId, ch.Race.Id, ch.Job.Id, ch.Level, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.Id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -329,7 +329,7 @@ func (ch *Character) Save() bool {
 		return false
 	}
 
-	err = ch.game.SavePlayerInventory(ch)
+	err = ch.Game.SavePlayerInventory(ch)
 	if err != nil {
 		log.Printf("Failed to save player inventory: %v.\r\n", err)
 		return false
@@ -344,12 +344,12 @@ func (ch *Character) attachObject(obj *ObjectInstance) error {
 		return err
 	}
 
-	_, err = ch.game.db.Exec(`
+	_, err = ch.Game.db.Exec(`
 	INSERT INTO
 		player_character_object(player_character_id, object_instance_id)
 	VALUES
 		(?, ?)
-	`, ch.Id, obj.id)
+	`, ch.Id, obj.Id)
 	if err != nil {
 		return err
 	}
@@ -358,13 +358,13 @@ func (ch *Character) attachObject(obj *ObjectInstance) error {
 }
 
 func (ch *Character) detachObject(obj *ObjectInstance) error {
-	result, err := ch.game.db.Exec(`
+	result, err := ch.Game.db.Exec(`
 		DELETE FROM
 			player_character_object
 		WHERE
 			player_character_id = ?
 		AND
-			object_instance_id = ?`, ch.Id, obj.id)
+			object_instance_id = ?`, ch.Id, obj.Id)
 	if err != nil {
 		return err
 	}
@@ -387,12 +387,12 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 	var updating []*ObjectInstance = make([]*ObjectInstance, 0)
 
 	/* Iterate over all objects in this player's inventory */
-	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
 		/* If this is a container, ensure that all contained object instances are also updated */
-		if obj.contents != nil && obj.contents.Count > 0 {
-			for containerIter := obj.contents.Head; containerIter != nil; containerIter = containerIter.Next {
+		if obj.Contents != nil && obj.Contents.Count > 0 {
+			for containerIter := obj.Contents.Head; containerIter != nil; containerIter = containerIter.Next {
 				containedObj := containerIter.Value.(*ObjectInstance)
 
 				updating = append(updating, containedObj)
@@ -424,7 +424,7 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 				value_2 = ?,
 				value_3 = ?,
 				value_4 = ?
-		`, obj.name, obj.shortDescription, obj.longDescription, obj.description, obj.WearLocation, obj.flags, obj.value0, obj.value1, obj.value2, obj.value3)
+		`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -473,15 +473,15 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 
 	for rows.Next() {
 		obj := &ObjectInstance{
-			game:         game,
-			contents:     NewLinkedList(),
-			inside:       nil,
-			carriedBy:    nil,
-			createdAt:    time.Now(),
+			Game:         game,
+			Contents:     NewLinkedList(),
+			Inside:       nil,
+			CarriedBy:    nil,
+			CreatedAt:    time.Now(),
 			WearLocation: -1,
 		}
 
-		err = rows.Scan(&obj.id, &obj.parentId, &obj.name, &obj.shortDescription, &obj.longDescription, &obj.description, &obj.flags, &obj.itemType, &obj.WearLocation, &obj.value0, &obj.value1, &obj.value2, &obj.value3)
+		err = rows.Scan(&obj.Id, &obj.ParentId, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.WearLocation, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3)
 		if err != nil {
 			return err
 		}
@@ -489,7 +489,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 		ch.addObject(obj)
 	}
 
-	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
 		rows, err := game.db.Query(`
@@ -510,7 +510,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 				object_instances
 			WHERE
 				object_instances.inside_object_instance_id = ?
-		`, obj.id)
+		`, obj.Id)
 		if err != nil {
 			return err
 		}
@@ -519,15 +519,15 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 
 		for rows.Next() {
 			containedObj := &ObjectInstance{
-				game:         game,
-				contents:     NewLinkedList(),
-				inside:       nil,
-				carriedBy:    nil,
-				createdAt:    time.Now(),
+				Game:         game,
+				Contents:     NewLinkedList(),
+				Inside:       nil,
+				CarriedBy:    nil,
+				CreatedAt:    time.Now(),
 				WearLocation: -1,
 			}
 
-			err = rows.Scan(&containedObj.id, &containedObj.parentId, &containedObj.name, &containedObj.shortDescription, &containedObj.longDescription, &containedObj.description, &containedObj.flags, &containedObj.itemType, &containedObj.value0, &containedObj.value1, &containedObj.value2, &containedObj.value3)
+			err = rows.Scan(&containedObj.Id, &containedObj.ParentId, &containedObj.Name, &containedObj.ShortDescription, &containedObj.LongDescription, &containedObj.Description, &containedObj.Flags, &containedObj.ItemType, &containedObj.Value0, &containedObj.Value1, &containedObj.Value2, &containedObj.Value3)
 			if err != nil {
 				return err
 			}
@@ -587,13 +587,13 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	`, username)
 
 	ch := NewCharacter()
-	ch.game = game
+	ch.Game = game
 
 	var roomId uint
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.Id, &ch.Name, &ch.wizard, &roomId, &raceId, &jobId, &ch.Level, &ch.Experience, &ch.Practices, &ch.Health, &ch.MaxHealth, &ch.Mana, &ch.MaxMana, &ch.Stamina, &ch.MaxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
+	err := row.Scan(&ch.Id, &ch.Name, &ch.Wizard, &roomId, &raceId, &jobId, &ch.Level, &ch.Experience, &ch.Practices, &ch.Health, &ch.MaxHealth, &ch.Mana, &ch.MaxMana, &ch.Stamina, &ch.MaxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -603,13 +603,13 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 		return nil, nil, err
 	}
 
-	ch.race = FindRaceByID(raceId)
-	if ch.race == nil {
+	ch.Race = FindRaceByID(raceId)
+	if ch.Race == nil {
 		return nil, nil, fmt.Errorf("failed to load race %d", raceId)
 	}
 
-	ch.job = FindJobByID(jobId)
-	if ch.job == nil {
+	ch.Job = FindJobByID(jobId)
+	if ch.Job == nil {
 		return nil, nil, fmt.Errorf("failed to load job %d", jobId)
 	}
 
@@ -682,25 +682,25 @@ func (ch *Character) flushOutput() {
 	}
 
 	if len(lines) <= maxLines {
-		ch.client.send <- ch.output
+		ch.Client.send <- ch.output
 		ch.clearOutputBuffer()
 		return
 	}
 
 	for index := ch.outputCursor; index <= ch.inputCursor; index++ {
 		if index >= len(lines) {
-			ch.client.send <- page.Bytes()
+			ch.Client.send <- page.Bytes()
 			ch.clearOutputBuffer()
 			return
 		}
 
 		if index-ch.outputCursor >= maxLines {
-			ch.client.send <- page.Bytes()
+			ch.Client.send <- page.Bytes()
 			ch.outputCursor += maxLines
 
 			amount := ch.outputCursor * 100 / ch.outputLines
 
-			ch.client.send <- []byte(fmt.Sprintf("[ Press return to continue (%d%%) ]\r\n", amount))
+			ch.Client.send <- []byte(fmt.Sprintf("[ Press return to continue (%d%%) ]\r\n", amount))
 			return
 		}
 
@@ -765,7 +765,7 @@ func (ch *Character) isFighting() bool {
 }
 
 func (ch *Character) Write(data []byte) (n int, err error) {
-	if ch.client == nil {
+	if ch.Client == nil {
 		/* If there is no client, succeed silently. */
 		return len(data), nil
 	}
@@ -798,8 +798,8 @@ func (game *Game) IsValidPCName(name string) bool {
 func (ch *Character) Send(text string) {
 	var output string = string(text)
 
-	if ch.client != nil {
-		output = ch.client.TranslateColourCodes(output)
+	if ch.Client != nil {
+		output = ch.Client.TranslateColourCodes(output)
 	}
 
 	_, err := ch.Write([]byte(output))
@@ -854,30 +854,30 @@ func (ch *Character) getLongDescription(viewer *Character) string {
 }
 
 func (ch *Character) addObject(obj *ObjectInstance) {
-	ch.inventory.Insert(obj)
+	ch.Inventory.Insert(obj)
 
-	obj.carriedBy = ch
-	obj.inRoom = nil
-	obj.inside = nil
+	obj.CarriedBy = ch
+	obj.InRoom = nil
+	obj.Inside = nil
 }
 
 func (ch *Character) removeObject(obj *ObjectInstance) {
-	ch.inventory.Remove(obj)
+	ch.Inventory.Remove(obj)
 
-	obj.carriedBy = nil
+	obj.CarriedBy = nil
 }
 
 func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *ObjectInstance {
 	processed := strings.ToLower(argument)
 
-	if ch.Room == nil || len(processed) < 1 || obj.contents == nil || obj.contents.Count < 1 {
+	if ch.Room == nil || len(processed) < 1 || obj.Contents == nil || obj.Contents.Count < 1 {
 		return nil
 	}
 
-	for iter := obj.contents.Head; iter != nil; iter = iter.Next {
+	for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
-		nameParts := strings.Split(obj.name, " ")
+		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
 			if strings.Compare(strings.ToLower(part), processed) == 0 {
 				return obj
@@ -895,10 +895,10 @@ func (ch *Character) findObjectInRoom(argument string) *ObjectInstance {
 		return nil
 	}
 
-	for iter := ch.Room.objects.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
-		nameParts := strings.Split(obj.name, " ")
+		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
 			if strings.Compare(strings.ToLower(part), processed) == 0 {
 				return obj
@@ -916,10 +916,10 @@ func (ch *Character) findObjectOnSelf(argument string) *ObjectInstance {
 		return nil
 	}
 
-	for iter := ch.inventory.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
-		nameParts := strings.Split(obj.name, " ")
+		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
 			if strings.Compare(strings.ToLower(part), processed) == 0 {
 				return obj
@@ -990,13 +990,13 @@ func NewCharacter() *Character {
 	character := &Character{}
 
 	character.Id = -1
-	character.wizard = false
-	character.afk = nil
-	character.job = nil
+	character.Wizard = false
+	character.Afk = nil
+	character.Job = nil
 	character.Flags = 0
 	character.Fighting = nil
 	character.Combat = nil
-	character.race = nil
+	character.Race = nil
 	character.Room = nil
 	character.Practices = 0
 	character.Position = PositionDead
@@ -1006,11 +1006,11 @@ func NewCharacter() *Character {
 	character.outputHead = 0
 
 	character.Name = UnauthenticatedUsername
-	character.client = nil
+	character.Client = nil
 	character.Level = 0
 	character.Experience = 0
-	character.inventory = NewLinkedList()
-	character.skills = make(map[uint]*Proficiency)
+	character.Inventory = NewLinkedList()
+	character.Skills = make(map[uint]*Proficiency)
 
 	character.Defense = 0
 	character.Strength = 10

@@ -18,10 +18,10 @@ import (
 )
 
 type Skill struct {
-	id        uint
-	name      string
-	skillType int
-	handler   *goja.Callable
+	Id        uint
+	Name      string
+	SkillType int
+	Handler   *goja.Callable
 }
 
 const (
@@ -54,17 +54,17 @@ type Proficiency struct {
 
 func (game *Game) RegisterSkillHandler(name string, fn goja.Callable) goja.Value {
 	skill := game.FindSkillByName(name)
-	if skill == nil || skill.skillType != SkillTypeSkill {
+	if skill == nil || skill.SkillType != SkillTypeSkill {
 		return game.vm.ToValue(nil)
 	}
 
-	skill.handler = &fn
+	skill.Handler = &fn
 	return game.vm.ToValue(skill)
 }
 
 func (game *Game) FindSkillByID(id uint) *Skill {
 	for _, skill := range game.skills {
-		if skill.id == id {
+		if skill.Id == id {
 			return skill
 		}
 	}
@@ -74,7 +74,7 @@ func (game *Game) FindSkillByID(id uint) *Skill {
 
 func (game *Game) FindSkillByName(name string) *Skill {
 	for _, skill := range game.skills {
-		if skill.name == name {
+		if skill.Name == name {
 			return skill
 		}
 	}
@@ -83,9 +83,9 @@ func (game *Game) FindSkillByName(name string) *Skill {
 }
 
 func (ch *Character) FindProficiencyByName(name string) *Proficiency {
-	for _, skill := range ch.skills {
-		if ch.game.skills[skill.SkillId].name == name {
-			return ch.skills[skill.SkillId]
+	for _, skill := range ch.Skills {
+		if ch.Game.skills[skill.SkillId].Name == name {
+			return ch.Skills[skill.SkillId]
 		}
 	}
 
@@ -93,18 +93,18 @@ func (ch *Character) FindProficiencyByName(name string) *Proficiency {
 }
 
 func (ch *Character) syncJobSkills() error {
-	for iter := ch.job.Skills.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Job.Skills.Head; iter != nil; iter = iter.Next {
 		jobSkill := iter.Value.(*JobSkill)
 
 		if uint(jobSkill.Level) > ch.Level {
 			continue
 		}
 
-		_, ok := ch.skills[jobSkill.Skill.id]
+		_, ok := ch.Skills[jobSkill.Skill.Id]
 		if !ok {
 			proficiency := &Proficiency{}
 
-			proficiency.SkillId = jobSkill.Skill.id
+			proficiency.SkillId = jobSkill.Skill.Id
 			proficiency.Complexity = jobSkill.Complexity
 			proficiency.Level = jobSkill.Level
 			proficiency.Cost = jobSkill.Cost
@@ -112,12 +112,12 @@ func (ch *Character) syncJobSkills() error {
 			proficiency.Proficiency = 0
 
 			/* Try to create the pc_skill_proficiency relationship before finalizing this skill attach */
-			res, err := ch.game.db.Exec(`
+			res, err := ch.Game.db.Exec(`
 			INSERT INTO
 				pc_skill_proficiency(player_character_id, skill_id, job_id, proficiency)
 			VALUES
 				(?, ?, ?, ?)
-			`, ch.Id, jobSkill.Skill.id, jobSkill.Job.Id, 0)
+			`, ch.Id, jobSkill.Skill.Id, jobSkill.Job.Id, 0)
 			if err != nil {
 				return err
 			}
@@ -131,7 +131,7 @@ func (ch *Character) syncJobSkills() error {
 
 			/* We have successfully insert the PC proficiency, attach it in-memory and continue */
 			proficiency.Id = uint(insertId)
-			ch.skills[jobSkill.Skill.id] = proficiency
+			ch.Skills[jobSkill.Skill.Id] = proficiency
 		}
 	}
 
@@ -144,14 +144,14 @@ func do_skills(ch *Character, arguments string) {
 
 	output.WriteString("{WYou have knowledge of the following skills:{x\r\n")
 
-	for id, proficiency := range ch.skills {
-		if ch.game.skills[id].skillType != SkillTypeSkill && ch.game.skills[id].skillType != SkillTypePassive {
+	for id, proficiency := range ch.Skills {
+		if ch.Game.skills[id].SkillType != SkillTypeSkill && ch.Game.skills[id].SkillType != SkillTypePassive {
 			continue
 		}
 
 		count++
 
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.game.skills[id].name, proficiency.Proficiency))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.Game.skills[id].Name, proficiency.Proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")
@@ -193,13 +193,13 @@ func do_practice(ch *Character, arguments string) {
 			return
 		}
 
-		skill := ch.game.FindSkillByName(firstArgument)
+		skill := ch.Game.FindSkillByName(firstArgument)
 		if skill == nil {
 			ch.Send("You can't practice that.\r\n")
 			return
 		}
 
-		prof, ok := ch.skills[skill.id]
+		prof, ok := ch.Skills[skill.Id]
 		if !ok {
 			ch.Send("You can't practice that.\r\n")
 			return
@@ -212,7 +212,7 @@ func do_practice(ch *Character, arguments string) {
 
 		ch.Practices -= prof.Complexity
 		prof.Proficiency++
-		ch.Send(fmt.Sprintf("{WYou practice %s!{x\r\n", skill.name))
+		ch.Send(fmt.Sprintf("{WYou practice %s!{x\r\n", skill.Name))
 		return
 	}
 
@@ -221,24 +221,24 @@ func do_practice(ch *Character, arguments string) {
 	var skills []string = []string{}
 	var proficiencies map[string]int = make(map[string]int)
 
-	for _, proficiency := range ch.skills {
+	for _, proficiency := range ch.Skills {
 		found := false
 
-		_, ok := ch.game.skills[proficiency.SkillId]
+		_, ok := ch.Game.skills[proficiency.SkillId]
 		if !ok {
 			log.Printf("Player had a proficiency with a nonexistent id %d.\r\n", proficiency.SkillId)
 			continue
 		}
 
 		for _, c := range skills {
-			if c == ch.game.skills[proficiency.SkillId].name {
+			if c == ch.Game.skills[proficiency.SkillId].Name {
 				found = true
 			}
 		}
 
 		if !found {
-			skills = append(skills, ch.game.skills[proficiency.SkillId].name)
-			proficiencies[ch.game.skills[proficiency.SkillId].name] = proficiency.Proficiency
+			skills = append(skills, ch.Game.skills[proficiency.SkillId].Name)
+			proficiencies[ch.Game.skills[proficiency.SkillId].Name] = proficiency.Proficiency
 		}
 	}
 
@@ -284,22 +284,22 @@ func (game *Game) LoadSkills() error {
 
 		skill := &Skill{}
 
-		err := rows.Scan(&skill.id, &skill.name, &skillType)
+		err := rows.Scan(&skill.Id, &skill.Name, &skillType)
 		if err != nil {
 			return err
 		}
 
 		switch skillType {
 		case "skill":
-			skill.skillType = SkillTypeSkill
+			skill.SkillType = SkillTypeSkill
 			break
 
 		case "spell":
-			skill.skillType = SkillTypeSpell
+			skill.SkillType = SkillTypeSpell
 			break
 
 		case "passive":
-			skill.skillType = SkillTypePassive
+			skill.SkillType = SkillTypePassive
 			break
 
 		default:
@@ -307,14 +307,14 @@ func (game *Game) LoadSkills() error {
 			break
 		}
 
-		game.skills[skill.id] = skill
+		game.skills[skill.Id] = skill
 	}
 
 	return nil
 }
 
 func (ch *Character) LoadPlayerSkills() error {
-	rows, err := ch.game.db.Query(`
+	rows, err := ch.Game.db.Query(`
 		SELECT
 			pc_skill_proficiency.id,
 			pc_skill_proficiency.skill_id,
@@ -362,7 +362,7 @@ func (ch *Character) LoadPlayerSkills() error {
 			return nil
 		}
 
-		ch.skills[proficiency.SkillId] = proficiency
+		ch.Skills[proficiency.SkillId] = proficiency
 	}
 
 	return nil

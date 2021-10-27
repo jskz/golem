@@ -45,7 +45,7 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 	`, index)
 
 	ch := NewCharacter()
-	ch.game = game
+	ch.Game = game
 
 	var raceId uint
 	var jobId uint
@@ -77,13 +77,13 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 		return nil, err
 	}
 
-	ch.race = FindRaceByID(jobId)
-	if ch.race == nil {
+	ch.Race = FindRaceByID(jobId)
+	if ch.Race == nil {
 		return nil, errors.New("failed to load race")
 	}
 
-	ch.job = FindJobByID(jobId)
-	if ch.job == nil {
+	ch.Job = FindJobByID(jobId)
+	if ch.Job == nil {
 		return nil, errors.New("failed to load job")
 	}
 

@@ -33,7 +33,7 @@ func (game *Game) ZoneUpdate() {
 	for iter := game.Zones.Head; iter != nil; iter = iter.Next {
 		zone := iter.Value.(*Zone)
 
-		if time.Since(zone.lastReset).Minutes() > float64(zone.resetFrequency) {
+		if time.Since(zone.LastReset).Minutes() > float64(zone.ResetFrequency) {
 			game.ResetZone(zone)
 		}
 	}
