@@ -215,12 +215,12 @@ func (game *Game) Run() {
 
 		case <-processOutputTicker.C:
 			for client := range game.clients {
-				if client.character != nil {
-					if client.character.outputHead > 0 {
+				if client.Character != nil {
+					if client.Character.outputHead > 0 {
 						client.displayPrompt()
 					}
 
-					client.character.flushOutput()
+					client.Character.flushOutput()
 				}
 			}
 
@@ -234,7 +234,7 @@ func (game *Game) Run() {
 			log.Print(out)
 			game.broadcast(out, WiznetBroadcastFilter)
 
-			client.connectionState = ConnectionStateName
+			client.ConnectionState = ConnectionStateName
 
 			client.send <- Config.greeting
 			client.send <- []byte("By what name do you wish to be known? ")
@@ -244,10 +244,10 @@ func (game *Game) Run() {
 
 			var logOutput string
 
-			if client.character != nil {
-				logOutput = fmt.Sprintf("Lost connection with %s@%s.\r\n", client.character.Name, client.conn.RemoteAddr().String())
+			if client.Character != nil {
+				logOutput = fmt.Sprintf("Lost connection with %s@%s.\r\n", client.Character.Name, client.conn.RemoteAddr().String())
 
-				client.character.Client = nil
+				client.Character.Client = nil
 				log.Print(logOutput)
 				game.broadcast(logOutput, WiznetBroadcastFilter)
 				break
@@ -258,8 +258,8 @@ func (game *Game) Run() {
 			game.broadcast(logOutput, WiznetBroadcastFilter)
 
 		case quit := <-game.quitRequest:
-			if quit.character != nil {
-				quit.character.flushOutput()
+			if quit.Character != nil {
+				quit.Character.flushOutput()
 			}
 
 			quit.conn.Close()

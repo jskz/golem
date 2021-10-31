@@ -76,8 +76,8 @@ func do_ooc(ch *Character, arguments string) {
 	output := buf.String()
 
 	for client := range ch.Game.clients {
-		if client.character != nil && client.connectionState == ConnectionStatePlaying {
-			client.character.Send(output)
+		if client.Character != nil && client.ConnectionState == ConnectionStatePlaying {
+			client.Character.Send(output)
 		}
 	}
 }
@@ -114,7 +114,7 @@ func do_quit(ch *Character, arguments string) {
 	})
 
 	ch.Game.Characters.Remove(ch)
-	ch.Client.connectionState = ConnectionStateNone
+	ch.Client.ConnectionState = ConnectionStateNone
 	ch.Send("{WLeaving for the real world...{x\r\n")
 
 	go func() {

@@ -16,6 +16,8 @@ import (
 	"net"
 	"strings"
 	"time"
+
+	"github.com/dop251/goja"
 )
 
 /*
@@ -58,18 +60,20 @@ const (
 	ConnectionStateConfirmClass    = 9
 	ConnectionStateMessageOfTheDay = 23
 	ConnectionStatePlaying         = 24
+	ConnectionStateMax             = 25
 )
 
 /* Instance of a client connection */
 type Client struct {
-	id               string
-	sessionStartedAt time.Time
-	conn             net.Conn
-	ansiEnabled      bool
-	send             chan []byte
-	close            chan bool
-	character        *Character
-	connectionState  uint
+	id                string
+	sessionStartedAt  time.Time
+	conn              net.Conn
+	ansiEnabled       bool
+	send              chan []byte
+	close             chan bool
+	Character         *Character     `json:"character"`
+	ConnectionState   uint           `json:"connectionState"`
+	ConnectionHandler *goja.Callable `json:"connectionHandler"`
 }
 
 type ClientTextMessage struct {
@@ -249,11 +253,11 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 		ch := iter.Value.(*Character)
 
 		if ch.Flags&CHAR_IS_PLAYER != 0 && ch.Name == name {
-			client.character = nil
+			client.Character = nil
 			ch.Client = client
 
-			client.character = ch
-			client.connectionState = ConnectionStatePlaying
+			client.Character = ch
+			client.ConnectionState = ConnectionStatePlaying
 
 			ch.clearOutputBuffer()
 			ch.Send("{MReconnecting to a session in progress.{x\r\n")
@@ -284,8 +288,8 @@ func (game *Game) handleConnection(conn net.Conn) {
 	client.conn = conn
 	client.send = make(chan []byte)
 	client.close = make(chan bool)
-	client.character = nil
-	client.connectionState = ConnectionStateNone
+	client.Character = nil
+	client.ConnectionState = ConnectionStateNone
 	client.ansiEnabled = true
 
 	/* Spawn two goroutines to handle client I/O */

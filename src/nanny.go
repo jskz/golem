@@ -22,46 +22,46 @@ const DefaultMaxLines = 50
 
 /* Bust a prompt! */
 func (client *Client) displayPrompt() {
-	if client.character == nil {
+	if client.Character == nil {
 		/* Something weird is going on: give a simple debug prompt */
 		client.send <- []byte("\r\n> ")
 		return
 	}
 
-	if client.connectionState == ConnectionStateNone {
+	if client.ConnectionState == ConnectionStateNone {
 		return
 	}
 
 	var prompt bytes.Buffer
-	if client.character.outputCursor >= DefaultMaxLines && client.character.inputCursor >= DefaultMaxLines {
+	if client.Character.outputCursor >= DefaultMaxLines && client.Character.inputCursor >= DefaultMaxLines {
 		return
 	}
 
-	healthPercentage := client.character.Health * 100 / client.character.MaxHealth
-	manaPercentage := client.character.Mana * 100 / client.character.MaxMana
-	staminaPercentage := client.character.Stamina * 100 / client.character.MaxStamina
+	healthPercentage := client.Character.Health * 100 / client.Character.MaxHealth
+	manaPercentage := client.Character.Mana * 100 / client.Character.MaxMana
+	staminaPercentage := client.Character.Stamina * 100 / client.Character.MaxStamina
 
 	currentHealthColour := SeverityColourFromPercentage(healthPercentage)
 	currentManaColour := SeverityColourFromPercentage(manaPercentage)
 	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
 
 	prompt.WriteString("\r\n")
-	if client.character.Room != nil && client.character.Room.Flags&ROOM_SAFE != 0 {
+	if client.Character.Room != nil && client.Character.Room.Flags&ROOM_SAFE != 0 {
 		prompt.WriteString(client.TranslateColourCodes("{W[SAFE]"))
 	}
 
 	prompt.WriteString(
 		client.TranslateColourCodes(fmt.Sprintf("{w[%s%d{w/{G%d{ghp %s%d{w/{G%d{gm %s%d{w/{G%d{gst{w]{x ",
 			currentHealthColour,
-			client.character.Health,
-			client.character.MaxHealth,
+			client.Character.Health,
+			client.Character.MaxHealth,
 			currentManaColour,
-			client.character.Mana,
-			client.character.MaxMana,
+			client.Character.Mana,
+			client.Character.MaxMana,
 			currentStaminaColour,
-			client.character.Stamina,
-			client.character.MaxStamina)))
-	client.character.Write(prompt.Bytes())
+			client.Character.Stamina,
+			client.Character.MaxStamina)))
+	client.Character.Write(prompt.Bytes())
 }
 
 func (game *Game) nanny(client *Client, message string) {
@@ -75,13 +75,13 @@ func (game *Game) nanny(client *Client, message string) {
 
 			ctx["remote_address"] = client.conn.RemoteAddr().String()
 
-			if client.character != nil {
-				ctx["name"] = client.character.Name
-				ctx["id"] = client.character.Id
+			if client.Character != nil {
+				ctx["name"] = client.Character.Name
+				ctx["id"] = client.Character.Id
 
-				if client.character.Room != nil {
-					ctx["room_id"] = client.character.Room.Id
-					ctx["room_name"] = client.character.Room.Name
+				if client.Character.Room != nil {
+					ctx["room_id"] = client.Character.Room.Id
+					ctx["room_name"] = client.Character.Room.Name
 				}
 			}
 
@@ -96,36 +96,36 @@ func (game *Game) nanny(client *Client, message string) {
 	 *
 	 *
 	 */
-	switch client.connectionState {
+	switch client.ConnectionState {
 	default:
 		log.Printf("Client is trying to send a message from an invalid or unhandled connection state.\r\n")
 
 	case ConnectionStatePlaying:
-		client.character.Interpret(message)
+		client.Character.Interpret(message)
 
 	case ConnectionStatePassword:
-		if !game.AttemptLogin(client.character.Name, message) {
-			client.connectionState = ConnectionStateName
-			client.character = nil
+		if !game.AttemptLogin(client.Character.Name, message) {
+			client.ConnectionState = ConnectionStateName
+			client.Character = nil
 
 			output.WriteString("Wrong password.\r\n\r\nBy what name do you wish to be known? ")
 			break
 		}
 
 		for other := range game.clients {
-			if other != client && other.character != nil && other.character.Name == client.character.Name {
+			if other != client && other.Character != nil && other.Character.Name == client.Character.Name {
 				delete(game.clients, other)
 
 				other.conn.Close()
 			}
 		}
 
-		if game.checkReconnect(client, client.character.Name) {
+		if game.checkReconnect(client, client.Character.Name) {
 			break
 		}
 
-		client.character.Client = client
-		client.connectionState = ConnectionStateMessageOfTheDay
+		client.Character.Client = client
+		client.ConnectionState = ConnectionStateMessageOfTheDay
 		output.WriteString(string(Config.motd))
 		output.WriteString("[ Press return to continue ]")
 
@@ -146,74 +146,74 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		if character != nil {
-			client.character = character
-			client.character.Flags |= CHAR_IS_PLAYER
+			client.Character = character
+			client.Character.Flags |= CHAR_IS_PLAYER
 			output.WriteString("Password: ")
-			client.character.Room = room
-			client.connectionState = ConnectionStatePassword
+			client.Character.Room = room
+			client.ConnectionState = ConnectionStatePassword
 			break
 		}
 
-		client.character = NewCharacter()
-		client.character.Game = game
-		client.character.Client = client
-		client.character.Name = name
-		client.character.Level = 1
-		client.character.Flags |= CHAR_IS_PLAYER
-		client.connectionState = ConnectionStateConfirmName
+		client.Character = NewCharacter()
+		client.Character.Game = game
+		client.Character.Client = client
+		client.Character.Name = name
+		client.Character.Level = 1
+		client.Character.Flags |= CHAR_IS_PLAYER
+		client.ConnectionState = ConnectionStateConfirmName
 
-		client.character.Practices = 100
-		client.character.Strength = 10
-		client.character.Dexterity = 10
-		client.character.Intelligence = 10
-		client.character.Wisdom = 10
-		client.character.Constitution = 10
-		client.character.Charisma = 10
-		client.character.Luck = 10
+		client.Character.Practices = 100
+		client.Character.Strength = 10
+		client.Character.Dexterity = 10
+		client.Character.Intelligence = 10
+		client.Character.Wisdom = 10
+		client.Character.Constitution = 10
+		client.Character.Charisma = 10
+		client.Character.Luck = 10
 
-		client.character.Health = 20
-		client.character.MaxHealth = 20
+		client.Character.Health = 20
+		client.Character.MaxHealth = 20
 
-		client.character.Mana = 100
-		client.character.MaxMana = 100
+		client.Character.Mana = 100
+		client.Character.MaxMana = 100
 
-		client.character.Stamina = 100
-		client.character.MaxStamina = 100
+		client.Character.Stamina = 100
+		client.Character.MaxStamina = 100
 
-		output.WriteString(fmt.Sprintf("No adventurer with that name exists.  Create %s? [y/N] ", client.character.Name))
+		output.WriteString(fmt.Sprintf("No adventurer with that name exists.  Create %s? [y/N] ", client.Character.Name))
 
 	case ConnectionStateConfirmName:
 		if !strings.HasPrefix(strings.ToLower(message), "y") {
-			client.connectionState = ConnectionStateName
-			client.character.Name = UnauthenticatedUsername
+			client.ConnectionState = ConnectionStateName
+			client.Character.Name = UnauthenticatedUsername
 			output.WriteString("\r\nBy what name do you wish to be known? ")
 			break
 		}
 
-		client.connectionState = ConnectionStateNewPassword
+		client.ConnectionState = ConnectionStateNewPassword
 
-		output.WriteString(fmt.Sprintf("Creating new character %s.\r\n", client.character.Name))
+		output.WriteString(fmt.Sprintf("Creating new character %s.\r\n", client.Character.Name))
 		output.WriteString("Please choose a password: ")
 
 	case ConnectionStateNewPassword:
-		client.connectionState = ConnectionStateConfirmPassword
+		client.ConnectionState = ConnectionStateConfirmPassword
 		ciphertext, err := bcrypt.GenerateFromPassword([]byte(message), 8)
 		if err != nil {
 			log.Println("Failed to bcrypt user password: ", err)
 			return
 		}
 
-		client.character.temporaryHash = string(ciphertext)
+		client.Character.temporaryHash = string(ciphertext)
 		output.WriteString("Please confirm your password: ")
 
 	case ConnectionStateConfirmPassword:
-		if bcrypt.CompareHashAndPassword([]byte(client.character.temporaryHash), []byte(message)) != nil {
-			client.connectionState = ConnectionStateNewPassword
+		if bcrypt.CompareHashAndPassword([]byte(client.Character.temporaryHash), []byte(message)) != nil {
+			client.ConnectionState = ConnectionStateNewPassword
 			output.WriteString("Passwords didn't match.\r\nPlease choose a password: ")
 			break
 		}
 
-		client.connectionState = ConnectionStateChooseRace
+		client.ConnectionState = ConnectionStateChooseRace
 		output.WriteString("Please choose a race from the following options:\r\n")
 
 		/* Counter value for periodically line-breaking */
@@ -244,13 +244,13 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		client.character.Race = race
-		client.connectionState = ConnectionStateConfirmRace
+		client.Character.Race = race
+		client.ConnectionState = ConnectionStateConfirmRace
 		output.WriteString(fmt.Sprintf("\r\nAre you sure you want to be a %s? [y/N] ", race.Name))
 
 	case ConnectionStateConfirmRace:
 		if !strings.HasPrefix(strings.ToLower(message), "y") {
-			client.connectionState = ConnectionStateChooseRace
+			client.ConnectionState = ConnectionStateChooseRace
 			output.WriteString("Please choose a race from the following options:\r\n")
 
 			/* Counter value for periodically line-breaking */
@@ -276,7 +276,7 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		client.connectionState = ConnectionStateChooseClass
+		client.ConnectionState = ConnectionStateChooseClass
 		output.WriteString("\r\nPlease choose a job from the following options:\r\n")
 
 		/* Counter value for periodically line-breaking */
@@ -307,13 +307,13 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		client.character.Job = job
-		client.connectionState = ConnectionStateConfirmClass
+		client.Character.Job = job
+		client.ConnectionState = ConnectionStateConfirmClass
 		output.WriteString(fmt.Sprintf("\r\nAre you sure you want to be a %s? [y/N] ", job.Name))
 
 	case ConnectionStateConfirmClass:
 		if !strings.HasPrefix(strings.ToLower(message), "y") {
-			client.connectionState = ConnectionStateChooseClass
+			client.ConnectionState = ConnectionStateChooseClass
 			output.WriteString("Please choose a job from the following options:\r\n")
 
 			/* Counter value for periodically line-breaking */
@@ -338,43 +338,43 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
-		err := client.character.Finalize()
+		err := client.Character.Finalize()
 		if err != nil {
-			log.Printf("Unable to create new character %v, dropping connection.\r\n", client.character)
+			log.Printf("Unable to create new character %v, dropping connection.\r\n", client.Character)
 			client.conn.Close()
 			break
 		}
 
-		client.connectionState = ConnectionStateMessageOfTheDay
+		client.ConnectionState = ConnectionStateMessageOfTheDay
 		output.WriteString(string(Config.motd))
 		output.WriteString("[ Press return to continue ]")
 
 	case ConnectionStateMessageOfTheDay:
-		client.connectionState = ConnectionStatePlaying
+		client.ConnectionState = ConnectionStatePlaying
 
-		game.Characters.Insert(client.character)
+		game.Characters.Insert(client.Character)
 
-		if client.character.Room != nil {
-			client.character.Room.AddCharacter(client.character)
+		if client.Character.Room != nil {
+			client.Character.Room.AddCharacter(client.Character)
 
-			out := fmt.Sprintf("{W%s has entered the game.{x\r\n", client.character.Name)
+			out := fmt.Sprintf("{W%s has entered the game.{x\r\n", client.Character.Name)
 
 			game.broadcast(out, func(character *Character) bool {
-				return character != client.character
+				return character != client.Character
 			})
 		}
 
-		do_time(client.character, "")
-		client.character.Send(fmt.Sprintf("%s\r\n", JoinedGameFlavourText))
-		err := client.character.syncJobSkills()
+		do_time(client.Character, "")
+		client.Character.Send(fmt.Sprintf("%s\r\n", JoinedGameFlavourText))
+		err := client.Character.syncJobSkills()
 		if err != nil {
 			log.Println(err)
 		}
 
-		do_look(client.character, "")
+		do_look(client.Character, "")
 	}
 
-	if client.connectionState != ConnectionStatePlaying && output.Len() > 0 {
+	if client.ConnectionState != ConnectionStatePlaying && output.Len() > 0 {
 		client.send <- output.Bytes()
 	}
 }

@@ -121,6 +121,11 @@ func (ch *Character) Interpret(input string) bool {
 		return true
 	}
 
+	if ch.Client != nil && ch.Client.ConnectionHandler != nil {
+		(*ch.Client.ConnectionHandler)(ch.Game.vm.ToValue(ch.Client), ch.Game.vm.ToValue(input))
+		return true
+	}
+
 	words := strings.Split(input, " ")
 	if len(words) < 1 {
 		return false

@@ -546,8 +546,8 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
  */
 func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	for client := range game.clients {
-		if client.connectionState == ConnectionStatePlaying && client.character != nil && client.character.Name == username {
-			return client.character, client.character.Room, nil
+		if client.ConnectionState == ConnectionStatePlaying && client.Character != nil && client.Character.Name == username {
+			return client.Character, client.Character.Room, nil
 		}
 	}
 

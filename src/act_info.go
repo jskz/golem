@@ -159,8 +159,8 @@ func do_who(ch *Character, arguments string) {
 	characters := make([]*Character, 0)
 
 	for client := range ch.Game.clients {
-		if client.character != nil && client.connectionState >= ConnectionStatePlaying {
-			characters = append(characters, client.character)
+		if client.Character != nil && client.ConnectionState >= ConnectionStatePlaying {
+			characters = append(characters, client.Character)
 		}
 	}
 
