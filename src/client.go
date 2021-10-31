@@ -244,14 +244,6 @@ func (client *Client) writePump(game *Game) {
 	}
 }
 
-func (client *Client) closeConnection() {
-	defer func() {
-		recover()
-	}()
-
-	client.close <- true
-}
-
 func (game *Game) checkReconnect(client *Client, name string) bool {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		ch := iter.Value.(*Character)
