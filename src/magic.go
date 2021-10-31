@@ -127,7 +127,7 @@ func do_spells(ch *Character, arguments string) {
 
 		count++
 
-		var skillName string = ch.Game.skills[id].Name
+		var skillName string = fmt.Sprintf("%s%s{x", SkillIntentColourTable[ch.Game.skills[id].Intent], ch.Game.skills[id].Name)
 		if strings.ContainsRune(skillName, ' ') {
 			skillName = fmt.Sprintf("'%s'", skillName)
 		}

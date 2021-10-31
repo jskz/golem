@@ -59,6 +59,15 @@ type Proficiency struct {
 	Cost        int  `json:"cost"`
 }
 
+var SkillIntentColourTable map[string]string
+
+func init() {
+	SkillIntentColourTable = make(map[string]string)
+	SkillIntentColourTable[SkillIntentNone] = "{x"
+	SkillIntentColourTable[SkillIntentOffensive] = "{R"
+	SkillIntentColourTable[SkillIntentCurative] = "{C"
+}
+
 func (game *Game) RegisterSkillHandler(name string, fn goja.Callable) goja.Value {
 	skill := game.FindSkillByName(name)
 	if skill == nil || skill.SkillType != SkillTypeSkill {
@@ -158,7 +167,7 @@ func do_skills(ch *Character, arguments string) {
 
 		count++
 
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.Game.skills[id].Name, proficiency.Proficiency))
+		output.WriteString(fmt.Sprintf("%s%-18s %3d%% ", SkillIntentColourTable[ch.Game.skills[id].Intent], ch.Game.skills[id].Name, proficiency.Proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")
@@ -244,7 +253,8 @@ func do_practice(ch *Character, arguments string) {
 		}
 
 		if !found {
-			var skillName string = ch.Game.skills[proficiency.SkillId].Name
+			var skillName string = fmt.Sprintf("%s%s{x", SkillIntentColourTable[ch.Game.skills[proficiency.SkillId].Intent], ch.Game.skills[proficiency.SkillId].Name)
+
 			if strings.ContainsRune(skillName, ' ') && ch.Game.skills[proficiency.SkillId].SkillType == SkillTypeSpell {
 				skillName = fmt.Sprintf("'%s'", skillName)
 			}
@@ -266,7 +276,7 @@ func do_practice(ch *Character, arguments string) {
 		}
 	}
 
-	output.WriteString(fmt.Sprintf("\r\nYou have %d practice sessions.\r\n", ch.Practices))
+	output.WriteString(fmt.Sprintf("\r\n{xYou have %d practice sessions.\r\n", ch.Practices))
 	ch.Send(output.String())
 }
 
