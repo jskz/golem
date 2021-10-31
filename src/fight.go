@@ -98,6 +98,10 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 		target.Health = target.MaxHealth
 	}
 
+	if target.Level > LevelHero && target.Health < 1 {
+		target.Health = 1
+	}
+
 	if target.Health <= 0 {
 		if target.Room != nil {
 			room := target.Room
