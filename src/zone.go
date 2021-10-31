@@ -158,7 +158,6 @@ func (game *Game) ResetRoom(room *Room) {
 			}
 
 			room.removeObject(obj)
-			break
 		}
 	}
 }
