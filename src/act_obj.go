@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 )
 
 const (
@@ -108,6 +109,34 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 
 	output.WriteString(fmt.Sprintf("{cObject {C'%s'{c is type {C%s{c.\r\n", obj.Name, obj.ItemType))
 	output.WriteString(fmt.Sprintf("{C%s{x\r\n", obj.Description))
+
+	if obj.Flags&ITEM_DECAYS != 0 {
+		var silentString string = " "
+		var minuteSuffix string = "s"
+		var minutesSince int = int(time.Since(obj.CreatedAt).Minutes())
+		var ttlSuffix string = "s"
+
+		if obj.Flags&ITEM_DECAY_SILENTLY != 0 {
+			silentString = " silently "
+		}
+
+		if minutesSince == 1 {
+			minuteSuffix = ""
+		}
+
+		if obj.Ttl == 1 {
+			ttlSuffix = ""
+		}
+
+		output.WriteString(fmt.Sprintf("{Y* {C%s{c was created %d minute%s ago and will%svanish after {C%d{c minute%s has passed.\r\n",
+			obj.GetShortDescriptionUpper(ch),
+			int(time.Since(obj.CreatedAt).Minutes()),
+			minuteSuffix,
+			silentString,
+			obj.Ttl,
+			ttlSuffix,
+		))
+	}
 
 	switch obj.ItemType {
 	case ItemTypeContainer:
