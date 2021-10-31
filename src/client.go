@@ -11,6 +11,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"strings"
@@ -86,6 +87,11 @@ func (client *Client) readPump(game *Game) {
 	for {
 		firstByte, err := reader.Peek(1)
 		if err != nil {
+			if err == io.EOF {
+				game.unregister <- client
+				return
+			}
+
 			log.Printf("Unable to read first byte: %v.\r\n", err)
 			return
 		}
