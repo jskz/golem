@@ -24,6 +24,7 @@ This will be a working document to track major feature development goals for eac
 ## 0.3 Telnet Done Right Milestones
 
 - [ ] Telnet IAC parsing/session handling implementation overhaul
+- [ ] Add a mechanism for NPCs (with flexibility for PCs in future?) to operate shops that players can buy from, sell?
 
 ## 0.4 Telnet Zlib Compression Milestones
 
