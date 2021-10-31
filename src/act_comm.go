@@ -119,7 +119,7 @@ func do_quit(ch *Character, arguments string) {
 
 	go func() {
 		/* Allow output to flush */
-		<-time.After(200 * time.Millisecond)
+		<-time.After(80 * time.Millisecond)
 		ch.Client.close <- true
 		ch.Client.conn.Close()
 	}()
