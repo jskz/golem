@@ -86,6 +86,11 @@ func do_cast(ch *Character, arguments string) {
 		return
 	}
 
+	if found.Intent == SkillIntentOffensive && ch.Room.Flags&ROOM_SAFE != 0 {
+		ch.Send("You can't cast that here.\r\n")
+		return
+	}
+
 	if prof.Cost > ch.Mana {
 		ch.Send("You do not have enough mana to cast that spell.\r\n")
 		return

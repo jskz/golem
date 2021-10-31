@@ -3,6 +3,7 @@ CREATE TABLE skills (
 
     `name` VARCHAR(255) NOT NULL UNIQUE,
     `type` ENUM('skill', 'spell', 'passive'),
+    `intent` ENUM('offensive', 'curative', 'none') DEFAULT 'none',
     
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -51,14 +52,14 @@ CREATE TABLE pc_skill_proficiency (
     FOREIGN KEY (skill_id) REFERENCES skills(id)
 );
 
-INSERT INTO skills(id, name, type) VALUES (1, 'dodge', 'passive');
-INSERT INTO skills(id, name, type) VALUES (2, 'unarmed combat', 'passive');
-INSERT INTO skills(id, name, type) VALUES (3, 'peek', 'passive');
-INSERT INTO skills(id, name, type) VALUES (4, 'armor', 'spell');
-INSERT INTO skills(id, name, type) VALUES (5, 'fireball', 'spell');
-INSERT INTO skills(id, name, type) VALUES (6, 'bash', 'skill');
-INSERT INTO skills(id, name, type) VALUES (7, 'cure light', 'spell');
-INSERT INTO skills(id, name, type) VALUES (8, 'magic map', 'spell');
+INSERT INTO skills(id, name, type, intent) VALUES (1, 'dodge', 'passive', 'none');
+INSERT INTO skills(id, name, type, intent) VALUES (2, 'unarmed combat', 'passive', 'none');
+INSERT INTO skills(id, name, type, intent) VALUES (3, 'peek', 'passive', 'none');
+INSERT INTO skills(id, name, type, intent) VALUES (4, 'armor', 'spell', 'curative');
+INSERT INTO skills(id, name, type, intent) VALUES (5, 'fireball', 'spell', 'offensive');
+INSERT INTO skills(id, name, type, intent) VALUES (6, 'bash', 'skill', 'offensive');
+INSERT INTO skills(id, name, type, intent) VALUES (7, 'cure light', 'spell', 'curative');
+INSERT INTO skills(id, name, type, intent) VALUES (8, 'magic map', 'spell', 'none');
 
 /* Grant unarmed combat as a seed skill for all four base jobs with varying complexity and cost */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (1, 1, 2, 1, 1, 50);

@@ -146,6 +146,11 @@ func (ch *Character) Interpret(input string) bool {
 				return false
 			}
 
+			if ch.Game.skills[prof.SkillId].Intent == SkillIntentOffensive && ch.Room.Flags&ROOM_SAFE != 0 {
+				ch.Send("You can't do that here.\r\n")
+				return false
+			}
+
 			(*ch.Game.skills[prof.SkillId].Handler)(ch.Game.vm.ToValue(prof), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(rest))
 		} else {
 			/* We'll still want a prompt on no input */

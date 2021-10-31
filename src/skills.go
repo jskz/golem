@@ -21,6 +21,7 @@ type Skill struct {
 	Id        uint
 	Name      string
 	SkillType int
+	Intent    string
 	Handler   *goja.Callable
 }
 
@@ -28,6 +29,12 @@ const (
 	SkillTypeSkill   = 0
 	SkillTypeSpell   = 1
 	SkillTypePassive = 2
+)
+
+const (
+	SkillIntentNone      = "none"
+	SkillIntentOffensive = "offensive"
+	SkillIntentCurative  = "curative"
 )
 
 type JobSkill struct {
@@ -274,7 +281,8 @@ func (game *Game) LoadSkills() error {
 		SELECT
 			skills.id,
 			skills.name,
-			skills.type
+			skills.type,
+			skills.intent
 		FROM
 			skills
 	`)
@@ -289,7 +297,7 @@ func (game *Game) LoadSkills() error {
 
 		skill := &Skill{}
 
-		err := rows.Scan(&skill.Id, &skill.Name, &skillType)
+		err := rows.Scan(&skill.Id, &skill.Name, &skillType, &skill.Intent)
 		if err != nil {
 			return err
 		}
