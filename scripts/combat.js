@@ -29,7 +29,7 @@ function onCombatUpdate() {
                 if (
                     !victim ||
                     victim.room === null ||
-                    vch.Room.id != victim.room.id
+                    vch.room.id != victim.room.id
                 ) {
                     break;
                 }
