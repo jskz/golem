@@ -52,17 +52,14 @@ func (list *LinkedList) Remove(value interface{}) {
 	}
 
 	iter = list.Head
-	for iter.Next.Value != value {
-		iter = iter.Next
 
-		if iter.Next == nil {
-			break
+	for iter.Next != nil {
+		if iter.Next.Value == value {
+			iter.Next = iter.Next.Next
+			return
 		}
-	}
 
-	if iter != nil && iter.Next != nil {
-		iter.Next = iter.Next.Next
-		list.Count--
+		iter = iter.Next
 	}
 }
 
