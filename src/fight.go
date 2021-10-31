@@ -59,7 +59,6 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 
 	if ch.Flags&CHAR_IS_PLAYER == 0 {
 		obj.Contents = NewLinkedList()
-		obj.Contents.Tail = ch.Inventory.Tail
 		obj.Contents.Head = ch.Inventory.Head
 		obj.Contents.Count = ch.Inventory.Count
 
