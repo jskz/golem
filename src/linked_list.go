@@ -16,14 +16,12 @@ type LinkedListNode struct {
 
 type LinkedList struct {
 	Head  *LinkedListNode `json:"head"`
-	Tail  *LinkedListNode `json:"tail"`
 	Count int             `json:"count"`
 }
 
 func NewLinkedList() *LinkedList {
 	list := &LinkedList{}
 	list.Head = nil
-	list.Tail = nil
 	list.Count = 0
 
 	return list
@@ -32,30 +30,20 @@ func NewLinkedList() *LinkedList {
 func (list *LinkedList) Remove(value interface{}) {
 	var iter *LinkedListNode = list.Head
 
+	if list.Count == 0 || list.Head == nil {
+		return
+	}
+
 	if list.Head.Value == value {
 		list.Head = list.Head.Next
-		list.Tail = list.Head
-
 		list.Count--
 		return
 	}
-
-	if list.Tail.Value == value {
-		for iter.Next != list.Tail {
-			iter = iter.Next
-		}
-
-		list.Tail = iter
-		list.Tail.Next = nil
-		list.Count--
-		return
-	}
-
-	iter = list.Head
 
 	for iter.Next != nil {
 		if iter.Next.Value == value {
 			iter.Next = iter.Next.Next
+			list.Count--
 			return
 		}
 
@@ -64,18 +52,7 @@ func (list *LinkedList) Remove(value interface{}) {
 }
 
 func (list *LinkedList) Insert(value interface{}) {
-	node := &LinkedListNode{}
-	node.Value = value
-
-	if list.Head == nil {
-		list.Head = node
-		list.Tail = node
-		list.Count++
-		return
-	}
-
-	list.Tail.Next = node
-	list.Tail = list.Tail.Next
+	list.Head = &LinkedListNode{Next: list.Head, Value: value}
 	list.Count++
 }
 
