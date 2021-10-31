@@ -122,7 +122,12 @@ func do_spells(ch *Character, arguments string) {
 
 		count++
 
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", ch.Game.skills[id].Name, proficiency.Proficiency))
+		var skillName string = ch.Game.skills[id].Name
+		if strings.ContainsRune(skillName, ' ') {
+			skillName = fmt.Sprintf("'%s'", skillName)
+		}
+
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", skillName, proficiency.Proficiency))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")

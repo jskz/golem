@@ -247,7 +247,12 @@ func do_practice(ch *Character, arguments string) {
 	for _, proficiency := range skills {
 		count++
 
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", proficiency, proficiencies[proficiency]))
+		var skillName string = proficiency
+		if strings.ContainsRune(proficiency, ' ') {
+			skillName = fmt.Sprintf("'%s'", skillName)
+		}
+
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", skillName, proficiencies[proficiency]))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")
