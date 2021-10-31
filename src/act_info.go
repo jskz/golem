@@ -187,6 +187,7 @@ func do_who(ch *Character, arguments string) {
 		}
 
 		var locationString string = ""
+		var extrasString strings.Builder
 
 		if character.Room != nil {
 			/* Inherit the zone's who tag if we are in a room at all */
@@ -206,21 +207,27 @@ func do_who(ch *Character, arguments string) {
 			}
 		}
 
+		if character.Fighting != nil {
+			extrasString.WriteString("{M[<FIGHTING>]{x ")
+		}
+
 		if character.Level >= LevelHero {
-			buf.WriteString(fmt.Sprintf("[%-15s][%-7s] %s %s(%s)\r\n",
+			buf.WriteString(fmt.Sprintf("[%-15s][%-7s] %s %s(%s) %s\r\n",
 				jobDisplay,
 				locationString,
 				character.Name,
 				flagsString.String(),
-				character.Race.DisplayName))
+				character.Race.DisplayName,
+				extrasString.String()))
 		} else {
-			buf.WriteString(fmt.Sprintf("[%3d][%-10s][%-7s] %s %s(%s)\r\n",
+			buf.WriteString(fmt.Sprintf("[%3d][%-10s][%-7s] %s %s(%s) %s\r\n",
 				character.Level,
 				jobDisplay,
 				locationString,
 				character.Name,
 				flagsString.String(),
-				character.Race.DisplayName))
+				character.Race.DisplayName,
+				extrasString.String()))
 		}
 	}
 
