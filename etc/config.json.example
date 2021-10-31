@@ -10,5 +10,9 @@
         "user": "username",
         "password": "password",
         "database": "database"
+    },
+    "profiling": {
+        "enabled": true,
+        "port": 6060
     }
 }

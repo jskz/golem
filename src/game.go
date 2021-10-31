@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -55,6 +56,13 @@ type Game struct {
 
 func NewGame() (*Game, error) {
 	var err error
+
+	/* Start the profiler HTTP server if enabled */
+	if Config.ProfilingConfiguration.Enabled {
+		go func() {
+			log.Println(http.ListenAndServe(fmt.Sprintf("localhost:%d", Config.ProfilingConfiguration.Port), nil))
+		}()
+	}
 
 	/* Create the game world instance and initialize variables & channels */
 	game := &Game{startedAt: time.Now()}
@@ -224,6 +232,7 @@ func (game *Game) Run() {
 
 			out := fmt.Sprintf("Network: new connection from %s\r\n", client.conn.RemoteAddr().String())
 			log.Print(out)
+			game.broadcast(out, WiznetBroadcastFilter)
 
 			client.connectionState = ConnectionStateName
 
@@ -233,14 +242,20 @@ func (game *Game) Run() {
 		case client := <-game.unregister:
 			delete(game.clients, client)
 
+			var logOutput string
+
 			if client.character != nil {
-				log.Printf("Lost connection with %s@%s.\r\n", client.character.Name, client.conn.RemoteAddr().String())
+				logOutput = fmt.Sprintf("Lost connection with %s@%s.\r\n", client.character.Name, client.conn.RemoteAddr().String())
 
 				client.character.Client = nil
+				log.Print(logOutput)
+				game.broadcast(logOutput, WiznetBroadcastFilter)
 				break
 			}
 
-			log.Printf("Lost connection with %s.\r\n", client.conn.RemoteAddr().String())
+			logOutput = fmt.Sprintf("Lost connection with %s.\r\n", client.conn.RemoteAddr().String())
+			log.Print(logOutput)
+			game.broadcast(logOutput, WiznetBroadcastFilter)
 
 		case quit := <-game.quitRequest:
 			if quit.character != nil {

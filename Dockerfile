@@ -17,5 +17,6 @@ VOLUME ./etc
 VOLUME ./scripts
 
 EXPOSE 8080
+EXPOSE 6060
 
 CMD [ "./golem" ]

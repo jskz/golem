@@ -27,15 +27,21 @@ type AppMySQLConfiguration struct {
 	Database string `json:"database"`
 }
 
+type AppProfilingConfiguration struct {
+	Enabled bool `json:"enabled"`
+	Port    int  `json:"port"`
+}
+
 type AppSentryConfiguration struct {
 	DSN     string `json:"dsn"`
 	Enabled bool   `json:"enabled"`
 }
 
 type AppConfiguration struct {
-	Port                int                    `json:"port"`
-	MySQLConfiguration  AppMySQLConfiguration  `json:"mysql"`
-	SentryConfiguration AppSentryConfiguration `json:"sentry"`
+	Port                   int                       `json:"port"`
+	MySQLConfiguration     AppMySQLConfiguration     `json:"mysql"`
+	SentryConfiguration    AppSentryConfiguration    `json:"sentry"`
+	ProfilingConfiguration AppProfilingConfiguration `json:"profiling"`
 
 	greeting []byte
 	motd     []byte

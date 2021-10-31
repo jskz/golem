@@ -14,6 +14,8 @@ import (
 	"net"
 	"os"
 	"time"
+
+	_ "net/http/pprof"
 )
 
 func main() {
