@@ -244,8 +244,13 @@ func do_practice(ch *Character, arguments string) {
 		}
 
 		if !found {
-			skills = append(skills, ch.Game.skills[proficiency.SkillId].Name)
-			proficiencies[ch.Game.skills[proficiency.SkillId].Name] = proficiency.Proficiency
+			var skillName string = ch.Game.skills[proficiency.SkillId].Name
+			if strings.ContainsRune(skillName, ' ') && ch.Game.skills[proficiency.SkillId].SkillType == SkillTypeSpell {
+				skillName = fmt.Sprintf("'%s'", skillName)
+			}
+
+			skills = append(skills, skillName)
+			proficiencies[skillName] = proficiency.Proficiency
 		}
 	}
 
@@ -254,12 +259,7 @@ func do_practice(ch *Character, arguments string) {
 	for _, proficiency := range skills {
 		count++
 
-		var skillName string = proficiency
-		if strings.ContainsRune(proficiency, ' ') {
-			skillName = fmt.Sprintf("'%s'", skillName)
-		}
-
-		output.WriteString(fmt.Sprintf("%-18s %3d%% ", skillName, proficiencies[proficiency]))
+		output.WriteString(fmt.Sprintf("%-18s %3d%% ", proficiency, proficiencies[proficiency]))
 
 		if count%3 == 0 {
 			output.WriteString("\r\n")
