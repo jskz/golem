@@ -92,7 +92,51 @@ const (
 	ITEM_WEAR_ARMS      = 1 << 13
 	ITEM_WEAR_WAIST     = 1 << 14
 	ITEM_WEAR_FEET      = 1 << 15
+	ITEM_GLOW           = 1 << 16
+	ITEM_HUM            = 1 << 17
 )
+
+type ObjectFlag struct {
+	Name string `json:"name"`
+	Flag int    `json:"flag"`
+}
+
+var ObjectFlagTable []ObjectFlag = []ObjectFlag{
+	{Name: "item", Flag: ITEM_TAKE},
+	{Name: "weapon", Flag: ITEM_WEAPON},
+	{Name: "wearable", Flag: ITEM_WEARABLE},
+	{Name: "decays", Flag: ITEM_DECAYS},
+	{Name: "decay_silently", Flag: ITEM_DECAY_SILENTLY},
+	{Name: "wear_held", Flag: ITEM_WEAR_HELD},
+	{Name: "wear_head", Flag: ITEM_WEAR_HEAD},
+	{Name: "wear_torso", Flag: ITEM_WEAR_TORSO},
+	{Name: "wear_body", Flag: ITEM_WEAR_BODY},
+	{Name: "wear_neck", Flag: ITEM_WEAR_NECK},
+	{Name: "wear_legs", Flag: ITEM_WEAR_LEGS},
+	{Name: "wear_hands", Flag: ITEM_WEAR_HANDS},
+	{Name: "wear_shield", Flag: ITEM_WEAR_SHIELD},
+	{Name: "wear_arms", Flag: ITEM_WEAR_ARMS},
+	{Name: "wear_waist", Flag: ITEM_WEAR_WAIST},
+	{Name: "wear_feet", Flag: ITEM_WEAR_FEET},
+	{Name: "glow", Flag: ITEM_GLOW},
+	{Name: "hum", Flag: ITEM_HUM},
+}
+
+func (obj *ObjectInstance) GetFlagsString() string {
+	var buf strings.Builder
+
+	for _, flag := range ObjectFlagTable {
+		if obj.Flags&flag.Flag != 0 {
+			buf.WriteString(fmt.Sprintf("%s ", flag.Name))
+		}
+	}
+
+	if obj.Flags == 0 {
+		buf.WriteString("none")
+	}
+
+	return strings.TrimRight(buf.String(), " ")
+}
 
 func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	row := game.db.QueryRow(`

@@ -63,7 +63,18 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 
 		var description string = obj.LongDescription
 		if !longDescriptions {
-			description = obj.ShortDescription
+			var buf strings.Builder
+
+			if obj.Flags&ITEM_GLOW != 0 {
+				buf.WriteString("{G(Glowing){x ")
+			}
+
+			if obj.Flags&ITEM_HUM != 0 {
+				buf.WriteString("{M(Humming){x ")
+			}
+
+			buf.WriteString(obj.GetShortDescription(ch))
+			description = buf.String()
 		}
 
 		_, ok := inventory[description]
@@ -107,7 +118,7 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 func (ch *Character) examineObject(obj *ObjectInstance) {
 	var output strings.Builder
 
-	output.WriteString(fmt.Sprintf("{cObject {C'%s'{c is type {C%s{c.\r\n", obj.Name, obj.ItemType))
+	output.WriteString(fmt.Sprintf("{cObject {C'%s'{c is type {C%s{c with flags {C%s{c.\r\n", obj.Name, obj.ItemType, obj.GetFlagsString()))
 	output.WriteString(fmt.Sprintf("{C%s{x\r\n", obj.Description))
 
 	if obj.Flags&ITEM_DECAYS != 0 {

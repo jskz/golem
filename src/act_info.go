@@ -44,12 +44,22 @@ func (ch *Character) examineCharacter(other *Character) {
 
 	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
 		var obj *ObjectInstance = other.getEquipment(i)
+		var buf strings.Builder
 
 		if obj == nil {
 			continue
 		}
 
-		ch.Send(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], obj.GetShortDescription(ch)))
+		if obj.Flags&ITEM_GLOW != 0 {
+			buf.WriteString("{G(Glowing){x ")
+		}
+
+		if obj.Flags&ITEM_HUM != 0 {
+			buf.WriteString("{M(Humming){x ")
+		}
+
+		buf.WriteString(obj.GetShortDescription(ch))
+		ch.Send(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], buf))
 	}
 
 	peek := ch.FindProficiencyByName("peek")
