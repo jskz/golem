@@ -123,6 +123,7 @@ type Character struct {
 	Description      string `json:"description"`
 
 	Wizard bool  `json:"wizard"`
+	Wiznet bool  `json:"wiznet"`
 	Job    *Job  `json:"job"`
 	Race   *Race `json:"race"`
 
@@ -783,8 +784,8 @@ func (game *Game) IsValidPCName(name string) bool {
 	}
 
 	/* If any character is non-alpha, invalidate. */
-	for c := range name {
-		if ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || c == ' ' {
+	for _, c := range name {
+		if (c < 'a' || c > 'z') && (c < 'A' || c > 'Z') {
 			return false
 		}
 	}
@@ -955,8 +956,6 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 func (game *Game) Broadcast(message string, filter goja.Callable) {
 	var recipients []*Character = make([]*Character, 0)
 
-	log.Printf("System-wide broadcast: %s\r\n", message)
-
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		var result bool = false
 
@@ -983,6 +982,33 @@ func (game *Game) Broadcast(message string, filter goja.Callable) {
 	}
 }
 
+func WiznetBroadcastFilter(ch *Character) bool {
+	return ch.Wiznet
+}
+
+func (game *Game) broadcast(message string, filterFn func(*Character) bool) {
+	var recipients []*Character = make([]*Character, 0)
+
+	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
+		var result bool = false
+
+		ch := iter.Value.(*Character)
+
+		if filterFn != nil {
+			result = filterFn(ch)
+		}
+
+		if result || filterFn == nil {
+			recipients = append(recipients, ch)
+		}
+	}
+
+	/* Send message to gathered users */
+	for _, rcpt := range recipients {
+		rcpt.Send(message)
+	}
+}
+
 func NewCharacter() *Character {
 	character := &Character{}
 
@@ -995,6 +1021,7 @@ func NewCharacter() *Character {
 	character.Combat = nil
 	character.Race = nil
 	character.Room = nil
+	character.Wiznet = false
 	character.Practices = 0
 	character.Position = PositionDead
 	character.output = make([]byte, 32768)

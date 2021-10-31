@@ -130,13 +130,16 @@ func (game *Game) nanny(client *Client, message string) {
 		output.WriteString("[ Press return to continue ]")
 
 	case ConnectionStateName:
-		name := strings.Title(strings.ToLower(strings.TrimSpace(message)))
+		name := strings.Title(strings.ToLower(message))
 		if !game.IsValidPCName(name) {
 			output.WriteString("Invalid name, please try another.\r\n\r\nBy what name do you wish to be known? ")
 			break
 		}
 
-		log.Printf("Guest attempting to login with name: %s\r\n", name)
+		out := fmt.Sprintf("Guest attempting to login with name: %s\r\n", name)
+		log.Print(out)
+		game.broadcast(out, WiznetBroadcastFilter)
+
 		character, room, err := game.FindPlayerByName(name)
 		if err != nil {
 			panic(err)
@@ -354,13 +357,11 @@ func (game *Game) nanny(client *Client, message string) {
 		if client.character.Room != nil {
 			client.character.Room.AddCharacter(client.character)
 
-			for iter := client.character.Room.Characters.Head; iter != nil; iter = iter.Next {
-				character := iter.Value.(*Character)
+			out := fmt.Sprintf("{W%s has entered the game.{x\r\n", client.character.Name)
 
-				if character != client.character {
-					character.Send(fmt.Sprintf("{W%s has entered the game.{x\r\n", client.character.Name))
-				}
-			}
+			game.broadcast(out, func(character *Character) bool {
+				return character != client.character
+			})
 		}
 
 		do_time(client.character, "")

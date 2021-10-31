@@ -105,16 +105,13 @@ func do_quit(ch *Character, arguments string) {
 	}
 
 	if ch.Room != nil {
-		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			character := iter.Value.(*Character)
-
-			if character != ch {
-				character.Send(fmt.Sprintf("{W%s{W has quit the game.{x\r\n", ch.GetShortDescriptionUpper(character)))
-			}
-		}
-
 		ch.Room.removeCharacter(ch)
 	}
+
+	out := fmt.Sprintf("{W%s has quit the game.{x\r\n", ch.Name)
+	ch.Game.broadcast(out, func(character *Character) bool {
+		return character != ch
+	})
 
 	ch.Game.Characters.Remove(ch)
 	ch.Client.connectionState = ConnectionStateNone
@@ -122,7 +119,7 @@ func do_quit(ch *Character, arguments string) {
 
 	go func() {
 		/* Allow output to flush */
-		<-time.After(500 * time.Millisecond)
+		<-time.After(200 * time.Millisecond)
 		ch.Client.close <- true
 		ch.Client.conn.Close()
 	}()

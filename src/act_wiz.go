@@ -148,6 +148,17 @@ func do_shutdown(ch *Character, arguments string) {
 	}
 }
 
+func do_wiznet(ch *Character, arguments string) {
+	if ch.Wiznet {
+		ch.Wiznet = false
+		ch.Send("Wiznet disabled.\r\n")
+		return
+	}
+
+	ch.Wiznet = true
+	ch.Send("Wiznet enabled.\r\n")
+}
+
 func do_goto(ch *Character, arguments string) {
 	id, err := strconv.Atoi(arguments)
 	if err != nil || id <= 0 {
