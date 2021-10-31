@@ -193,9 +193,6 @@ func (game *Game) AttemptLogin(username string, password string) bool {
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
 }
 
-func (ch *Character) onZoneUpdate() {
-}
-
 func (ch *Character) onUpdate() {
 	/* Regen, script hooks, etc. */
 	if ch.Health < ch.MaxHealth {

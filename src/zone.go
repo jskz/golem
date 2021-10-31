@@ -128,7 +128,6 @@ func (game *Game) ResetRoom(room *Room) {
 
 	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
-		character.onZoneUpdate()
 
 		if room.Zone.ResetMessage != "" && character.Flags&CHAR_IS_PLAYER != 0 {
 			character.Send(fmt.Sprintf("\r\n{x%s{x\r\n", room.Zone.ResetMessage))
