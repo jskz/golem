@@ -30,9 +30,9 @@ func (game *Game) createBlood(intensity int) *ObjectInstance {
 	obj := &ObjectInstance{Game: game}
 
 	obj.ParentId = 1
-	obj.Description = fmt.Sprintf("{rA puddle of blood has spilled here.{x")
-	obj.ShortDescription = fmt.Sprintf("a puddle of blood")
-	obj.LongDescription = fmt.Sprintf("{rThere is a puddle of blood here.")
+	obj.Description = "{rA puddle of blood has spilled here.{x"
+	obj.ShortDescription = "a puddle of blood"
+	obj.LongDescription = "{rThere is a puddle of blood here."
 	obj.Name = "blood puddle"
 	obj.ItemType = ItemTypeNone
 	obj.CreatedAt = time.Now()
