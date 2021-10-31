@@ -116,7 +116,7 @@ VALUES (1, 'limbo-developer-maze',
                                         baseMobile.experience = 4000 + (2000 * (z + 1));
 
                                         baseMobile.flags =
-                                            Golem.CharFlags.CHAR_AGGRESSIVE;
+                                            Golem.CharacterFlags.CHAR_AGGRESSIVE;
 
                                         cell.room.addCharacter(baseMobile);
                                         Golem.game.characters.insert(
