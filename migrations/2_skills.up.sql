@@ -77,7 +77,7 @@ INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (12,
 /* Cleric defaults: armor, cure light, magic map */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (7, 4, 4, 1, 1, 50);
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (9, 4, 7, 1, 1, 50);
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (10, 4, 8, 5, 1, 50);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (10, 4, 8, 1, 1, 50);
 
 /* Mage defaults: fireball */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (8, 3, 5, 1, 5, 50);
