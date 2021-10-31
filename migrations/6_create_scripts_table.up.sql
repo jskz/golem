@@ -100,11 +100,20 @@ VALUES (1, 'limbo-developer-maze',
                                             'An angry slime has festered to the point of open hostility in the dungeon.';
                                         baseMobile.description =
                                             'This angry slime has one big chip on its gelatinous shoulder.';
-                                        baseMobile.dexterity = 15;
-                                        baseMobile.health = 100;
-                                        baseMobile.maxHealth = 100;
-                                        baseMobile.strength = 20;
-                                        baseMobile.experience = 6000;
+
+                                        if(z >= 4) {
+                                            baseMobile.name = 'ancient evil slime';
+                                            baseMobile.shortDescription = 'an ancient, evil slime';
+                                            baseMobile.longDescription = 'An ancient, evil slime guards the inner sanctum of the dungeon.';
+                                            baseMobile.description = 'This putrid puddle is not going to take it anymore.';
+                                        }
+
+                                        baseMobile.level = 10 * z;
+                                        baseMobile.dexterity = 15 + (2 * (z + 1));
+                                        baseMobile.health = 100 + (100 * (z * 10));
+                                        baseMobile.maxHealth = 100 + (100 * (z * 10));
+                                        baseMobile.strength = 20 + (2 * (z + 1));
+                                        baseMobile.experience = 4000 + (2000 * (z + 1));
                                         baseMobile.flags =
                                             Golem.CharFlags.CHAR_AGGRESSIVE;
 
