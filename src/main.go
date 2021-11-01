@@ -8,14 +8,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"math/rand"
 	"net"
 	"os"
+	"syscall"
 	"time"
 
 	_ "net/http/pprof"
+
+	"golang.org/x/sys/unix"
 )
 
 func main() {
@@ -28,7 +32,21 @@ func main() {
 		os.Exit(1)
 	}
 
-	app, err := net.Listen("tcp", fmt.Sprintf(":%d", Config.Port))
+	listenConfig := net.ListenConfig{
+		Control: func(network, address string, conn syscall.RawConn) error {
+			err := conn.Control(func(fd uintptr) {
+				syscall.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+			})
+
+			if err != nil {
+				return err
+			}
+
+			return nil
+		},
+	}
+
+	app, err := listenConfig.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", Config.Port))
 	if err != nil {
 		log.Println(err)
 		os.Exit(1)
