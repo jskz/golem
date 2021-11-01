@@ -15,6 +15,16 @@ import (
 	"unicode"
 )
 
+type CopyoverSession struct {
+	Fd   int    `json:"fd"`
+	Name string `json:"name"`
+	Room int    `json:"room"`
+}
+
+type CopyoverData struct {
+	Sessions []CopyoverSession `json:"sessions"`
+}
+
 func SimpleGET(url string, data string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {

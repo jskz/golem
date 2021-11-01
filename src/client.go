@@ -14,6 +14,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"reflect"
 	"strings"
 	"time"
 
@@ -65,6 +66,7 @@ const (
 
 /* Instance of a client connection */
 type Client struct {
+	Fd                uint `json:"Fd"`
 	id                string
 	sessionStartedAt  time.Time
 	conn              net.Conn
@@ -86,7 +88,8 @@ func (client *Client) readPump(game *Game) {
 		client.conn.Close()
 	}()
 
-	reader := bufio.NewReader(client.conn)
+	var reader *bufio.Reader
+	reader = bufio.NewReader(client.conn)
 
 	for {
 		firstByte, err := reader.Peek(1)
@@ -280,11 +283,16 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 }
 
 func (game *Game) handleConnection(conn net.Conn) {
-	defer func() {
-		recover()
-	}()
+	/* We'll use reflection to grab the real FD of the net.Conn for later copyover-ing */
+	v := reflect.ValueOf(conn)
+	netFD := reflect.Indirect(reflect.Indirect(v).FieldByName("fd"))
+	pfd := netFD.FieldByName("pfd")
+	fd := int(pfd.FieldByName("Sysfd").Int())
 
-	client := &Client{sessionStartedAt: time.Now()}
+	client := &Client{
+		Fd:               uint(fd),
+		sessionStartedAt: time.Now(),
+	}
 	client.conn = conn
 	client.send = make(chan []byte)
 	client.close = make(chan bool)

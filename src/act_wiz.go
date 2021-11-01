@@ -8,7 +8,11 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -124,6 +128,67 @@ func do_purge(ch *Character, arguments string) {
 			rch.Send(fmt.Sprintf("%s purges the contents of the room.\r\n", ch.GetShortDescriptionUpper(rch)))
 		}
 	}
+}
+
+func do_copyover(ch *Character, arguments string) {
+	var _, err = os.Stat(CopyoverDataPath)
+
+	if os.IsNotExist(err) {
+		f, err := os.Create(CopyoverDataPath)
+		if err != nil {
+			ch.Send(fmt.Sprintf("You failed to copyover: %v\r\n", err))
+			return
+		}
+
+		defer f.Close()
+	}
+
+	copyoverData := &CopyoverData{
+		Sessions: make([]CopyoverSession, 0),
+	}
+
+	log.Printf("Creating a dump of sessions...\r\n")
+
+	for client := range ch.Game.clients {
+		log.Println(client)
+		if client.Character == nil || client.ConnectionState != ConnectionStatePlaying {
+			log.Printf("Skipping somebody...\r\n")
+			continue
+		}
+
+		var room *Room = client.Character.Room
+		var err error
+
+		if room == nil {
+			room, err = ch.Game.LoadRoomIndex(RoomLimbo)
+			if err != nil {
+				ch.Send(fmt.Sprintf("You failed to copyover: %v\r\n", err))
+				return
+			}
+		}
+
+		copyoverData.Sessions = append(copyoverData.Sessions, CopyoverSession{
+			Fd:   int(client.Fd),
+			Name: client.Character.Name,
+			Room: int(room.Id),
+		})
+	}
+
+	copyoverDataBytes, err := json.Marshal(copyoverData)
+	if err != nil {
+		ch.Send(fmt.Sprintf("Failed to serialize copyover session data: %v.\r\n", err))
+		return
+	}
+
+	err = ioutil.WriteFile(CopyoverDataPath, copyoverDataBytes, os.ModeAppend)
+	if err != nil {
+		ch.Send(fmt.Sprintf("You failed to copyover: %v.\r\n", err))
+		return
+	}
+
+	ch.Game.broadcast("{WAn awful whining noise raises to a shrill pitch as the fabric of reality pulls itself apart at the seams.{x\r\n", nil)
+	os.Exit(1) // trigger with an error, let us restart...
+	return
 }
 
 func do_peace(ch *Character, arguments string) {

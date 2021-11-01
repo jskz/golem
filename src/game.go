@@ -230,7 +230,7 @@ func (game *Game) Run() {
 		case client := <-game.register:
 			game.clients[client] = true
 
-			out := fmt.Sprintf("Network: new connection from %s\r\n", client.conn.RemoteAddr().String())
+			out := fmt.Sprintf("Network: new connection from %s with file descriptor %d\r\n", client.conn.RemoteAddr().String(), client.Fd)
 			log.Print(out)
 			game.broadcast(out, WiznetBroadcastFilter)
 
