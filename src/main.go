@@ -34,15 +34,13 @@ func main() {
 
 	listenConfig := net.ListenConfig{
 		Control: func(network, address string, conn syscall.RawConn) error {
-			err := conn.Control(func(fd uintptr) {
-				syscall.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
+			var err error = nil
+
+			conn.Control(func(fd uintptr) {
+				err = syscall.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
 			})
 
-			if err != nil {
-				return err
-			}
-
-			return nil
+			return err
 		},
 	}
 
