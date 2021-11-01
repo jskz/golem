@@ -38,35 +38,55 @@ func main() {
 		os.Exit(1)
 	}
 
-	listenConfig := net.ListenConfig{
-		Control: func(network, address string, conn syscall.RawConn) error {
-			var err error = nil
-
-			conn.Control(func(fd uintptr) {
-				err = syscall.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEPORT, 1)
-			})
-
-			return err
-		},
-	}
-
-	app, err := listenConfig.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", Config.Port))
-	if err != nil {
-		log.Println(err)
-		os.Exit(1)
-	}
-
 	/* Attempt read of copyover sessions */
 	copyoverBytes, err := ioutil.ReadFile(CopyoverDataPath)
 	if err != nil {
-		/* Don't try to restore these copyover sessions. */
-		log.Println(err)
+		listenConfig := net.ListenConfig{
+			Control: func(network, address string, conn syscall.RawConn) error {
+				var err error = nil
+
+				conn.Control(func(fd uintptr) {
+					err = syscall.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEADDR, 1)
+				})
+
+				return err
+			},
+		}
+
+		game.listener, err = listenConfig.Listen(context.Background(), "tcp", fmt.Sprintf(":%d", Config.Port))
+		if err != nil {
+			log.Println(err)
+			os.Exit(1)
+		}
 	} else {
 		sessions := &CopyoverData{}
 
 		err = json.Unmarshal(copyoverBytes, &sessions)
 		if err != nil {
 			log.Printf("Failed to unmarshal previous copyover data: %v\r\n", err)
+			return
+		}
+
+		/* Resume the existing server socket */
+		f := os.NewFile(uintptr(sessions.Fd), "golem")
+		c, err := f.SyscallConn()
+		if err != nil {
+			log.Printf("Failed to acquire raw conn for %d: %v\r\n", sessions.Fd, err)
+			return
+		}
+
+		err = nil
+		c.Control(func(fd uintptr) {
+			err = syscall.SetsockoptInt(int(fd), unix.SOL_SOCKET, unix.SO_REUSEADDR, 1)
+		})
+		if err != nil {
+			log.Printf("Failed to set SO_REUSEADDR on server sock: %v\r\n", err)
+			return
+		}
+
+		game.listener, err = net.FileListener(f)
+		if err != nil {
+			log.Printf("Failed to reuse existing server FD: %v\r\n", err)
 			return
 		}
 
@@ -110,7 +130,7 @@ func main() {
 
 	/* Spawn a new goroutine for each new client. */
 	for {
-		conn, err := app.Accept()
+		conn, err := game.listener.Accept()
 		if err != nil {
 			log.Printf("Failed to accept connection: %v\r\n", err)
 			continue

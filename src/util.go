@@ -22,6 +22,7 @@ type CopyoverSession struct {
 }
 
 type CopyoverData struct {
+	Fd       int               `json:"fd"`
 	Sessions []CopyoverSession `json:"sessions"`
 }
 

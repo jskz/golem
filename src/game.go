@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -25,6 +26,7 @@ import (
 )
 
 type Game struct {
+	listener  net.Listener
 	startedAt time.Time
 
 	db *sql.DB

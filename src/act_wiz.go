@@ -13,8 +13,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -143,11 +145,14 @@ func do_copyover(ch *Character, arguments string) {
 		defer f.Close()
 	}
 
+	v := reflect.ValueOf(ch.Game.listener)
+	netFD := reflect.Indirect(reflect.Indirect(v).FieldByName("fd"))
+	pfd := reflect.Indirect(netFD.FieldByName("pfd"))
+
 	copyoverData := &CopyoverData{
 		Sessions: make([]CopyoverSession, 0),
+		Fd:       int(pfd.FieldByName("Sysfd").Int()),
 	}
-
-	log.Printf("Creating a dump of sessions...\r\n")
 
 	for client := range ch.Game.clients {
 		log.Println(client)
@@ -187,8 +192,9 @@ func do_copyover(ch *Character, arguments string) {
 	}
 
 	ch.Game.broadcast("{WAn awful whining noise raises to a shrill pitch as the fabric of reality pulls itself apart at the seams.{x\r\n", nil)
-	os.Exit(1) // trigger with an error, let us restart...
-	return
+
+	/* Start a new game process to load and then assume our server and client descriptors to reinitialized sessions */
+	syscall.Exec("./golem", []string{"./golem"}, []string{})
 }
 
 func do_peace(ch *Character, arguments string) {
