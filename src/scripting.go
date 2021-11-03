@@ -226,7 +226,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			webhook_script.webhook_id,
 			webhook_script.script_id
 		FROM
-			plane_script
+			webhook_script
 	`)
 	if err != nil {
 		return err
