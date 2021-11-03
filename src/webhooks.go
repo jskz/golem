@@ -120,9 +120,7 @@ func (game *Game) handleWebhooks() {
 		}
 
 		log.Printf("Got a webhook request with key: %s\r\n", keyParam)
-
 		game.webhookMessage <- keyParam
-
 	})
 
 	http.ListenAndServe(":9000", nil)

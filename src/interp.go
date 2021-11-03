@@ -77,6 +77,7 @@ func init() {
 	CommandTable["purge"] = Command{Name: "purge", CmdFunc: do_purge, MinimumLevel: LevelHero + 2}
 	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown, MinimumLevel: LevelAdmin}
 	CommandTable["zones"] = Command{Name: "zones", CmdFunc: do_zones, MinimumLevel: LevelHero + 1}
+	CommandTable["webhook"] = Command{Name: "webhook", CmdFunc: do_webhook, MinimumLevel: LevelAdmin}
 	CommandTable["wiznet"] = Command{Name: "wiznet", CmdFunc: do_wiznet, MinimumLevel: LevelAdmin}
 
 	/* fight.go */
