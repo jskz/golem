@@ -175,7 +175,18 @@ func do_webhook(ch *Character, arguments string) {
 	command := strings.ToLower(firstArgument)
 	switch command {
 	case "list":
-		break
+		var output strings.Builder
+
+		output.WriteString("{YID#   | URL\r\n")
+		output.WriteString("------+------------------------------------------------------------------\r\n")
+
+		for _, webhook := range ch.Game.webhooks {
+			output.WriteString(fmt.Sprintf("{Y%4d | %s/webhook?key=%s\r\n", webhook.Id, Config.WebConfiguration.PublicRoot, webhook.Uuid))
+		}
+
+		output.WriteString("{x\r\n")
+		ch.Send(output.String())
+
 	case "create":
 		webhook, err := ch.Game.CreateWebhook()
 		if err != nil {
