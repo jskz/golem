@@ -53,7 +53,26 @@ func (game *Game) LoadWebhooks() error {
 	return nil
 }
 
-func (game *Game) DeleteWebhook(*Webhook) error {
+func (game *Game) DeleteWebhook(webhook *Webhook) error {
+	result, err := game.db.Exec(`
+	DELETE FROM
+		webhooks
+	WHERE
+		id = ?`, webhook.Id)
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected != 1 {
+		/* Weird, but not fatal */
+		return nil
+	}
+
 	return nil
 }
 
