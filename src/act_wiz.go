@@ -164,7 +164,7 @@ func do_webhook(ch *Character, arguments string) {
 		output := "{WWebhook management:\r\n" +
 			"{Glist       - {glist all system webhooks\r\n" +
 			"{Gcreate     - {gcreate a system webhook\r\n" +
-			"{Gdelete [#] - {gdelete a webhook by ID (from list){x\r\n\r\n"
+			"{Gdelete [#] - {gdelete a webhook by ID (from {G\"webhook list\"){x\r\n"
 		ch.Send(output)
 		return
 	}
@@ -177,13 +177,13 @@ func do_webhook(ch *Character, arguments string) {
 		var output strings.Builder
 
 		output.WriteString("{YID#   | URL\r\n")
-		output.WriteString("------+------------------------------------------------------------------------------\r\n")
+		output.WriteString("------+------------------------------------------------------------------------\r\n")
 
 		for _, webhook := range ch.Game.webhooks {
 			output.WriteString(fmt.Sprintf("{Y%5d | %s/webhook?key=%s\r\n", webhook.Id, Config.WebConfiguration.PublicRoot, webhook.Uuid))
 		}
 
-		output.WriteString("{x\r\n")
+		output.WriteString("{x")
 		ch.Send(output.String())
 
 	case "create":
@@ -193,7 +193,7 @@ func do_webhook(ch *Character, arguments string) {
 			break
 		}
 
-		ch.Send(fmt.Sprintf("{gSuccessfully created a new webhook with URL: {G%s/webhook?key=%s{x\r\n", Config.WebConfiguration.PublicRoot, webhook.Uuid))
+		ch.Send(fmt.Sprintf("Successfully created a new webhook with URL:\r\n{Y%s/webhook?key=%s{x\r\n", Config.WebConfiguration.PublicRoot, webhook.Uuid))
 
 	case "delete":
 		secondArgument, _ := oneArgument(arguments)
