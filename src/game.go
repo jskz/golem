@@ -30,8 +30,6 @@ type Game struct {
 	db *sql.DB
 	vm *goja.Runtime
 
-	eventHandlers map[string]*LinkedList
-
 	Characters   *LinkedList `json:"characters"`
 	Fights       *LinkedList `json:"fights"`
 	Planes       *LinkedList `json:"planes"`
@@ -42,17 +40,18 @@ type Game struct {
 	skills  map[uint]*Skill
 	world   map[uint]*Room
 
+	eventHandlers  map[string]*LinkedList
 	scripts        map[uint]*Script
 	objectScripts  map[uint]*Script
 	webhookScripts map[int]*Script
 	webhooks       map[string]*Webhook
 
-	register        chan *Client
-	unregister      chan *Client
-	quitRequest     chan *Client
-	shutdownRequest chan bool
-	clientMessage   chan ClientTextMessage
-
+	register                 chan *Client
+	unregister               chan *Client
+	quitRequest              chan *Client
+	shutdownRequest          chan bool
+	clientMessage            chan ClientTextMessage
+	webhookMessage           chan string
 	planeGenerationCompleted chan int
 }
 
@@ -74,6 +73,7 @@ func NewGame() (*Game, error) {
 	game.unregister = make(chan *Client)
 	game.quitRequest = make(chan *Client)
 	game.shutdownRequest = make(chan bool)
+	game.webhookMessage = make(chan string)
 	game.clientMessage = make(chan ClientTextMessage)
 	game.planeGenerationCompleted = make(chan int)
 
@@ -233,6 +233,24 @@ func (game *Game) Run() {
 
 		case clientMessage := <-game.clientMessage:
 			game.nanny(clientMessage.client, clientMessage.message)
+
+		case webhookMessage := <-game.webhookMessage:
+			webhook, ok := game.webhooks[webhookMessage]
+			if !ok {
+				log.Print("Received GET webhook request with a nonexistent key.\r\n")
+				break
+			}
+
+			script, ok := game.webhookScripts[webhook.Id]
+			if !ok {
+				log.Print("Received GET webhook message for webhook without an attached script handler.\r\n")
+				break
+			}
+
+			_, err := script.tryEvaluate("onGET", game.vm.ToValue(game))
+			if err != nil {
+				log.Printf("Script evaluation for webhook onGET request failed: %v\r\n", err)
+			}
 
 		case client := <-game.register:
 			game.clients[client] = true

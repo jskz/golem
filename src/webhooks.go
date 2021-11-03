@@ -52,8 +52,22 @@ func (game *Game) LoadWebhooks() error {
 }
 
 func (game *Game) handleWebhooks() {
+	defer func() {
+		recover()
+	}()
+
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, req *http.Request) {
-		log.Printf("Got a webhook request with key: %s\r\n", req.URL.Query().Get("key"))
+		keyParam := req.URL.Query().Get("key")
+
+		if len(keyParam) != 4 {
+			log.Printf("Got a webhook request with BAD key: %s\r\n", keyParam)
+			return
+		}
+
+		log.Printf("Got a webhook request with key: %s\r\n", keyParam)
+
+		game.webhookMessage <- keyParam
+
 	})
 
 	http.ListenAndServe(":9000", nil)
