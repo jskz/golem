@@ -34,8 +34,12 @@ func main() {
 		os.Exit(1)
 	}
 
+	/* Spawn the webhook-handling goroutine */
+	go game.handleWebhooks()
+
 	/* Start the game loop */
 	go game.Run()
+
 	log.Printf("Golem is ready to rock and roll on port %d.\r\n", Config.Port)
 
 	/* Spawn a new goroutine for each new client. */

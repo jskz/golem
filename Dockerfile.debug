@@ -24,6 +24,7 @@ VOLUME /scripts
 FROM debian:buster
 
 EXPOSE 8080 40000
+EXPOSE 9000
 
 WORKDIR /
 

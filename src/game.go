@@ -42,8 +42,10 @@ type Game struct {
 	skills  map[uint]*Skill
 	world   map[uint]*Room
 
-	scripts       map[uint]*Script
-	objectScripts map[uint]*Script
+	scripts        map[uint]*Script
+	objectScripts  map[uint]*Script
+	webhookScripts map[int]*Script
+	webhooks       map[string]*Webhook
 
 	register        chan *Client
 	unregister      chan *Client

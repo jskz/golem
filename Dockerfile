@@ -18,5 +18,6 @@ VOLUME ./scripts
 
 EXPOSE 8080
 EXPOSE 6060
+EXPOSE 9000
 
 CMD [ "./golem" ]

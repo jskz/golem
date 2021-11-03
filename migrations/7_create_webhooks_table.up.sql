@@ -20,6 +20,6 @@ CREATE TABLE webhook_script (
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id),
-    FOREIGN KEY (webhook_id) REFERENCES webhook(id),
+    FOREIGN KEY (webhook_id) REFERENCES webhooks(id),
     FOREIGN KEY (script_id) REFERENCES scripts(id)
 );
