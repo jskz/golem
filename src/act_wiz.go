@@ -203,11 +203,27 @@ func do_webhook(ch *Character, arguments string) {
 			break
 		}
 
-		//id, err := strconv.Atoi(secondArgument)
-		//if err != nil {
-		//	ch.Send("Bad argument, please provider an integer ID.\r\n")
-		//	break
-		//}
+		id, err := strconv.Atoi(secondArgument)
+		if err != nil {
+			ch.Send("Bad argument, please provider an integer ID.\r\n")
+			break
+		}
+
+		for _, webhook := range ch.Game.webhooks {
+			if webhook.Id == id {
+				err := ch.Game.DeleteWebhook(webhook)
+				if err != nil {
+					ch.Send(fmt.Sprintf("Something went wrong trying to delete that webhook: %v\r\n", err))
+					return
+				}
+
+				ch.Send("Ok.\r\n")
+				return
+			}
+		}
+
+		ch.Send("A webook with that ID could not be found.\r\n")
+
 	default:
 		ch.Send("Unrecognized command.\r\n")
 	}

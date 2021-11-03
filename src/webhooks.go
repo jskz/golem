@@ -53,6 +53,10 @@ func (game *Game) LoadWebhooks() error {
 	return nil
 }
 
+func (game *Game) DeleteWebhook(*Webhook) error {
+	return nil
+}
+
 func (game *Game) CreateWebhook() (*Webhook, error) {
 	webhookUuid, err := uuid.NewUUID()
 	if err != nil {
