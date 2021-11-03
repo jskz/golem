@@ -183,8 +183,7 @@ func do_webhook(ch *Character, arguments string) {
 			break
 		}
 
-		ch.Send(fmt.Sprintf("{gSuccessfully created a new webhook with URL: {G%s/webhook?key=%s", Config.WebConfiguration.PublicRoot, webhook.Uuid))
-		break
+		ch.Send(fmt.Sprintf("{gSuccessfully created a new webhook with URL: {G%s/webhook?key=%s{x\r\n", Config.WebConfiguration.PublicRoot, webhook.Uuid))
 
 	case "delete":
 		secondArgument, _ := oneArgument(arguments)
@@ -198,11 +197,8 @@ func do_webhook(ch *Character, arguments string) {
 		//	ch.Send("Bad argument, please provider an integer ID.\r\n")
 		//	break
 		//}
-
-		break
 	default:
 		ch.Send("Unrecognized command.\r\n")
-		break
 	}
 }
 
