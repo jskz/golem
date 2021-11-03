@@ -150,6 +150,11 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
+	err = game.LoadWebhooks()
+	if err != nil {
+		return nil, err
+	}
+
 	err = game.InitScripting()
 	if err != nil {
 		return nil, err
