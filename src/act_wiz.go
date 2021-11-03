@@ -177,7 +177,15 @@ func do_webhook(ch *Character, arguments string) {
 	case "list":
 		break
 	case "create":
+		webhook, err := ch.Game.CreateWebhook()
+		if err != nil {
+			ch.Send(fmt.Sprintf("Something went wrong trying to create a new webhook: %v\r\n", err))
+			break
+		}
+
+		ch.Send(fmt.Sprintf("{gSuccessfully created a new webhook with URL: {G%s/webhook?key=%s", Config.WebConfiguration.PublicRoot, webhook.Uuid))
 		break
+
 	case "delete":
 		secondArgument, _ := oneArgument(arguments)
 		if secondArgument == "" {

@@ -14,5 +14,8 @@
     "profiling": {
         "enabled": true,
         "port": 6060
+    },
+    "web": {
+        "publicRoot": "http://localhost:9000/"
     }
 }

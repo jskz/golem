@@ -37,11 +37,16 @@ type AppSentryConfiguration struct {
 	Enabled bool   `json:"enabled"`
 }
 
+type AppWebConfiguration struct {
+	PublicRoot string `json:"publicRoot"`
+}
+
 type AppConfiguration struct {
 	Port                   int                       `json:"port"`
 	MySQLConfiguration     AppMySQLConfiguration     `json:"mysql"`
 	SentryConfiguration    AppSentryConfiguration    `json:"sentry"`
 	ProfilingConfiguration AppProfilingConfiguration `json:"profiling"`
+	WebConfiguration       AppWebConfiguration       `json:"web"`
 
 	greeting []byte
 	motd     []byte
