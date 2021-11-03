@@ -159,6 +159,45 @@ func do_wiznet(ch *Character, arguments string) {
 	ch.Send("Wiznet enabled.\r\n")
 }
 
+func do_webhook(ch *Character, arguments string) {
+	if len(arguments) < 1 {
+		output :=
+			`{WWebhook management:\r\n\r\n
+    {Glist       - {glist all system webhooks\r\n
+	{Gcreate     - {gcreate a system webhook\r\n
+	{Gdelete [#] - {gdelete a webhook by ID (from list){x\r\n\r\n`
+		ch.Send(output)
+		return
+	}
+
+	firstArgument, arguments := oneArgument(arguments)
+
+	command := strings.ToLower(firstArgument)
+	switch command {
+	case "list":
+		break
+	case "create":
+		break
+	case "delete":
+		secondArgument, _ := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Delete requires an ID argument.\r\n")
+			break
+		}
+
+		//id, err := strconv.Atoi(secondArgument)
+		//if err != nil {
+		//	ch.Send("Bad argument, please provider an integer ID.\r\n")
+		//	break
+		//}
+
+		break
+	default:
+		ch.Send("Unrecognized command.\r\n")
+		break
+	}
+}
+
 func do_goto(ch *Character, arguments string) {
 	id, err := strconv.Atoi(arguments)
 	if err != nil || id <= 0 {

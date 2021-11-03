@@ -10,6 +10,8 @@ package main
 import (
 	"log"
 	"net/http"
+
+	"github.com/google/uuid"
 )
 
 type Webhook struct {
@@ -49,6 +51,36 @@ func (game *Game) LoadWebhooks() error {
 	}
 
 	return nil
+}
+
+func (game *Game) CreateWebhook() (*Webhook, error) {
+	webhookUuid, err := uuid.NewUUID()
+	if err != nil {
+		return nil, err
+	}
+
+	uuidString := webhookUuid.String()
+
+	/* Try to create the new webhook in-DB first */
+	res, err := game.db.Exec(`
+	INSERT INTO
+		webhooks(uuid)
+	VALUES
+		(?)
+	`, uuidString)
+	if err != nil {
+		return nil, err
+	}
+
+	var insertId int64
+
+	insertId, err = res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	game.webhooks[uuidString] = &Webhook{Id: int(insertId), Uuid: uuidString}
+	return game.webhooks[uuidString], nil
 }
 
 func (game *Game) handleWebhooks() {
