@@ -176,11 +176,11 @@ func do_webhook(ch *Character, arguments string) {
 	case "list":
 		var output strings.Builder
 
-		output.WriteString("{YID#   | URL\r\n")
+		output.WriteString("{Y  ID# | URL\r\n")
 		output.WriteString("------+------------------------------------------------------------------------\r\n")
 
 		for _, webhook := range ch.Game.webhooks {
-			output.WriteString(fmt.Sprintf("{Y%5d | %s/webhook?key=%s\r\n", webhook.Id, Config.WebConfiguration.PublicRoot, webhook.Uuid))
+			output.WriteString(fmt.Sprintf("{Y%5d | %swebhook?key=%s\r\n", webhook.Id, Config.WebConfiguration.PublicRoot, webhook.Uuid))
 		}
 
 		output.WriteString("{x")
@@ -193,7 +193,7 @@ func do_webhook(ch *Character, arguments string) {
 			break
 		}
 
-		ch.Send(fmt.Sprintf("Successfully created a new webhook with URL:\r\n{Y%s/webhook?key=%s{x\r\n", Config.WebConfiguration.PublicRoot, webhook.Uuid))
+		ch.Send(fmt.Sprintf("Successfully created a new webhook with URL:\r\n{Y%swebhook?key=%s{x\r\n", Config.WebConfiguration.PublicRoot, webhook.Uuid))
 
 	case "delete":
 		secondArgument, _ := oneArgument(arguments)
