@@ -161,11 +161,10 @@ func do_wiznet(ch *Character, arguments string) {
 
 func do_webhook(ch *Character, arguments string) {
 	if len(arguments) < 1 {
-		output :=
-			`{WWebhook management:\r\n\r\n
-    {Glist       - {glist all system webhooks\r\n
-	{Gcreate     - {gcreate a system webhook\r\n
-	{Gdelete [#] - {gdelete a webhook by ID (from list){x\r\n\r\n`
+		output := "{WWebhook management:\r\n" +
+			"{Glist       - {glist all system webhooks\r\n" +
+			"{Gcreate     - {gcreate a system webhook\r\n" +
+			"{Gdelete [#] - {gdelete a webhook by ID (from list){x\r\n\r\n"
 		ch.Send(output)
 		return
 	}
@@ -178,10 +177,10 @@ func do_webhook(ch *Character, arguments string) {
 		var output strings.Builder
 
 		output.WriteString("{YID#   | URL\r\n")
-		output.WriteString("------+------------------------------------------------------------------\r\n")
+		output.WriteString("------+------------------------------------------------------------------------------\r\n")
 
 		for _, webhook := range ch.Game.webhooks {
-			output.WriteString(fmt.Sprintf("{Y%4d | %s/webhook?key=%s\r\n", webhook.Id, Config.WebConfiguration.PublicRoot, webhook.Uuid))
+			output.WriteString(fmt.Sprintf("{Y%5d | %s/webhook?key=%s\r\n", webhook.Id, Config.WebConfiguration.PublicRoot, webhook.Uuid))
 		}
 
 		output.WriteString("{x\r\n")
