@@ -287,8 +287,26 @@ func (game *Game) DeleteScript(script *Script) error {
 	return nil
 }
 
-func (game *Game) CreateScript() (*Script, error) {
-	return nil, nil
+func (game *Game) CreateScript(name string, initialBody string) (*Script, error) {
+	res, err := game.db.Exec(`
+	INSERT INTO
+		scripts(name, script)
+	VALUES
+		(?, ?)
+	`, name, initialBody)
+	if err != nil {
+		return nil, err
+	}
+
+	insertId64, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	insertId := uint(insertId64)
+	script := &Script{id: insertId, name: name, script: initialBody}
+	game.scripts[insertId] = script
+	return script, nil
 }
 
 func (game *Game) scriptTimersUpdate() {
