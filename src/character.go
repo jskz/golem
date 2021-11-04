@@ -367,14 +367,9 @@ func (ch *Character) detachObject(obj *ObjectInstance) error {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	_, err = result.RowsAffected()
 	if err != nil {
 		return err
-	}
-
-	if rowsAffected != 1 {
-		/* Weird, but not fatal */
-		return nil
 	}
 
 	return nil

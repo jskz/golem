@@ -65,14 +65,9 @@ func (game *Game) DeleteWebhook(webhook *Webhook) error {
 		return err
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	_, err = result.RowsAffected()
 	if err != nil {
 		return err
-	}
-
-	if rowsAffected != 1 {
-		/* Weird, but not fatal */
-		return nil
 	}
 
 	delete(game.webhooks, webhook.Uuid)

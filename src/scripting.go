@@ -268,6 +268,29 @@ func (game *Game) setTimeout(cb goja.Callable, delay int64) goja.Value {
 	return game.vm.ToValue(timer)
 }
 
+func (game *Game) DeleteScript(script *Script) error {
+	result, err := game.db.Exec(`
+	DELETE FROM
+		scripts
+	WHERE
+		id = ?`, script.id)
+	if err != nil {
+		return err
+	}
+
+	_, err = result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	delete(game.scripts, script.id)
+	return nil
+}
+
+func (game *Game) CreateScript() (*Script, error) {
+	return nil, nil
+}
+
 func (game *Game) scriptTimersUpdate() {
 	for iter := game.ScriptTimers.Head; iter != nil; iter = iter.Next {
 		effect := iter.Value.(*ScriptTimer)
