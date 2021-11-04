@@ -33,12 +33,17 @@ Golem.StringEditor = function (client, string, callback) {
             if(!['!', '$', '?'].includes(input) && input[0] !== ':') {
                 const lines = _string.match(/[^\r\n]+/g);
 
-                let nextString = lines.filter((_, index) => index < cursor)
-                    .concat([input])
-                    .concat(lines.filter((_, index) => index > cursor))
-                    .join("\r\n");
+                if(lines && lines.length + 1 > Golem.StringEditor.MaxAllowedLines) {
+                    ch.send("{RString buffer is full, delete lines to make some room!{x\r\n");
+                    return;
+                }
 
-                _string = nextString;
+                _string = lines
+                    ? lines.filter((_, index) => index < cursor)
+                        .concat([input])
+                        .concat(lines.filter((_, index) => index > cursor))
+                        .join("\r\n")
+                    : input;
                 cursor++;
             }
 
@@ -69,17 +74,16 @@ Golem.StringEditor = function (client, string, callback) {
                 ch.send("{WOk.  Moved to line " + lineNumber + ".{x\r\n");
                 cursor = lineNumber;
             } else if(Golem.StringEditor.DeleteLineRegex.test(input)) {
-                const [_, lineNumber] = Golem.StringEditor.DeleteLineRegex.exec(input);
+                const [_, lineNumber] = Golem.StringEditor.DeleteLineRegex.exec(input),
+                    lines = _string.match(/[^\r\n]+/g);
 
-                const lines = _string.match(/[^\r\n]+/g);
-
-                let nextString = lines.filter((_, index) => index < cursor)
-                    .concat(lines.filter(
-                        (_, index) => (index >= cursor + lineNumber)))
-                    .join("\r\n");
-
-                _string = nextString;
-                cursor++;
+                if(lineNumber > 1024) return;
+                if(lines) {
+                    _string = lines.filter((_, index) => index < cursor)
+                        .concat(lines.filter(
+                            (_, index) => (index >= cursor + lineNumber)))
+                        .join("\r\n");
+                }
 
                 ch.send("{WOk.  Deleted " + lineNumber + " lines.{x\r\n");
             }
@@ -89,6 +93,7 @@ Golem.StringEditor = function (client, string, callback) {
     };
 };
 
+Golem.StringEditor.MaxAllowedLines = 256;
 Golem.StringEditor.LinesRegex = new RegExp(/[^\r\n]+/igm);
 Golem.StringEditor.LineNavigationRegex = new RegExp(/^\:(\d+)/);
 Golem.StringEditor.DeleteLineRegex = new RegExp(/^\:d(\d+)/);
