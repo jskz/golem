@@ -6,7 +6,11 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function do_example(ch) {
-    ch.send('Hello from an example command!\r\n');
+    Golem.StringEditor(ch.client,
+        "Testing string editor test text...\r\nSecond line\r\nHey",
+        function(_, string) {
+            ch.send('{CResulting string was: ' + string + '{x\r\n');
+        });
 }
 
 Golem.registerPlayerCommand('example', do_example);
