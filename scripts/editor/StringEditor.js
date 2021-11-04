@@ -77,7 +77,7 @@ Golem.StringEditor = function (client, string, callback) {
                 const [_, lineNumber] = Golem.StringEditor.DeleteLineRegex.exec(input),
                     lines = _string.match(/[^\r\n]+/g);
 
-                if(lineNumber > 1024) return;
+                if(lineNumber > Golem.StringEditor.MaxAllowedLines) return;
                 if(lines) {
                     _string = lines.filter((_, index) => index < cursor)
                         .concat(lines.filter(
