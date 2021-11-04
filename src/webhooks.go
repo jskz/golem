@@ -19,6 +19,8 @@ type Webhook struct {
 	Uuid string `json:"uuid"`
 }
 
+const WebhookKeyLength = 36
+
 func (game *Game) LoadWebhooks() error {
 	log.Printf("Loading webhooks.\r\n")
 
@@ -115,7 +117,7 @@ func (game *Game) handleWebhooks() {
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, req *http.Request) {
 		keyParam := req.URL.Query().Get("key")
 
-		if len(keyParam) != 36 {
+		if len(keyParam) != WebhookKeyLength {
 			log.Print("Ignoring a webhook key submitted without a length of 36.\r\n")
 			return
 		}
