@@ -115,8 +115,8 @@ func (game *Game) handleWebhooks() {
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, req *http.Request) {
 		keyParam := req.URL.Query().Get("key")
 
-		if len(keyParam) != 4 {
-			log.Printf("Got a webhook request with BAD key: %s\r\n", keyParam)
+		if len(keyParam) != 36 {
+			log.Print("Ignoring a webhook key submitted without a length of 36.\r\n")
 			return
 		}
 
