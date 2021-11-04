@@ -37,6 +37,7 @@ services:
       - "4000:4000"
       - "40000:40000"
       - "6060:6060"
+      - "9000:9000"
     volumes:
       - ./etc:/app/etc
       - ./scripts:/app/scripts

@@ -52,6 +52,7 @@ func (game *Game) DefaultSourceLoader(filename string) ([]byte, error) {
 func (game *Game) LoadScriptsFromDatabase() error {
 	game.scripts = make(map[uint]*Script)
 	game.objectScripts = make(map[uint]*Script)
+	game.webhookScripts = make(map[int]*Script)
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -217,6 +218,37 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		}
 
 		plane.Scripts = game.scripts[scriptId]
+	}
+
+	log.Println("Loading webhook-script relations from database...")
+	rows, err = game.db.Query(`
+		SELECT
+			webhook_script.webhook_id,
+			webhook_script.script_id
+		FROM
+			webhook_script
+	`)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var webhookId int
+		var scriptId uint
+
+		err := rows.Scan(&webhookId, &scriptId)
+		if err != nil {
+			return err
+		}
+
+		_, ok := game.scripts[scriptId]
+		if !ok {
+			return errors.New("tried to load a webhook_script for a nonexistent script")
+		}
+
+		game.webhookScripts[webhookId] = game.scripts[scriptId]
 	}
 
 	return nil

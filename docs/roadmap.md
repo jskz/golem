@@ -25,11 +25,13 @@ This will be a working document to track major feature development goals for eac
 
 - [ ] Telnet IAC parsing/session handling implementation overhaul
 - [ ] Add a mechanism for NPCs (with flexibility for PCs in future?) to operate shops that players can buy from, sell?
+- [ ] Webhook facility for scripting API
 
 ## 0.4 Telnet Zlib Compression Milestones
 
 - [ ] [MCCP2 or MCCP3 support](https://mudhalla.net/tintin/protocols/mccp/)
 - [ ] Find a solution to perform some fuzz testing of the telnet implementation
+- [ ] Copyover: allow hot reloading the app server reusing the existing socket file descriptors and restoring sessions
 - [ ] README subsection for traditional compile and run with existing services
 
 ## 0.5 Online Creation Milestones

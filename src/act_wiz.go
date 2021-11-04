@@ -159,6 +159,75 @@ func do_wiznet(ch *Character, arguments string) {
 	ch.Send("Wiznet enabled.\r\n")
 }
 
+func do_webhook(ch *Character, arguments string) {
+	if len(arguments) < 1 {
+		output := "{WWebhook management:\r\n" +
+			"{Glist       - {glist all system webhooks\r\n" +
+			"{Gcreate     - {gcreate a system webhook\r\n" +
+			"{Gdelete [#] - {gdelete a webhook by ID (from {G\"webhook list\"){x\r\n"
+		ch.Send(output)
+		return
+	}
+
+	firstArgument, arguments := oneArgument(arguments)
+
+	command := strings.ToLower(firstArgument)
+	switch command {
+	case "list":
+		var output strings.Builder
+
+		output.WriteString("{Y  ID# | URL\r\n")
+		output.WriteString("------+------------------------------------------------------------------------\r\n")
+
+		for _, webhook := range ch.Game.webhooks {
+			output.WriteString(fmt.Sprintf("{Y%5d | %swebhook?key=%s\r\n", webhook.Id, Config.WebConfiguration.PublicRoot, webhook.Uuid))
+		}
+
+		output.WriteString("{x")
+		ch.Send(output.String())
+
+	case "create":
+		webhook, err := ch.Game.CreateWebhook()
+		if err != nil {
+			ch.Send(fmt.Sprintf("Something went wrong trying to create a new webhook: %v\r\n", err))
+			break
+		}
+
+		ch.Send(fmt.Sprintf("Successfully created a new webhook with URL:\r\n{Y%swebhook?key=%s{x\r\n", Config.WebConfiguration.PublicRoot, webhook.Uuid))
+
+	case "delete":
+		secondArgument, _ := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Delete requires an ID argument.\r\n")
+			break
+		}
+
+		id, err := strconv.Atoi(secondArgument)
+		if err != nil {
+			ch.Send("Bad argument, please provider an integer ID.\r\n")
+			break
+		}
+
+		for _, webhook := range ch.Game.webhooks {
+			if webhook.Id == id {
+				err := ch.Game.DeleteWebhook(webhook)
+				if err != nil {
+					ch.Send(fmt.Sprintf("Something went wrong trying to delete that webhook: %v\r\n", err))
+					return
+				}
+
+				ch.Send("Ok.\r\n")
+				return
+			}
+		}
+
+		ch.Send("A webook with that ID could not be found.\r\n")
+
+	default:
+		ch.Send("Unrecognized command.\r\n")
+	}
+}
+
 func do_goto(ch *Character, arguments string) {
 	id, err := strconv.Atoi(arguments)
 	if err != nil || id <= 0 {
