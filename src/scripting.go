@@ -33,6 +33,7 @@ type ScriptTimer struct {
 }
 
 type Script struct {
+	Game    *Game  `json:"game"`
 	id      uint   `json:"id"`
 	name    string `json:"name"`
 	script  string `json:"script"`
@@ -284,6 +285,30 @@ func (game *Game) DeleteScript(script *Script) error {
 	}
 
 	delete(game.scripts, script.id)
+	return nil
+}
+
+func (script *Script) Save() error {
+	result, err := script.Game.db.Exec(`
+		UPDATE
+			scripts
+		SET
+			name = ?,
+			script = ?
+		WHERE
+			id = ?
+	`, script.name, script.script, script.id)
+	if err != nil {
+		log.Printf("Failed to save script: %v.\r\n", err)
+		return err
+	}
+
+	_, err = result.RowsAffected()
+	if err != nil {
+		log.Printf("Failed to retrieve number of rows affected: %v.\r\n", err)
+		return err
+	}
+
 	return nil
 }
 
