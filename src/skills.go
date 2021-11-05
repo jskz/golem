@@ -315,19 +315,15 @@ func (game *Game) LoadSkills() error {
 		switch skillType {
 		case "skill":
 			skill.SkillType = SkillTypeSkill
-			break
 
 		case "spell":
 			skill.SkillType = SkillTypeSpell
-			break
 
 		case "passive":
 			skill.SkillType = SkillTypePassive
-			break
 
 		default:
-			err = errors.New("skill with bad enum value scanned")
-			break
+			return errors.New("skill with bad enum value scanned")
 		}
 
 		game.skills[skill.Id] = skill

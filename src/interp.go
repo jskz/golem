@@ -75,6 +75,7 @@ func init() {
 	CommandTable["path"] = Command{Name: "path", CmdFunc: do_path, MinimumLevel: LevelAdmin}
 	CommandTable["peace"] = Command{Name: "peace", CmdFunc: do_peace, MinimumLevel: LevelHero + 1}
 	CommandTable["purge"] = Command{Name: "purge", CmdFunc: do_purge, MinimumLevel: LevelHero + 2}
+	CommandTable["script"] = Command{Name: "script", CmdFunc: do_script, MinimumLevel: LevelAdmin}
 	CommandTable["shutdown"] = Command{Name: "shutdown", CmdFunc: do_shutdown, MinimumLevel: LevelAdmin}
 	CommandTable["zones"] = Command{Name: "zones", CmdFunc: do_zones, MinimumLevel: LevelHero + 1}
 	CommandTable["webhook"] = Command{Name: "webhook", CmdFunc: do_webhook, MinimumLevel: LevelAdmin}

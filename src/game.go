@@ -41,7 +41,7 @@ type Game struct {
 	world   map[uint]*Room
 
 	eventHandlers  map[string]*LinkedList
-	scripts        map[uint]*Script
+	Scripts        map[uint]*Script `json:"scripts"`
 	objectScripts  map[uint]*Script
 	webhookScripts map[int]*Script
 	webhooks       map[string]*Webhook

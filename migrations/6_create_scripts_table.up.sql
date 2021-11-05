@@ -20,8 +20,8 @@ CREATE TABLE mobile_script (
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id),
-    FOREIGN KEY (mobile_id) REFERENCES mobiles(id),
-    FOREIGN KEY (script_id) REFERENCES scripts(id)
+    FOREIGN KEY (mobile_id) REFERENCES mobiles(id) ON DELETE CASCADE,
+    FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE object_script (
@@ -34,8 +34,8 @@ CREATE TABLE object_script (
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id),
-    FOREIGN KEY (`object_id`) REFERENCES objects(id),
-    FOREIGN KEY (script_id) REFERENCES scripts(id)
+    FOREIGN KEY (`object_id`) REFERENCES objects(id) ON DELETE CASCADE,
+    FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE room_script (
@@ -48,8 +48,8 @@ CREATE TABLE room_script (
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id),
-    FOREIGN KEY (room_id) REFERENCES rooms(id),
-    FOREIGN KEY (script_id) REFERENCES scripts(id)
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE,
+    FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE
 );
 
 CREATE TABLE plane_script (
@@ -62,8 +62,8 @@ CREATE TABLE plane_script (
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id),
-    FOREIGN KEY (plane_id) REFERENCES planes(id),
-    FOREIGN KEY (script_id) REFERENCES scripts(id)
+    FOREIGN KEY (plane_id) REFERENCES planes(id ON DELETE CASCADE,
+    FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE
 );
 
 INSERT INTO 
