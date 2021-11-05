@@ -9,7 +9,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -163,9 +162,12 @@ func do_wiznet(ch *Character, arguments string) {
 func do_webhook(ch *Character, arguments string) {
 	if len(arguments) < 1 {
 		output := "{WWebhook management:\r\n" +
-			"{Glist       - {glist all system webhooks\r\n" +
-			"{Gcreate     - {gcreate a system webhook\r\n" +
-			"{Gdelete [#] - {gdelete a webhook by ID (from {G\"webhook list\"){x\r\n"
+			"{Glist                                 - {glist all webhooks\r\n" +
+			"{Gcreate                               - {gcreate webhook\r\n" +
+			"{Gshow [webhook_id]                    - {gdetailed info about webhook by ID{x\r\n" +
+			"{Gdelete [webhook_id]                  - {gdelete webhook by ID{x\r\n" +
+			"{Gconnect [webhook_id] [script_id]     - {gconnect webhook with script{x\r\n" +
+			"{Gdisconnect [webhook_id] [script_id]  - {gdetach webhook from script{x\r\n"
 		ch.Send(output)
 		return
 	}
@@ -196,6 +198,98 @@ func do_webhook(ch *Character, arguments string) {
 
 		ch.Send(fmt.Sprintf("Successfully created a new webhook with URL:\r\n{Y%swebhook?key=%s{x\r\n", Config.WebConfiguration.PublicRoot, webhook.Uuid))
 
+	case "disconnect":
+		secondArgument, arguments := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Disconnect requires two ID arguments, webhook_id and script_id.\r\n")
+			break
+		}
+
+		webhookId, err := strconv.Atoi(secondArgument)
+		if err != nil {
+			ch.Send("Bad argument, please provider two integer IDs.\r\n")
+			break
+		}
+
+		thirdArgument, _ := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Disconnect requires two ID arguments, webhook_id and script_id.\r\n")
+			break
+		}
+
+		scriptId, err := strconv.Atoi(thirdArgument)
+		if err != nil {
+			ch.Send("Bad argument, please provider two integer IDs.\r\n")
+			break
+		}
+
+		script, ok := ch.Game.Scripts[uint(scriptId)]
+		if !ok {
+			ch.Send("Could not find script with that ID for webhook to disconnect.\r\n")
+			break
+		}
+
+		for _, webhook := range ch.Game.webhooks {
+			if webhook.Id == webhookId {
+				err := webhook.DetachScript(script)
+				if err != nil {
+					ch.Send(fmt.Sprintf("Something went wrong trying to detach webhook-script relation: %v\r\n", err))
+					return
+				}
+
+				ch.Send("Ok.\r\n")
+				return
+			}
+		}
+
+		ch.Send("Could not find that webhook to detach that script.\r\n")
+
+	case "connect":
+		secondArgument, arguments := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Connect requires two ID arguments, webhook_id and script_id.\r\n")
+			break
+		}
+
+		webhookId, err := strconv.Atoi(secondArgument)
+		if err != nil {
+			ch.Send("Bad argument, please provider two integer IDs.\r\n")
+			break
+		}
+
+		thirdArgument, _ := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Connect requires two ID arguments, webhook_id and script_id.\r\n")
+			break
+		}
+
+		scriptId, err := strconv.Atoi(thirdArgument)
+		if err != nil {
+			ch.Send("Bad argument, please provider two integer IDs.\r\n")
+			break
+		}
+
+		script, ok := ch.Game.Scripts[uint(scriptId)]
+		if !ok {
+			ch.Send("Could not find script with that ID for webhook to connect.\r\n")
+			break
+		}
+
+		for _, webhook := range ch.Game.webhooks {
+			if webhook.Id == webhookId {
+				err := webhook.AttachScript(script)
+				if err != nil {
+					ch.Send(fmt.Sprintf("Something went wrong trying to connect webhook-script relation: %v\r\n", err))
+					return
+				}
+
+				ch.Send("Ok.\r\n")
+				return
+			}
+		}
+
+		ch.Send("Could not find that webhook to attach that script.\r\n")
+
 	case "delete":
 		secondArgument, _ := oneArgument(arguments)
 		if secondArgument == "" {
@@ -218,6 +312,38 @@ func do_webhook(ch *Character, arguments string) {
 				}
 
 				ch.Send("Ok.\r\n")
+				return
+			}
+		}
+
+		ch.Send("A webook with that ID could not be found.\r\n")
+
+	case "show":
+		secondArgument, _ := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Show requires an ID argument.\r\n")
+			break
+		}
+
+		id, err := strconv.Atoi(secondArgument)
+		if err != nil {
+			ch.Send("Bad argument, please provider an integer ID.\r\n")
+			break
+		}
+
+		for _, webhook := range ch.Game.webhooks {
+			if webhook.Id == id {
+				var output strings.Builder
+
+				output.WriteString(fmt.Sprintf("{YWebhook with ID %d:\r\n", webhook.Id))
+				output.WriteString(fmt.Sprintf("URL: %swebhook?key=%s\r\n", Config.WebConfiguration.PublicRoot, webhook.Uuid))
+
+				script, ok := ch.Game.webhookScripts[id]
+				if ok {
+					output.WriteString(fmt.Sprintf("{C* {MWebhook connected to script {Y%s{M/{Y%d{x\r\n", script.Name, script.Id))
+				}
+
+				ch.Send(output.String())
 				return
 			}
 		}
@@ -251,8 +377,8 @@ func do_script(ch *Character, arguments string) {
 		output.WriteString("{Y  ID# | Name\r\n")
 		output.WriteString("------+-------------------------------------\r\n")
 
-		for _, script := range ch.Game.scripts {
-			output.WriteString(fmt.Sprintf("{Y%5d | %s\r\n", script.id, script.name))
+		for _, script := range ch.Game.Scripts {
+			output.WriteString(fmt.Sprintf("{Y%5d | %s\r\n", script.Id, script.Name))
 		}
 
 		output.WriteString("{x")
@@ -271,7 +397,7 @@ func do_script(ch *Character, arguments string) {
 			break
 		}
 
-		ch.Send(fmt.Sprintf("Successfully created a new script with ID %d.{x\r\n", script.id))
+		ch.Send(fmt.Sprintf("Successfully created a new script with ID %d.{x\r\n", script.Id))
 
 	case "edit":
 		secondArgument, _ := oneArgument(arguments)
@@ -286,13 +412,53 @@ func do_script(ch *Character, arguments string) {
 			break
 		}
 
-		script, ok := ch.Game.scripts[uint(id)]
+		_, ok := ch.Game.Scripts[uint(id)]
 		if !ok {
 			ch.Send("A script with that ID could not be found.\r\n")
 			return
 		}
 
-		log.Println(script)
+		/* For now, crudely do this from the host.  In the future we'll rewrite this shell command in JS anyway. */
+		_, err = ch.Game.vm.RunString(fmt.Sprintf(`
+			(function() {
+				try {
+					const ch = Golem.game.findPlayerByName("%s")[0];
+					const script = Golem.game.scripts[%d];
+
+					if(!ch || !ch.client || !script) {
+						return;
+					}
+
+					Golem.StringEditor(ch.client,
+						script.script,
+						(_, string) => {
+							ch.send("{WSaving script " + script.name + " (" + script.id + ")...{x\r\n");
+							script.script = string;
+
+							if(!script.save()) {
+								ch.send("{RSave failed.{x\r\n");
+							}
+							
+							ch.send("{WSaved, trying to re-evaluate script for exports...{x\r\n");
+
+							try {
+								var newExports = script.getExports();
+								script.exports = newExports;
+
+								ch.send("{Y" + JSON.stringify(newExports) + "\r\n");
+								ch.send("{GScript exports updated in-place after a successful execution.{x\r\n");
+							} catch(err) {
+								ch.send("{RFailed to update script exports in place: " + err + "{x\r\n");
+							}
+						});
+				} catch(err) {
+				    Golem.game.broadcast(err);
+				}
+			})();
+		`, ch.Name, id))
+		if err != nil {
+			ch.Send(fmt.Sprintf("Failed to edit this script: %v\r\n", err))
+		}
 
 	case "delete":
 		secondArgument, _ := oneArgument(arguments)
@@ -307,7 +473,7 @@ func do_script(ch *Character, arguments string) {
 			break
 		}
 
-		script, ok := ch.Game.scripts[uint(id)]
+		script, ok := ch.Game.Scripts[uint(id)]
 		if !ok {
 			ch.Send("A script with that ID could not be found.\r\n")
 			return

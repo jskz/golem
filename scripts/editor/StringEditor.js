@@ -71,7 +71,7 @@ Golem.StringEditor = function (client, string, callback) {
                     return;
                 }
 
-                ch.send("{WOk.  Moved to line " + lineNumber + ".{x\r\n");
+                ch.send("{WOk.  Cursor at " + lineNumber + ". Next line will write to line " + (parseInt(lineNumber) + 1) + "{x\r\n");
                 cursor = lineNumber;
             } else if(Golem.StringEditor.DeleteLineRegex.test(input)) {
                 const [_, lineNumber] = Golem.StringEditor.DeleteLineRegex.exec(input),
@@ -85,7 +85,7 @@ Golem.StringEditor = function (client, string, callback) {
                         .join("\r\n");
                 }
 
-                ch.send("{WOk.  Deleted " + lineNumber + " lines.{x\r\n");
+                ch.send("{WOk.  Deleted " + lineNumber + " lines from cursor " + lineNumber + "{x\r\n");
             }
         } catch(err) {
             ch.send(err);

@@ -15,6 +15,7 @@ import (
 )
 
 type Webhook struct {
+	Game *Game  `json:"game"`
 	Id   int    `json:"id"`
 	Uuid string `json:"uuid"`
 }
@@ -41,7 +42,7 @@ func (game *Game) LoadWebhooks() error {
 	defer rows.Close()
 
 	for rows.Next() {
-		webhook := &Webhook{}
+		webhook := &Webhook{Game: game}
 
 		err := rows.Scan(&webhook.Id, &webhook.Uuid)
 		if err != nil {
@@ -74,6 +75,42 @@ func (game *Game) DeleteWebhook(webhook *Webhook) error {
 	return nil
 }
 
+func (webhook *Webhook) DetachScript(script *Script) error {
+	result, err := webhook.Game.db.Exec(`
+		DELETE FROM
+			webhook_script
+		WHERE
+			webhook_id = ?
+		AND
+			script_id = ?`, webhook.Id, script.Id)
+	if err != nil {
+		return err
+	}
+
+	_, err = result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	delete(webhook.Game.webhookScripts, webhook.Id)
+	return nil
+}
+
+func (webhook *Webhook) AttachScript(script *Script) error {
+	_, err := webhook.Game.db.Exec(`
+	INSERT INTO
+		webhook_script(webhook_id, script_id)
+	VALUES
+		(?, ?)
+	`, webhook.Id, script.Id)
+	if err != nil {
+		return err
+	}
+
+	webhook.Game.webhookScripts[webhook.Id] = script
+	return nil
+}
+
 func (game *Game) CreateWebhook() (*Webhook, error) {
 	webhookUuid, err := uuid.NewUUID()
 	if err != nil {
@@ -100,7 +137,7 @@ func (game *Game) CreateWebhook() (*Webhook, error) {
 		return nil, err
 	}
 
-	game.webhooks[uuidString] = &Webhook{Id: int(insertId), Uuid: uuidString}
+	game.webhooks[uuidString] = &Webhook{Id: int(insertId), Uuid: uuidString, Game: game}
 	return game.webhooks[uuidString], nil
 }
 

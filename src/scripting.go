@@ -33,25 +33,66 @@ type ScriptTimer struct {
 }
 
 type Script struct {
-	Game    *Game  `json:"game"`
-	id      uint   `json:"id"`
-	name    string `json:"name"`
-	script  string `json:"script"`
-	exports *goja.Object
+	Game    *Game        `json:"game"`
+	Id      uint         `json:"id"`
+	Name    string       `json:"name"`
+	Script  string       `json:"script"`
+	Exports *goja.Object `json:"exports"`
 }
 
 func (game *Game) DefaultSourceLoader(filename string) ([]byte, error) {
-	for _, script := range game.scripts {
-		if strings.Compare(strings.ToLower(filename), strings.ToLower(script.name)) == 0 {
-			return []byte(script.script), nil
+	for _, script := range game.Scripts {
+		if strings.Compare(strings.ToLower(filename), strings.ToLower(script.Name)) == 0 {
+			return []byte(script.Script), nil
 		}
 	}
 
 	return nil, errors.New("unable to find a script of that name")
 }
 
+func (script *Script) GetExports() (*goja.Object, error) {
+	game := script.Game
+
+	source := "(function(exports, require, module) {" + script.Script + "\n})"
+	parsed, err := goja.Parse(script.Name, source, parser.WithSourceMapLoader(game.DefaultSourceLoader))
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	compiled, err := goja.CompileAST(parsed, false)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	res, err := game.vm.RunProgram(compiled)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	fn, ok := goja.AssertFunction(res)
+	if !ok {
+		log.Printf("Failed to execute script %s/%d.", script.Name, script.Id)
+		return nil, nil
+	}
+
+	module := game.vm.NewObject()
+	exports := game.vm.NewObject()
+	module.Set("exports", exports)
+
+	_, err = fn(exports, exports, nil, module)
+	if err != nil {
+		log.Printf("Failed to evaluate script (%s/%d): %v\r\n", script.Name, script.Id, err)
+		return nil, err
+	}
+
+	return module.ToObject(game.vm).Get("exports").ToObject(game.vm), nil
+}
+
 func (game *Game) LoadScriptsFromDatabase() error {
-	game.scripts = make(map[uint]*Script)
+	game.Scripts = make(map[uint]*Script)
 	game.objectScripts = make(map[uint]*Script)
 	game.webhookScripts = make(map[int]*Script)
 
@@ -70,51 +111,24 @@ func (game *Game) LoadScriptsFromDatabase() error {
 	defer rows.Close()
 
 	for rows.Next() {
-		script := &Script{}
+		script := &Script{Game: game}
 
-		err := rows.Scan(&script.id, &script.name, &script.script)
+		err := rows.Scan(&script.Id, &script.Name, &script.Script)
 		if err != nil {
 			log.Printf("Failed to load script from database: %v\r\n", err)
 			continue
 		}
 
-		source := "(function(exports, require, module) {" + script.script + "\n})"
-		parsed, err := goja.Parse(script.name, source, parser.WithSourceMapLoader(game.DefaultSourceLoader))
+		script.Exports, err = script.GetExports()
 		if err != nil {
-			return err
-		}
-
-		compiled, err := goja.CompileAST(parsed, false)
-		if err != nil {
-			return err
-		}
-
-		res, err := game.vm.RunProgram(compiled)
-		if err != nil {
-			return err
-		}
-
-		fn, ok := goja.AssertFunction(res)
-		if !ok {
-			log.Printf("Failed to execute script (%s) loaded from database.", script.name)
+			log.Printf("Failed to retrieve module exports: %v\r\n", err)
 			continue
 		}
 
-		module := game.vm.NewObject()
-		exports := game.vm.NewObject()
-		module.Set("exports", exports)
-
-		_, err = fn(exports, exports, nil, module)
-		if err != nil {
-			log.Printf("Failed to evaluate script (%s) loaded from database: %v\r\n", script.name, err)
-			continue
-		}
-
-		script.exports = module.ToObject(game.vm).Get("exports").ToObject(game.vm)
-		game.scripts[script.id] = script
+		game.Scripts[script.Id] = script
 	}
 
-	log.Printf("Loaded %d scripts from database.\r\n", len(game.scripts))
+	log.Printf("Loaded %d scripts from database.\r\n", len(game.Scripts))
 
 	log.Println("Loading object-script relations from database...")
 	rows, err = game.db.Query(`
@@ -139,13 +153,13 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			return err
 		}
 
-		_, ok := game.scripts[scriptId]
+		_, ok := game.Scripts[scriptId]
 		if !ok {
 			log.Printf("Trying to relate object with script")
 			continue
 		}
 
-		game.objectScripts[objectId] = game.scripts[scriptId]
+		game.objectScripts[objectId] = game.Scripts[scriptId]
 	}
 
 	log.Println("Loading room-script relations from database...")
@@ -171,7 +185,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			return err
 		}
 
-		_, ok := game.scripts[scriptId]
+		_, ok := game.Scripts[scriptId]
 		if !ok {
 			log.Printf("Trying to relate room with script")
 			continue
@@ -182,7 +196,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			return err
 		}
 
-		room.script = game.scripts[scriptId]
+		room.script = game.Scripts[scriptId]
 	}
 
 	log.Println("Loading plane-script relations from database...")
@@ -213,12 +227,12 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			return errors.New("tried to load a plane_script for a nonexistent plane")
 		}
 
-		_, ok := game.scripts[scriptId]
+		_, ok := game.Scripts[scriptId]
 		if !ok {
 			return errors.New("tried to load a plane_script for a nonexistent script")
 		}
 
-		plane.Scripts = game.scripts[scriptId]
+		plane.Scripts = game.Scripts[scriptId]
 	}
 
 	log.Println("Loading webhook-script relations from database...")
@@ -244,12 +258,12 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			return err
 		}
 
-		_, ok := game.scripts[scriptId]
+		_, ok := game.Scripts[scriptId]
 		if !ok {
 			return errors.New("tried to load a webhook_script for a nonexistent script")
 		}
 
-		game.webhookScripts[webhookId] = game.scripts[scriptId]
+		game.webhookScripts[webhookId] = game.Scripts[scriptId]
 	}
 
 	return nil
@@ -274,7 +288,7 @@ func (game *Game) DeleteScript(script *Script) error {
 	DELETE FROM
 		scripts
 	WHERE
-		id = ?`, script.id)
+		id = ?`, script.Id)
 	if err != nil {
 		return err
 	}
@@ -284,11 +298,11 @@ func (game *Game) DeleteScript(script *Script) error {
 		return err
 	}
 
-	delete(game.scripts, script.id)
+	delete(game.Scripts, script.Id)
 	return nil
 }
 
-func (script *Script) Save() error {
+func (script *Script) Save() bool {
 	result, err := script.Game.db.Exec(`
 		UPDATE
 			scripts
@@ -297,19 +311,19 @@ func (script *Script) Save() error {
 			script = ?
 		WHERE
 			id = ?
-	`, script.name, script.script, script.id)
+	`, script.Name, script.Script, script.Id)
 	if err != nil {
 		log.Printf("Failed to save script: %v.\r\n", err)
-		return err
+		return false
 	}
 
 	_, err = result.RowsAffected()
 	if err != nil {
 		log.Printf("Failed to retrieve number of rows affected: %v.\r\n", err)
-		return err
+		return false
 	}
 
-	return nil
+	return true
 }
 
 func (game *Game) CreateScript(name string, initialBody string) (*Script, error) {
@@ -329,8 +343,8 @@ func (game *Game) CreateScript(name string, initialBody string) (*Script, error)
 	}
 
 	insertId := uint(insertId64)
-	script := &Script{id: insertId, name: name, script: initialBody}
-	game.scripts[insertId] = script
+	script := &Script{Id: insertId, Name: name, Script: initialBody, Game: game}
+	game.Scripts[insertId] = script
 	return script, nil
 }
 
@@ -347,10 +361,10 @@ func (game *Game) scriptTimersUpdate() {
 }
 
 func (script *Script) tryEvaluate(methodName string, this goja.Value, arguments ...goja.Value) (goja.Value, error) {
-	v := script.exports.Get(methodName)
+	v := script.Exports.Get(methodName)
 	fn, ok := goja.AssertFunction(v)
 	if !ok {
-		return nil, fmt.Errorf("%s not a function exported by script %s", methodName, script.name)
+		return nil, fmt.Errorf("%s not a function exported by script %s", methodName, script.Name)
 	}
 
 	result, err := fn(this, arguments...)
