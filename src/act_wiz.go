@@ -228,6 +228,83 @@ func do_webhook(ch *Character, arguments string) {
 	}
 }
 
+func do_script(ch *Character, arguments string) {
+	if len(arguments) < 1 {
+		output := "{WScript management:\r\n" +
+			"{Glist       - {glist all mutable scripts\r\n" +
+			"{Gcreate     - {gcreate a new mutable script\r\n" +
+			"{Gshow [#]   - {gshow more details about a mutable script\r\n" +
+			"{Gedit [#]   - {gstart a line editor on a script's source\r\n" +
+			"{Gdelete [#] - {gdelete a script by ID (from {G\"script list\"){x\r\n"
+		ch.Send(output)
+		return
+	}
+
+	firstArgument, arguments := oneArgument(arguments)
+
+	command := strings.ToLower(firstArgument)
+	switch command {
+	case "list":
+		var output strings.Builder
+
+		output.WriteString("{Y  ID# | Name\r\n")
+		output.WriteString("------+-------------------------------------\r\n")
+
+		for _, script := range ch.Game.scripts {
+			output.WriteString(fmt.Sprintf("{Y%5d | %s\r\n", script.id, script.name))
+		}
+
+		output.WriteString("{x")
+		ch.Send(output.String())
+
+	case "create":
+		secondArgument, _ := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Create requires a script name string argument.\r\n")
+			break
+		}
+
+		script, err := ch.Game.CreateScript(secondArgument, "module.exports = {};")
+		if err != nil {
+			ch.Send(fmt.Sprintf("Something went wrong trying to create a new script: %v\r\n", err))
+			break
+		}
+
+		ch.Send(fmt.Sprintf("Successfully created a new script with ID %d.{x\r\n", script.id))
+
+	case "delete":
+		secondArgument, _ := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Delete requires an ID argument.\r\n")
+			break
+		}
+
+		id, err := strconv.Atoi(secondArgument)
+		if err != nil {
+			ch.Send("Bad argument, please provider an integer ID.\r\n")
+			break
+		}
+
+		for _, script := range ch.Game.scripts {
+			if script.id == uint(id) {
+				err := ch.Game.DeleteScript(script)
+				if err != nil {
+					ch.Send(fmt.Sprintf("Something went wrong trying to delete this script: %v\r\n", err))
+					return
+				}
+
+				ch.Send("Ok.\r\n")
+				return
+			}
+		}
+
+		ch.Send("A script with that ID could not be found.\r\n")
+
+	default:
+		ch.Send("Unrecognized command.\r\n")
+	}
+}
+
 func do_goto(ch *Character, arguments string) {
 	id, err := strconv.Atoi(arguments)
 	if err != nil || id <= 0 {
