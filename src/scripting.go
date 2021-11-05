@@ -325,7 +325,7 @@ func (script *Script) tryEvaluate(methodName string, this goja.Value, arguments 
 	v := script.exports.Get(methodName)
 	fn, ok := goja.AssertFunction(v)
 	if !ok {
-		return nil, errors.New(fmt.Sprintf("%s not a function exported by script %s", methodName, script.name))
+		return nil, fmt.Errorf("%s not a function exported by script %s", methodName, script.name)
 	}
 
 	result, err := fn(this, arguments...)
