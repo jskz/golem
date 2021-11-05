@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"time"
@@ -272,6 +273,27 @@ func do_script(ch *Character, arguments string) {
 
 		ch.Send(fmt.Sprintf("Successfully created a new script with ID %d.{x\r\n", script.id))
 
+	case "edit":
+		secondArgument, _ := oneArgument(arguments)
+		if secondArgument == "" {
+			ch.Send("Delete requires an ID argument.\r\n")
+			break
+		}
+
+		id, err := strconv.Atoi(secondArgument)
+		if err != nil {
+			ch.Send("Bad argument, please provider an integer ID.\r\n")
+			break
+		}
+
+		script, ok := ch.Game.scripts[uint(id)]
+		if !ok {
+			ch.Send("A script with that ID could not be found.\r\n")
+			return
+		}
+
+		log.Println(script)
+
 	case "delete":
 		secondArgument, _ := oneArgument(arguments)
 		if secondArgument == "" {
@@ -285,20 +307,20 @@ func do_script(ch *Character, arguments string) {
 			break
 		}
 
-		for _, script := range ch.Game.scripts {
-			if script.id == uint(id) {
-				err := ch.Game.DeleteScript(script)
-				if err != nil {
-					ch.Send(fmt.Sprintf("Something went wrong trying to delete this script: %v\r\n", err))
-					return
-				}
-
-				ch.Send("Ok.\r\n")
-				return
-			}
+		script, ok := ch.Game.scripts[uint(id)]
+		if !ok {
+			ch.Send("A script with that ID could not be found.\r\n")
+			return
 		}
 
-		ch.Send("A script with that ID could not be found.\r\n")
+		err = ch.Game.DeleteScript(script)
+		if err != nil {
+			ch.Send(fmt.Sprintf("Something went wrong trying to delete this script: %v\r\n", err))
+			return
+		}
+
+		ch.Send("Ok.\r\n")
+		return
 
 	default:
 		ch.Send("Unrecognized command.\r\n")
