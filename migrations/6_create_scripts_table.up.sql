@@ -62,7 +62,7 @@ CREATE TABLE plane_script (
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
 
     PRIMARY KEY (id),
-    FOREIGN KEY (plane_id) REFERENCES planes(id ON DELETE CASCADE,
+    FOREIGN KEY (plane_id) REFERENCES planes(id) ON DELETE CASCADE,
     FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE
 );
 
