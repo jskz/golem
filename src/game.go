@@ -174,6 +174,11 @@ func NewGame() (*Game, error) {
 		}
 	}
 
+	err = game.LoadShops()
+	if err != nil {
+		return nil, err
+	}
+
 	err = game.LoadResets()
 	if err != nil {
 		return nil, err
