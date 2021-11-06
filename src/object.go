@@ -73,6 +73,7 @@ const (
 	ItemTypeTreasure  = "treasure"
 	ItemTypeReagent   = "reagent"
 	ItemTypeArtifact  = "artifact"
+	ItemTypeCurrency  = "currency"
 )
 
 const (
@@ -95,6 +96,9 @@ const (
 	ITEM_GLOW           = 1 << 16
 	ITEM_HUM            = 1 << 17
 )
+
+const ObjectGoldSingle = 2
+const ObjectGoldCoins = 3
 
 type ObjectFlag struct {
 	Name string `json:"name"`
@@ -120,6 +124,56 @@ var ObjectFlagTable []ObjectFlag = []ObjectFlag{
 	{Name: "wear_feet", Flag: ITEM_WEAR_FEET},
 	{Name: "glow", Flag: ITEM_GLOW},
 	{Name: "hum", Flag: ITEM_HUM},
+}
+
+func (game *Game) CreateGold(amount int) *ObjectInstance {
+	if amount <= 0 {
+		return nil
+	} else if amount == 1 {
+		obj, err := game.LoadObjectIndex(ObjectGoldSingle)
+		if err != nil {
+			log.Printf("Failed to create single gold coin: %v\r\n", err)
+			return nil
+		}
+
+		objectInstance := &ObjectInstance{
+			Game:             game,
+			ParentId:         obj.Id,
+			Description:      obj.Description,
+			ShortDescription: obj.ShortDescription,
+			LongDescription:  obj.LongDescription,
+			Name:             obj.Name,
+			ItemType:         obj.ItemType,
+			CreatedAt:        time.Now(),
+			Flags:            ITEM_TAKE,
+			WearLocation:     0,
+			Value0:           amount,
+		}
+
+		return objectInstance
+	}
+
+	obj, err := game.LoadObjectIndex(ObjectGoldCoins)
+	if err != nil {
+		log.Printf("Failed to create gold coins: %v\r\n", err)
+		return nil
+	}
+
+	objectInstance := &ObjectInstance{
+		Game:             game,
+		ParentId:         obj.Id,
+		ShortDescription: fmt.Sprintf(obj.ShortDescription, amount),
+		LongDescription:  obj.LongDescription,
+		Description:      fmt.Sprintf(obj.Description, amount),
+		Name:             obj.Name,
+		ItemType:         obj.ItemType,
+		CreatedAt:        time.Now(),
+		Flags:            ITEM_TAKE,
+		WearLocation:     0,
+		Value0:           amount,
+	}
+
+	return objectInstance
 }
 
 func (obj *ObjectInstance) GetFlagsString() string {
@@ -183,14 +237,11 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 
 		if err != nil {
 			if err == sql.ErrNoRows {
-				log.Printf("no rows...\r\n")
 				break
 			}
 
 			return nil, err
 		}
-
-		log.Println(obj)
 
 		objects = append(objects, obj)
 	}
@@ -273,7 +324,7 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 		INSERT INTO
 			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3)
 	if err != nil {
 		log.Printf("Failed to finalize new object: %v.\r\n", err)

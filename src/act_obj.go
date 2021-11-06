@@ -219,14 +219,22 @@ func do_equipment(ch *Character, arguments string) {
 }
 
 func do_inventory(ch *Character, arguments string) {
-	var count int = 0
 	var weightTotal float64 = 0.0
 
 	ch.Send("\r\n{YYour current inventory:{x\r\n")
 	ch.listObjects(ch.Inventory, false, true)
 
+	if ch.Gold > 0 {
+		var goldPlural string = ""
+		if ch.Gold != 1 {
+			goldPlural = "s"
+		}
+
+		ch.Send(fmt.Sprintf("{xYou are carrying {Y%d gold coin%s{x.\r\n", ch.Gold, goldPlural))
+	}
+
 	ch.Send(fmt.Sprintf("{xTotal: %d/%d items, %0.1f/%.1f lbs.\r\n",
-		count,
+		ch.Inventory.Count,
 		ch.getMaxItemsInventory(),
 		weightTotal,
 		ch.getMaxCarryWeight()))
@@ -663,14 +671,21 @@ func do_take(ch *Character, arguments string) {
 			return
 		}
 
-		err := ch.attachObject(takingObj)
-		if err != nil {
-			ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
-			return
+		if takingObj.ItemType != ItemTypeCurrency {
+			err := ch.attachObject(takingObj)
+			if err != nil {
+				ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+				return
+			}
 		}
 
 		takingFrom.removeObject(takingObj)
-		ch.addObject(takingObj)
+
+		if takingObj.ItemType != ItemTypeCurrency {
+			ch.addObject(takingObj)
+		} else {
+			ch.Gold = ch.Gold + takingObj.Value0
+		}
 
 		ch.Send(fmt.Sprintf("You take %s{x from %s{x.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
@@ -697,18 +712,23 @@ func do_take(ch *Character, arguments string) {
 
 	/* TODO: Check if object can be taken, weight limits, etc */
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
-		err := ch.attachObject(found)
-		if err != nil {
-			log.Println(err)
-			ch.Send("A strange force prevents you from taking that.\r\n")
-			return
+		if found.ItemType != ItemTypeCurrency {
+			err := ch.attachObject(found)
+			if err != nil {
+				log.Println(err)
+				ch.Send("A strange force prevents you from taking that.\r\n")
+				return
+			}
+
 		}
 
-		ch.addObject(found)
 		ch.Room.removeObject(found)
 	} else {
-		ch.addObject(found)
 		ch.Room.removeObject(found)
+	}
+
+	if found.ItemType != ItemTypeCurrency {
+		ch.addObject(found)
 	}
 
 	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.ShortDescription))
@@ -754,13 +774,13 @@ func do_give(ch *Character, arguments string) {
 	}
 
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
-		err := ch.detachObject(found)
+		err := ch.DetachObject(found)
 		if err != nil {
 			ch.Send("A strange force prevents you from releasing your grip.\r\n")
 			return
 		}
 
-		ch.removeObject(found)
+		ch.RemoveObject(found)
 	}
 
 	if target.Flags&CHAR_IS_PLAYER != 0 {
@@ -804,16 +824,16 @@ func do_drop(ch *Character, arguments string) {
 	}
 
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
-		err := ch.detachObject(found)
+		err := ch.DetachObject(found)
 		if err != nil {
 			ch.Send("A strange force prevents you from releasing your grip.\r\n")
 			return
 		}
 
-		ch.removeObject(found)
+		ch.RemoveObject(found)
 		ch.Room.addObject(found)
 	} else {
-		ch.removeObject(found)
+		ch.RemoveObject(found)
 		ch.Room.addObject(found)
 	}
 

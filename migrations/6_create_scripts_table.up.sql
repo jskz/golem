@@ -171,4 +171,25 @@ VALUES (1, 'limbo-developer-maze',
 
 INSERT INTO plane_script (id, plane_id, script_id) VALUES (1, 1, 1);
 
+INSERT INTO
+    scripts (id, name, script)
+VALUES (2, 'minor-healing-potion', 'module.exports = {
+    onUse: function(ch) {
+        if(!ch.isEqual(this.carriedBy)) {
+            ch.send("You aren\'t carrying that.\\r\\n");
+            return;
+        }
+
+        ch.detachObject(this);
+        ch.send("{WYou quaff " + this.getShortDescription(ch) + "{x.\\r\\n");
+        ch.removeObject(this);
+
+        const amount = ~~(Math.random() * 5) + 5;
+        Golem.game.damage(null, ch, false, -amount, Golem.Combat.DamageTypeExotic);
+        ch.send("{WYou feel a little bit better.{x\\r\\n");
+    }
+};');
+
+INSERT INTO object_script (id, `object_id`, script_id) VALUES (1, 5, 2);
+
 CREATE INDEX index_script_name ON scripts(name);

@@ -226,6 +226,11 @@ func do_practice(ch *Character, arguments string) {
 			return
 		}
 
+		if prof.Proficiency >= 100 {
+			ch.Send("You have already mastered this proficiency.\r\n")
+			return
+		}
+
 		ch.Practices -= prof.Complexity
 		prof.Proficiency++
 		ch.Send(fmt.Sprintf("{WYou practice %s!{x\r\n", skill.Name))

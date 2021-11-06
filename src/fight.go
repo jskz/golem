@@ -63,6 +63,12 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 		obj.Contents.Count = ch.Inventory.Count
 
 		ch.Inventory = NewLinkedList()
+
+		// Also create a gold object corresponding to how much gold they had on their person
+		gobj := game.CreateGold(ch.Gold)
+		if gobj != nil {
+			obj.Contents.Insert(gobj)
+		}
 	} else {
 		obj.Contents = NewLinkedList()
 	}

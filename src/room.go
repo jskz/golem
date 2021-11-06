@@ -20,6 +20,7 @@ import (
 /* Fixed location IDs */
 const RoomLimbo = 1
 const RoomDeveloperLounge = 2
+const RoomTradingPost = 8
 
 /* Room flag types */
 const (

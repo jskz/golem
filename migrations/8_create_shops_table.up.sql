@@ -29,4 +29,4 @@ CREATE TABLE shop_object (
 );
 
 INSERT INTO shops (id, mobile_id) VALUES (1, 3);
-INSERT INTO shop_object (id, shop_id, `object_id`, price) VALUES (1, 1, 3, 10);
+INSERT INTO shop_object (id, shop_id, `object_id`, price) VALUES (1, 1, 5, 10);
