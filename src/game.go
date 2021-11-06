@@ -39,6 +39,7 @@ type Game struct {
 	clients map[*Client]bool
 	skills  map[uint]*Skill
 	world   map[uint]*Room
+	shops   map[uint]*Shop
 
 	eventHandlers  map[string]*LinkedList
 	Scripts        map[uint]*Script `json:"scripts"`
