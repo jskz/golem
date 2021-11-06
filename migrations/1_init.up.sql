@@ -352,9 +352,9 @@ VALUES
 
 /* Test NPC in Limbo area */
 INSERT INTO
-    mobiles(id, name, short_description, long_description, description, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
+    mobiles(id, name, short_description, long_description, description, race_id, job_id, level, gold, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 VALUES
-    (1, 'animated animate slime', 'an animated slime', 'An animated slime languidly oozes here.', 'Despite its benign appearance, this puddle of ooze seems poised to strike.', 1, 1, 5, 1250, 15, 15, 100, 100, 100, 100, 12, 12, 12, 12, 12, 12, 10);
+    (1, 'animated animate slime', 'an animated slime', 'An animated slime languidly oozes here.', 'Despite its benign appearance, this puddle of ooze seems poised to strike.', 1, 1, 5, 1, 1250, 15, 15, 100, 100, 100, 100, 12, 12, 12, 12, 12, 12, 10);
 
 INSERT INTO
     mobiles(id, name, short_description, long_description, description, flags, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
