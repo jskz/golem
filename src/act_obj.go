@@ -715,6 +715,11 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
+	if ch.Inventory.Count+1 > ch.getMaxItemsInventory() {
+		ch.Send("You can't carry any more.\r\n")
+		return
+	}
+
 	/* TODO: Check if object can be taken, weight limits, etc */
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
 		if found.ItemType != ItemTypeCurrency {
