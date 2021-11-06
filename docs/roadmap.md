@@ -25,7 +25,7 @@ This will be a working document to track major feature development goals for eac
 
 - [ ] Telnet IAC parsing/session handling implementation overhaul
 - [ ] Add a mechanism for NPCs (with flexibility for PCs in future?) to operate shops that players can buy from, sell?
-- [ ] Webhook facility for scripting API
+- [x] Webhook facility for scripting API
 
 ## 0.4 Telnet Zlib Compression Milestones
 
