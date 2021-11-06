@@ -105,6 +105,7 @@ CREATE TABLE player_characters (
     `experience` BIGINT NOT NULL,
 
     `practices` INT NOT NULL,
+    `gold` INT NOT NULL DEFAULT 0,
 
     `health` INT NOT NULL,
     `max_health` INT NOT NULL,
@@ -148,6 +149,7 @@ CREATE TABLE mobiles (
     `job_id` BIGINT NOT NULL,
 
     `flags` INT NOT NULL DEFAULT 0,
+    `gold` INT NOT NULL DEFAULT 0,
 
     `level` INT NOT NULL,
     `experience` INT NOT NULL,
@@ -342,9 +344,9 @@ VALUES
 
 /* Insert a testing admin character with details: Admin/password */
 INSERT INTO
-    player_characters(id, username, password_hash, wizard, room_id, race_id, job_id, level, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
+    player_characters(id, username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 VALUES
-    (1, 'Admin', '$2a$10$sS5pzrKaD9qeG3ntkT7.gOohefnxSy/9OHR/p1uImyTL2edzYeJzW', 1, 1, 1, 3, 60, 0, 0, 100, 100, 100, 100, 100, 100, 18, 18, 18, 18, 18, 18, 18);
+    (1, 'Admin', '$2a$10$sS5pzrKaD9qeG3ntkT7.gOohefnxSy/9OHR/p1uImyTL2edzYeJzW', 1, 1, 1, 3, 60, 5000, 0, 0, 100, 100, 100, 100, 100, 100, 18, 18, 18, 18, 18, 18, 18);
 
 /* Test NPC in Limbo area */
 INSERT INTO
