@@ -217,7 +217,7 @@ CREATE TABLE objects (
     `description` TEXT,
     `flags` INT,
 
-    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign', 'treasure', 'reagent', 'artifact') NOT NULL DEFAULT 'protoplasm',
+    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign', 'treasure', 'reagent', 'artifact', 'currency') NOT NULL DEFAULT 'protoplasm',
     `value_1` INT,
     `value_2` INT,
     `value_3` INT,
@@ -245,7 +245,7 @@ CREATE TABLE object_instances (
     `flags` INT,
     `wear_location` INT DEFAULT -1,
 
-    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign', 'treasure', 'reagent', 'artifact') NOT NULL DEFAULT 'protoplasm',
+    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign', 'treasure', 'reagent', 'artifact', 'currency') NOT NULL DEFAULT 'protoplasm',
 
     `value_1` INT,
     `value_2` INT,
@@ -293,8 +293,10 @@ INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (7, 1, 'Training
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (8, 1, 'Trading Post', "A station for commerce has somehow taken shape in the astral void.", 4);
 
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!', 0, 'protoplasm');
-INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (2, 1, 'sign post signpost', 'a signpost', 'A signpost hangs in the aether beside a foreboding trapdoor.', "{YWelcome to Golem!{x\r\n\r\n{CThis pre-alpha MUD is in active development.\r\n\r\nBeneath this safe zone welcome lobby is a test dungeon with multiple floors\r\nwhose mazes are regenerated each reboot.\r\n\r\nFind updates and information on development at https://github.com/jskz/golem\r\n\r\n{WProblems? {wFeel free to {Wcontact{w the developer at {Wjames@jskarzin.org{w.{x", 0, 'sign');
-INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (3, 1, 'minor healing potion', 'a potion of minor healing', 'A hazy cyan potion lays here.', '{CTh{cis fo{Cgg{Wy c{wyan l{Wi{Cq{cu{Cid is a life-giving elixir, but the taste is not so great.{x', 0, 'potion');
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (2, 1, 'gold coin', 'a gold coin', 'A gold coin lies on the ground here.', 'A single gold coin.', 0, 'currency');
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (3, 1, 'gold coins pile', '%d gold coins', 'There is a pile of gold coins here.', 'A pile gold coins.', 0, 'currency');
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (4, 1, 'sign post signpost', 'a signpost', 'A signpost hangs in the aether beside a foreboding trapdoor.', "{YWelcome to Golem!{x\r\n\r\n{CThis pre-alpha MUD is in active development.\r\n\r\nBeneath this safe zone welcome lobby is a test dungeon with multiple floors\r\nwhose mazes are regenerated each reboot.\r\n\r\nFind updates and information on development at https://github.com/jskz/golem\r\n\r\n{WProblems? {wFeel free to {Wcontact{w the developer at {Wjames@jskarzin.org{w.{x", 0, 'sign');
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type) VALUES (5, 1, 'minor healing potion', 'a potion of minor healing', 'A hazy cyan potion lays here.', '{CTh{cis fo{Cgg{Wy c{wyan l{Wi{Cq{cu{Cid is a life-giving elixir, but the taste is not so great.{x', 0, 'potion');
 
 /* developer office <-> limbo */
 INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 3);
@@ -375,12 +377,12 @@ VALUES
 INSERT INTO
     resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
 VALUES
-    (4, 1, 8, 'mobile', 3, 3, 1, 1);
+    (3, 1, 8, 'mobile', 3, 3, 1, 1);
 
 INSERT INTO
     resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
 VALUES
-    (3, 1, 1, 'object', 2, 1, 1, 1);
+    (4, 1, 1, 'object', 4, 1, 1, 1);
 
 CREATE INDEX index_pc_username ON player_characters(username);
 CREATE INDEX index_race_name ON races(name);
