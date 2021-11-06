@@ -725,6 +725,9 @@ func do_take(ch *Character, arguments string) {
 	}
 }
 
+func do_shop(ch *Character, arguments string) {
+}
+
 func do_give(ch *Character, arguments string) {
 	args := strings.Split(arguments, " ")
 	if len(args) < 2 {
