@@ -219,7 +219,6 @@ func do_equipment(ch *Character, arguments string) {
 }
 
 func do_inventory(ch *Character, arguments string) {
-	var count int = 0
 	var weightTotal float64 = 0.0
 
 	ch.Send("\r\n{YYour current inventory:{x\r\n")
@@ -235,7 +234,7 @@ func do_inventory(ch *Character, arguments string) {
 	}
 
 	ch.Send(fmt.Sprintf("{xTotal: %d/%d items, %0.1f/%.1f lbs.\r\n",
-		count,
+		ch.Inventory.Count,
 		ch.getMaxItemsInventory(),
 		weightTotal,
 		ch.getMaxCarryWeight()))

@@ -200,9 +200,14 @@ func do_buy(ch *Character, arguments string) {
 			continue
 		}
 
-		objIndex := listing.Object
-
 		if count == id {
+			if listing.Price > ch.Gold {
+				ch.Send("You can't afford that.\r\n")
+				return
+			}
+
+			objIndex := listing.Object
+
 			obj := &ObjectInstance{
 				Game:             ch.Game,
 				ParentId:         objIndex.Id,
@@ -239,6 +244,7 @@ func do_buy(ch *Character, arguments string) {
 			}
 
 			ch.addObject(obj)
+			ch.Gold -= listing.Price
 			return
 		}
 
