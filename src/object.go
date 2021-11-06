@@ -137,6 +137,7 @@ func (game *Game) CreateGold(amount int) *ObjectInstance {
 		}
 
 		objectInstance := &ObjectInstance{
+			Game:             game,
 			ParentId:         obj.Id,
 			Description:      obj.Description,
 			ShortDescription: obj.ShortDescription,
@@ -159,6 +160,7 @@ func (game *Game) CreateGold(amount int) *ObjectInstance {
 	}
 
 	objectInstance := &ObjectInstance{
+		Game:             game,
 		ParentId:         obj.Id,
 		ShortDescription: fmt.Sprintf(obj.ShortDescription, amount),
 		LongDescription:  obj.LongDescription,
@@ -322,7 +324,7 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 		INSERT INTO
 			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3)
 	if err != nil {
 		log.Printf("Failed to finalize new object: %v.\r\n", err)

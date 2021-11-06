@@ -10,7 +10,9 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type ShopListing struct {
@@ -171,6 +173,79 @@ func do_buy(ch *Character, arguments string) {
 		ch.Send("You can't do that here.\r\n")
 		return
 	}
+
+	if len(arguments) < 1 {
+		ch.Send("Buy what?  Use SHOP to determine the item number you wish to purchase and buy # with an optional extra quantity number.\r\n")
+		return
+	}
+
+	secondArgument, _ := oneArgument(arguments)
+	if secondArgument == "" {
+		ch.Send("Buy requires a numeric argument.\r\n")
+		return
+	}
+
+	id, err := strconv.Atoi(secondArgument)
+	if err != nil {
+		ch.Send("Bad argument, please provider an integer.\r\n")
+		return
+	}
+
+	var count int = 1
+
+	for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
+		listing := iter.Value.(*ShopListing)
+
+		if listing.Object == nil {
+			continue
+		}
+
+		objIndex := listing.Object
+
+		if count == id {
+			obj := &ObjectInstance{
+				Game:             ch.Game,
+				ParentId:         objIndex.Id,
+				Contents:         NewLinkedList(),
+				Inside:           nil,
+				CarriedBy:        nil,
+				Name:             objIndex.Name,
+				ShortDescription: objIndex.ShortDescription,
+				LongDescription:  objIndex.LongDescription,
+				Description:      objIndex.Description,
+				ItemType:         objIndex.ItemType,
+				Value0:           objIndex.Value0,
+				Value1:           objIndex.Value1,
+				Value2:           objIndex.Value2,
+				Value3:           objIndex.Value3,
+				CreatedAt:        time.Now(),
+				WearLocation:     -1,
+			}
+
+			err := ch.attachObject(obj)
+			if err != nil {
+				ch.Send("{RA mysterious force prevents you from buying that.{x\r\n")
+				return
+			}
+
+			ch.Send(fmt.Sprintf("You buy %s for %d gold coins.\r\n", obj.GetShortDescription(ch), listing.Price))
+
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				rch := iter.Value.(*Character)
+
+				if !rch.IsEqual(ch) {
+					rch.Send(fmt.Sprintf("%s buys %s.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+				}
+			}
+
+			ch.addObject(obj)
+			return
+		}
+
+		count++
+	}
+
+	ch.Send("That doesn't seem to be for sale.\r\n")
 }
 
 func do_shop(ch *Character, arguments string) {
