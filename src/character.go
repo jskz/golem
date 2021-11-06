@@ -134,6 +134,7 @@ type Character struct {
 
 	Skills map[uint]*Proficiency `json:"skills"`
 
+	Gold  int               `json:"int"`
 	Flags int               `json:"flags"`
 	Afk   *AwayFromKeyboard `json:"afk"`
 
@@ -218,10 +219,10 @@ func (ch *Character) Finalize() error {
 
 	result, err := ch.Game.db.Exec(`
 		INSERT INTO
-			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
+			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -292,6 +293,7 @@ func (ch *Character) Save() bool {
 			race_id = ?,
 			job_id = ?,
 			level = ?,
+			gold = ?,
 			experience = ?,
 			practices = ?,
 			health = ?,
@@ -310,7 +312,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.Wizard, roomId, ch.Race.Id, ch.Job.Id, ch.Level, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.Id)
+	`, ch.Wizard, roomId, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.Id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -557,6 +559,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 			race_id,
 			job_id,
 			level,
+			gold,
 			experience,
 			practices,
 			health,
@@ -587,7 +590,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.Id, &ch.Name, &ch.Wizard, &roomId, &raceId, &jobId, &ch.Level, &ch.Experience, &ch.Practices, &ch.Health, &ch.MaxHealth, &ch.Mana, &ch.MaxMana, &ch.Stamina, &ch.MaxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
+	err := row.Scan(&ch.Id, &ch.Name, &ch.Wizard, &roomId, &raceId, &jobId, &ch.Level, &ch.Gold, &ch.Experience, &ch.Practices, &ch.Health, &ch.MaxHealth, &ch.Mana, &ch.MaxMana, &ch.Stamina, &ch.MaxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -1013,6 +1016,7 @@ func NewCharacter() *Character {
 	character.Afk = nil
 	character.Job = nil
 	character.Flags = 0
+	character.Gold = 0
 	character.Fighting = nil
 	character.Combat = nil
 	character.Race = nil
