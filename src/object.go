@@ -138,6 +138,66 @@ func (obj *ObjectInstance) GetFlagsString() string {
 	return strings.TrimRight(buf.String(), " ")
 }
 
+func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
+	var objectIdValues strings.Builder
+
+	if len(indices) == 0 {
+		return make([]*Object, 0), nil
+	}
+
+	for _, index := range indices {
+		objectIdValues.WriteString(fmt.Sprintf("%d,", index))
+	}
+
+	objectIdValuesString := strings.TrimRight(objectIdValues.String(), ",")
+
+	rows, err := game.db.Query(fmt.Sprintf(`
+		SELECT
+			id,
+			name,
+			short_description,
+			long_description,
+			description,
+			flags,
+			item_type
+		FROM
+			objects
+		WHERE
+			id 
+		IN
+			(%s)
+		AND
+			deleted_at IS NULL
+	`, objectIdValuesString))
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var objects []*Object = make([]*Object, 0)
+
+	for rows.Next() {
+		obj := &Object{}
+		err := rows.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType)
+
+		if err != nil {
+			if err == sql.ErrNoRows {
+				log.Printf("no rows...\r\n")
+				break
+			}
+
+			return nil, err
+		}
+
+		log.Println(obj)
+
+		objects = append(objects, obj)
+	}
+
+	return objects, nil
+}
+
 func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	row := game.db.QueryRow(`
 		SELECT

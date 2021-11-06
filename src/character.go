@@ -54,6 +54,7 @@ const (
 	CHAR_TRAIN      = 1 << 4
 	CHAR_PRACTICE   = 1 << 5
 	CHAR_HEALER     = 1 << 6
+	CHAR_SHOPKEEPER = 1 << 7
 )
 
 const (

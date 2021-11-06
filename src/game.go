@@ -36,9 +36,11 @@ type Game struct {
 	Zones        *LinkedList `json:"zones"`
 	ScriptTimers *LinkedList `json:"scriptTimers"`
 
-	clients map[*Client]bool
-	skills  map[uint]*Skill
-	world   map[uint]*Room
+	clients     map[*Client]bool
+	skills      map[uint]*Skill
+	world       map[uint]*Room
+	shops       map[uint]*Shop
+	mobileShops map[uint]*Shop
 
 	eventHandlers  map[string]*LinkedList
 	Scripts        map[uint]*Script `json:"scripts"`
@@ -172,6 +174,11 @@ func NewGame() (*Game, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	err = game.LoadShops()
+	if err != nil {
+		return nil, err
 	}
 
 	err = game.LoadResets()
