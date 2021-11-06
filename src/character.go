@@ -358,7 +358,7 @@ func (ch *Character) attachObject(obj *ObjectInstance) error {
 	return nil
 }
 
-func (ch *Character) detachObject(obj *ObjectInstance) error {
+func (ch *Character) DetachObject(obj *ObjectInstance) error {
 	result, err := ch.Game.db.Exec(`
 		DELETE FROM
 			player_character_object
@@ -858,7 +858,7 @@ func (ch *Character) addObject(obj *ObjectInstance) {
 	obj.Inside = nil
 }
 
-func (ch *Character) removeObject(obj *ObjectInstance) {
+func (ch *Character) RemoveObject(obj *ObjectInstance) {
 	ch.Inventory.Remove(obj)
 
 	obj.CarriedBy = nil

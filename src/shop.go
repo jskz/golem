@@ -219,6 +219,7 @@ func do_buy(ch *Character, arguments string) {
 				LongDescription:  objIndex.LongDescription,
 				Description:      objIndex.Description,
 				ItemType:         objIndex.ItemType,
+				Flags:            objIndex.Flags,
 				Value0:           objIndex.Value0,
 				Value1:           objIndex.Value1,
 				Value2:           objIndex.Value2,

@@ -774,13 +774,13 @@ func do_give(ch *Character, arguments string) {
 	}
 
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
-		err := ch.detachObject(found)
+		err := ch.DetachObject(found)
 		if err != nil {
 			ch.Send("A strange force prevents you from releasing your grip.\r\n")
 			return
 		}
 
-		ch.removeObject(found)
+		ch.RemoveObject(found)
 	}
 
 	if target.Flags&CHAR_IS_PLAYER != 0 {
@@ -824,16 +824,16 @@ func do_drop(ch *Character, arguments string) {
 	}
 
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
-		err := ch.detachObject(found)
+		err := ch.DetachObject(found)
 		if err != nil {
 			ch.Send("A strange force prevents you from releasing your grip.\r\n")
 			return
 		}
 
-		ch.removeObject(found)
+		ch.RemoveObject(found)
 		ch.Room.addObject(found)
 	} else {
-		ch.removeObject(found)
+		ch.RemoveObject(found)
 		ch.Room.addObject(found)
 	}
 
