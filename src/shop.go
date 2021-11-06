@@ -47,8 +47,7 @@ func (game *Game) LoadShops() error {
 	defer rows.Close()
 
 	for rows.Next() {
-		shop := &Shop{Game: game}
-
+		shop := &Shop{Game: game, Listings: NewLinkedList()}
 		err := rows.Scan(&shop.Id, &shop.MobileId)
 		if err != nil {
 			log.Printf("Unable to scan shop: %v.\r\n", err)
@@ -88,7 +87,11 @@ func (ch *Character) FindShopInRoom() *Shop {
 }
 
 func do_buy(ch *Character, arguments string) {
-
+	shop := ch.FindShopInRoom()
+	if shop == nil {
+		ch.Send("You can't do that here.\r\n")
+		return
+	}
 }
 
 func do_shop(ch *Character, arguments string) {
