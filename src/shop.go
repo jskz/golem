@@ -7,7 +7,11 @@
  */
 package main
 
-import "log"
+import (
+	"fmt"
+	"log"
+	"strings"
+)
 
 type ShopListing struct {
 	Shop   *Shop   `json:"shop"`
@@ -84,7 +88,25 @@ func (ch *Character) FindShopInRoom() *Shop {
 }
 
 func do_buy(ch *Character, arguments string) {
+
 }
 
 func do_shop(ch *Character, arguments string) {
+	var output strings.Builder
+	var count int = 1
+
+	shop := ch.FindShopInRoom()
+	if shop == nil {
+		ch.Send("You can't do that here.\r\n")
+		return
+	}
+
+	for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
+		listing := iter.Value.(*ShopListing)
+
+		output.WriteString(fmt.Sprintf("%2d) %-32s %5d gold coins{x\r\n", count, listing.Object.ShortDescription, listing.Price))
+		count++
+	}
+
+	ch.Send(output.String())
 }
