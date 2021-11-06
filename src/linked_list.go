@@ -57,12 +57,7 @@ func (list *LinkedList) Insert(value interface{}) {
 }
 
 func (list *LinkedList) GetRandomNode() *LinkedListNode {
-	c := len(list.Values())
-	if c <= 0 {
-		return nil
-	}
-
-	choice := rand.Intn(c)
+	choice := rand.Intn(list.Count)
 
 	i := 0
 	for iter := list.Head; iter != nil; iter = iter.Next {
