@@ -73,6 +73,7 @@ const (
 	ItemTypeTreasure  = "treasure"
 	ItemTypeReagent   = "reagent"
 	ItemTypeArtifact  = "artifact"
+	ItemTypeCurrency  = "currency"
 )
 
 const (

@@ -672,14 +672,21 @@ func do_take(ch *Character, arguments string) {
 			return
 		}
 
-		err := ch.attachObject(takingObj)
-		if err != nil {
-			ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
-			return
+		if takingObj.ItemType != ItemTypeCurrency {
+			err := ch.attachObject(takingObj)
+			if err != nil {
+				ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+				return
+			}
 		}
 
 		takingFrom.removeObject(takingObj)
-		ch.addObject(takingObj)
+
+		if takingObj.ItemType != ItemTypeCurrency {
+			ch.addObject(takingObj)
+		} else {
+			ch.Gold = ch.Gold + takingObj.Value0
+		}
 
 		ch.Send(fmt.Sprintf("You take %s{x from %s{x.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
@@ -706,18 +713,23 @@ func do_take(ch *Character, arguments string) {
 
 	/* TODO: Check if object can be taken, weight limits, etc */
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
-		err := ch.attachObject(found)
-		if err != nil {
-			log.Println(err)
-			ch.Send("A strange force prevents you from taking that.\r\n")
-			return
+		if found.ItemType != ItemTypeCurrency {
+			err := ch.attachObject(found)
+			if err != nil {
+				log.Println(err)
+				ch.Send("A strange force prevents you from taking that.\r\n")
+				return
+			}
+
 		}
 
-		ch.addObject(found)
 		ch.Room.removeObject(found)
 	} else {
-		ch.addObject(found)
 		ch.Room.removeObject(found)
+	}
+
+	if found.ItemType != ItemTypeCurrency {
+		ch.addObject(found)
 	}
 
 	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.ShortDescription))
