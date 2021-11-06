@@ -96,6 +96,9 @@ const (
 	ITEM_HUM            = 1 << 17
 )
 
+const ObjectGoldSingle = 2
+const ObjectGoldCoins = 3
+
 type ObjectFlag struct {
 	Name string `json:"name"`
 	Flag int    `json:"flag"`
@@ -120,6 +123,54 @@ var ObjectFlagTable []ObjectFlag = []ObjectFlag{
 	{Name: "wear_feet", Flag: ITEM_WEAR_FEET},
 	{Name: "glow", Flag: ITEM_GLOW},
 	{Name: "hum", Flag: ITEM_HUM},
+}
+
+func (game *Game) CreateGold(amount int) *ObjectInstance {
+	if amount <= 0 {
+		return nil
+	} else if amount == 1 {
+		obj, err := game.LoadObjectIndex(ObjectGoldSingle)
+		if err != nil {
+			log.Printf("Failed to create single gold coin: %v\r\n", err)
+			return nil
+		}
+
+		objectInstance := &ObjectInstance{
+			ParentId:         obj.Id,
+			Description:      obj.Description,
+			ShortDescription: obj.ShortDescription,
+			LongDescription:  obj.LongDescription,
+			Name:             obj.Name,
+			ItemType:         obj.ItemType,
+			CreatedAt:        time.Now(),
+			Flags:            0,
+			WearLocation:     0,
+			Value0:           amount,
+		}
+
+		return objectInstance
+	}
+
+	obj, err := game.LoadObjectIndex(ObjectGoldCoins)
+	if err != nil {
+		log.Printf("Failed to create gold coins: %v\r\n", err)
+		return nil
+	}
+
+	objectInstance := &ObjectInstance{
+		ParentId:         obj.Id,
+		ShortDescription: fmt.Sprintf(obj.ShortDescription, amount),
+		LongDescription:  obj.LongDescription,
+		Description:      fmt.Sprintf(obj.Description, amount),
+		Name:             obj.Name,
+		ItemType:         obj.ItemType,
+		CreatedAt:        time.Now(),
+		Flags:            0,
+		WearLocation:     0,
+		Value0:           amount,
+	}
+
+	return objectInstance
 }
 
 func (obj *ObjectInstance) GetFlagsString() string {

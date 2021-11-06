@@ -225,6 +225,15 @@ func do_inventory(ch *Character, arguments string) {
 	ch.Send("\r\n{YYour current inventory:{x\r\n")
 	ch.listObjects(ch.Inventory, false, true)
 
+	if ch.Gold > 0 {
+		var goldPlural string = ""
+		if ch.Gold != 1 {
+			goldPlural = "s"
+		}
+
+		ch.Send(fmt.Sprintf("{xYou are carrying {Y%d gold coin%s{x.\r\n", ch.Gold, goldPlural))
+	}
+
 	ch.Send(fmt.Sprintf("{xTotal: %d/%d items, %0.1f/%.1f lbs.\r\n",
 		count,
 		ch.getMaxItemsInventory(),
