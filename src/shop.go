@@ -31,6 +31,7 @@ func (game *Game) LoadShops() error {
 	log.Printf("Loading shops.\r\n")
 
 	game.shops = make(map[uint]*Shop)
+	game.mobileShops = make(map[uint]*Shop)
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -54,7 +55,86 @@ func (game *Game) LoadShops() error {
 			return err
 		}
 
-		game.shops[shop.MobileId] = shop
+		game.shops[uint(shop.Id)] = shop
+		game.mobileShops[shop.MobileId] = shop
+	}
+
+	log.Print("Loading shop-object relations.\r\n")
+	rows, err = game.db.Query(`
+		SELECT
+			id,
+			price,
+			shop_id,
+			object_id
+		FROM
+			shop_object
+	`)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	defer rows.Close()
+
+	var objectIds map[uint]int = make(map[uint]int)
+
+	for rows.Next() {
+		var shopId uint
+		var objectId uint
+
+		shopListing := &ShopListing{}
+		err := rows.Scan(&shopListing.Id, &shopListing.Price, &shopId, &objectId)
+		if err != nil {
+			log.Printf("Unable to scan shop: %v.\r\n", err)
+			return err
+		}
+
+		_, ok := game.shops[shopId]
+		if !ok {
+			continue
+		}
+
+		shopListing.Shop = game.shops[shopId]
+		shopListing.Shop.Listings.Insert(shopListing.Shop)
+		objectIds[objectId] = shopListing.Id
+	}
+
+	/*
+	 * At this point, any shop listings have been loaded but have not had their
+	 * object structure instances hydrated.  We will try to bulk load every ID
+	 * and then populate any shop listing with its
+	 */
+	var ids []uint = make([]uint, 0)
+
+	for id := range objectIds {
+		ids = append(ids, id)
+	}
+
+	objects, err := game.LoadObjectsByIndices(ids)
+	if err != nil {
+		return err
+	}
+
+	var objectFromId map[uint]*Object = make(map[uint]*Object)
+	for _, obj := range objects {
+		objectFromId[obj.Id] = obj
+	}
+
+	for _, shop := range game.shops {
+		for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
+			listing := iter.Value.(*ShopListing)
+
+			objectId, ok := objectIds[uint(listing.Id)]
+			if !ok {
+				continue
+			}
+
+			listing.Object, ok = objectFromId[uint(objectId)]
+			if !ok {
+				shop.Listings.Remove(listing)
+				continue
+			}
+		}
 	}
 
 	return nil
@@ -73,7 +153,7 @@ func (ch *Character) FindShopInRoom() *Shop {
 		rch := iter.Value.(*Character)
 
 		if rch.Flags&CHAR_SHOPKEEPER != 0 {
-			shop, ok := ch.Game.shops[uint(rch.Id)]
+			shop, ok := ch.Game.mobileShops[uint(rch.Id)]
 			if !ok {
 				/* Flagged shopkeeper but no associated shop */
 				continue

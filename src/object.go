@@ -141,13 +141,17 @@ func (obj *ObjectInstance) GetFlagsString() string {
 func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 	var objectIdValues strings.Builder
 
+	if len(indices) == 0 {
+		return make([]*Object, 0), nil
+	}
+
 	for _, index := range indices {
 		objectIdValues.WriteString(fmt.Sprintf("%d,", index))
 	}
 
 	objectIdValuesString := strings.TrimRight(objectIdValues.String(), ",")
 
-	rows, err := game.db.Query(`
+	rows, err := game.db.Query(fmt.Sprintf(`
 		SELECT
 			id,
 			name,
@@ -164,7 +168,7 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 			(%s)
 		AND
 			deleted_at IS NULL
-	`, objectIdValuesString)
+	`, objectIdValuesString))
 	if err != nil {
 		return nil, err
 	}
