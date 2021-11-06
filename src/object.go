@@ -144,7 +144,7 @@ func (game *Game) CreateGold(amount int) *ObjectInstance {
 			Name:             obj.Name,
 			ItemType:         obj.ItemType,
 			CreatedAt:        time.Now(),
-			Flags:            0,
+			Flags:            ITEM_TAKE,
 			WearLocation:     0,
 			Value0:           amount,
 		}
@@ -166,7 +166,7 @@ func (game *Game) CreateGold(amount int) *ObjectInstance {
 		Name:             obj.Name,
 		ItemType:         obj.ItemType,
 		CreatedAt:        time.Now(),
-		Flags:            0,
+		Flags:            ITEM_TAKE,
 		WearLocation:     0,
 		Value0:           amount,
 	}
