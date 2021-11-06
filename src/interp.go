@@ -65,7 +65,6 @@ func init() {
 	CommandTable["give"] = Command{Name: "give", CmdFunc: do_give}
 	CommandTable["take"] = Command{Name: "take", CmdFunc: do_take}
 	CommandTable["drop"] = Command{Name: "drop", CmdFunc: do_drop}
-	CommandTable["shop"] = Command{Name: "shop", CmdFunc: do_shop}
 	CommandTable["use"] = Command{Name: "use", CmdFunc: do_use}
 
 	/* act_wiz.go */
@@ -89,6 +88,10 @@ func init() {
 	/* magic.go */
 	CommandTable["cast"] = Command{Name: "cast", CmdFunc: do_cast}
 	CommandTable["spells"] = Command{Name: "spells", CmdFunc: do_spells}
+
+	/* shop.go */
+	CommandTable["buy"] = Command{Name: "buy", CmdFunc: do_buy}
+	CommandTable["shop"] = Command{Name: "list", CmdFunc: do_shop}
 
 	/* scripting.go */
 	CommandTable["reload"] = Command{Name: "reload", CmdFunc: do_reload, MinimumLevel: LevelAdmin}

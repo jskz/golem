@@ -60,3 +60,31 @@ func (game *Game) LoadShops() error {
 func (shop *Shop) Save() error {
 	return nil
 }
+
+func (ch *Character) FindShopInRoom() *Shop {
+	if ch == nil || ch.Room == nil || ch.Room.Characters == nil {
+		return nil
+	}
+
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+
+		if rch.Flags&CHAR_SHOPKEEPER != 0 {
+			shop, ok := ch.Game.shops[uint(rch.Id)]
+			if !ok {
+				/* Flagged shopkeeper but no associated shop */
+				continue
+			}
+
+			return shop
+		}
+	}
+
+	return nil
+}
+
+func do_buy(ch *Character, arguments string) {
+}
+
+func do_shop(ch *Character, arguments string) {
+}
