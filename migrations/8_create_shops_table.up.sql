@@ -1,7 +1,7 @@
 CREATE TABLE shops (
     `id` BIGINT NOT NULL AUTO_INCREMENT,
 
-    `mobile_id` BIGINT NOT NULL,
+    `mobile_id` BIGINT NOT NULL UNIQUE,
 
     FOREIGN KEY (mobile_id) REFERENCES mobiles(id),
 
