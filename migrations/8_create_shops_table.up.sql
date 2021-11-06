@@ -27,3 +27,6 @@ CREATE TABLE shop_object (
     FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE,
     FOREIGN KEY (`object_id`) REFERENCES objects(id) ON DELETE CASCADE
 );
+
+INSERT INTO shops (id, mobile_id) VALUES (1, 3);
+INSERT INTO shop_object (id, shop_id, `object_id`, price) VALUES (1, 1, 3, 10);

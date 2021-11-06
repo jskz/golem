@@ -183,11 +183,14 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 
 		if err != nil {
 			if err == sql.ErrNoRows {
+				log.Printf("no rows...\r\n")
 				break
 			}
 
 			return nil, err
 		}
+
+		log.Println(obj)
 
 		objects = append(objects, obj)
 	}

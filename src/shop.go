@@ -76,7 +76,8 @@ func (game *Game) LoadShops() error {
 
 	defer rows.Close()
 
-	var objectIds map[uint]int = make(map[uint]int)
+	var objectIds map[int]uint = make(map[int]uint)
+	var shopListingIds map[int]uint = make(map[int]uint)
 
 	for rows.Next() {
 		var shopId uint
@@ -95,19 +96,20 @@ func (game *Game) LoadShops() error {
 		}
 
 		shopListing.Shop = game.shops[shopId]
-		shopListing.Shop.Listings.Insert(shopListing.Shop)
-		objectIds[objectId] = shopListing.Id
+		shopListing.Shop.Listings.Insert(shopListing)
+		objectIds[int(objectId)] = uint(shopListing.Id)
+		shopListingIds[shopListing.Id] = objectId
 	}
 
 	/*
 	 * At this point, any shop listings have been loaded but have not had their
 	 * object structure instances hydrated.  We will try to bulk load every ID
-	 * and then populate any shop listing with its
+	 * and then populate any shop listing with its parent object instance.
 	 */
 	var ids []uint = make([]uint, 0)
 
 	for id := range objectIds {
-		ids = append(ids, id)
+		ids = append(ids, uint(id))
 	}
 
 	objects, err := game.LoadObjectsByIndices(ids)
@@ -124,16 +126,13 @@ func (game *Game) LoadShops() error {
 		for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
 			listing := iter.Value.(*ShopListing)
 
-			objectId, ok := objectIds[uint(listing.Id)]
+			obj, ok := objectFromId[shopListingIds[listing.Id]]
 			if !ok {
+				log.Printf("Failed to hydrate object for shop, omitting.\r\n")
 				continue
 			}
 
-			listing.Object, ok = objectFromId[uint(objectId)]
-			if !ok {
-				shop.Listings.Remove(listing)
-				continue
-			}
+			listing.Object = obj
 		}
 	}
 
@@ -184,10 +183,19 @@ func do_shop(ch *Character, arguments string) {
 		return
 	}
 
+	if shop.Listings == nil || shop.Listings.Count == 0 {
+		ch.Send("There isn't anything for sale here.\r\n")
+		return
+	}
+
 	for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
 		listing := iter.Value.(*ShopListing)
 
-		output.WriteString(fmt.Sprintf("%2d) %-32s %5d gold coins{x\r\n", count, listing.Object.ShortDescription, listing.Price))
+		if listing.Object == nil {
+			continue
+		}
+
+		output.WriteString(fmt.Sprintf("{x%2d) %-32s {Y%5d gold coins\r\n", count, listing.Object.ShortDescription, listing.Price))
 		count++
 	}
 
