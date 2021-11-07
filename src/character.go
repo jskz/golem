@@ -406,6 +406,10 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 	}
 
 	for _, obj := range updating {
+		if obj.Id == 0 {
+			continue
+		}
+
 		_, err = tx.ExecContext(ctx, `
 			UPDATE
 				object_instances
@@ -420,7 +424,9 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 				value_2 = ?,
 				value_3 = ?,
 				value_4 = ?
-		`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3)
+			WHERE
+				id = ?
+		`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Id)
 		if err != nil {
 			tx.Rollback()
 			return err
