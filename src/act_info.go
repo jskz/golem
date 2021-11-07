@@ -59,7 +59,7 @@ func (ch *Character) examineCharacter(other *Character) {
 		}
 
 		buf.WriteString(obj.GetShortDescription(ch))
-		ch.Send(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], buf))
+		ch.Send(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], buf.String()))
 	}
 
 	peek := ch.FindProficiencyByName("peek")
