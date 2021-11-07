@@ -102,8 +102,8 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 				character := iter.Value.(*Character)
 				if character != ch && character != target {
 					character.Send(fmt.Sprintf("{G%s{G %s %s{G for %d damage.{x\r\n",
-						damageTypeVerbOtherTable[damageType],
 						ch.GetShortDescriptionUpper(character),
+						damageTypeVerbOtherTable[damageType],
 						target.GetShortDescription(character),
 						amount))
 				}
