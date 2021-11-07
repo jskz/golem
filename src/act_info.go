@@ -43,7 +43,7 @@ func (ch *Character) examineCharacter(other *Character) {
 	ch.Send(fmt.Sprintf("%s\r\n", other.getHealthFeedback(ch)))
 
 	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
-		var obj *ObjectInstance = other.getEquipment(i)
+		var obj *ObjectInstance = other.GetEquipment(i)
 		var buf strings.Builder
 
 		if obj == nil {

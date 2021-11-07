@@ -167,7 +167,7 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	ch.Send(output.String())
 }
 
-func (ch *Character) getEquipment(wearLocation int) *ObjectInstance {
+func (ch *Character) GetEquipment(wearLocation int) *ObjectInstance {
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
@@ -180,7 +180,7 @@ func (ch *Character) getEquipment(wearLocation int) *ObjectInstance {
 }
 
 func (ch *Character) detachEquipment(obj *ObjectInstance) bool {
-	if ch.getEquipment(obj.WearLocation) == nil {
+	if ch.GetEquipment(obj.WearLocation) == nil {
 		return false
 	}
 
@@ -189,7 +189,7 @@ func (ch *Character) detachEquipment(obj *ObjectInstance) bool {
 }
 
 func (ch *Character) attachEquipment(obj *ObjectInstance, wearLocation int) bool {
-	if ch.getEquipment(wearLocation) != nil {
+	if ch.GetEquipment(wearLocation) != nil {
 		return false
 	}
 
@@ -204,7 +204,7 @@ func do_equipment(ch *Character, arguments string) {
 
 	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
 		var objectDescription strings.Builder
-		var obj *ObjectInstance = ch.getEquipment(i)
+		var obj *ObjectInstance = ch.GetEquipment(i)
 
 		if obj == nil {
 			objectDescription.WriteString("nothing")
@@ -254,7 +254,7 @@ func do_wear(ch *Character, arguments string) {
 		if obj.WearLocation == -1 {
 			if strings.Contains(obj.Name, firstArgument) {
 				if obj.Flags&ITEM_WEAR_HELD != 0 {
-					wearing := ch.getEquipment(WearLocationHeld)
+					wearing := ch.GetEquipment(WearLocationHeld)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -279,7 +279,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAPON != 0 {
-					wearing := ch.getEquipment(WearLocationWielded)
+					wearing := ch.GetEquipment(WearLocationWielded)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -304,7 +304,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_BODY != 0 {
-					wearing := ch.getEquipment(WearLocationBody)
+					wearing := ch.GetEquipment(WearLocationBody)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -329,7 +329,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_HEAD != 0 {
-					wearing := ch.getEquipment(WearLocationHead)
+					wearing := ch.GetEquipment(WearLocationHead)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -354,7 +354,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_NECK != 0 {
-					wearing := ch.getEquipment(WearLocationNeck)
+					wearing := ch.GetEquipment(WearLocationNeck)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -379,7 +379,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_TORSO != 0 {
-					wearing := ch.getEquipment(WearLocationTorso)
+					wearing := ch.GetEquipment(WearLocationTorso)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -404,7 +404,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_ARMS != 0 {
-					wearing := ch.getEquipment(WearLocationArms)
+					wearing := ch.GetEquipment(WearLocationArms)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -429,7 +429,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_HANDS != 0 {
-					wearing := ch.getEquipment(WearLocationHands)
+					wearing := ch.GetEquipment(WearLocationHands)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -454,7 +454,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_WAIST != 0 {
-					wearing := ch.getEquipment(WearLocationWaist)
+					wearing := ch.GetEquipment(WearLocationWaist)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -479,7 +479,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_SHIELD != 0 {
-					wearing := ch.getEquipment(WearLocationShield)
+					wearing := ch.GetEquipment(WearLocationShield)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -504,7 +504,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_LEGS != 0 {
-					wearing := ch.getEquipment(WearLocationLegs)
+					wearing := ch.GetEquipment(WearLocationLegs)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
@@ -529,7 +529,7 @@ func do_wear(ch *Character, arguments string) {
 						return
 					}
 				} else if obj.Flags&ITEM_WEAR_FEET != 0 {
-					wearing := ch.getEquipment(WearLocationFeet)
+					wearing := ch.GetEquipment(WearLocationFeet)
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
