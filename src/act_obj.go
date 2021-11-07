@@ -258,9 +258,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop holding %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop holding %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't let go of %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't let go of %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -283,9 +283,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wielding %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wielding %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wielding %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wielding %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -308,9 +308,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -333,9 +333,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -358,9 +358,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -383,9 +383,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -408,9 +408,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -433,9 +433,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -458,9 +458,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -483,9 +483,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -508,9 +508,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
@@ -533,9 +533,9 @@ func do_wear(ch *Character, arguments string) {
 					if wearing != nil {
 						result := ch.detachEquipment(wearing)
 						if result {
-							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 						} else {
-							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", obj.GetShortDescription(ch)))
+							ch.Send(fmt.Sprintf("You can't stop wearing %s{x.\r\n", wearing.GetShortDescription(ch)))
 							return
 						}
 					}
