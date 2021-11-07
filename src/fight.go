@@ -81,12 +81,28 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 		return false
 	}
 
+	var damageTypeVerbTable map[int]string = make(map[int]string)
+	var damageTypeVerbOtherTable map[int]string = make(map[int]string)
+
+	damageTypeVerbOtherTable[DamageTypeBash] = "hits"
+	damageTypeVerbTable[DamageTypeBash] = "hit"
+
+	damageTypeVerbOtherTable[DamageTypeSlash] = "slashes"
+	damageTypeVerbTable[DamageTypeSlash] = "slash"
+
+	damageTypeVerbOtherTable[DamageTypeStab] = "stabs"
+	damageTypeVerbTable[DamageTypeStab] = "stab"
+
+	damageTypeVerbOtherTable[DamageTypeExotic] = "zaps"
+	damageTypeVerbTable[DamageTypeExotic] = "zap"
+
 	if display && ch != nil {
 		if ch.Room != nil && target.Room != nil && target.Room == ch.Room {
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 				character := iter.Value.(*Character)
 				if character != ch && character != target {
-					character.Send(fmt.Sprintf("{G%s{G hits %s{G for %d damage.{x\r\n",
+					character.Send(fmt.Sprintf("{G%s{G %s %s{G for %d damage.{x\r\n",
+						damageTypeVerbOtherTable[damageType],
 						ch.GetShortDescriptionUpper(character),
 						target.GetShortDescription(character),
 						amount))
@@ -94,8 +110,8 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 			}
 		}
 
-		ch.Send(fmt.Sprintf("{GYou hit %s{G for %d damage.{x\r\n", target.GetShortDescription(ch), amount))
-		target.Send(fmt.Sprintf("{Y%s{Y hits you for %d damage.{x\r\n", ch.GetShortDescriptionUpper(target), amount))
+		ch.Send(fmt.Sprintf("{GYou %s %s{G for %d damage.{x\r\n", damageTypeVerbTable[damageType], target.GetShortDescription(ch), amount))
+		target.Send(fmt.Sprintf("{Y%s{Y %s you for %d damage.{x\r\n", ch.GetShortDescriptionUpper(target), damageTypeVerbOtherTable[damageType], amount))
 	}
 
 	target.Health -= amount

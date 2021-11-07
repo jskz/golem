@@ -42,17 +42,37 @@ function onCombatUpdate() {
                     found = true;
 
                     let damage = ~~(Math.random() * 2);
+                    let damageType = Golem.Combat.DamageTypeBash;
 
-                    damage += ~~(Math.random() * (vch.strength / 3));
+                    let weapon = vch.getEquipment(Golem.WearLocations.WearLocationWielded);
+                    if(!weapon) {
+                        damage += ~~(Math.random() * (vch.strength / 3));
 
-                    const unarmedCombatProficiency =
-                        vch.findProficiencyByName('unarmed combat');
-                    /* TODO: check if wielding or not! ... weapon type profs.. */
-                    if (unarmedCombatProficiency) {
-                        /* +1 damage to unarmed base damage for every 10% of unarmed combat proficiency */
-                        damage += Math.floor(
-                            unarmedCombatProficiency.proficiency / 10
-                        );
+                        const unarmedCombatProficiency =
+                            vch.findProficiencyByName('unarmed combat');
+                        /* TODO: check if wielding or not! ... weapon type profs.. */
+                        if (unarmedCombatProficiency) {
+                            /* +1 damage to unarmed base damage for every 10% of unarmed combat proficiency */
+                            damage += Math.floor(
+                                unarmedCombatProficiency.proficiency / 10
+                            );
+                        }
+                    } else {
+                        let sum = 0;
+
+                        const v0 = parseInt(weapon.value0),
+                            v1 = parseInt(weapon.value1),
+                            v2 = parseInt(weapon.value2),
+                            v3 = parseInt(weapon.value3);
+
+                        for(let i = 0; i < v0; i++) {
+                            sum += ~~(Math.random() * v1);
+                        }
+
+                        sum += v2;
+
+                        damageType = v3;
+                        damage = sum;
                     }
 
                     /* Check victim dodge skill */
@@ -81,7 +101,7 @@ function onCombatUpdate() {
                         victim,
                         true,
                         damage,
-                        Golem.Combat.DamageTypeBash
+                        damageType
                     );
                 } catch (err) {
                     Golem.game.broadcast(err.toString());

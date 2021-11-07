@@ -213,7 +213,11 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 			long_description,
 			description,
 			flags,
-			item_type
+			item_type,
+			value_1,
+			value_2,
+			value_3,
+			value_4
 		FROM
 			objects
 		WHERE
@@ -233,7 +237,7 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 
 	for rows.Next() {
 		obj := &Object{}
-		err := rows.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType)
+		err := rows.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3)
 
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -258,7 +262,11 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 			long_description,
 			description,
 			flags,
-			item_type
+			item_type,
+			value_1,
+			value_2,
+			value_3,
+			value_4
 		FROM
 			objects
 		WHERE
@@ -268,7 +276,7 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	`, index)
 
 	obj := &Object{}
-	err := row.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType)
+	err := row.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
