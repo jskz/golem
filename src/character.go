@@ -767,6 +767,14 @@ func (ch *Character) Write(data []byte) (n int, err error) {
 		return len(data), nil
 	}
 
+	if ch.outputHead+len(data) >= 32768 {
+		/* Clear buffer and drop connection for overflowing the pager */
+		ch.clearOutputBuffer()
+		ch.Client.close <- true
+		ch.Client.conn.Close()
+		return 0, nil
+	}
+
 	copy(ch.output[ch.outputHead:ch.outputHead+len(data)], data[:])
 	ch.outputHead = ch.outputHead + len(data)
 
