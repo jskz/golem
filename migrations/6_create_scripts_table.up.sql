@@ -79,6 +79,12 @@ VALUES (1, 'limbo-developer-maze',
                 for (let y = 0; y < dungeon.floors[z].grid.length; y++) {
                     for (let x = 0; x < dungeon.floors[z].grid[y].length; x++) {
                         const cell = dungeon.floors[z].grid[x][y];
+
+                        /* Do not spawn anything at the entrance of the dungeon */
+                        if(z === 0 && x == dungeon.floors[z].entryX && y == dungeon.floors[z].entryY) {
+                            continue;
+                        }
+
                         if (!cell.wall && cell.room) {
                             cell.room.flags = Golem.RoomFlags.ROOM_VIRTUAL | Golem.RoomFlags.ROOM_DUNGEON;
 
