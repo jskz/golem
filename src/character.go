@@ -930,6 +930,10 @@ func (ch *Character) findObjectOnSelf(argument string) *ObjectInstance {
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
+		if obj.WearLocation != -1 {
+			continue
+		}
+
 		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
 			if strings.Compare(strings.ToLower(part), processed) == 0 {
