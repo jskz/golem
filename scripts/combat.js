@@ -11,34 +11,34 @@ function onCombatUpdate() {
 
         let found = false;
 
-        for (let i = 0; i < combat.participants.length; i++) {
-            const vch = combat.participants[i];
+        if(combat && combat.participants) {
+            for (let i = 0; i < combat.participants.length; i++) {
+                const vch = combat.participants[i];
 
-            if (vch.Room === null) {
-                continue;
-            }
-
-            let attackerRounds = 1,
-                dexterityBonusRounds = parseInt((vch.dexterity - 10) / 4);
-
-            attackerRounds += dexterityBonusRounds;
-
-            for (let r = 0; r < attackerRounds; r++) {
-                let victim = vch.fighting;
-
-                if (
-                    !victim ||
-                    victim.room === null ||
-                    vch.room.id != victim.room.id
-                ) {
-                    break;
+                if (vch.Room === null) {
+                    continue;
                 }
 
-                if (victim.room.flags & Golem.RoomFlags.ROOM_SAFE) {
-                    break;
-                }
+                let attackerRounds = 1,
+                    dexterityBonusRounds = parseInt((vch.dexterity - 10) / 4);
 
-                try {
+                attackerRounds += dexterityBonusRounds;
+
+                for (let r = 0; r < attackerRounds; r++) {
+                    let victim = vch.fighting;
+
+                    if (
+                        !victim ||
+                        victim.room === null ||
+                        !vch.room.isEqual(victim.room)
+                    ) {
+                        break;
+                    }
+
+                    if (victim.room.flags & Golem.RoomFlags.ROOM_SAFE) {
+                        break;
+                    }
+
                     found = true;
 
                     let damage = ~~(Math.random() * 2);
@@ -103,30 +103,33 @@ function onCombatUpdate() {
                         damage,
                         damageType
                     );
-                } catch (err) {
-                    Golem.game.broadcast(err.toString());
-                }
 
-                /*
-                if(victim && victim.group !== null) {
-                    for(let iter = victim.gch.head; iter != null; iter = gch.next) {
-                        const gch = iter.value;
+                    if(victim.group) {
+                        for(let iter = victim.group.head; iter != null; iter = iter.next) {
+                            const gch = iter.value;
 
-                        if(!gch.fighting) {
-                            gch.send('{WYou start attacking ' + ch.getShortDescription(gch) + '{W in defense of ' + victim.getShortDescriptionUpper(gch) + '{W!{x');
-                            gch.fighting = ch;
-                            gch.combat = ch.combat;
-                            gch.combat.insert(gch);
+                            if(!gch.fighting && vch.room && gch.room && vch.room.isEqual(gch.room)) {
+                                gch.send('{WYou start attacking ' + vch.getShortDescription(gch) + '{W in defense of ' + victim.getShortDescription(gch) + "{W!{x\r\n");
+                                gch.fighting = vch;
+                                gch.combat = victim.combat;
+
+                                if(gch.combat && gch.combat.participants) {
+                                    gch.combat.participants.push(gch);
+                                }
+                            }
+                        }
+                    } else {
+                        if(!victim.fighting || !victim.combat) {
+                            victim.fighting = vch;
+                            victim.combat = vch.combat;
                         }
                     }
                 }
-                */
             }
         }
 
         if (!found) {
             this.disposeCombat(combat);
-            break;
         }
     }
 }

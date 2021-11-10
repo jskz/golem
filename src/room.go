@@ -155,6 +155,10 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	return room, nil
 }
 
+func (room *Room) IsEqual(oroom *Room) bool {
+	return oroom == room
+}
+
 func (game *Game) FixExits() error {
 	log.Printf("Fixing exits.\r\n")
 

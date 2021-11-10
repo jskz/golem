@@ -14,8 +14,8 @@ import (
 )
 
 type Zone struct {
-	Id int `json:"id"`
-
+	Game           *Game  `json:"game"`
+	Id             int    `json:"id"`
 	Name           string `json:"name"`
 	WhoDescription string `json:"whoDescription"`
 	Low            uint   `json:"low"`
@@ -202,7 +202,7 @@ func (game *Game) LoadZones() error {
 	defer rows.Close()
 
 	for rows.Next() {
-		zone := &Zone{}
+		zone := &Zone{Game: game}
 
 		err := rows.Scan(&zone.Id, &zone.Name, &zone.WhoDescription, &zone.Low, &zone.High, &zone.ResetMessage, &zone.ResetFrequency)
 		if err != nil {
