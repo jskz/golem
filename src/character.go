@@ -134,7 +134,7 @@ type Character struct {
 
 	Skills map[uint]*Proficiency `json:"skills"`
 
-	Gold  int               `json:"int"`
+	Gold  int               `json:"gold"`
 	Flags int               `json:"flags"`
 	Afk   *AwayFromKeyboard `json:"afk"`
 
