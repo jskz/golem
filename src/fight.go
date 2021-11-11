@@ -26,6 +26,26 @@ const (
 	DamageTypeExotic = 3
 )
 
+func (ch *Character) GetArmorValues() []int {
+	var totalBashArmor int = 0
+	var totalSlashArmor int = 0
+	var totalStabArmor int = 0
+	var totalExoticArmor int = 0
+
+	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
+		var obj *ObjectInstance = ch.GetEquipment(i)
+
+		if obj != nil && obj.ItemType == "armor" {
+			totalBashArmor += obj.Value0
+			totalSlashArmor += obj.Value1
+			totalStabArmor += obj.Value2
+			totalExoticArmor += obj.Value3
+		}
+	}
+
+	return []int{totalBashArmor, totalSlashArmor, totalStabArmor, totalExoticArmor}
+}
+
 func (game *Game) createBlood(intensity int) *ObjectInstance {
 	obj := &ObjectInstance{Game: game}
 
