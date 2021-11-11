@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -829,7 +830,41 @@ func do_drop(ch *Character, arguments string) {
 		return
 	}
 
-	var found *ObjectInstance = ch.findObjectOnSelf(arguments)
+	firstArgument, arguments := oneArgument(arguments)
+	secondArgument, _ := oneArgument(arguments)
+
+	if secondArgument == "gold" {
+		amount, err := strconv.Atoi(firstArgument)
+		if err != nil {
+			ch.Send("Please provide a valid integer gold amount.\r\n")
+			return
+		}
+
+		if amount > ch.Gold {
+			ch.Send("You don't have enough gold.\r\n")
+			return
+		}
+
+		ch.Gold -= amount
+		gold := ch.Game.CreateGold(amount)
+		ch.Room.Objects.Insert(gold)
+
+		ch.Send(fmt.Sprintf("You drop %s.\r\n", gold.GetShortDescription(ch)))
+
+		if ch.Room != nil {
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				rch := iter.Value.(*Character)
+
+				if !rch.IsEqual(ch) {
+					rch.Send(fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.GetShortDescriptionUpper(rch), gold.GetShortDescription(rch)))
+				}
+			}
+		}
+
+		return
+	}
+
+	var found *ObjectInstance = ch.findObjectOnSelf(firstArgument)
 	if found == nil {
 		ch.Send("No such item in your inventory.\r\n")
 		return
