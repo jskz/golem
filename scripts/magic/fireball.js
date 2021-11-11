@@ -13,7 +13,7 @@ function spell_fireball(ch, args) {
 
     const target = ch.findCharacterInRoom(args);
 
-    if (!target || !ch.room || !target.room || target.room.id !== ch.room.id) {
+    if (!target || !ch.room || !target.room || !target.room.isEqual(ch.room)) {
         ch.send("Your target isn't here.\r\n");
         return;
     }
