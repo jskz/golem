@@ -203,6 +203,11 @@ func do_equipment(ch *Character, arguments string) {
 
 	output.WriteString("\r\n{WYou are equipped with the following:{x\r\n")
 
+	var totalBashArmor int = 0
+	var totalSlashArmor int = 0
+	var totalStabArmor int = 0
+	var totalExoticArmor int = 0
+
 	for i := WearLocationNone + 1; i < WearLocationMax; i++ {
 		var objectDescription strings.Builder
 		var obj *ObjectInstance = ch.GetEquipment(i)
@@ -211,10 +216,22 @@ func do_equipment(ch *Character, arguments string) {
 			objectDescription.WriteString("nothing")
 		} else {
 			objectDescription.WriteString(obj.GetShortDescription(ch))
+
+			if obj.ItemType == "armor" {
+				totalBashArmor += obj.Value0
+				totalSlashArmor += obj.Value1
+				totalStabArmor += obj.Value2
+				totalExoticArmor += obj.Value3
+			}
 		}
 
 		output.WriteString(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], objectDescription.String()))
 	}
+
+	output.WriteString(fmt.Sprintf("\r\n{WArmor versus bash damage:      %d\r\n", totalBashArmor))
+	output.WriteString(fmt.Sprintf("Armor versus slash damage:     %d\r\n", totalSlashArmor))
+	output.WriteString(fmt.Sprintf("Armor versus piercing damage:  %d\r\n", totalStabArmor))
+	output.WriteString(fmt.Sprintf("Armor versus exotic damage:    %d{x\r\n", totalExoticArmor))
 
 	ch.Send(output.String())
 }
