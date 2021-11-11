@@ -739,6 +739,8 @@ func do_take(ch *Character, arguments string) {
 
 	if found.ItemType != ItemTypeCurrency {
 		ch.addObject(found)
+	} else {
+		ch.Gold = ch.Gold + found.Value0
 	}
 
 	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.ShortDescription))
