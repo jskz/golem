@@ -217,7 +217,7 @@ CREATE TABLE objects (
     `description` TEXT,
     `flags` INT,
 
-    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign', 'treasure', 'reagent', 'artifact', 'currency') NOT NULL DEFAULT 'protoplasm',
+    `item_type` ENUM ('protoplasm', 'light', 'potion', 'food', 'furniture', 'drink_container', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign', 'treasure', 'reagent', 'artifact', 'currency') NOT NULL DEFAULT 'protoplasm',
     `value_1` INT,
     `value_2` INT,
     `value_3` INT,
@@ -245,7 +245,7 @@ CREATE TABLE object_instances (
     `flags` INT,
     `wear_location` INT DEFAULT -1,
 
-    `item_type` ENUM ('protoplasm', 'light', 'potion', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign', 'treasure', 'reagent', 'artifact', 'currency') NOT NULL DEFAULT 'protoplasm',
+    `item_type` ENUM ('protoplasm', 'light', 'potion', 'food', 'furniture', 'drink_container', 'scroll', 'container', 'armor', 'weapon', 'furniture', 'sign', 'treasure', 'reagent', 'artifact', 'currency') NOT NULL DEFAULT 'protoplasm',
 
     `value_1` INT,
     `value_2` INT,
