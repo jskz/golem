@@ -765,17 +765,61 @@ func do_give(ch *Character, arguments string) {
 		return
 	}
 
+	firstArgument, arguments := oneArgument(arguments)
+	secondArgument, arguments := oneArgument(arguments)
+	thirdArgument, _ := oneArgument(arguments)
+
 	if ch.Room == nil {
 		return
 	}
 
-	var found *ObjectInstance = ch.findObjectOnSelf(args[0])
+	if secondArgument == "gold" {
+		amount, err := strconv.Atoi(firstArgument)
+		if err != nil {
+			ch.Send("Please provide an integer amount of gold to give and another player to give it to.\r\n")
+			return
+		}
+
+		var target *Character = ch.FindCharacterInRoom(thirdArgument)
+		if target == nil {
+			ch.Send("No such person here.\r\n")
+			return
+		}
+
+		if amount > ch.Gold {
+			ch.Send("You don't have enough gold.\r\n")
+			return
+		}
+
+		/* We don't need to exchange the object, but it is handy to have its short description */
+		goldRepresentation := ch.Game.CreateGold(amount)
+
+		ch.Gold -= amount
+		target.Gold += amount
+
+		ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", goldRepresentation.GetShortDescription(ch), target.GetShortDescription(ch)))
+		target.Send(fmt.Sprintf("%s{x gives you %s{x.\r\n", ch.GetShortDescriptionUpper(target), goldRepresentation.GetShortDescription(target)))
+
+		if ch.Room != nil {
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				rch := iter.Value.(*Character)
+
+				if rch != ch && rch != target {
+					rch.Send(fmt.Sprintf("\r\n%s{x gives %s{x to %s{x.\r\n", ch.GetShortDescriptionUpper(rch), goldRepresentation.GetShortDescription(rch), target.GetShortDescription(rch)))
+				}
+			}
+		}
+
+		return
+	}
+
+	var found *ObjectInstance = ch.findObjectOnSelf(firstArgument)
 	if found == nil {
 		ch.Send("No such item in your inventory.\r\n")
 		return
 	}
 
-	var target *Character = ch.FindCharacterInRoom(args[1])
+	var target *Character = ch.FindCharacterInRoom(secondArgument)
 	if target == nil {
 		ch.Send("No such person here.\r\n")
 		return
