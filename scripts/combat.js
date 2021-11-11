@@ -96,11 +96,13 @@ function onCombatUpdate() {
                         }
                     }
 
+                    const armorClass = victim.getArmorValues();
+
                     this.damage(
                         vch,
                         victim,
                         true,
-                        damage,
+                        Math.max(0, damage - (armorClass[damageType] / 4)),
                         damageType
                     );
 
