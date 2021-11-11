@@ -151,6 +151,11 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	}
 
 	switch obj.ItemType {
+	case ItemTypeArmor:
+		output.WriteString(fmt.Sprintf("{Y* {C%s{c provides {C%d{c defense against bash damage.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value0))
+		output.WriteString(fmt.Sprintf("{Y* {C%s{c provides {C%d{c defense against slash damage.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value1))
+		output.WriteString(fmt.Sprintf("{Y* {C%s{c provides {C%d{c defense against piercing damage.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value2))
+		output.WriteString(fmt.Sprintf("{Y* {C%s{c provides {C%d{c defense against exotic damage.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value3))
 	case ItemTypeContainer:
 		output.WriteString(fmt.Sprintf("{C%s{c can hold up to {C%d{c items and {C%d{c lbs.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value0, obj.Value1))
 	default:
