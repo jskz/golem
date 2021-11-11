@@ -61,19 +61,21 @@ type ObjectInstance struct {
 }
 
 const (
-	ItemTypeNone      = "protoplasm"
-	ItemTypeContainer = "container"
-	ItemTypeScroll    = "scroll"
-	ItemTypePotion    = "potion"
-	ItemTypeArmor     = "armor"
-	ItemTypeWeapon    = "weapon"
-	ItemTypeLight     = "light"
-	ItemTypeFurniture = "furniture"
-	ItemTypeSign      = "sign"
-	ItemTypeTreasure  = "treasure"
-	ItemTypeReagent   = "reagent"
-	ItemTypeArtifact  = "artifact"
-	ItemTypeCurrency  = "currency"
+	ItemTypeNone           = "protoplasm"
+	ItemTypeContainer      = "container"
+	ItemTypeScroll         = "scroll"
+	ItemTypePotion         = "potion"
+	ItemTypeFood           = "food"
+	ItemTypeDrinkContainer = "drink_container"
+	ItemTypeArmor          = "armor"
+	ItemTypeWeapon         = "weapon"
+	ItemTypeLight          = "light"
+	ItemTypeFurniture      = "furniture"
+	ItemTypeSign           = "sign"
+	ItemTypeTreasure       = "treasure"
+	ItemTypeReagent        = "reagent"
+	ItemTypeArtifact       = "artifact"
+	ItemTypeCurrency       = "currency"
 )
 
 const (
