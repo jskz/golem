@@ -1,6 +1,12 @@
 version: "3.9"
     
 services:
+  redis:
+    image: redislabs/redisgears:latest
+    networks:
+      - overlay
+    ports:
+      - 6379:6379
   mysql:
     image: mysql:8.0
     networks:
