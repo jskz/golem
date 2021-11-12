@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/dop251/goja"
+	"github.com/gomodule/redigo/redis"
 
 	_ "github.com/go-sql-driver/mysql"
 
@@ -27,8 +28,9 @@ import (
 type Game struct {
 	startedAt time.Time
 
-	db *sql.DB
-	vm *goja.Runtime
+	redis *redis.Pool
+	db    *sql.DB
+	vm    *goja.Runtime
 
 	Characters   *LinkedList `json:"characters"`
 	Fights       *LinkedList `json:"fights"`
@@ -94,6 +96,24 @@ func NewGame() (*Game, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	game.redis = &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			conn, err := redis.Dial("tcp", fmt.Sprintf("%s:%d", Config.RedisConfiguration.Host, Config.RedisConfiguration.Port))
+			if err != nil {
+				return nil, err
+			}
+
+			return conn, nil
+		},
+	}
+
+	pulse, err := game.redis.Get().Do("PING")
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println(pulse)
 
 	/* Validate we can interact with the DSN */
 	err = game.db.Ping()

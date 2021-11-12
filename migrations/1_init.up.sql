@@ -276,8 +276,7 @@ CREATE TABLE player_character_object (
     `deleted_by` BIGINT DEFAULT NULL,
 
     PRIMARY KEY (id),
-    FOREIGN KEY (player_character_id) REFERENCES player_characters(id),
-    FOREIGN KEY (object_instance_id) REFERENCES object_instances(id)
+    FOREIGN KEY (player_character_id) REFERENCES player_characters(id)
 );
 
 /* Seed data */

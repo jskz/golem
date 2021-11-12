@@ -10,7 +10,6 @@ package main
 import (
 	"bufio"
 	"bytes"
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -21,6 +20,7 @@ import (
 	"unicode"
 
 	"github.com/dop251/goja"
+	"github.com/gomodule/redigo/redis"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -398,45 +398,50 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 		updating = append(updating, obj)
 	}
 
-	/* Create a context and begin a transaction for bulk upsert */
-	ctx := context.Background()
-	tx, err := game.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
-	}
+	/* Retrieve a Redis client handle from the pool and update appropriate hashes */
+	client := game.redis.Get()
+	defer client.Close()
 
 	for _, obj := range updating {
-		if obj.Id == 0 {
+		if obj.Id <= 0 {
 			continue
 		}
 
-		_, err = tx.ExecContext(ctx, `
-			UPDATE
-				object_instances
-			SET
-				name = ?,
-				short_description = ?,
-				long_description = ?,
-				description = ?,
-				wear_location = ?,
-				flags = ?,
-				value_1 = ?,
-				value_2 = ?,
-				value_3 = ?,
-				value_4 = ?
-			WHERE
-				id = ?
-		`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Id)
-		if err != nil {
-			tx.Rollback()
-			return err
+		data := struct {
+			ParentId               uint   `redis:"parent_id"`
+			InsideObjectInstanceId uint   `redis:"inside_object_instance_id"`
+			Name                   string `redis:"name"`
+			ShortDescription       string `redis:"short_description"`
+			LongDescription        string `redis:"long_description"`
+			Description            string `redis:"description"`
+			ItemType               string `redis:"item_type"`
+			Flags                  int    `redis:"flags"`
+			WearLocation           int    `redis:"wear_location"`
+			Value0                 int    `redis:"value_1"`
+			Value1                 int    `redis:"value_2"`
+			Value2                 int    `redis:"value_3"`
+			Value3                 int    `redis:"value_4"`
+		}{
+			ParentId:               obj.ParentId,
+			InsideObjectInstanceId: obj.Id,
+			Name:                   obj.Name,
+			ShortDescription:       obj.ShortDescription,
+			Description:            obj.Description,
+			LongDescription:        obj.LongDescription,
+			ItemType:               obj.ItemType,
+			Flags:                  obj.Flags,
+			WearLocation:           obj.WearLocation,
+			Value0:                 obj.Value0,
+			Value1:                 obj.Value1,
+			Value2:                 obj.Value2,
+			Value3:                 obj.Value3,
 		}
-	}
 
-	err = tx.Commit()
-	if err != nil {
-		tx.Rollback()
-		return err
+		_, err := client.Do("HSET", redis.Args{}.Add(fmt.Sprintf("object:%d", obj.Id)).AddFlat(data)...)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
 	}
 
 	return nil

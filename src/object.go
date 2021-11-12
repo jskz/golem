@@ -40,21 +40,21 @@ type ObjectInstance struct {
 	CarriedBy *Character      `json:"carriedBy"`
 
 	Id       uint   `json:"id"`
-	ParentId uint   `json:"parentId"`
-	ItemType string `json:"itemType"`
+	ParentId uint   `json:"parentId" redis:"parent_id"`
+	ItemType string `json:"itemType" redis:"item_type"`
 
-	Name             string `json:"name"`
-	ShortDescription string `json:"shortDescription"`
-	LongDescription  string `json:"longDescription"`
-	Description      string `json:"description"`
-	Flags            int    `json:"flags"`
+	Name             string `json:"name" redis:"name"`
+	ShortDescription string `json:"shortDescription" redis:"short_description"`
+	LongDescription  string `json:"longDescription" redis:"long_description"`
+	Description      string `json:"description" redis:"description"`
+	Flags            int    `json:"flags" redis:"flags"`
 
-	WearLocation int `json:"wearLocation"`
+	WearLocation int `json:"wearLocation" redis:"wear_location"`
 
-	Value0 int `json:"value0"`
-	Value1 int `json:"value1"`
-	Value2 int `json:"value2"`
-	Value3 int `json:"value3"`
+	Value0 int `json:"value0" redis:"value_1"`
+	Value1 int `json:"value1" redis:"value_2"`
+	Value2 int `json:"value2" redis:"value_3"`
+	Value3 int `json:"value3" redis:"value_4"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	Ttl       int       `json:"ttl"`

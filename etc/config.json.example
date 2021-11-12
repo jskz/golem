@@ -6,7 +6,7 @@
     },
     "redis": {
         "host": "redis",
-        "port": 6378,
+        "port": 6379,
         "password": "password"
     },
     "mysql": {
