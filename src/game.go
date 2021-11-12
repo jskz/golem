@@ -30,6 +30,7 @@ type Game struct {
 	db *sql.DB
 	vm *goja.Runtime
 
+	Objects      *LinkedList `json:"objects"`
 	Characters   *LinkedList `json:"characters"`
 	Fights       *LinkedList `json:"fights"`
 	Planes       *LinkedList `json:"planes"`
@@ -81,6 +82,7 @@ func NewGame() (*Game, error) {
 
 	game.Characters = NewLinkedList()
 	game.Fights = NewLinkedList()
+	game.Objects = NewLinkedList()
 	game.ScriptTimers = NewLinkedList()
 	game.Planes = NewLinkedList()
 

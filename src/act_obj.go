@@ -754,6 +754,7 @@ func do_take(ch *Character, arguments string) {
 		ch.addObject(found)
 	} else {
 		ch.Gold = ch.Gold + found.Value0
+		ch.Game.Objects.Remove(found)
 	}
 
 	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.ShortDescription))
@@ -904,6 +905,7 @@ func do_drop(ch *Character, arguments string) {
 		ch.Gold -= amount
 		gold := ch.Game.CreateGold(amount)
 		ch.Room.Objects.Insert(gold)
+		ch.Game.Objects.Insert(gold)
 
 		ch.Send(fmt.Sprintf("You drop %s.\r\n", gold.GetShortDescription(ch)))
 

@@ -250,6 +250,7 @@ func do_buy(ch *Character, arguments string) {
 			}
 
 			ch.addObject(obj)
+			ch.Game.Objects.Insert(obj)
 			ch.Gold -= listing.Price
 			return
 		}
