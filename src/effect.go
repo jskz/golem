@@ -73,3 +73,21 @@ func (game *Game) CreateEffect(effectType int, bits int, duration int, level int
 		OnComplete: onComplete,
 	}
 }
+
+func (ch *Character) AddEffect(fx *Effect) {
+	switch fx.EffectType {
+	case EffectTypeAffected:
+		ch.Affected |= fx.Bits
+	}
+
+	ch.Effects.Insert(fx)
+}
+
+func (ch *Character) RemoveEffect(fx *Effect) {
+	switch fx.EffectType {
+	case EffectTypeAffected:
+		ch.Affected &= ^fx.Bits
+	}
+
+	ch.Effects.Remove(fx)
+}

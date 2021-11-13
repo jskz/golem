@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -18,6 +19,21 @@ func (game *Game) characterUpdate() {
 
 		if ch.Casting != nil {
 			ch.onCastingUpdate()
+		}
+
+		for effectIter := ch.Effects.Head; effectIter != nil; effectIter = effectIter.Next {
+			fx := effectIter.Value.(*Effect)
+
+			if int(time.Since(fx.CreatedAt).Seconds()) >= fx.Duration {
+				if fx.OnComplete != nil {
+					_, err := (*fx.OnComplete)(game.vm.ToValue(ch))
+					if err != nil {
+						log.Println(err)
+					}
+				}
+
+				ch.RemoveEffect(fx)
+			}
 		}
 	}
 }

@@ -140,8 +140,9 @@ type Character struct {
 	Experience uint `json:"experience"`
 	Practices  int  `json:"practices"`
 
-	Effects *LinkedList           `json:"effects"`
-	Skills  map[uint]*Proficiency `json:"skills"`
+	Affected int                   `json:"affected"`
+	Effects  *LinkedList           `json:"effects"`
+	Skills   map[uint]*Proficiency `json:"skills"`
 
 	Gold  int               `json:"gold"`
 	Flags int               `json:"flags"`
@@ -1056,6 +1057,7 @@ func NewCharacter() *Character {
 	character.inputCursor = DefaultMaxLines
 	character.outputHead = 0
 
+	character.Affected = 0
 	character.Name = UnauthenticatedUsername
 	character.Client = nil
 	character.Level = 0
