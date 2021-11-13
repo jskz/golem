@@ -39,6 +39,7 @@ func init() {
 	CommandTable["save"] = Command{Name: "save", CmdFunc: do_save}
 
 	/* act_info.go */
+	CommandTable["affect"] = Command{Name: "affect", CmdFunc: do_affect}
 	CommandTable["help"] = Command{Name: "help", CmdFunc: do_help}
 	CommandTable["look"] = Command{Name: "look", CmdFunc: do_look}
 	CommandTable["quit"] = Command{Name: "quit", CmdFunc: do_quit}

@@ -60,6 +60,26 @@ type Effect struct {
  * Bits = MOD_INTELLIGENCE
  */
 
+type AffectedFlag struct {
+	Name string `json:"name"`
+	Flag int    `json:"flag"`
+}
+
+var AffectedFlagTable []AffectedFlag = []AffectedFlag{
+	{Name: "sanctuary", Flag: AFFECT_SANCTUARY},
+	{Name: "haste", Flag: AFFECT_HASTE},
+}
+
+func GetAffectedFlagName(bit int) string {
+	for _, flag := range AffectedFlagTable {
+		if flag.Flag == bit {
+			return flag.Name
+		}
+	}
+
+	return "none"
+}
+
 // CreateEffect instances a new effect object; utility for scripting
 func (game *Game) CreateEffect(effectType int, bits int, duration int, level int, location int, modifier int, onComplete *goja.Callable) *Effect {
 	return &Effect{
