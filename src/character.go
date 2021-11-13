@@ -82,6 +82,14 @@ const (
 )
 
 const (
+	AFFECT_SANCTUARY = 1
+	AFFECT_HASTE     = 1 << 1
+	AFFECT_SLOW      = 1 << 2
+	AFFECT_POISON    = 1 << 3
+	AFFECT_SILENCE   = 1 << 4
+)
+
+const (
 	PositionDead     = 0
 	PositionStunned  = 1
 	PositionSleeping = 2
@@ -132,7 +140,8 @@ type Character struct {
 	Experience uint `json:"experience"`
 	Practices  int  `json:"practices"`
 
-	Skills map[uint]*Proficiency `json:"skills"`
+	Effects *LinkedList           `json:"effects"`
+	Skills  map[uint]*Proficiency `json:"skills"`
 
 	Gold  int               `json:"gold"`
 	Flags int               `json:"flags"`
@@ -1052,6 +1061,7 @@ func NewCharacter() *Character {
 	character.Level = 0
 	character.Experience = 0
 	character.Inventory = NewLinkedList()
+	character.Effects = NewLinkedList()
 	character.Skills = make(map[uint]*Proficiency)
 
 	character.Defense = 0

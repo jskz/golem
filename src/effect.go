@@ -7,7 +7,11 @@
  */
 package main
 
-import "time"
+import (
+	"time"
+
+	"github.com/dop251/goja"
+)
 
 /*
  * Effects represent forms of enchantments that can be imbued on either the player generally
@@ -24,13 +28,14 @@ const (
 )
 
 type Effect struct {
-	EffectType int       `json:"effectType"`
-	Bits       int       `json:"bits"`
-	Duration   int       `json:"duration"`
-	Level      int       `json:"level"`
-	Location   int       `json:"location"`
-	Modifier   int       `json:"modifier"`
-	CreatedAt  time.Time `json:"createdAt"`
+	EffectType int            `json:"effectType"`
+	Bits       int            `json:"bits"`
+	Duration   int            `json:"duration"`
+	Level      int            `json:"level"`
+	Location   int            `json:"location"`
+	Modifier   int            `json:"modifier"`
+	CreatedAt  time.Time      `json:"createdAt"`
+	OnComplete *goja.Callable `json:"onComplete"`
 }
 
 /*
@@ -45,7 +50,7 @@ type Effect struct {
  * Location = 0
  * Bits = AFFECT_SANCTUARY
  *
- * A level 25 +2 intelligence buffing enchantment for a helmet when worn:
+ * A level 25 +2 intelligence buffing enchantment for an armor with id 50 when worn:
  *
  * EffectType = "EffectTypeEquipment"
  * Duration = -1
@@ -55,8 +60,8 @@ type Effect struct {
  * Bits = MOD_INTELLIGENCE
  */
 
-// Instance a new effect object, handy for scripting
-func (game *Game) CreateEffect(effectType int, bits int, duration int, level int, location int, modifier int) *Effect {
+// CreateEffect instances a new effect object; utility for scripting
+func (game *Game) CreateEffect(effectType int, bits int, duration int, level int, location int, modifier int, onComplete *goja.Callable) *Effect {
 	return &Effect{
 		EffectType: effectType,
 		Bits:       bits,
@@ -65,5 +70,6 @@ func (game *Game) CreateEffect(effectType int, bits int, duration int, level int
 		Location:   location,
 		Modifier:   modifier,
 		CreatedAt:  time.Now(),
+		OnComplete: onComplete,
 	}
 }
