@@ -593,6 +593,18 @@ func (game *Game) InitScripting() error {
 	wearLocationsConstantsObj.Set("WearLocationHeld", game.vm.ToValue(WearLocationHeld))
 	wearLocationsConstantsObj.Set("WearLocationMax", game.vm.ToValue(WearLocationMax))
 
+	effectTypes := game.vm.NewObject()
+	effectTypes.Set("EffectTypeAffected", game.vm.ToValue(EffectTypeAffected))
+	effectTypes.Set("EffectTypeEquipment", game.vm.ToValue(EffectTypeEquipment))
+	effectTypes.Set("EffectTypeImmunity", game.vm.ToValue(EffectTypeImmunity))
+
+	affectedTypes := game.vm.NewObject()
+	affectedTypes.Set("AFFECT_SANCTUARY", game.vm.ToValue(AFFECT_SANCTUARY))
+	affectedTypes.Set("AFFECT_HASTE", game.vm.ToValue(AFFECT_HASTE))
+	affectedTypes.Set("AFFECT_SLOW", game.vm.ToValue(AFFECT_SLOW))
+	affectedTypes.Set("AFFECT_POISON", game.vm.ToValue(AFFECT_POISON))
+	affectedTypes.Set("AFFECT_SILENCE", game.vm.ToValue(AFFECT_SILENCE))
+
 	combatObj := game.vm.NewObject()
 	combatObj.Set("DamageTypeBash", game.vm.ToValue(DamageTypeBash))
 	combatObj.Set("DamageTypeSlash", game.vm.ToValue(DamageTypeSlash))
@@ -605,6 +617,8 @@ func (game *Game) InitScripting() error {
 
 	obj.Set("KnownLocations", knownLocationsConstantsObj)
 	obj.Set("ExitFlags", exitFlagsConstantsObj)
+	obj.Set("EffectTypes", effectTypes)
+	obj.Set("AffectedTypes", affectedTypes)
 	obj.Set("RoomFlags", roomFlagsConstantsObj)
 	obj.Set("CharacterFlags", charFlagsConstantsObj)
 	obj.Set("ObjectFlags", objectFlagsConstantsObj)

@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"math/rand"
 	"sort"
 	"strings"
@@ -112,6 +113,25 @@ func do_help(ch *Character, arguments string) {
 		buf.WriteString("\r\n")
 	}
 
+	ch.Send(buf.String())
+}
+
+/* Display information about effects the player is affected by */
+func do_affect(ch *Character, arguments string) {
+	var buf strings.Builder
+
+	buf.WriteString("{MYou are affected by the following enchantments:{x\r\n")
+
+	for effect := ch.Effects.Head; effect != nil; effect = effect.Next {
+		fx := effect.Value.(*Effect)
+
+		switch fx.EffectType {
+		case EffectTypeAffected:
+			buf.WriteString(fmt.Sprintf("{Y* {MLevel {Y%d '%s' {Mspell for another {Y%d{M seconds.{x\r\n", fx.Level, GetAffectedFlagName(fx.Bits), int(math.Max(0, time.Until(fx.CreatedAt.Add(time.Duration(fx.Duration)*time.Second)).Seconds()))))
+		}
+	}
+
+	buf.WriteString(fmt.Sprintf("\r\n{M%d total effects.{x\r\n", ch.Effects.Count))
 	ch.Send(buf.String())
 }
 
