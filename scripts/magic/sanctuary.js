@@ -6,7 +6,7 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function spell_sanctuary(ch) {
-    if(ch.isAffected(Golem.AffectedTypes.AFFECT_SANCTUARY)) {
+    if(ch.affected & Golem.AffectedTypes.AFFECT_SANCTUARY) {
         ch.Send("{WYou failed.{x\r\n");
         return;
     }
@@ -24,4 +24,4 @@ function spell_sanctuary(ch) {
     ch.send("{WYou feel protected.{x\r\n");
 }
 
-Golem.registerSpellHandler('sanctuary', spell_armor);
+Golem.registerSpellHandler('sanctuary', spell_sanctuary);
