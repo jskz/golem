@@ -7,7 +7,7 @@
  */
 function spell_sanctuary(ch) {
     if(ch.affected & Golem.AffectedTypes.AFFECT_SANCTUARY) {
-        ch.Send("{WYou failed.{x\r\n");
+        ch.send("{WYou failed.{x\r\n");
         return;
     }
 

@@ -41,10 +41,9 @@ function onCombatUpdate() {
 
                     found = true;
 
-                    let damage = ~~(Math.random() * 2);
-                    let damageType = Golem.Combat.DamageTypeBash;
-
-                    let weapon = vch.getEquipment(Golem.WearLocations.WearLocationWielded);
+                    let damage = ~~(Math.random() * 2),
+                        damageType = Golem.Combat.DamageTypeBash,
+                        weapon = vch.getEquipment(Golem.WearLocations.WearLocationWielded);
                     if(!weapon) {
                         damage += ~~(Math.random() * (vch.strength / 3));
 
@@ -94,6 +93,10 @@ function onCombatUpdate() {
                             );
                             continue;
                         }
+                    }
+
+                    if(victim.affected & Golem.AffectedTypes.AFFECT_SANCTUARY) {
+                        damage /= 2;
                     }
 
                     const armorClass = victim.getArmorValues();
