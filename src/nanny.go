@@ -354,6 +354,20 @@ func (game *Game) nanny(client *Client, message string) {
 
 		game.Characters.Insert(client.Character)
 
+		for iter := client.Character.Inventory.Head; iter != nil; iter = iter.Next {
+			obj := iter.Value.(*ObjectInstance)
+
+			game.Objects.Insert(obj)
+
+			if obj.Contents != nil {
+				for innerIter := obj.Contents.Head; innerIter != nil; innerIter = innerIter.Next {
+					containedObj := innerIter.Value.(*ObjectInstance)
+
+					game.Objects.Insert(containedObj)
+				}
+			}
+		}
+
 		if client.Character.Room != nil {
 			client.Character.Room.AddCharacter(client.Character)
 
