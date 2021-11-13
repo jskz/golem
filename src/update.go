@@ -27,7 +27,7 @@ func (game *Game) objectUpdate() {
 		obj := iter.Value.(*ObjectInstance)
 
 		/* Remove the obj after its ttl time in minutes, if the ITEM_DECAYS flag is set */
-		if obj.Flags&ITEM_DECAYS != 0 && int(time.Since(obj.CreatedAt).Minutes()) > obj.Ttl {
+		if obj.Flags&ITEM_DECAYS != 0 && int(time.Since(obj.CreatedAt).Minutes()) >= obj.Ttl {
 			if obj.Flags&ITEM_DECAY_SILENTLY == 0 {
 				for innerIter := obj.InRoom.Characters.Head; innerIter != nil; innerIter = innerIter.Next {
 					rch := innerIter.Value.(*Character)
