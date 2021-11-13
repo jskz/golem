@@ -489,7 +489,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 		}
 
 		ch.addObject(obj)
-		ch.Game.Objects.Remove(obj)
+		ch.Game.Objects.Insert(obj)
 	}
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
@@ -536,7 +536,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			}
 
 			obj.addObject(containedObj)
-			ch.Game.Objects.Remove(containedObj)
+			ch.Game.Objects.Insert(containedObj)
 		}
 	}
 

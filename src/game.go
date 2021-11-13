@@ -203,7 +203,7 @@ func (game *Game) Run() {
 	processCharacterUpdateTicker := time.NewTicker(2 * time.Second)
 
 	/* Handle object update logic */
-	processObjectUpdateTicker := time.NewTicker(1 * time.Minute)
+	processObjectUpdateTicker := time.NewTicker(15 * time.Second)
 
 	/* Buffered/paged output for clients */
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)

@@ -114,6 +114,20 @@ func do_quit(ch *Character, arguments string) {
 	})
 
 	ch.Game.Characters.Remove(ch)
+	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		if obj.Contents != nil {
+			for innerIter := obj.Contents.Head; innerIter != nil; innerIter = innerIter.Next {
+				containedObj := innerIter.Value.(*ObjectInstance)
+
+				ch.Game.Objects.Remove(containedObj)
+			}
+		}
+
+		ch.Game.Objects.Remove(obj)
+	}
+
 	ch.Client.ConnectionState = ConnectionStateNone
 	ch.Send("{WLeaving for the real world...{x\r\n")
 
