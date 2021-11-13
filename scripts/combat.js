@@ -23,6 +23,12 @@ function onCombatUpdate() {
                     dexterityBonusRounds = parseInt((vch.dexterity - 10) / 4);
 
                 attackerRounds += dexterityBonusRounds;
+                
+                if(vch.affected & Golem.AffectedTypes.AFFECT_HASTE) {
+                    // TODO: allow interface for getting effect level versus player level; i.e., 
+                    // max level haste spell = 2 or 3 extra rounds, lowest level = just 1
+                    attackerRounds += 1;
+                }
 
                 for (let r = 0; r < attackerRounds; r++) {
                     let victim = vch.fighting;
