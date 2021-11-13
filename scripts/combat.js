@@ -15,7 +15,7 @@ function onCombatUpdate() {
             for (let i = 0; i < combat.participants.length; i++) {
                 const vch = combat.participants[i];
 
-                if (vch.Room === null) {
+                if(!vch.room) {
                     continue;
                 }
 
