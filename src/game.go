@@ -30,6 +30,7 @@ type Game struct {
 	db *sql.DB
 	vm *goja.Runtime
 
+	Objects      *LinkedList `json:"objects"`
 	Characters   *LinkedList `json:"characters"`
 	Fights       *LinkedList `json:"fights"`
 	Planes       *LinkedList `json:"planes"`
@@ -81,6 +82,7 @@ func NewGame() (*Game, error) {
 
 	game.Characters = NewLinkedList()
 	game.Fights = NewLinkedList()
+	game.Objects = NewLinkedList()
 	game.ScriptTimers = NewLinkedList()
 	game.Planes = NewLinkedList()
 
@@ -200,6 +202,9 @@ func (game *Game) Run() {
 	/* Handle frequent character update logic */
 	processCharacterUpdateTicker := time.NewTicker(2 * time.Second)
 
+	/* Handle object update logic */
+	processObjectUpdateTicker := time.NewTicker(15 * time.Second)
+
 	/* Buffered/paged output for clients */
 	processOutputTicker := time.NewTicker(50 * time.Millisecond)
 
@@ -217,6 +222,9 @@ func (game *Game) Run() {
 
 		case <-processZoneUpdateTicker.C:
 			game.ZoneUpdate()
+
+		case <-processObjectUpdateTicker.C:
+			game.objectUpdate()
 
 		case <-processCharacterUpdateTicker.C:
 			game.characterUpdate()

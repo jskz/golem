@@ -10,6 +10,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -136,16 +137,17 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 			minuteSuffix = ""
 		}
 
-		if obj.Ttl == 1 {
+		objExpiry := int(math.Max(time.Until(obj.CreatedAt.Add(time.Duration(obj.Ttl)*time.Minute)).Minutes(), 0))
+		if objExpiry == 1 {
 			ttlSuffix = ""
 		}
 
-		output.WriteString(fmt.Sprintf("{Y* {C%s{c was created %d minute%s ago and will%svanish after {C%d{c minute%s has passed.\r\n",
+		output.WriteString(fmt.Sprintf("{Y* {C%s{c was created %d minute%s ago and will%svanish in {C%d{c minute%s.\r\n",
 			obj.GetShortDescriptionUpper(ch),
 			int(time.Since(obj.CreatedAt).Minutes()),
 			minuteSuffix,
 			silentString,
-			obj.Ttl,
+			objExpiry,
 			ttlSuffix,
 		))
 	}
@@ -703,6 +705,7 @@ func do_take(ch *Character, arguments string) {
 			ch.addObject(takingObj)
 		} else {
 			ch.Gold = ch.Gold + takingObj.Value0
+			ch.Game.Objects.Remove(takingObj)
 		}
 
 		ch.Send(fmt.Sprintf("You take %s{x from %s{x.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
@@ -754,6 +757,7 @@ func do_take(ch *Character, arguments string) {
 		ch.addObject(found)
 	} else {
 		ch.Gold = ch.Gold + found.Value0
+		ch.Game.Objects.Remove(found)
 	}
 
 	ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.ShortDescription))
@@ -904,6 +908,7 @@ func do_drop(ch *Character, arguments string) {
 		ch.Gold -= amount
 		gold := ch.Game.CreateGold(amount)
 		ch.Room.Objects.Insert(gold)
+		ch.Game.Objects.Insert(gold)
 
 		ch.Send(fmt.Sprintf("You drop %s.\r\n", gold.GetShortDescription(ch)))
 

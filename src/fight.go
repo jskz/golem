@@ -88,6 +88,8 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 		gobj := game.CreateGold(ch.Gold)
 		if gobj != nil {
 			obj.Contents.Insert(gobj)
+
+			ch.Game.Objects.Insert(gobj)
 		}
 	} else {
 		obj.Contents = NewLinkedList()
@@ -149,12 +151,16 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 			room := target.Room
 
 			corpse := game.createCorpse(target)
-			room.removeCharacter(target)
 
+			room.removeCharacter(target)
 			room.addObject(corpse)
+
+			ch.Game.Objects.Insert(corpse)
 
 			blood := game.createBlood(1)
 			room.addObject(blood)
+
+			ch.Game.Objects.Insert(blood)
 
 			target.Fighting = nil
 			target.Combat = nil
