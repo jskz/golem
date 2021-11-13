@@ -94,5 +94,6 @@ INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, prof
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (6, 1, 6, 1, 100);
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (7, 1, 7, 4, 100);
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (8, 1, 8, 4, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (9, 1, 9, 4, 100);
 
 CREATE INDEX index_skill_name ON skills(name);
