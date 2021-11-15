@@ -906,19 +906,38 @@ func do_drop(ch *Character, arguments string) {
 		}
 
 		ch.Gold -= amount
+
+		var found *ObjectInstance = nil
+
+		for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
+			obj := iter.Value.(*ObjectInstance)
+
+			if obj.ItemType == ItemTypeCurrency {
+				found = obj
+				break
+			}
+		}
+
 		gold := ch.Game.CreateGold(amount)
+		ch.Send(fmt.Sprintf("You drop %s.\r\n", gold.GetShortDescription(ch)))
+
+		if found != nil {
+			amount += found.Value0
+
+			ch.Room.Objects.Remove(found)
+			ch.Game.Objects.Remove(found)
+
+			gold = ch.Game.CreateGold(amount)
+		}
+
 		ch.Room.Objects.Insert(gold)
 		ch.Game.Objects.Insert(gold)
 
-		ch.Send(fmt.Sprintf("You drop %s.\r\n", gold.GetShortDescription(ch)))
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+			rch := iter.Value.(*Character)
 
-		if ch.Room != nil {
-			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value.(*Character)
-
-				if !rch.IsEqual(ch) {
-					rch.Send(fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.GetShortDescriptionUpper(rch), gold.GetShortDescription(rch)))
-				}
+			if !rch.IsEqual(ch) {
+				rch.Send(fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.GetShortDescriptionUpper(rch), gold.GetShortDescription(rch)))
 			}
 		}
 
@@ -948,13 +967,11 @@ func do_drop(ch *Character, arguments string) {
 	ch.Send(fmt.Sprintf("You drop %s{x.\r\n", found.ShortDescription))
 	outString := fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.Name, found.ShortDescription)
 
-	if ch.Room != nil {
-		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value.(*Character)
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
 
-			if rch != ch {
-				rch.Send(outString)
-			}
+		if rch != ch {
+			rch.Send(outString)
 		}
 	}
 }

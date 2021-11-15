@@ -58,6 +58,25 @@ func (game *Game) objectUpdate() {
 					contentObj := contentIter.Value.(*ObjectInstance)
 
 					obj.removeObject(contentObj)
+
+					var found *ObjectInstance = nil
+
+					for iter := obj.InRoom.Objects.Head; iter != nil; iter = iter.Next {
+						obj := iter.Value.(*ObjectInstance)
+
+						if obj.ItemType == ItemTypeCurrency {
+							found = obj
+							break
+						}
+					}
+
+					if found != nil && contentObj.ItemType == ItemTypeCurrency {
+						obj.InRoom.Objects.Remove(found)
+						game.Objects.Remove(found)
+
+						contentObj = game.CreateGold(found.Value0 + contentObj.Value0)
+					}
+
 					obj.InRoom.addObject(contentObj)
 				}
 			}
