@@ -207,13 +207,18 @@ func (game *Game) AttemptLogin(username string, password string) bool {
 }
 
 func (ch *Character) onUpdate() {
-	/* Regen, script hooks, etc. */
-	if ch.Health < ch.MaxHealth {
-		ch.Health = int(math.Min(float64(ch.MaxHealth), float64(ch.Health+3)))
-	}
+	/*
+	 * Regenerate some health and mana every tick if not in a room with ROOM_EVIL_AURA set.
+	 * Always regenerate some stamina.
+	 */
+	if ch.Room != nil && ch.Room.Flags&ROOM_EVIL_AURA == 0 {
+		if ch.Health < ch.MaxHealth {
+			ch.Health = int(math.Min(float64(ch.MaxHealth), float64(ch.Health+3)))
+		}
 
-	if ch.Mana < ch.MaxMana {
-		ch.Mana = int(math.Min(float64(ch.MaxMana), float64(ch.Mana+7)))
+		if ch.Mana < ch.MaxMana {
+			ch.Mana = int(math.Min(float64(ch.MaxMana), float64(ch.Mana+7)))
+		}
 	}
 
 	if ch.Stamina < ch.MaxStamina {
