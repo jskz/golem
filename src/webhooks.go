@@ -8,10 +8,9 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
 type Webhook struct {
@@ -112,20 +111,13 @@ func (webhook *Webhook) AttachScript(script *Script) error {
 }
 
 func (game *Game) CreateWebhook() (*Webhook, error) {
-	webhookUuid, err := uuid.NewUUID()
-	if err != nil {
-		return nil, err
-	}
-
-	uuidString := webhookUuid.String()
-
-	/* Try to create the new webhook in-DB first */
+	/* Try to create the new webhook in-DB first, retrieving its MySQL-generated UUID */
 	res, err := game.db.Exec(`
 	INSERT INTO
 		webhooks(uuid)
 	VALUES
-		(?)
-	`, uuidString)
+		(UUID())
+	`)
 	if err != nil {
 		return nil, err
 	}
@@ -135,6 +127,26 @@ func (game *Game) CreateWebhook() (*Webhook, error) {
 	insertId, err = res.LastInsertId()
 	if err != nil {
 		return nil, err
+	}
+
+	var uuidString string = ""
+
+	uuid := game.db.QueryRow(`
+	SELECT
+		uuid
+	FROM
+		webhooks
+	WHERE
+		id = ?`,
+		insertId)
+	err = uuid.Scan(&uuidString)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	if uuidString == "" {
+		return nil, errors.New("unable to retrieve webhook UUID from fresh webhook")
 	}
 
 	game.webhooks[uuidString] = &Webhook{Id: int(insertId), Uuid: uuidString, Game: game}
