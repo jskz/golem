@@ -802,6 +802,11 @@ func do_give(ch *Character, arguments string) {
 			return
 		}
 
+		if amount <= 0 {
+			ch.Send("Invalid amount.\r\n")
+			return
+		}
+
 		if amount > ch.Gold {
 			ch.Send("You don't have enough gold.\r\n")
 			return
@@ -897,6 +902,11 @@ func do_drop(ch *Character, arguments string) {
 		amount, err := strconv.Atoi(firstArgument)
 		if err != nil {
 			ch.Send("Please provide a valid integer gold amount.\r\n")
+			return
+		}
+
+		if amount <= 0 {
+			ch.Send("Invalid amount.\r\n")
 			return
 		}
 
