@@ -26,10 +26,10 @@ function spell_detect_magic(ch, args) {
     for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
         const rch = iter.value;
 
-        if (!rch.isEqual(target)) {
+        if (!rch.isEqual(ch)) {
             rch.send(
                 '{D' +
-                    target.getShortDescriptionUpper(rch) +
+                    ch.getShortDescriptionUpper(rch) +
                     ' suddenly shivers and momentarily stares placidly into space before snapping out of it.{x\r\n'
             );
         }
