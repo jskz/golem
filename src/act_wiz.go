@@ -64,6 +64,7 @@ func do_mem(ch *Character, arguments string) {
 
 	output.WriteString("{YUsage statistics:\r\n")
 	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Characters", ch.Game.Characters.Count))
+	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Objects", ch.Game.Objects.Count))
 	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Jobs", Jobs.Count))
 	output.WriteString(fmt.Sprintf("%-15s %-6d\r\n", "Races", Races.Count))
 	output.WriteString(fmt.Sprintf("%-15s %-6d{x\r\n", "Zones", ch.Game.Zones.Count))
