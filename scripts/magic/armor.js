@@ -6,13 +6,7 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function spell_armor(ch) {
-    ch.defense += 5;
-    ch.send('{WThe air suddenly hardens around you!{x\r\n');
-
-    setTimeout(function () {
-        ch.defense -= 5;
-        ch.send('{DYour magical armor has worn off.{x\r\n');
-    }, 5000);
+    ch.send("This spell is not currently implemented, please try again later!\r\n");
 }
 
 Golem.registerSpellHandler('armor', spell_armor);

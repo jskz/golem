@@ -20,7 +20,7 @@ function spell_sanctuary(ch, args) {
         0,
         0,
         function() {
-            ch.send("{WYour holy protection has worn off.{x\r\n");
+            target.send("{WYour holy protection has worn off.{x\r\n");
 
             for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
                 const rch = iter.value;

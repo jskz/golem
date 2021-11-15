@@ -20,7 +20,7 @@ function spell_haste(ch, args) {
         0,
         0,
         function() {
-            ch.send("{DYou slow down and begin to move normally again.{x\r\n");
+            target.send("{DYou slow down and begin to move normally again.{x\r\n");
 
             for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
                 const rch = iter.value;

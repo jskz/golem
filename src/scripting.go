@@ -605,6 +605,7 @@ func (game *Game) InitScripting() error {
 	affectedTypes.Set("AFFECT_SLOW", game.vm.ToValue(AFFECT_SLOW))
 	affectedTypes.Set("AFFECT_POISON", game.vm.ToValue(AFFECT_POISON))
 	affectedTypes.Set("AFFECT_SILENCE", game.vm.ToValue(AFFECT_SILENCE))
+	affectedTypes.Set("AFFECT_DETECT_MAGIC", game.vm.ToValue(AFFECT_DETECT_MAGIC))
 
 	combatObj := game.vm.NewObject()
 	combatObj.Set("DamageTypeBash", game.vm.ToValue(DamageTypeBash))

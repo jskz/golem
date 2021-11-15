@@ -82,11 +82,12 @@ const (
 )
 
 const (
-	AFFECT_SANCTUARY = 1
-	AFFECT_HASTE     = 1 << 1
-	AFFECT_SLOW      = 1 << 2
-	AFFECT_POISON    = 1 << 3
-	AFFECT_SILENCE   = 1 << 4
+	AFFECT_SANCTUARY    = 1
+	AFFECT_HASTE        = 1 << 1
+	AFFECT_SLOW         = 1 << 2
+	AFFECT_POISON       = 1 << 3
+	AFFECT_SILENCE      = 1 << 4
+	AFFECT_DETECT_MAGIC = 1 << 5
 )
 
 const (
@@ -211,7 +212,7 @@ func (ch *Character) onUpdate() {
 	 * Regenerate some health and mana every tick if not in a room with ROOM_EVIL_AURA set.
 	 * Always regenerate some stamina.
 	 */
-	if ch.Room != nil && ch.Room.Flags&ROOM_EVIL_AURA == 0 {
+	if ch.Room == nil || ch.Room.Flags&ROOM_EVIL_AURA == 0 {
 		if ch.Health < ch.MaxHealth {
 			ch.Health = int(math.Min(float64(ch.MaxHealth), float64(ch.Health+3)))
 		}
