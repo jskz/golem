@@ -69,6 +69,7 @@ var AffectedFlagTable []AffectedFlag = []AffectedFlag{
 	{Name: "sanctuary", Flag: AFFECT_SANCTUARY},
 	{Name: "haste", Flag: AFFECT_HASTE},
 	{Name: "detect_magic", Flag: AFFECT_DETECT_MAGIC},
+	{Name: "fireshield", Flag: AFFECT_FIRESHIELD},
 }
 
 func GetAffectedFlagName(bit int) string {

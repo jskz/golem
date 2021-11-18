@@ -67,6 +67,10 @@ func (ch *Character) examineCharacter(other *Character) {
 		if other.Affected&AFFECT_SANCTUARY != 0 {
 			ch.Send(fmt.Sprintf("{W%s{W is surrounded by a protective holy aura.{x\r\n", other.GetShortDescriptionUpper(ch)))
 		}
+
+		if other.Affected&AFFECT_FIRESHIELD != 0 {
+			ch.Send(fmt.Sprintf("{R%s{R is surrounded by a reactive fireshield.{x\r\n", other.GetShortDescriptionUpper(ch)))
+		}
 	}
 
 	if other.Affected&AFFECT_POISON != 0 {

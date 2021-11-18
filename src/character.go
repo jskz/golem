@@ -88,6 +88,7 @@ const (
 	AFFECT_POISON       = 1 << 3
 	AFFECT_SILENCE      = 1 << 4
 	AFFECT_DETECT_MAGIC = 1 << 5
+	AFFECT_FIRESHIELD   = 1 << 6
 )
 
 const (
