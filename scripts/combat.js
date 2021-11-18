@@ -135,6 +135,33 @@ function onCombatUpdate() {
                             victim.combat = vch.combat;
                         }
                     }
+
+                    if(victim && victim.combat) {
+                        if(victim.affected & Golem.AffectedTypes.AFFECT_FIRESHIELD) {
+                            this.damage(
+                                victim,
+                                vch,
+                                false,
+                                ~~(Math.random() * victim.level),
+                                Golem.Combat.DamageTypeExotic
+                            );
+
+                            vch.send("{ROuch!  You are burned by " + victim.getShortDescription(vch) + "{R's reactive fireshield!{x\r\n");
+                            victim.send("{RYour reactive fireshield lights up and burns " + vch.getShortDescription(victim) + "{R!{x\r\n");
+
+                            for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+                                const rch = iter.value;
+
+                                if (!rch.isEqual(vch) && !rch.isEqual(victim)) {
+                                    rch.send(
+                                        '{R' +
+                                            vch.getShortDescriptionUpper(rch) +
+                                            '{R is burned by the reactive fireshield protecting ' + victim.getShortDescription(vch) + '!{x\r\n'
+                                    );
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
