@@ -149,7 +149,7 @@ function onCombatUpdate() {
                             vch.send("{ROuch!  You are burned by " + victim.getShortDescription(vch) + "{R's reactive fireshield!{x\r\n");
                             victim.send("{RYour reactive fireshield lights up and burns " + vch.getShortDescription(victim) + "{R!{x\r\n");
 
-                            for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+                            for (let iter = vch.room.characters.head; iter !== null; iter = iter.next) {
                                 const rch = iter.value;
 
                                 if (!rch.isEqual(vch) && !rch.isEqual(victim)) {
