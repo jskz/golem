@@ -5,7 +5,7 @@
  * Authors:
  *     James Skarzinskas <james@jskarzin.org>
  */
-function spell_sanctuary(ch, args) {
+function spell_fireshield(ch, args) {
     const target = args.length > 1 ? ch.findCharacterInRoom(args) : ch;
 
     if(target.affected & Golem.AffectedTypes.AFFECT_FIRESHIELD) {
