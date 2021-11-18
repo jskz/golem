@@ -91,21 +91,21 @@ func init() {
 	}
 
 	/* Read greeting */
-	Config.greeting, err = ioutil.ReadFile("etc/greeting.ansi")
+	Config.greeting, err = ioutil.ReadFile("etc/GREETING.ANS")
 	if err != nil {
 		log.Printf("Warning: failed to read greeting ANSI file: %v.\r\n", err)
 		Config.greeting = []byte(string(""))
 	}
 
 	/* Read MOTD */
-	Config.motd, err = ioutil.ReadFile("etc/motd.ansi")
+	Config.motd, err = ioutil.ReadFile("etc/MOTD.ANS")
 	if err != nil {
 		log.Printf("Warning: failed to read MOTD ANSI file: %v.\r\n", err)
 		Config.motd = []byte(string(""))
 	}
 
 	/* Read death ANSI */
-	Config.death, err = ioutil.ReadFile("etc/death.ansi")
+	Config.death, err = ioutil.ReadFile("etc/DEATH.ANS")
 	if err != nil {
 		log.Printf("Warning: failed to read death ANSI file: %v.\r\n", err)
 		Config.death = []byte(string(""))
