@@ -138,14 +138,6 @@ function onCombatUpdate() {
 
                     if(victim && victim.combat) {
                         if(victim.affected & Golem.AffectedTypes.AFFECT_FIRESHIELD) {
-                            this.damage(
-                                victim,
-                                vch,
-                                false,
-                                ~~(Math.random() * victim.level),
-                                Golem.Combat.DamageTypeExotic
-                            );
-
                             vch.send("{ROuch!  You are burned by " + victim.getShortDescription(vch) + "{R's reactive fireshield!{x\r\n");
                             victim.send("{RYour reactive fireshield lights up and burns " + vch.getShortDescription(victim) + "{R!{x\r\n");
 
@@ -160,6 +152,14 @@ function onCombatUpdate() {
                                     );
                                 }
                             }
+                            
+                            this.damage(
+                                victim,
+                                vch,
+                                false,
+                                ~~(Math.random() * victim.level),
+                                Golem.Combat.DamageTypeExotic
+                            );
                         }
                     }
                 }
