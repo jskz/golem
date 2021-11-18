@@ -63,6 +63,16 @@ func (ch *Character) examineCharacter(other *Character) {
 		ch.Send(fmt.Sprintf("{C%s{x%s{x\r\n", WearLocations[i], buf.String()))
 	}
 
+	if ch.Affected&AFFECT_DETECT_MAGIC != 0 {
+		if other.Affected&AFFECT_SANCTUARY != 0 {
+			ch.Send(fmt.Sprintf("{W%s{W is surrounded by a protective holy aura.{x\r\n", other.GetShortDescriptionUpper(ch)))
+		}
+	}
+
+	if other.Affected&AFFECT_POISON != 0 {
+		ch.Send(fmt.Sprintf("{G%s{G isn't looking so good.{x\r\n", other.GetShortDescriptionUpper(ch)))
+	}
+
 	peek := ch.FindProficiencyByName("peek")
 	if peek != nil && rand.Intn(100) < peek.Proficiency {
 		if other.Inventory.Count > 0 {
