@@ -75,6 +75,7 @@ func (game *Game) objectUpdate() {
 						game.Objects.Remove(found)
 
 						contentObj = game.CreateGold(found.Value0 + contentObj.Value0)
+						game.Objects.Insert(contentObj)
 					}
 
 					obj.InRoom.addObject(contentObj)
