@@ -17,6 +17,9 @@ type QuadTree struct {
 	Northeast *QuadTree
 	Southwest *QuadTree
 	Southeast *QuadTree
+
+	Nodes    *LinkedList `json:"data"`
+	Capacity int         `json:"capacity"`
 }
 
 type Rect struct {
@@ -31,6 +34,10 @@ type Point struct {
 	Y int `json:"y"`
 }
 
+// Subdivide redistributes the nodes among four child trees for each subdivided rect
+func (qt *QuadTree) Subdivide() {
+}
+
 // Insert adds a new value to the quadtree at point p
 func (qt *QuadTree) Insert(p Point, value interface{}) {
 }
@@ -42,4 +49,11 @@ func (qt *QuadTree) Remove(value interface{}) {
 // QueryRect retrieves all data within the rect defined by r
 func (qt *QuadTree) QueryRect(r Rect) []interface{} {
 	return nil
+}
+
+// NewQuadTree creates a new quadtree instance
+func NewQuadTree() *QuadTree {
+	qt := &QuadTree{}
+
+	return qt
 }
