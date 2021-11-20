@@ -85,7 +85,9 @@ const (
 )
 
 // Fill the source_value field for this plane with an appropriately sized binary blob of zeroes
-func (plane *Plane) InitializeBlob() error {
+func (plane *Plane) InitializeBlob() ([]byte, int, error) {
+	log.Printf("Initializing new blob for plane %d.\r\n", plane.Id)
+
 	plane.Map = &Map{
 		Layers: make([]*MapGrid, 0),
 	}
@@ -117,10 +119,10 @@ func (plane *Plane) InitializeBlob() error {
 			id = ?
 	`, bytes, plane.Id)
 	if err != nil {
-		return err
+		return nil, 0, err
 	}
 
-	return nil
+	return bytes, plane.Depth * plane.Width * plane.Height, nil
 }
 
 func (plane *Plane) generate() error {
@@ -161,8 +163,11 @@ func (plane *Plane) generate() error {
 			}
 
 			if blobSize == -1 {
-				log.Printf("Plane %d remaining uninitialized after load with a NULL blob.\r\n", plane.Id)
-				return nil
+				blob, blobSize, err = plane.InitializeBlob()
+				if err != nil {
+					log.Printf("Plane %d remaining uninitialized after load with a NULL blob.\r\n", plane.Id)
+					return nil
+				}
 			}
 
 			planeMap := &Map{
