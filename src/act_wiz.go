@@ -504,25 +504,42 @@ func do_goto(ch *Character, arguments string) {
 			ch.Send("Goto which plane ID?\r\n")
 			return
 		}
+
+		if ch.Room != nil {
+			ch.Room.removeCharacter(ch)
+
+		}
 	}
 
 	var room *Room = nil
 
-	playerTarget, _, err := ch.Game.FindPlayerByName(firstArgument)
+	for iter := ch.Game.Characters.Head; iter != nil; iter = iter.Next {
+		gch := iter.Value.(*Character)
 
-	if playerTarget != nil {
-		room = playerTarget.Room
-	} else {
+		nameParts := strings.Split(gch.Name, " ")
+		for _, part := range nameParts {
+			if strings.Compare(strings.ToLower(part), firstArgument) == 0 {
+				room = gch.Room
+				break
+			}
+		}
+	}
+
+	if room == nil {
 		id, err := strconv.Atoi(firstArgument)
 		if err != nil || id <= 0 {
-			ch.Send("Goto which room ID?\r\n")
+			ch.Send("Goto which room?\r\n")
 			return
 		}
 
 		room, err = ch.Game.LoadRoomIndex(uint(id))
+		if err != nil {
+			ch.Send("No such room.\r\n")
+			return
+		}
 	}
 
-	if err != nil || room == nil {
+	if room == nil {
 		ch.Send("No such room.\r\n")
 		return
 	}
