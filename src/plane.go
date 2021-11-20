@@ -85,6 +85,37 @@ func (plane *Plane) generate() error {
 		case SourceTypeBlob:
 			log.Printf("Initializing a %dx%dx%d wilderness zone from a data blob for plane %d.\r\n", plane.Width, plane.Height, plane.Depth, plane.Id)
 
+			row := game.db.QueryRow(`
+				SELECT
+					(CASE
+						WHEN source_value IS NULL THEN -1
+						ELSE LENGTH(source_value)
+					END),
+					(CASE
+						WHEN source_value IS NULL THEN -1
+						ELSE source_value
+					END)
+				FROM
+					planes
+				WHERE
+					id = ?`,
+				plane.Id)
+
+			var blobSize int = 0
+			var blob []byte = make([]byte, plane.Depth*plane.Width*plane.Height)
+
+			err := row.Scan(&blobSize, &blob)
+			if err != nil {
+				return err
+			}
+
+			if blobSize == -1 {
+				log.Printf("Plane %d remaining uninitialized after load with a NULL blob.\r\n", plane.Id)
+				return nil
+			}
+
+			log.Printf("Plane %d initialized from %d byte blob.\r\n", plane.Id, blobSize)
+
 			plane.Flags |= PLANE_INITIALIZED
 		}
 	case PlaneTypeMaze:
@@ -215,7 +246,7 @@ func (game *Game) LoadPlanes() error {
 			}
 		}
 
-		if plane.Zone == nil {
+		if zoneId != 0 && plane.Zone == nil {
 			return errors.New("trying to load plane with a bad zone")
 		}
 
