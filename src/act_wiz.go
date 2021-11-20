@@ -520,12 +520,30 @@ func do_goto(ch *Character, arguments string) {
 			return
 		}
 
+		destination := found.MaterializeRoom(0, 0, 0)
+
+		if ch.Room != nil && ch.Room.Characters != nil {
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				character := iter.Value.(*Character)
+				if character != ch {
+					character.Send(fmt.Sprintf("\r\n{W%s{W disappears in a puff of smoke.{x\r\n", ch.GetShortDescriptionUpper(character)))
+				}
+			}
+		}
+
 		if ch.Room != nil {
 			ch.Room.removeCharacter(ch)
+			destination.AddCharacter(ch)
 
-			destination := found.MaterializeRoom(0, 0, 0)
-			destination.addCharacter(ch)
+			for iter := destination.Characters.Head; iter != nil; iter = iter.Next {
+				character := iter.Value.(*Character)
+				if character != ch {
+					character.Send(fmt.Sprintf("\r\n{W%s{W appears in a puff of smoke.{x\r\n", ch.GetShortDescriptionUpper(character)))
+				}
+			}
 		}
+
+		return
 	}
 
 	var room *Room = nil
