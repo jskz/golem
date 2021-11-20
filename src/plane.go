@@ -27,8 +27,18 @@ type Plane struct {
 	SourceType string   `json:"sourceType"`
 	Scripts    *Script  `json:"scripts"`
 
+	Map     *Map        `json:"map"`
 	Maze    *MazeGrid   `json:"maze"`
 	Portals *LinkedList `json:"portals"`
+}
+
+type MapGrid struct {
+	Terrain [][]int `json:"terrain"`
+	Atlas   Atlas   `json:"atlas"`
+}
+
+type Map struct {
+	Layers []MapGrid `json:layers"`
 }
 
 // Atlas will be a collection of quadtrees for a plane providing spacial indices for any characters, objects,
@@ -72,6 +82,10 @@ const (
 	PortalTypeProcedural = "procedural"
 )
 
+func (plane *Plane) initializeBlob() error {
+	return nil
+}
+
 func (plane *Plane) generate() error {
 	game := plane.Game
 
@@ -113,7 +127,18 @@ func (plane *Plane) generate() error {
 				log.Printf("Plane %d remaining uninitialized after load with a NULL blob.\r\n", plane.Id)
 				return nil
 			}
+			/*
+			   			3D position to 1D array: (z * (y * height)) + x
 
+			   1D array to 3D position:
+
+			   for z = 0; z < depth; z++
+			       for y = 0; y < height; y++
+			           for x = 0; x < width; x++
+			               index = (z * (y * height)) + x;
+
+			               world[z][y][x] = data[index];
+			*/
 			log.Printf("Plane %d initialized from %d byte blob.\r\n", plane.Id, blobSize)
 
 			plane.Flags |= PLANE_INITIALIZED
