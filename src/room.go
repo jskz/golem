@@ -29,6 +29,7 @@ const (
 	ROOM_SAFE       = 1 << 2
 	ROOM_DUNGEON    = 1 << 3
 	ROOM_EVIL_AURA  = 1 << 4
+	ROOM_PLANAR     = 1 << 5
 )
 
 type Room struct {

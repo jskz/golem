@@ -561,6 +561,7 @@ func (game *Game) InitScripting() error {
 	roomFlagsConstantsObj := game.vm.NewObject()
 	roomFlagsConstantsObj.Set("ROOM_PERSISTENT", ROOM_PERSISTENT)
 	roomFlagsConstantsObj.Set("ROOM_VIRTUAL", ROOM_VIRTUAL)
+	roomFlagsConstantsObj.Set("ROOM_PLANAR", ROOM_PLANAR)
 	roomFlagsConstantsObj.Set("ROOM_SAFE", ROOM_SAFE)
 	roomFlagsConstantsObj.Set("ROOM_DUNGEON", ROOM_DUNGEON)
 	roomFlagsConstantsObj.Set("ROOM_EVIL_AURA", ROOM_EVIL_AURA)

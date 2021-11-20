@@ -276,6 +276,29 @@ func (plane *Plane) generate() error {
 }
 
 func (plane *Plane) MaterializeRoom(x int, y int, z int) *Room {
+	room := plane.Game.NewRoom()
+
+	room.Id = 0
+	room.Name = "Holodeck"
+	room.Description = "If you are seeing this message, something has gone wrong."
+	room.Flags = ROOM_VIRTUAL | ROOM_PLANAR
+
+	return room
+}
+
+func (plane *Plane) GetTerrainRect(x int, y int, z int, w int, h int) [][]int {
+	var rectWidth int = w
+	var rectHeight int = h
+	var terrain [][]int = make([][]int, h)
+
+	for rectY := y; rectY < y+rectHeight; rectY++ {
+		terrain[rectY] = make([]int, 0)
+
+		for rectX := x; rectX < x+rectWidth; rectX++ {
+			terrain[rectY] = append(terrain[rectY], plane.Map.Layers[z].Terrain[rectY][rectX])
+		}
+	}
+
 	return nil
 }
 
