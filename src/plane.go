@@ -276,6 +276,10 @@ func (plane *Plane) generate() error {
 }
 
 func (plane *Plane) MaterializeRoom(x int, y int, z int) *Room {
+	if plane.PlaneType == "dungeon" {
+		return plane.Dungeon.Floors[z].Grid[y][x].Room
+	}
+
 	room := plane.Game.NewRoom()
 
 	room.Id = 0
