@@ -34,15 +34,17 @@ type Plane struct {
 
 type MapGrid struct {
 	Terrain [][]int `json:"terrain"`
-	Atlas   Atlas   `json:"atlas"`
+	Atlas   *Atlas  `json:"atlas"`
+	Width   int     `json:"width"`
+	Height  int     `json:"height"`
 }
 
 type Map struct {
-	Layers []MapGrid `json:layers"`
+	Layers []*MapGrid `json:layers"`
 }
 
 // Atlas will be a collection of quadtrees for a plane providing spacial indices for any characters, objects,
-// misc game entities within that plane
+// misc game entities within that plane; these are unused interface stubs for now
 type Atlas struct {
 	Characters interface{}
 	Objects    interface{}
@@ -82,7 +84,42 @@ const (
 	PortalTypeProcedural = "procedural"
 )
 
-func (plane *Plane) initializeBlob() error {
+// Fill the source_value field for this plane with an appropriately sized binary blob of zeroes
+func (plane *Plane) InitializeBlob() error {
+	plane.Map = &Map{
+		Layers: make([]*MapGrid, 0),
+	}
+
+	var bytes []byte = make([]byte, plane.Depth*plane.Width*plane.Height)
+
+	for z := 0; z < plane.Depth; z++ {
+		grid := &MapGrid{}
+		grid.Terrain = make([][]int, plane.Height)
+
+		for y := 0; y < plane.Height; y++ {
+			grid.Terrain[y] = make([]int, plane.Width)
+
+			for x := 0; x < plane.Width; x++ {
+				grid.Terrain[y][x] = 0
+				bytes = append(bytes, 0)
+			}
+		}
+
+		plane.Map.Layers = append(plane.Map.Layers, grid)
+	}
+
+	_, err := plane.Game.db.Exec(`
+		UPDATE
+			planes
+		SET
+			source_value = ?
+		WHERE
+			id = ?
+	`, bytes, plane.Id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -127,21 +164,30 @@ func (plane *Plane) generate() error {
 				log.Printf("Plane %d remaining uninitialized after load with a NULL blob.\r\n", plane.Id)
 				return nil
 			}
-			/*
-			   			3D position to 1D array: (z * (y * height)) + x
 
-			   1D array to 3D position:
+			planeMap := &Map{
+				Layers: make([]*MapGrid, 0),
+			}
 
-			   for z = 0; z < depth; z++
-			       for y = 0; y < height; y++
-			           for x = 0; x < width; x++
-			               index = (z * (y * height)) + x;
+			for z := 0; z < plane.Depth; z++ {
+				grid := &MapGrid{}
+				grid.Terrain = make([][]int, plane.Height)
 
-			               world[z][y][x] = data[index];
-			*/
+				for y := 0; y < plane.Height; y++ {
+					grid.Terrain[y] = make([]int, plane.Width)
+
+					for x := 0; x < plane.Width; x++ {
+						grid.Terrain[y][x] = int(blob[(z*(y*plane.Height))+x])
+					}
+				}
+
+				planeMap.Layers = append(planeMap.Layers, grid)
+			}
+
 			log.Printf("Plane %d initialized from %d byte blob.\r\n", plane.Id, blobSize)
 
 			plane.Flags |= PLANE_INITIALIZED
+			plane.Map = planeMap
 		}
 	case PlaneTypeMaze:
 		switch plane.SourceType {
