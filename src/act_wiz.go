@@ -496,7 +496,7 @@ func do_script(ch *Character, arguments string) {
 
 func do_goto(ch *Character, arguments string) {
 	firstArgument, arguments := oneArgument(arguments)
-	secondArgument, arguments := oneArgument(arguments)
+	secondArgument, _ := oneArgument(arguments)
 
 	if firstArgument == "plane" {
 		id, err := strconv.Atoi(secondArgument)
@@ -505,9 +505,26 @@ func do_goto(ch *Character, arguments string) {
 			return
 		}
 
+		var found *Plane = nil
+		for iter := ch.Game.Planes.Head; iter != nil; iter = iter.Next {
+			plane := iter.Value.(*Plane)
+
+			if plane.Id == id {
+				found = plane
+				break
+			}
+		}
+
+		if found == nil {
+			ch.Send("No such plane.\r\n")
+			return
+		}
+
 		if ch.Room != nil {
 			ch.Room.removeCharacter(ch)
 
+			destination := found.MaterializeRoom(0, 0, 0)
+			destination.addCharacter(ch)
 		}
 	}
 

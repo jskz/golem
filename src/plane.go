@@ -43,11 +43,14 @@ type Map struct {
 	Layers []*MapGrid `json:layers"`
 }
 
-// Atlas will be a collection of quadtrees for a plane providing spacial indices for any characters, objects,
-// misc game entities within that plane; these are unused interface stubs for now
+// Atlas will be a collection of quadtrees for a plane providing spacial indices to quickly lookup:
+// temporary instances of in-memory rooms, characters, objects, misc game entities within that plane;
+// these are unused interface stubs until quadtree branch is ready
 type Atlas struct {
 	Characters interface{}
 	Objects    interface{}
+	Rooms      interface{}
+
 	// portals, scripts, exits?
 }
 
@@ -83,6 +86,12 @@ const (
 	PortalTypeFixed      = "fixed"
 	PortalTypeProcedural = "procedural"
 )
+
+func NewAtlas() *Atlas {
+	return &Atlas{
+		// init quadtrees
+	}
+}
 
 // Fill the source_value field for this plane with an appropriately sized binary blob of zeroes
 func (plane *Plane) InitializeBlob() ([]byte, int, error) {
@@ -263,6 +272,10 @@ func (plane *Plane) generate() error {
 		return errors.New("unimplemented plane type")
 	}
 
+	return nil
+}
+
+func (plane *Plane) MaterializeRoom(x int, y int, z int) *Room {
 	return nil
 }
 
