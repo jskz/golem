@@ -495,13 +495,33 @@ func do_script(ch *Character, arguments string) {
 }
 
 func do_goto(ch *Character, arguments string) {
-	id, err := strconv.Atoi(arguments)
-	if err != nil || id <= 0 {
-		ch.Send("Goto which room ID?\r\n")
-		return
+	firstArgument, arguments := oneArgument(arguments)
+	secondArgument, arguments := oneArgument(arguments)
+
+	if firstArgument == "plane" {
+		id, err := strconv.Atoi(secondArgument)
+		if err != nil || id <= 0 {
+			ch.Send("Goto which plane ID?\r\n")
+			return
+		}
 	}
 
-	room, err := ch.Game.LoadRoomIndex(uint(id))
+	var room *Room = nil
+
+	playerTarget, _, err := ch.Game.FindPlayerByName(firstArgument)
+
+	if playerTarget != nil {
+		room = playerTarget.Room
+	} else {
+		id, err := strconv.Atoi(firstArgument)
+		if err != nil || id <= 0 {
+			ch.Send("Goto which room ID?\r\n")
+			return
+		}
+
+		room, err = ch.Game.LoadRoomIndex(uint(id))
+	}
+
 	if err != nil || room == nil {
 		ch.Send("No such room.\r\n")
 		return
