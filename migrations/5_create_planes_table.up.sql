@@ -20,3 +20,4 @@ CREATE TABLE planes (
 );
 
 INSERT INTO planes(id, zone_id, name, plane_type, source_type, width, height, depth) VALUES (1, 1, 'limbo-maze', 'maze', 'procedural', 32, 32, 4);
+INSERT INTO planes(id, zone_id, name, plane_type, source_type, width, height, depth) VALUES (2, 0, 'overworld', 'wilderness', 'blob', 512, 512, 1);

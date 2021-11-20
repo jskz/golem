@@ -31,6 +31,14 @@ type Plane struct {
 	Portals *LinkedList `json:"portals"`
 }
 
+// Atlas will be a collection of quadtrees for a plane providing spacial indices for any characters, objects,
+// misc game entities within that plane
+type Atlas struct {
+	Characters interface{}
+	Objects    interface{}
+	// portals, scripts, exits?
+}
+
 type Portal struct {
 	Id         int    `json:"id"`
 	PortalType string `json:"portalType"`
@@ -40,7 +48,8 @@ type Portal struct {
 
 /* plane flags */
 const (
-	PLANE_INITIALIZED = 0
+	PLANE_NONE        = 0
+	PLANE_INITIALIZED = 1
 )
 
 /* plane_type ENUM values */
@@ -71,6 +80,13 @@ func (plane *Plane) generate() error {
 	}
 
 	switch plane.PlaneType {
+	case PlaneTypeWilderness:
+		switch plane.SourceType {
+		case SourceTypeBlob:
+			log.Printf("Initializing a %dx%dx%d wilderness zone from a data blob for plane %d.\r\n", plane.Width, plane.Height, plane.Depth, plane.Id)
+
+			plane.Flags |= PLANE_INITIALIZED
+		}
 	case PlaneTypeMaze:
 		switch plane.SourceType {
 		case SourceTypeProcedural:
@@ -84,7 +100,6 @@ func (plane *Plane) generate() error {
 				if err != nil {
 					log.Println(err)
 				}
-
 			*/
 
 			/* Exit will be self-referential and locked until the maze is done generating */
