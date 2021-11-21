@@ -619,6 +619,9 @@ func (game *Game) InitScripting() error {
 	httpUtilityObj.Set("Get", game.vm.ToValue(SimpleGET))
 	httpUtilityObj.Set("Post", game.vm.ToValue(SimplePOST))
 
+	utilObj := game.vm.NewObject()
+	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))
+
 	obj.Set("KnownLocations", knownLocationsConstantsObj)
 	obj.Set("ExitFlags", exitFlagsConstantsObj)
 	obj.Set("EffectTypes", effectTypes)
@@ -631,6 +634,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("WearLocations", wearLocationsConstantsObj)
 	obj.Set("HTTP", httpUtilityObj)
 	obj.Set("NewExit", game.vm.ToValue(game.NewExit))
+	obj.Set("util", utilObj)
 
 	sentryObj := game.vm.NewObject()
 	sentryObj.Set("captureMessage", game.vm.ToValue(sentry.CaptureMessage))

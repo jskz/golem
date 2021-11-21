@@ -10,6 +10,7 @@ package main
 import (
 	"bytes"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"strings"
 	"unicode"
@@ -73,4 +74,10 @@ func oneArgument(args string) (string, string) {
 	}
 
 	return buf.String(), strings.TrimLeft(args[end:], " ")
+}
+
+func Distance2D(x int, y int, x2 int, y2 int) int {
+	d := int(math.Sqrt(float64(((x2 - x) * (x2 - x)) + ((y2 - y) * (y2 - y)))))
+
+	return d
 }
