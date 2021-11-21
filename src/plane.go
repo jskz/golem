@@ -148,14 +148,14 @@ func (ch *Character) CreatePlaneMap() string {
 	var buf strings.Builder
 
 	var cameraWidth = 26
-	var cameraHeight = 14
+	var cameraHeight = 15
 
 	cameraX := ch.Room.X
 	cameraY := ch.Room.Y
 	cameraZ := ch.Room.Z
 	lastColour := ""
 
-	for cY := cameraY - (cameraHeight / 2); cY < cameraY+(cameraY/2); cY++ {
+	for cY := cameraY - (cameraHeight / 2); cY < cameraY+(cameraHeight/2)+1; cY++ {
 		for cX := cameraX - (cameraWidth / 2); cX < cameraX+(cameraWidth/2); cX++ {
 			if cX < 0 || cX >= ch.Room.Plane.Width || cY < 0 || cY >= ch.Room.Plane.Height {
 				buf.WriteString(" ")
