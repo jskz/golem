@@ -281,11 +281,13 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int) *Room {
 	}
 
 	room := plane.Game.NewRoom()
-
 	room.Id = 0
 	room.Name = "Holodeck"
 	room.Description = "If you are seeing this message, something has gone wrong."
 	room.Flags = ROOM_VIRTUAL | ROOM_PLANAR
+	room.Characters = NewLinkedList()
+	room.Objects = NewLinkedList()
+	room.Exit = make(map[uint]*Exit)
 
 	return room
 }

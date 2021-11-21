@@ -43,6 +43,9 @@ type Room struct {
 	Flags   int       `json:"flags"`
 	Virtual bool      `json:"virtual"`
 	Cell    *MazeCell `json:"cell"`
+	X       int       `json:"x"`
+	Y       int       `json:"y"`
+	Z       int       `json:"z"`
 
 	Name        string `json:"name"`
 	Description string `json:"description"`

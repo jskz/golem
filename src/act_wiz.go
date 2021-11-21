@@ -543,6 +543,7 @@ func do_goto(ch *Character, arguments string) {
 			}
 		}
 
+		do_look(ch, "")
 		return
 	}
 
