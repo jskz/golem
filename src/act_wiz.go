@@ -520,7 +520,7 @@ func do_goto(ch *Character, arguments string) {
 			return
 		}
 
-		destination := found.MaterializeRoom(0, 0, 0)
+		destination := found.MaterializeRoom(0, 0, 0, true)
 
 		if ch.Room != nil && ch.Room.Characters != nil {
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {

@@ -320,9 +320,13 @@ func (plane *Plane) generate() error {
 	return nil
 }
 
-func (plane *Plane) MaterializeRoom(x int, y int, z int) *Room {
+func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 	if plane.PlaneType == "dungeon" {
 		return plane.Dungeon.Floors[z].Grid[y][x].Room
+	}
+
+	if x < 0 || x > plane.Width || y < 0 || y > plane.Height || z < 0 || z > plane.Depth {
+		return nil
 	}
 
 	room := plane.Game.NewRoom()
@@ -336,7 +340,49 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int) *Room {
 	room.Exit = make(map[uint]*Exit)
 	room.X = x
 	room.Y = y
-	room.Z = y
+	room.Z = z
+
+	if src {
+		/* Try to materialize adjacent (no ordinals) rooms and link them */
+		for direction := uint(DirectionNorth); direction < DirectionUp; direction++ {
+			var translatedX int = x
+			var translatedY int = y
+
+			switch direction {
+			case DirectionNorth:
+				translatedX = x
+				translatedY = y - 1
+			case DirectionEast:
+				translatedX = x + 1
+				translatedY = y
+			case DirectionSouth:
+				translatedX = x
+				translatedY = y + 1
+			case DirectionWest:
+				translatedX = x - 1
+				translatedY = y
+			}
+
+			adj := plane.MaterializeRoom(translatedX, translatedY, z, false)
+			if adj == nil {
+				continue
+			}
+
+			room.Exit[uint(direction)] = &Exit{
+				Id:        0,
+				To:        adj,
+				Direction: direction,
+				Flags:     0,
+			}
+
+			adj.Exit[ReverseDirection[uint(direction)]] = &Exit{
+				Id:        0,
+				To:        room,
+				Direction: direction,
+				Flags:     0,
+			}
+		}
+	}
 
 	return room
 }
