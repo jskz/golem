@@ -288,6 +288,9 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int) *Room {
 	room.Characters = NewLinkedList()
 	room.Objects = NewLinkedList()
 	room.Exit = make(map[uint]*Exit)
+	room.X = x
+	room.Y = y
+	room.Z = y
 
 	return room
 }
