@@ -147,8 +147,9 @@ func (ch *Character) CreatePlaneMap() string {
 
 	var buf strings.Builder
 
-	var cameraWidth = 26
-	var cameraHeight = 15
+	var cameraWidth int = 32
+	var cameraHeight int = 17
+	var cameraRange int = 9
 
 	cameraX := ch.Room.X
 	cameraY := ch.Room.Y
@@ -157,7 +158,7 @@ func (ch *Character) CreatePlaneMap() string {
 
 	for cY := cameraY - (cameraHeight / 2); cY < cameraY+(cameraHeight/2)+1; cY++ {
 		for cX := cameraX - (cameraWidth / 2); cX < cameraX+(cameraWidth/2); cX++ {
-			if cX < 0 || cX >= ch.Room.Plane.Width || cY < 0 || cY >= ch.Room.Plane.Height {
+			if cX < 0 || cX >= ch.Room.Plane.Width || cY < 0 || cY >= ch.Room.Plane.Height || Distance2D(cameraX, cameraY, cX, cY) > cameraRange {
 				buf.WriteString(" ")
 				lastColour = " "
 				continue
