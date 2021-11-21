@@ -49,11 +49,13 @@ type Map struct {
 // Atlas will be a collection of quadtrees for a plane providing spacial indices to quickly lookup:
 // temporary instances of in-memory rooms, characters, objects, misc game entities within that plane;
 // these are unused interface stubs until quadtree branch is ready
-type Atlas struct {
-	Characters interface{}
-	Objects    interface{}
-	Rooms      interface{}
 
+// least power/MVP approach until quadtree branch
+type Atlas struct {
+	Characters map[int]*LinkedList
+	Objects    map[int]*LinkedList
+	Rooms      map[int]*LinkedList
+	Exits      map[int]map[uint]*Exit
 	// portals, scripts, exits?
 }
 
@@ -92,7 +94,9 @@ const (
 
 func NewAtlas() *Atlas {
 	return &Atlas{
-		// init quadtrees
+		Characters: make(map[int]*LinkedList),
+		Objects:    make(map[int]*LinkedList),
+		Exits:      make(map[int]map[uint]*Exit),
 	}
 }
 
@@ -107,7 +111,7 @@ func (plane *Plane) InitializeBlob() ([]byte, int, error) {
 	var bytes []byte = make([]byte, plane.Depth*plane.Width*plane.Height)
 
 	for z := 0; z < plane.Depth; z++ {
-		grid := &MapGrid{}
+		grid := &MapGrid{Atlas: NewAtlas()}
 		grid.Terrain = make([][]int, plane.Height)
 
 		for y := 0; y < plane.Height; y++ {
@@ -230,7 +234,7 @@ func (plane *Plane) generate() error {
 			}
 
 			for z := 0; z < plane.Depth; z++ {
-				grid := &MapGrid{}
+				grid := &MapGrid{Atlas: NewAtlas()}
 				grid.Terrain = make([][]int, plane.Height)
 
 				for y := 0; y < plane.Height; y++ {
@@ -342,9 +346,35 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 	room.Name = "Holodeck"
 	room.Description = "If you are seeing this message, something has gone wrong."
 	room.Flags = ROOM_VIRTUAL | ROOM_PLANAR
-	room.Characters = NewLinkedList()
-	room.Objects = NewLinkedList()
-	room.Exit = make(map[uint]*Exit)
+
+	var ok bool = false
+
+	room.Characters, ok = plane.Map.Layers[z].Atlas.Characters[y*plane.Height+x]
+	if !ok {
+		list := NewLinkedList()
+
+		plane.Map.Layers[z].Atlas.Characters[y*plane.Height+x] = list
+		room.Characters = list
+	}
+
+	ok = false
+	room.Objects, ok = plane.Map.Layers[z].Atlas.Objects[y*plane.Height+x]
+	if !ok {
+		list := NewLinkedList()
+
+		plane.Map.Layers[z].Atlas.Objects[y*plane.Height+x] = list
+		room.Characters = list
+	}
+
+	ok = false
+	room.Exit, ok = plane.Map.Layers[z].Atlas.Exits[y*plane.Height+x]
+	if !ok {
+		exits := make(map[uint]*Exit, DirectionWest)
+
+		plane.Map.Layers[z].Atlas.Exits[y*plane.Height+x] = exits
+		room.Exit = exits
+	}
+
 	room.X = x
 	room.Y = y
 	room.Z = z

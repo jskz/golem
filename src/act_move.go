@@ -142,7 +142,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	ch.Stamina -= MovementCost
 
-	/* Is the exit closed, etc. */
+	// Is the exit closed, etc.
 	from := ch.Room
 	from.removeCharacter(ch)
 	for iter := from.Characters.Head; iter != nil; iter = iter.Next {
@@ -152,6 +152,11 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	if from.script != nil {
 		from.script.tryEvaluate("onRoomLeave", ch.Game.vm.ToValue(from), ch.Game.vm.ToValue(ch))
+	}
+
+	// If destination room is planar, then try to fully materialize on the room that the player is about to move into
+	if exit.To.Flags&ROOM_PLANAR != 0 {
+		exit.To = exit.To.Plane.MaterializeRoom(exit.To.X, exit.To.Y, exit.To.Z, true)
 	}
 
 	exit.To.AddCharacter(ch)
