@@ -13,6 +13,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Plane struct {
@@ -247,6 +248,12 @@ func (plane *Plane) generate() error {
 
 			plane.Flags |= PLANE_INITIALIZED
 			plane.Map = planeMap
+
+			go func() {
+				// Code smell, but allow the main thread a little time to poll for this event
+				<-time.After(1 * time.Second)
+				game.planeGenerationCompleted <- plane.Id
+			}()
 		}
 	case PlaneTypeMaze:
 		switch plane.SourceType {

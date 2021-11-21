@@ -181,9 +181,25 @@ VALUES (1, 'limbo-developer-maze',
 
 INSERT INTO plane_script (id, plane_id, script_id) VALUES (1, 1, 1);
 
+INSERT INTO scripts (id, name, script) VALUES (2, 'overworld', 'module.exports = {
+    onGenerationComplete: function(p) {
+        const w = p.width;
+        const h = p.height;
+        const terrain = p.map.layers[0].terrain;
+
+        // Fill the plane with empty ocean
+        for(let y = 0; y < h; y++) {
+            for(let x = 0; x < w; x++) {
+                terrain[y][x] = Golem.TerrainTypes.TerrainTypeOcean;
+            }
+        }
+    }
+};');
+
+INSERT INTO plane_script (id, plane_id, script_id) VALUES (2, 2, 2);
+
 INSERT INTO
-    scripts (id, name, script)
-VALUES (2, 'minor-healing-potion', 'module.exports = {
+    scripts (id, name, script) VALUES (3, 'minor-healing-potion', 'module.exports = {
     onUse: function(ch) {
         if(!ch.isEqual(this.carriedBy)) {
             ch.send("You aren\'t carrying that.\\r\\n");
@@ -200,6 +216,6 @@ VALUES (2, 'minor-healing-potion', 'module.exports = {
     }
 };');
 
-INSERT INTO object_script (id, `object_id`, script_id) VALUES (1, 5, 2);
+INSERT INTO object_script (id, `object_id`, script_id) VALUES (1, 5, 3);
 
 CREATE INDEX index_script_name ON scripts(name);

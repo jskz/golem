@@ -990,6 +990,8 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 func (game *Game) Broadcast(message string, filter goja.Callable) {
 	var recipients []*Character = make([]*Character, 0)
 
+	log.Println(message)
+
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		var result bool = false
 
@@ -1022,6 +1024,8 @@ func WiznetBroadcastFilter(ch *Character) bool {
 
 func (game *Game) broadcast(message string, filterFn func(*Character) bool) {
 	var recipients []*Character = make([]*Character, 0)
+
+	log.Println(message)
 
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		var result bool = false

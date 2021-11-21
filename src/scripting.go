@@ -619,6 +619,9 @@ func (game *Game) InitScripting() error {
 	httpUtilityObj.Set("Get", game.vm.ToValue(SimpleGET))
 	httpUtilityObj.Set("Post", game.vm.ToValue(SimplePOST))
 
+	terrainTypes := game.vm.NewObject()
+	terrainTypes.Set("TerrainTypeOcean", game.vm.ToValue(TerrainTypeOcean))
+
 	utilObj := game.vm.NewObject()
 	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))
 
@@ -627,6 +630,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("EffectTypes", effectTypes)
 	obj.Set("AffectedTypes", affectedTypes)
 	obj.Set("RoomFlags", roomFlagsConstantsObj)
+	obj.Set("TerrainTypes", terrainTypes)
 	obj.Set("CharacterFlags", charFlagsConstantsObj)
 	obj.Set("ObjectFlags", objectFlagsConstantsObj)
 	obj.Set("Combat", combatObj)
