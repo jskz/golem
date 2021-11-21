@@ -67,14 +67,17 @@ const (
 )
 
 const (
-	TerrainTypeCaveWall      = 1
-	TerrainTypeCaveDeepWall1 = 2
-	TerrainTypeCaveDeepWall2 = 3
-	TerrainTypeCaveDeepWall3 = 4
-	TerrainTypeCaveDeepWall4 = 5
-	TerrainTypeCaveDeepWall5 = 6
-	TerrainTypeCaveTunnel    = 7
-	TerrainTypeOcean         = 8
+	TerrainTypeCaveWall              = 1
+	TerrainTypeCaveDeepWall1         = 2
+	TerrainTypeCaveDeepWall2         = 3
+	TerrainTypeCaveDeepWall3         = 4
+	TerrainTypeCaveDeepWall4         = 5
+	TerrainTypeCaveDeepWall5         = 6
+	TerrainTypeCaveTunnel            = 7
+	TerrainTypeOcean                 = 8
+	TerrainTypeOverworldCityExterior = 9
+	TerrainTypeOverworldCityInterior = 10
+	TerrainTypeOverworldCityEntrance = 11
 )
 
 type Terrain struct {

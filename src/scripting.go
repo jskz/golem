@@ -621,6 +621,9 @@ func (game *Game) InitScripting() error {
 
 	terrainTypes := game.vm.NewObject()
 	terrainTypes.Set("TerrainTypeOcean", game.vm.ToValue(TerrainTypeOcean))
+	terrainTypes.Set("OverworldCityExterior", game.vm.ToValue(TerrainTypeOverworldCityExterior))
+	terrainTypes.Set("OverworldCityInterior", game.vm.ToValue(TerrainTypeOverworldCityInterior))
+	terrainTypes.Set("OverworldCityEntrance", game.vm.ToValue(TerrainTypeOverworldCityEntrance))
 
 	utilObj := game.vm.NewObject()
 	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))

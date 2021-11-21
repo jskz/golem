@@ -293,6 +293,11 @@ func do_flee(ch *Character, arguments string) {
 	ch.Combat = nil
 
 	ch.Room.removeCharacter(ch)
+
+	if chosenEscape.To.Plane != nil && chosenEscape.To.Flags&ROOM_PLANAR != 0 {
+		chosenEscape.To = chosenEscape.To.Plane.MaterializeRoom(chosenEscape.To.X, chosenEscape.To.Y, chosenEscape.To.Z, true)
+	}
+
 	chosenEscape.To.AddCharacter(ch)
 
 	/* Announce player's arrival to all other players in the new room */
