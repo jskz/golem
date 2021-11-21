@@ -12,5 +12,3 @@ function do_example(ch) {
             ch.send('{CResulting string was: ' + string + '{x\r\n');
         });
 }
-
-Golem.registerPlayerCommand('example', do_example);
