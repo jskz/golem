@@ -78,6 +78,10 @@ const (
 	TerrainTypeOverworldCityExterior = 9
 	TerrainTypeOverworldCityInterior = 10
 	TerrainTypeOverworldCityEntrance = 11
+	TerrainTypePlains                = 12
+	TerrainTypeField                 = 13
+	TerrainTypeShore                 = 14
+	TerrainTypeShallowWater          = 15
 )
 
 type Terrain struct {

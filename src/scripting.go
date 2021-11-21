@@ -624,6 +624,10 @@ func (game *Game) InitScripting() error {
 	terrainTypes.Set("OverworldCityExterior", game.vm.ToValue(TerrainTypeOverworldCityExterior))
 	terrainTypes.Set("OverworldCityInterior", game.vm.ToValue(TerrainTypeOverworldCityInterior))
 	terrainTypes.Set("OverworldCityEntrance", game.vm.ToValue(TerrainTypeOverworldCityEntrance))
+	terrainTypes.Set("TerrainTypePlains", game.vm.ToValue(TerrainTypePlains))
+	terrainTypes.Set("TerrainTypeField", game.vm.ToValue(TerrainTypeField))
+	terrainTypes.Set("TerrainTypeShore", game.vm.ToValue(TerrainTypeShore))
+	terrainTypes.Set("TerrainTypeShallowWater", game.vm.ToValue(TerrainTypeShallowWater))
 
 	utilObj := game.vm.NewObject()
 	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))
@@ -647,6 +651,7 @@ func (game *Game) InitScripting() error {
 	sentryObj.Set("captureMessage", game.vm.ToValue(sentry.CaptureMessage))
 
 	game.vm.Set("Golem", obj)
+	game.vm.Set("println", game.vm.ToValue(log.Println))
 	game.vm.Set("Sentry", sentryObj)
 	game.vm.Set("setTimeout", game.vm.ToValue(game.setTimeout))
 

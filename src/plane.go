@@ -9,7 +9,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -148,40 +147,40 @@ func (ch *Character) CreatePlaneMap() string {
 
 	var buf strings.Builder
 
-	rect := ch.Room.Plane.GetTerrainRect(0, 0, 0, 26, 14)
-	if len(rect) != 0 {
-		lastColour := ""
+	var cameraWidth = 26
+	var cameraHeight = 14
 
-		for cY := 0; cY < 14; cY++ {
-			for cX := 0; cX < 26; cX++ {
-				if ch.Room.X == cX && cY == ch.Room.Y {
-					buf.WriteString("{Y@")
-					lastColour = "{Y"
-					continue
-				}
+	cameraX := ch.Room.X
+	cameraY := ch.Room.Y
+	cameraZ := ch.Room.Z
+	lastColour := ""
 
-				_, ok := TerrainTable[rect[cY][cX]]
-				if !ok {
-					buf.WriteString("{x ")
-					lastColour = ""
-					continue
-				}
-
-				if lastColour == "" || lastColour != TerrainTable[rect[cY][cX]].GlyphColour {
-					lastColour = TerrainTable[rect[cY][cX]].GlyphColour
-					buf.WriteString(lastColour)
-				}
-
-				buf.WriteString(TerrainTable[rect[cY][cX]].MapGlyph)
+	for cY := cameraY - (cameraHeight / 2); cY < cameraY+(cameraY/2); cY++ {
+		for cX := cameraX - (cameraWidth / 2); cX < cameraX+(cameraWidth/2); cX++ {
+			if cX < 0 || cX >= ch.Room.Plane.Width || cY < 0 || cY >= ch.Room.Plane.Height {
+				buf.WriteString(" ")
+				lastColour = " "
+				continue
 			}
 
-			buf.WriteString("\r\n")
+			if ch.Room.X == cX && cY == ch.Room.Y {
+				buf.WriteString("{Y@")
+				lastColour = "{Y"
+				continue
+			}
+
+			if lastColour == "" || lastColour != TerrainTable[ch.Room.Plane.Map.Layers[cameraZ].Terrain[cY][cX]].GlyphColour {
+				lastColour = TerrainTable[ch.Room.Plane.Map.Layers[cameraZ].Terrain[cY][cX]].GlyphColour
+				buf.WriteString(lastColour)
+			}
+
+			buf.WriteString(TerrainTable[ch.Room.Plane.Map.Layers[cameraZ].Terrain[cY][cX]].MapGlyph)
 		}
 
-		return buf.String()
+		buf.WriteString("\r\n")
 	}
 
-	return fmt.Sprintf("Erroneous plane ID %d map from position (%d, %d, %d)\r\n", ch.Room.Plane.Id, ch.Room.X, ch.Room.Y, ch.Room.Z)
+	return buf.String()
 }
 
 func (plane *Plane) generate() error {
@@ -369,7 +368,7 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 	ok = false
 	room.Exit, ok = plane.Map.Layers[z].Atlas.Exits[y*plane.Height+x]
 	if !ok {
-		exits := make(map[uint]*Exit, DirectionWest)
+		exits := make(map[uint]*Exit, DirectionMax)
 
 		plane.Map.Layers[z].Atlas.Exits[y*plane.Height+x] = exits
 		room.Exit = exits
@@ -405,6 +404,11 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 				continue
 			}
 
+			_, ok := room.Exit[uint(direction)]
+			if ok {
+				continue
+			}
+
 			room.Exit[uint(direction)] = &Exit{
 				Id:        0,
 				To:        adj,
@@ -425,16 +429,24 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 }
 
 func (plane *Plane) GetTerrainRect(x int, y int, z int, w int, h int) [][]int {
-	var rectWidth int = w
-	var rectHeight int = h
-	var terrain [][]int = make([][]int, h)
+	var terrain [][]int = make([][]int, 0)
 
-	for rectY := y; rectY < y+rectHeight; rectY++ {
-		terrain[rectY] = make([]int, 0)
+	for rectY := y; rectY < y+h; rectY++ {
+		row := make([]int, w)
 
-		for rectX := x; rectX < x+rectWidth; rectX++ {
-			terrain[rectY] = append(terrain[rectY], plane.Map.Layers[z].Terrain[rectY][rectX])
+		c := 0
+		for rectX := x; rectX < x+w; rectX++ {
+			if rectX < 0 || rectX >= plane.Width || rectY < 0 || rectY > plane.Height || z < 0 || z > plane.Depth {
+				row[c] = 0
+				c++
+				continue
+			}
+
+			row[c] = plane.Map.Layers[z].Terrain[rectY][rectX]
+			c++
 		}
+
+		terrain = append(terrain, row)
 	}
 
 	return terrain

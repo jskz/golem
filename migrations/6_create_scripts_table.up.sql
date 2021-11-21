@@ -181,19 +181,72 @@ VALUES (1, 'limbo-developer-maze',
 
 INSERT INTO plane_script (id, plane_id, script_id) VALUES (1, 1, 1);
 
-INSERT INTO scripts (id, name, script) VALUES (2, 'overworld', 'module.exports = {
-    onGenerationComplete: function(p) {
-        const w = p.width;
-        const h = p.height;
-        const terrain = p.map.layers[0].terrain;
+INSERT INTO scripts (id, name, script) VALUES (2, 'overworld', 'function drawFilledRect(d, x, y, w, h, t, f) {
+  let j, s;
 
-        // Fill the plane with empty ocean
-        for(let y = 0; y < h; y++) {
-            for(let x = 0; x < w; x++) {
-                terrain[y][x] = Golem.TerrainTypes.TerrainTypeOcean;
-            }
-        }
+  for (j = y; j < y + h; j++) {
+    for (s = x; s < x + w; s++) {
+      d[j][s] = f;
     }
+  }
+
+  for (s = x; s <= x + w; s++) {
+    d[y][s] = t;
+    d[y + h][s] = t;
+  }
+
+  for (j = y; j < y + h; j++) {
+    d[j][x] = t;
+    d[j][x + w] = t;
+  }
+}
+
+module.exports = {
+  onGenerationComplete: function (p) {
+    const BUILDING_POSITION = [5, 5],
+      BUILDING_WIDTH = 5,
+      BUILDING_HEIGHT = 5;
+    const w = p.width;
+    const h = p.height;
+    const terrain = p.map.layers[0].terrain;
+
+    // Fill the plane with empty ocean
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        terrain[y][x] = Golem.TerrainTypes.TerrainTypeOcean;
+      }
+    }
+
+    // Create a small island area
+
+    // Create a structure representing the developer area
+    drawFilledRect(
+      terrain,
+      BUILDING_POSITION[0],
+      BUILDING_POSITION[1],
+      BUILDING_WIDTH,
+      BUILDING_HEIGHT,
+      Golem.TerrainTypes.OverworldCityExterior,
+      Golem.TerrainTypes.OverworldCityInterior
+    );
+
+    // Create the entrance
+    terrain[10][7] = Golem.TerrainTypes.OverworldCityEntrance;
+    
+    // 7, 11 = in front of the temple
+    const templeFront = p.materializeRoom(7, 11, 0, true);     
+    const foyer = Golem.game.loadRoomIndex(3);
+
+    foyer.exit[Golem.Directions.DirectionSouth] =
+        Golem.NewExit(
+            Golem.Directions.DirectionSouth,
+            templeFront,
+            Golem.ExitFlags.EXIT_IS_DOOR |
+                Golem.ExitFlags.EXIT_CLOSED
+        );
+    templeFront.exit[Golem.Directions.DirectionNorth].to = foyer;
+    templeFront.exit[Golem.Directions.DirectionNorth].flags = Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED;
+  },
 };');
 
 INSERT INTO plane_script (id, plane_id, script_id) VALUES (2, 2, 2);

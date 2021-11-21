@@ -25,3 +25,7 @@ INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VAL
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (9, 'overworld-city-exterior', '{w', 'I', -1, 0);
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (10, 'overworld-city-interior', '{x', ' ', -1, 0);
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (11, 'overworld-city-entrance', '{W', 'O', 0, 0);
+INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (12, 'plains', '{G', '.', 5, 0);
+INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (13, 'field', '{G', ':', 5, 0);
+INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (14, 'shore', '{Y', ':', 10, 0);
+INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (15, 'shallow-water', '{C', '~', 6, 0);
