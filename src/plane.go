@@ -9,6 +9,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"sync"
 )
@@ -132,6 +133,14 @@ func (plane *Plane) InitializeBlob() ([]byte, int, error) {
 	}
 
 	return bytes, plane.Depth * plane.Width * plane.Height, nil
+}
+
+func (ch *Character) CreatePlaneMap() string {
+	if ch.Room == nil || ch.Room.Plane == nil {
+		return "Error retrieving plane map\r\n"
+	}
+
+	return fmt.Sprintf("Plane ID %d map from position (%d, %d, %d)\r\n", ch.Room.Plane.Id, ch.Room.X, ch.Room.Y, ch.Room.Z)
 }
 
 func (plane *Plane) generate() error {
@@ -281,6 +290,7 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int) *Room {
 	}
 
 	room := plane.Game.NewRoom()
+	room.Plane = plane
 	room.Id = 0
 	room.Name = "Holodeck"
 	room.Description = "If you are seeing this message, something has gone wrong."

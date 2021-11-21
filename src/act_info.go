@@ -361,7 +361,7 @@ func do_look(ch *Character, arguments string) {
 	buf.WriteString(fmt.Sprintf("{D  %s%-50s {D-      %s{D      -\r\n", roomFlagDescriptionColour, roomFlagDescription, lookCompassOutput[DirectionSouth]))
 
 	if ch.Room.Flags&ROOM_PLANAR != 0 {
-		buf.WriteString(ch.CreateMap())
+		buf.WriteString(ch.CreatePlaneMap())
 	} else {
 		buf.WriteString(fmt.Sprintf("\r\n{w  %s{x\r\n", ch.Room.Description))
 	}

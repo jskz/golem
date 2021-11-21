@@ -33,10 +33,10 @@ const (
 )
 
 type Room struct {
-	Game *Game `json:"game"`
-
-	Id   uint  `json:"id"`
-	Zone *Zone `json:"zone"`
+	Game  *Game  `json:"game"`
+	Plane *Plane `json:"plane"`
+	Id    uint   `json:"id"`
+	Zone  *Zone  `json:"zone"`
 
 	script *Script
 
