@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 )
 
@@ -140,7 +141,22 @@ func (ch *Character) CreatePlaneMap() string {
 		return "Error retrieving plane map\r\n"
 	}
 
-	return fmt.Sprintf("Plane ID %d map from position (%d, %d, %d)\r\n", ch.Room.Plane.Id, ch.Room.X, ch.Room.Y, ch.Room.Z)
+	var buf strings.Builder
+
+	rect := ch.Room.Plane.GetTerrainRect(0, 0, 0, 26, 14)
+	if len(rect) != 0 {
+		for cY := 0; cY < 26; cY++ {
+			for cX := 0; cX < 14; cX++ {
+				buf.WriteString(TerrainTable[rect[cY][cX]].MapGlyph)
+			}
+
+			buf.WriteString("\r\n")
+		}
+
+		return buf.String()
+	}
+
+	return fmt.Sprintf("Erroneous plane ID %d map from position (%d, %d, %d)\r\n", ch.Room.Plane.Id, ch.Room.X, ch.Room.Y, ch.Room.Z)
 }
 
 func (plane *Plane) generate() error {
@@ -318,7 +334,7 @@ func (plane *Plane) GetTerrainRect(x int, y int, z int, w int, h int) [][]int {
 		}
 	}
 
-	return nil
+	return terrain
 }
 
 func (game *Game) FindPlaneByID(id int) *Plane {
