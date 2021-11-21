@@ -46,6 +46,11 @@ func (client *Client) displayPrompt() {
 	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
 
 	prompt.WriteString("\r\n")
+
+	if client.Character.isAdmin() && client.Character.Room != nil && client.Character.Room.Flags&ROOM_PLANAR != 0 {
+		prompt.WriteString(client.TranslateColourCodes(fmt.Sprintf("{C(%d, %d)", client.Character.Room.X, client.Character.Room.Y)))
+	}
+
 	if client.Character.Room != nil && client.Character.Room.Flags&ROOM_SAFE != 0 {
 		prompt.WriteString(client.TranslateColourCodes("{W[SAFE]"))
 	}
