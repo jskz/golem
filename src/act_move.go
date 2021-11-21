@@ -79,6 +79,7 @@ const (
 type Terrain struct {
 	Id           int    `json:"id"`
 	Name         string `json:"name"`
+	GlyphColour  string `json:"glyphColour"`
 	MapGlyph     string `json:"mapGlyph"`
 	MovementCost int    `json:"movementCost"`
 	Flags        int    `json:"flags"`

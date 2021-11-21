@@ -42,7 +42,7 @@ type MapGrid struct {
 }
 
 type Map struct {
-	Layers []*MapGrid `json:layers"`
+	Layers []*MapGrid `json:"layers"`
 }
 
 // Atlas will be a collection of quadtrees for a plane providing spacial indices to quickly lookup:
@@ -145,8 +145,28 @@ func (ch *Character) CreatePlaneMap() string {
 
 	rect := ch.Room.Plane.GetTerrainRect(0, 0, 0, 26, 14)
 	if len(rect) != 0 {
-		for cY := 0; cY < 26; cY++ {
-			for cX := 0; cX < 14; cX++ {
+		lastColour := ""
+
+		for cY := 0; cY < 14; cY++ {
+			for cX := 0; cX < 26; cX++ {
+				if ch.Room.X == cX && cY == ch.Room.Y {
+					buf.WriteString("{Y@")
+					lastColour = "{Y"
+					continue
+				}
+
+				_, ok := TerrainTable[rect[cY][cX]]
+				if !ok {
+					buf.WriteString("{x ")
+					lastColour = ""
+					continue
+				}
+
+				if lastColour == "" || lastColour != TerrainTable[rect[cY][cX]].GlyphColour {
+					lastColour = TerrainTable[rect[cY][cX]].GlyphColour
+					buf.WriteString(lastColour)
+				}
+
 				buf.WriteString(TerrainTable[rect[cY][cX]].MapGlyph)
 			}
 

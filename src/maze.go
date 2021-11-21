@@ -263,6 +263,7 @@ func (ch *Character) CreateMazeMap() string {
 			} else {
 				var terrain *Terrain = TerrainTable[maze.Grid[x][y].Terrain]
 
+				output.WriteString(terrain.GlyphColour)
 				output.WriteString(terrain.MapGlyph)
 			}
 		}
