@@ -161,7 +161,9 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 }
 
 func (room *Room) IsEqual(oroom *Room) bool {
-	return oroom == room
+	return (oroom == room || ((room.Flags&ROOM_PLANAR != 0 && oroom.Flags&ROOM_PLANAR != 0) &&
+		(room.Plane == oroom.Plane) &&
+		(room.X == oroom.X && room.Y == oroom.Y && room.Z == oroom.Z)))
 }
 
 func (game *Game) FixExits() error {
