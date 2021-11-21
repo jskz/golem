@@ -63,6 +63,7 @@ INSERT INTO skills(id, name, type, intent) VALUES (8, 'magic map', 'spell', 'non
 INSERT INTO skills(id, name, type, intent) VALUES (9, 'sanctuary', 'spell', 'curative');
 INSERT INTO skills(id, name, type, intent) VALUES (10, 'haste', 'spell', 'curative');
 INSERT INTO skills(id, name, type, intent) VALUES (11, 'fireshield', 'spell', 'curative');
+INSERT INTO skills(id, name, type, intent) VALUES (12, 'acrobatics', 'passive', 'none');
 
 /* Grant unarmed combat as a seed skill for all four base jobs with varying complexity and cost */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (1, 1, 2, 1, 1, 50);
@@ -74,9 +75,10 @@ INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (4, 
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (5, 1, 6, 1, 5, 50);
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (11, 1, 1, 20, 10, 50);
 
-/* Thief defaults: peek, dodge */
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (6, 2, 3, 1, 5, 50);
-INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (12, 2, 1, 5, 5, 50);
+/* Thief defaults: peek, dodge, acrobatics */
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (6, 2, 3, 1, 5, 5);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (12, 2, 1, 5, 5, 5);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (16, 2, 12, 25, 5, 5);
 
 /* Cleric defaults: armor, cure light, magic map, sanctuary */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (7, 4, 4, 1, 1, 50);

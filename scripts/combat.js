@@ -101,6 +101,27 @@ function onCombatUpdate() {
                         }
                     }
 
+                    /* Check victim acrobatics skill */
+                    const victimAcrobaticsProficiency =
+                        victim.findProficiencyByName('acrobatics');
+                    if (victimAcrobaticsProficiency) {
+                        if (
+                            Math.random() <
+                            victimAcrobaticsProficiency.proficiency / 100 / 5
+                        ) {
+                            vch.send('{D' +
+                                victim.getShortDescriptionUpper(vch) +
+                                    '{D nimbly backflips out of the way of your attack!{x\r\n'
+                            );
+                            victim.send(
+                                '{DYou nimbly backflip out of the way of ' +
+                                    vch.getShortDescription(victim) +
+                                    "{D's attack!{x\r\n"
+                            );
+                            continue;
+                        }
+                    }
+
                     if(victim.affected & Golem.AffectedTypes.AFFECT_SANCTUARY) {
                         damage /= 2;
                     }
