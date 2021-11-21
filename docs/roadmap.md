@@ -21,41 +21,39 @@ This will be a working document to track major feature development goals for eac
 - [x] Groups: forming and unforming groups with other players (and NPCs), interaction commands/combat mechanics/experience splitting
 - [x] Serialization for player proficiencies with flexibility for multi-job system in future
 
-## 0.3 Telnet Done Right Milestones
+## 0.3 Scripting and Shops
 
-- [ ] Telnet IAC parsing/session handling implementation overhaul
 - [x] Add a mechanism for NPCs (with flexibility for PCs in future?) to operate shops that players can buy from, sell?
 - [x] Webhook facility for scripting API
 
-## 0.4 Telnet Zlib Compression Milestones
-
-- [ ] [MCCP2 or MCCP3 support](https://mudhalla.net/tintin/protocols/mccp/)
-- [ ] Find a solution to perform some fuzz testing of the telnet implementation
-- [ ] Copyover: allow hot reloading the app server reusing the existing socket file descriptors and restoring sessions
-- [ ] README subsection for traditional compile and run with existing services
-
-## 0.5 Online Creation Milestones
-
-- [ ] Online Creation (OLC) command set: redit, medit, oedit, reset, digging two-way exits from a room
-- [ ] World persistence updates: currently mobile, room, and object instances have only read operations defined
-
-## 0.6 Plane Development Milestones
+## 0.4 Plane Development Milestones
 
 - [x] Create a new model `plane` representing a 2D array by dimensions and a blob of integer terrain pivots.  The data structure for a plane may evolve towards a quadtree but until post-1.0 will remain simple
 - [x] Create a new model `terrain` to store information about unique terrain types: name, a glyph used to represent that terrain type in a 2D map, movement cost to traverse a unit of this terrain type, etc.
 - [ ] Allow players to navigate a plane-based virtual room, like maze-based virtual rooms, with an ANSI art representation of the nearby landscape
 - [x] Allow for a mechanism by which each app startup will generate (preset or random?) varied `Dungeon` instances and then create virtual exits between chosen planes
 
-## 0.7 Procedural Content Development Milestones
+## 0.5 Online Creation Milestones
+
+- [ ] Online Creation (OLC) command set: redit, medit, oedit, reset, digging two-way exits from a room
+- [ ] World persistence updates: currently mobile, room, and object instances have only read operations defined
+
+## 0.6 Procedural Content Development Milestones
 
 - [ ] Procedural object instance generation for "ephemeral" items that do not have prototype objects, only instances; string tables will suffice for 1.0
 - [ ] Procedural NPC monster instance generation for similar creature Character instances to populate generated maze zones
+- [ ] Enhance Prim's with some fun flavour effects; deliberately carve some special effects
+- [ ] Library of templated parts to make generated dungeons more interesting without breaking "solvability" of mazes
 
-## 0.8 Gameplay Content Development
+## 0.7 Gameplay General Content Development Milestones
 
 - [ ] Gameplay development and balancing: experience curves and enchantment tweaks for races and jobs
+- [ ] Stat rolling at character creation, stat buffing/nerfs on effect/enchantments
 - [ ] Extra commands and UX for gameplay: combat experience, leveling/healing/item consumption gameplay loop considerations: "is it fun to hack-and-slash and navigate this as a game?"
 - [ ] Gameplay and content development: Ensure that each player job choice has at least ten unique skills and/or spells available by the hero level (50)
+
+## 0.8 The Human Element Development Milestones
+
 - [ ] Death mechanic: forced out-of-body "ghost timer" for a player between respawns; define that experience
 - [ ] Socials: flavour text commands for socializing in-room like grin, nod, laugh
 - [ ] Enforcement: bans on username and host (IP? allow covering prefix with single ban?)
@@ -64,7 +62,9 @@ This will be a working document to track major feature development goals for eac
 
 - [ ] Allow for a repeatable OLC-available mechanism to declare a crafted zone to have a virtual exit to some plane: fixed position, random range, feature-based?
 - [ ] Content: "town square" board which both UX resembles a popular old "boards" plugin, and also provides a generated quest gameplay mechanic: venture into level/difficulty-based random choice of floor X of generated dungeon Y to do some combination of obtain/kill/charm a chosen item/creature in order to return for Z quest points
+- [ ] Threaded message board game object type in the style of Erwin Andreasen's boards snippet?
 
 ## 1.0 Release Milestones
 
-- [ ] TBD
+- [ ] Harden existing telnet implementation and begin fuzzing; we'll rewrite the telnet implementation as a post-1.0 goal
+- [ ] TBD; errata, polish, suggestions uncovered en route
