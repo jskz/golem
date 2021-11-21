@@ -218,6 +218,15 @@ module.exports = {
     }
 
     // Create a small island area
+    drawFilledRect(
+      terrain,
+      BUILDING_POSITION[0] - 4,
+      BUILDING_POSITION[1] - 4,
+      BUILDING_WIDTH + 8,
+      BUILDING_HEIGHT + 8,
+      Golem.TerrainTypes.TerrainTypeShore,
+      Golem.TerrainTypes.TerrainTypeField
+    );
 
     // Create a structure representing the developer area
     drawFilledRect(
