@@ -169,6 +169,15 @@ func (ch *Character) CreatePlaneMap() string {
 				continue
 			}
 
+			otherCharacters, ok := ch.Room.Plane.Map.Layers[ch.Room.Z].Atlas.Characters[cY*ch.Room.Plane.Height+cX]
+			if ok {
+				if otherCharacters.Count > 0 {
+					buf.WriteString("{W@")
+					lastColour = "{W"
+					continue
+				}
+			}
+
 			if lastColour == "" || lastColour != TerrainTable[ch.Room.Plane.Map.Layers[cameraZ].Terrain[cY][cX]].GlyphColour {
 				lastColour = TerrainTable[ch.Room.Plane.Map.Layers[cameraZ].Terrain[cY][cX]].GlyphColour
 				buf.WriteString(lastColour)
@@ -397,6 +406,12 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 			case DirectionWest:
 				translatedX = x - 1
 				translatedY = y
+			}
+
+			// If this terrain type is impassible, don't try to materialize it
+			if (translatedX >= 0 && translatedX < plane.Width && translatedY >= 0 && translatedY < plane.Height) &&
+				TerrainTable[plane.Map.Layers[z].Terrain[translatedY][translatedX]].Flags&TERRAIN_IMPASSABLE != 0 {
+				continue
 			}
 
 			adj := plane.MaterializeRoom(translatedX, translatedY, z, false)

@@ -21,9 +21,9 @@ INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VAL
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (5, 'cave-deep-wall-4', '{D', '.', -1, 0);
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (6, 'cave-deep-wall-5', '{y', ':', -1, 0);
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (7, 'cave-tunnel', '{c', '.', 2, 0);
-INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (8, 'ocean', '{B', '~', 8, 0);
-INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (9, 'overworld-city-exterior', '{w', 'I', -1, 0);
-INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (10, 'overworld-city-interior', '{x', ' ', -1, 0);
+INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (8, 'ocean', '{B', '~', 8, 1);
+INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (9, 'overworld-city-exterior', '{w', 'I', -1, 1);
+INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (10, 'overworld-city-interior', '{x', ' ', -1, 1);
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (11, 'overworld-city-entrance', '{W', 'O', 0, 0);
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (12, 'plains', '{G', '.', 5, 0);
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (13, 'field', '{G', ':', 5, 0);
