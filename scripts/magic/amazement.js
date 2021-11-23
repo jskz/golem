@@ -5,6 +5,8 @@
  * Authors:
  *     James Skarzinskas <james@jskarzin.org>
  */
+
+// It's like a basement, but a maze!
 function spell_amazement(ch) {
     if(!ch.room) {
         ch.send("You can't do that here.\r\n");
