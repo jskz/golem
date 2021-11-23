@@ -8,6 +8,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"log"
 	"strings"
@@ -99,6 +100,36 @@ func NewAtlas() *Atlas {
 	}
 }
 
+func (plane *Plane) SaveBlob() error {
+	log.Printf("Saving blob for plane %d.\r\n", plane.Id)
+
+	var buf bytes.Buffer
+
+	for z := 0; z < plane.Depth; z++ {
+		for y := 0; y < plane.Height; y++ {
+			for x := 0; x < plane.Width; x++ {
+				buf.WriteByte(byte(plane.Map.Layers[z].Terrain[y][x]))
+			}
+		}
+	}
+
+	_, err := plane.Game.db.Exec(`
+		UPDATE
+			planes
+		SET
+			source_value = ?
+		WHERE
+			id = ?
+	`, buf.Bytes(), plane.Id)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	log.Printf("Saved blob %d.\r\n", plane.Id)
+	return nil
+}
+
 // Fill the source_value field for this plane with an appropriately sized binary blob of zeroes
 func (plane *Plane) InitializeBlob() ([]byte, int, error) {
 	log.Printf("Initializing new blob for plane %d.\r\n", plane.Id)
@@ -107,7 +138,7 @@ func (plane *Plane) InitializeBlob() ([]byte, int, error) {
 		Layers: make([]*MapGrid, 0),
 	}
 
-	var bytes []byte = make([]byte, plane.Depth*plane.Width*plane.Height)
+	var bytes []byte = make([]byte, 0)
 
 	for z := 0; z < plane.Depth; z++ {
 		grid := &MapGrid{Atlas: NewAtlas()}
@@ -117,8 +148,8 @@ func (plane *Plane) InitializeBlob() ([]byte, int, error) {
 			grid.Terrain[y] = make([]int, plane.Width)
 
 			for x := 0; x < plane.Width; x++ {
-				grid.Terrain[y][x] = 0
-				bytes = append(bytes, 0)
+				grid.Terrain[y][x] = 8
+				bytes = append(bytes, 8)
 			}
 		}
 
@@ -250,14 +281,14 @@ func (plane *Plane) generate() error {
 					grid.Terrain[y] = make([]int, plane.Width)
 
 					for x := 0; x < plane.Width; x++ {
-						grid.Terrain[y][x] = int(blob[(z*(y*plane.Height))+x])
+						grid.Terrain[y][x] = int(blob[x*plane.Height*plane.Depth+y*plane.Depth+z])
 					}
 				}
 
 				planeMap.Layers = append(planeMap.Layers, grid)
 			}
 
-			log.Printf("Plane %d initialized from %d byte blob.\r\n", plane.Id, blobSize)
+			log.Printf("Plane %d (%d,%d) initialized from %d byte blob.\r\n", plane.Id, plane.Width, plane.Height, blobSize)
 
 			plane.Flags |= PLANE_INITIALIZED
 			plane.Map = planeMap
