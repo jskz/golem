@@ -108,7 +108,7 @@ func (plane *Plane) SaveBlob() error {
 	for z := 0; z < plane.Depth; z++ {
 		for y := 0; y < plane.Height; y++ {
 			for x := 0; x < plane.Width; x++ {
-				buf.WriteByte(byte(plane.Map.Layers[z].Terrain[y][x]))
+				buf.WriteByte(byte(plane.Map.Layers[z].Terrain[x][y]))
 			}
 		}
 	}
