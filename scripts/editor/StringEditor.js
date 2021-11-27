@@ -56,11 +56,11 @@ Golem.StringEditor = function (client, string, callback) {
                 commit();
                 client.connectionHandler = null;
 
-                ch.send("{YExiting without writing changes.{x\r\n");
                 callback(client, _string);
             } else if(input === '@') {
                 client.connectionHandler = null;
 
+                ch.send("{YExiting without writing changes.{x\r\n");
                 callback(client, _string);
             } else if(input === '!') {
                 ch.send("{YContents of the string editor buffer:{x\r\n");
