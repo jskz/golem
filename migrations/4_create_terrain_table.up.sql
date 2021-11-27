@@ -29,3 +29,5 @@ INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VAL
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (13, 'field', '{G', ':', 5, 0);
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (14, 'shore', '{Y', ':', 10, 0);
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (15, 'shallow-water', '{C', '~', 6, 0);
+INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (16, 'light-forest', '{G', '*', 8, 0);
+INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (17, 'deep-forest', '{G', '*', 8, 0);
