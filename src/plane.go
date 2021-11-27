@@ -178,7 +178,7 @@ func (ch *Character) CreatePlaneMap() string {
 
 	var buf strings.Builder
 
-	var cameraWidth int = 45
+	var cameraWidth int = 48
 	var cameraHeight int = 18
 	var cameraRange int = 9
 
