@@ -21,17 +21,16 @@ This will be a working document to track major feature development goals for eac
 - [x] Groups: forming and unforming groups with other players (and NPCs), interaction commands/combat mechanics/experience splitting
 - [x] Serialization for player proficiencies with flexibility for multi-job system in future
 
-## 0.3 Scripting and Shops
+## 0.3 Scripting and Shops, Plane Development Milestones
 
 - [x] Add a mechanism for NPCs (with flexibility for PCs in future?) to operate shops that players can buy from, sell?
 - [x] Webhook facility for scripting API
-
-## 0.4 Plane Development Milestones
-
 - [x] Create a new model `plane` representing a 2D array by dimensions and a blob of integer terrain pivots.  The data structure for a plane may evolve towards a quadtree but until post-1.0 will remain simple
 - [x] Create a new model `terrain` to store information about unique terrain types: name, a glyph used to represent that terrain type in a 2D map, movement cost to traverse a unit of this terrain type, etc.
-- [ ] Allow players to navigate a plane-based virtual room, like maze-based virtual rooms, with an ANSI art representation of the nearby landscape
+- [x] Allow players to navigate a plane-based virtual room, like maze-based virtual rooms, with an ANSI art representation of the nearby landscape
 - [x] Allow for a mechanism by which each app startup will generate (preset or random?) varied `Dungeon` instances and then create virtual exits between chosen planes
+
+## 0.4 TBD - Collapsed 0.4 into 0.3
 
 ## 0.5 Online Creation Milestones
 
