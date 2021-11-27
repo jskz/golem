@@ -76,8 +76,6 @@ func oneArgument(args string) (string, string) {
 	return buf.String(), strings.TrimLeft(args[end:], " ")
 }
 
-func Distance2D(x int, y int, x2 int, y2 int) int {
-	d := int(math.Sqrt(float64(((x2 - x) * (x2 - x)) + ((y2 - y) * (y2 - y)))))
-
-	return d
+func Distance2D(x float64, y float64, x2 float64, y2 float64, a float64, b float64) int {
+	return int(math.Sqrt(((((x2 - x) * (x2 - x)) / (a * a)) + ((y2-y)*(y2-y))/(b*b))))
 }
