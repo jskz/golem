@@ -203,19 +203,12 @@ INSERT INTO scripts (id, name, script) VALUES (2, 'overworld', 'function drawFil
 
 module.exports = {
   onGenerationComplete: function (p) {
-    const BUILDING_POSITION = [5, 5],
+    const BUILDING_POSITION = [25, 25],
       BUILDING_WIDTH = 5,
       BUILDING_HEIGHT = 5;
     const w = p.width;
     const h = p.height;
     const terrain = p.map.layers[0].terrain;
-
-    // Fill the plane with empty ocean
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        terrain[y][x] = Golem.TerrainTypes.TerrainTypeOcean;
-      }
-    }
 
     // Create a small island area
     drawFilledRect(
@@ -240,10 +233,8 @@ module.exports = {
     );
 
     // Create the entrance
-    terrain[10][7] = Golem.TerrainTypes.OverworldCityEntrance;
-    
-    // 7, 11 = in front of the temple
-    const templeFront = p.materializeRoom(7, 11, 0, true);     
+    terrain[30][27] = Golem.TerrainTypes.OverworldCityEntrance;
+    const templeFront = p.materializeRoom(27, 31, 0, true);     
     const foyer = Golem.game.loadRoomIndex(3);
 
     foyer.exit[Golem.Directions.DirectionSouth] =
