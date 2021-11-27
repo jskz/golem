@@ -30,7 +30,12 @@ This will be a working document to track major feature development goals for eac
 - [x] Allow players to navigate a plane-based virtual room, like maze-based virtual rooms, with an ANSI art representation of the nearby landscape
 - [x] Allow for a mechanism by which each app startup will generate (preset or random?) varied `Dungeon` instances and then create virtual exits between chosen planes
 
-## 0.4 TBD - Collapsed 0.4 into 0.3
+## 0.4 Pivot for Scope, Simplify
+
+- [ ] Gameplay pivots: always drop all loot on death, remove the experience points/leveling mechanic for now - we can make 1.0 work with skills/equipment/effects
+- [ ] Ensure that the caster's proficiency details are passed into the script handler context for a given skill or spell for logic based on proficiency %
+- [ ] Lean into content generation for the overworld map: Perlin noise to simulate some islands with a terrain gradient between shores, field, and trees of various density
+- [ ] Complete and merge the quadtree branch, "district" metadata for things like regional terrain name overrides, QueryRect for players/other objects, have "harder" regions with aggressive or passive NPCs, auto-generated rewards; no "resets" on overworld, run planar reset scripts on an interval instead
 
 ## 0.5 Online Creation Milestones
 
@@ -39,29 +44,24 @@ This will be a working document to track major feature development goals for eac
 
 ## 0.6 Procedural Content Development Milestones
 
-- [ ] Procedural object instance generation for "ephemeral" items that do not have prototype objects, only instances; string tables will suffice for 1.0
-- [ ] Procedural NPC monster instance generation for similar creature Character instances to populate generated maze zones
-- [ ] Enhance Prim's with some fun flavour effects; deliberately carve some special effects
-- [ ] Library of templated parts to make generated dungeons more interesting without breaking "solvability" of mazes
+- [ ] Library of templated parts to make generated maze-based dungeons more interesting without breaking "solvability" of the mazes
+- [ ] Develop sufficient base data for procedural loot tables for mazes and overworld
 
 ## 0.7 Gameplay General Content Development Milestones
 
-- [ ] Gameplay development and balancing: experience curves and enchantment tweaks for races and jobs
 - [ ] Stat rolling at character creation, stat buffing/nerfs on effect/enchantments
 - [ ] Extra commands and UX for gameplay: combat experience, leveling/healing/item consumption gameplay loop considerations: "is it fun to hack-and-slash and navigate this as a game?"
-- [ ] Gameplay and content development: Ensure that each player job choice has at least ten unique skills and/or spells available by the hero level (50)
+- [ ] Gameplay and content development: ensure that each player job choice has at least ten unique skills and/or spells
 
-## 0.8 The Human Element Development Milestones
+## 0.8 The (Problematic) Human Element Development Milestones
 
-- [ ] Death mechanic: forced out-of-body "ghost timer" for a player between respawns; define that experience
 - [ ] Socials: flavour text commands for socializing in-room like grin, nod, laugh
 - [ ] Enforcement: bans on username and host (IP? allow covering prefix with single ban?)
 
 ## 0.9 Tying It All Together Milestones
 
-- [ ] Allow for a repeatable OLC-available mechanism to declare a crafted zone to have a virtual exit to some plane: fixed position, random range, feature-based?
-- [ ] Content: "town square" board which both UX resembles a popular old "boards" plugin, and also provides a generated quest gameplay mechanic: venture into level/difficulty-based random choice of floor X of generated dungeon Y to do some combination of obtain/kill/charm a chosen item/creature in order to return for Z quest points
-- [ ] Threaded message board game object type in the style of Erwin Andreasen's boards snippet?
+- [ ] Portals?  Planes and zones shouldn't need "soft-coded" scripts for mutual exits, portals which cover all plane/zone cases
+- [ ] "Town square" job/message board which both UX resembles a popular old "boards" plugin, and also provides a generated quest gameplay mechanic: venture into level/difficulty-based random choice of floor X of generated dungeon Y to do some combination of obtain/kill/charm a chosen item/creature in order to return for Z quest points
 
 ## 1.0 Release Milestones
 

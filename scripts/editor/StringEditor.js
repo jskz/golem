@@ -23,14 +23,19 @@ Golem.StringEditor = function (client, string, callback) {
     }
 
     ch.send(
-        "\r\n{Y?SINGLE ! PRINT | $ WRITE/QUIT | :5 (line) SET LINE, :d # DELETE LINES\r\n" + 
+        "\r\n{Y?SINGLE ! PRINT | @ DISCARD/QUIT | $ WRITE/QUIT | :5 SET LINE | :d # DEL LINES\r\n" + 
         "-[ STRING EDITOR BUFFER ]---------------------------------------------{x\r\n");
     showEditorBuffer();
     ch.send("{Y----------------------------------------------------------------------{x\r\n");
 
     client.connectionHandler = function (input) {
-        try {
-            if(!['!', '$', '?'].includes(input) && input[0] !== ':') {
+        try {     
+            if(input.length > Golem.StringEditor.MaxLineLength) {
+                ch.send("{RInput too long, ignoring.{x\r\n");
+                return;
+            }
+
+            if(!['!', '@', '$', '?'].includes(input) && input[0] !== ':') {
                 const lines = _string.match(/[^\r\n]+/g);
 
                 if(lines && lines.length + 1 > Golem.StringEditor.MaxAllowedLines) {
@@ -49,6 +54,11 @@ Golem.StringEditor = function (client, string, callback) {
 
             if(input === '$') {
                 commit();
+                client.connectionHandler = null;
+
+                ch.send("{YExiting without writing changes.{x\r\n");
+                callback(client, _string);
+            } else if(input === '@') {
                 client.connectionHandler = null;
 
                 callback(client, _string);
@@ -94,6 +104,7 @@ Golem.StringEditor = function (client, string, callback) {
 };
 
 Golem.StringEditor.MaxAllowedLines = 256;
+Golem.StringEditor.MaxLineLength = 256;
 Golem.StringEditor.LinesRegex = new RegExp(/[^\r\n]+/igm);
 Golem.StringEditor.LineNavigationRegex = new RegExp(/^\:(\d+)/);
 Golem.StringEditor.DeleteLineRegex = new RegExp(/^\:d(\d+)/);
