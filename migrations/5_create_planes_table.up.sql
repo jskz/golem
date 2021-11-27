@@ -5,7 +5,7 @@ CREATE TABLE planes (
 
     `plane_type` ENUM('void', 'maze', 'wilderness') NOT NULL DEFAULT 'void',
     `source_type` ENUM('void', 'blob', 'procedural') NOT NULL DEFAULT 'void',
-    `source_value` MEDIUMBLOB, /* may be empty/NULL, a 2D array of terrain ids, or seed */
+    `source_value` LONGBLOB, /* may be empty/NULL, a 2D array of terrain ids, or seed */
 
     `width` INT NOT NULL,
     `height` INT NOT NULL,
