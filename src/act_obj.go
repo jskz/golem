@@ -56,6 +56,10 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 	var output strings.Builder
 	var inventory map[string]uint = make(map[string]uint)
 
+	if objects == nil {
+		return
+	}
+
 	for iter := objects.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 

@@ -203,49 +203,90 @@ INSERT INTO scripts (id, name, script) VALUES (2, 'overworld', 'function drawFil
 
 module.exports = {
   onGenerationComplete: function (p) {
-    const BUILDING_POSITION = [25, 25],
-      BUILDING_WIDTH = 5,
-      BUILDING_HEIGHT = 5;
-    const w = p.width;
-    const h = p.height;
-    const terrain = p.map.layers[0].terrain;
+    try {
+        const BUILDING_POSITION = [49, 418],
+        BUILDING_WIDTH = 12,
+        BUILDING_HEIGHT = 6;
+        const w = p.width;
+        const h = p.height;
+        const terrain = p.map.layers[0].terrain;
 
-    // Create a small island area
-    drawFilledRect(
-      terrain,
-      BUILDING_POSITION[0] - 4,
-      BUILDING_POSITION[1] - 4,
-      BUILDING_WIDTH + 8,
-      BUILDING_HEIGHT + 8,
-      Golem.TerrainTypes.TerrainTypeShore,
-      Golem.TerrainTypes.TerrainTypeField
-    );
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                let nx = x/w - 0.5, 
+                    ny = y/h - 0.5;
+                let n = Golem.util.perlin2D(nx * 1.25, ny * 1.25);
 
-    // Create a structure representing the developer area
-    drawFilledRect(
-      terrain,
-      BUILDING_POSITION[0],
-      BUILDING_POSITION[1],
-      BUILDING_WIDTH,
-      BUILDING_HEIGHT,
-      Golem.TerrainTypes.OverworldCityExterior,
-      Golem.TerrainTypes.OverworldCityInterior
-    );
+                n += 1.0;
+                n /= 2.0;
 
-    // Create the entrance
-    terrain[30][27] = Golem.TerrainTypes.OverworldCityEntrance;
-    const templeFront = p.materializeRoom(27, 31, 0, true);     
-    const foyer = Golem.game.loadRoomIndex(3);
+                let t = Golem.TerrainTypes.TerrainTypeOcean;
 
-    foyer.exit[Golem.Directions.DirectionSouth] =
-        Golem.NewExit(
-            Golem.Directions.DirectionSouth,
-            templeFront,
-            Golem.ExitFlags.EXIT_IS_DOOR |
-                Golem.ExitFlags.EXIT_CLOSED
+                if(n > 0.47) {
+                    t = Golem.TerrainTypes.TerrainTypeShallowWater;
+                }
+                if (n > 0.485) {
+                    t = Golem.TerrainTypes.TerrainTypeShore;
+                }
+                if (n > 0.50) {
+                    t = Golem.TerrainTypes.TerrainTypePlains;
+                }
+                if (n > 0.53) {
+                    t = Golem.TerrainTypes.TerrainTypeField;
+                }
+                if (n > 0.60) {
+                    t = Golem.TerrainTypes.TerrainTypeLightForest;
+                }
+                if (n > 0.67) {
+                    t = Golem.TerrainTypes.TerrainTypeDenseForest;
+                }
+                if (n > 0.73) {
+                    t = Golem.TerrainTypes.TerrainTypeHills;
+                }
+                if (n > 0.85) {
+                    t = Golem.TerrainTypes.TerrainTypeMountains;
+                }
+                if (n > 1.1) {
+                    t = Golem.TerrainTypes.TerrainTypeSnowcappedMountains;
+                }
+
+                terrain[y][x] = t;
+            }
+        }
+
+        // Create a structure representing the developer area
+        drawFilledRect(
+        terrain,
+        BUILDING_POSITION[0],
+        BUILDING_POSITION[1],
+        BUILDING_WIDTH,
+        BUILDING_HEIGHT,
+        Golem.TerrainTypes.OverworldCityExterior,
+        Golem.TerrainTypes.OverworldCityInterior
         );
-    templeFront.exit[Golem.Directions.DirectionNorth].to = foyer;
-    templeFront.exit[Golem.Directions.DirectionNorth].flags = Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED;
+
+        // Create the entrance
+        const BOTTOM_WALL_Y = BUILDING_POSITION[1] + BUILDING_HEIGHT;
+        const BOTTOM_ENTRANCE_FRONT_X = BUILDING_POSITION[0] + 3;
+        const BOTTOM_ENTRANCE_FRONT_Y = BOTTOM_WALL_Y + 1;
+        
+        terrain[BOTTOM_WALL_Y][BOTTOM_ENTRANCE_FRONT_X] = Golem.TerrainTypes.OverworldCityEntrance;
+        const templeFront = p.materializeRoom(BOTTOM_ENTRANCE_FRONT_X, BOTTOM_ENTRANCE_FRONT_Y, 0, true);     
+
+        const foyer = Golem.game.loadRoomIndex(3);
+
+        foyer.exit[Golem.Directions.DirectionSouth] =
+            Golem.NewExit(
+                Golem.Directions.DirectionSouth,
+                templeFront,
+                Golem.ExitFlags.EXIT_IS_DOOR |
+                    Golem.ExitFlags.EXIT_CLOSED
+            );
+        templeFront.exit[Golem.Directions.DirectionNorth].to = foyer;
+        templeFront.exit[Golem.Directions.DirectionNorth].flags = Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED;
+    } catch(err) {
+      println(err.toString());
+    }
   },
 };');
 
