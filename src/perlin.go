@@ -9,90 +9,69 @@ package main
 
 import (
 	"math"
-	"math/rand"
 )
 
 /*
  * Perlin noise generator; we'll expose this to the scripting API as a utility method for helping to generate
  * "islands" or other gradient-based planes.
  *
- * https://rtouti.github.io/graphics/perlin-noise-algorithm provided the helpful reference implementation and
- * explanatory article.
- *
- * We may generalize this yet ;)
+ * This borrowed much from reference implementations provided by:
+ * - https://rtouti.github.io/graphics/perlin-noise-algorithm
+ * - https://en.wikipedia.org/wiki/Perlin_noise#Implementation
  */
 type PerlinVector2D struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
 }
 
-func (v PerlinVector2D) DotProduct(other PerlinVector2D) float64 {
-	return v.X*other.X + v.Y*other.Y
-}
+func RandomGradient(x int, y int) PerlinVector2D {
+	var w uint = 8
+	var s uint = w / 2
 
-func GeneratePermutation() []int {
-	P := make([]int, 256)
+	var a uint = uint(x)
+	var b uint = uint(y)
 
-	var x int
+	a *= 3284157443
+	b ^= a<<s | a>>b>>w - s
+	b *= 1911520717
+	a ^= b<<s | b>>w - s
+	a *= 2048419325
 
-	for x = 0; x < 256; x++ {
-		P[x] = x
+	var r float64 = float64(a) * (math.Pi / float64(^(^uint(0) >> 1)))
+
+	v := PerlinVector2D{
+		X: math.Sin(r),
+		Y: math.Cos(r),
 	}
 
-	/* shuffle bytes in-place */
-	for i := range P {
-		j := rand.Intn(i + 1)
-
-		P[i], P[j] = P[j], P[i]
-	}
-
-	for x = 0; x < 256; x++ {
-		P = append(P, P[x])
-	}
-
-	return P
+	return v
 }
 
-func GetConstantVector(value byte) PerlinVector2D {
-	b := value & 3
+func DotGradient(ix int, iy int, x float64, y float64) float64 {
+	g := RandomGradient(ix, iy)
 
-	if b == 0 {
-		return PerlinVector2D{1.0, 1.0}
-	} else if b == 1 {
-		return PerlinVector2D{-1.0, 1.0}
-	} else if b == 2 {
-		return PerlinVector2D{-1.0, -1.0}
-	}
+	dy := x - float64(ix)
+	dx := y - float64(iy)
 
-	return PerlinVector2D{1.0, -1.0}
+	return dx*g.X + dy*g.Y
 }
 
-func Noise2D(x float64, y float64, P []byte) float64 {
-	X := byte(x) & 255
-	Y := byte(y) & 255
+func Perlin2D(x float64, y float64, P []byte) float64 {
+	x0 := int(x)
+	x1 := x0 + 1
+	y0 := int(y)
+	y1 := y0 + 1
 
-	xf := x - math.Floor(x)
-	yf := y - math.Floor(y)
+	sx := x - float64(x0)
+	sy := y - float64(y0)
 
-	c10 := PerlinVector2D{X: xf - 1.0, Y: yf - 1.0}
-	c00 := PerlinVector2D{X: xf, Y: yf - 1.0}
-	c11 := PerlinVector2D{X: xf - 1.0, Y: yf}
-	c01 := PerlinVector2D{X: xf, Y: yf}
+	n0 := DotGradient(x0, y0, x, y)
+	n1 := DotGradient(x1, y0, x, y)
+	ix0 := SmootherStep2D(n0, n1, sx)
 
-	vc10 := P[P[X+1]+Y+1]
-	vc00 := P[P[X]+Y+1]
-	vc11 := P[P[X+1]+Y]
-	vc01 := P[P[X]+Y]
+	n0 = DotGradient(x0, y1, x, y)
+	n1 = DotGradient(x1, y1, x, y)
+	ix1 := SmootherStep2D(n0, n1, sx)
 
-	dp10 := c10.DotProduct(GetConstantVector(vc10))
-	dp00 := c00.DotProduct(GetConstantVector(vc00))
-	dp11 := c11.DotProduct(GetConstantVector(vc11))
-	dp01 := c01.DotProduct(GetConstantVector(vc01))
-
-	u := Fade(xf)
-	v := Fade(yf)
-
-	return Lerp2D(u, Lerp2D(v, dp01, dp00), Lerp2D(v, dp11, dp10))
+	return SmootherStep2D(ix0, ix1, sy)
 }
-
-func GeneratePerlinNoise(w int, h int)

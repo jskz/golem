@@ -638,8 +638,7 @@ func (game *Game) InitScripting() error {
 
 	utilObj := game.vm.NewObject()
 	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))
-	utilObj.Set("perlin2D", game.vm.ToValue(Noise2D))
-	utilObj.Set("generatePermutation", game.vm.ToValue(GeneratePermutation))
+	utilObj.Set("perlin2D", game.vm.ToValue(Perlin2D))
 
 	obj.Set("KnownLocations", knownLocationsConstantsObj)
 	obj.Set("ExitFlags", exitFlagsConstantsObj)
