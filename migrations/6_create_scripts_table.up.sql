@@ -210,14 +210,14 @@ module.exports = {
     const h = p.height;
     const terrain = p.map.layers[0].terrain;
 
-    // Create a small island area
+    // Create a small field border
     drawFilledRect(
       terrain,
       BUILDING_POSITION[0] - 4,
       BUILDING_POSITION[1] - 4,
       BUILDING_WIDTH + 8,
       BUILDING_HEIGHT + 8,
-      Golem.TerrainTypes.TerrainTypeShore,
+      Golem.TerrainTypes.TerrainTypeField,
       Golem.TerrainTypes.TerrainTypeField
     );
 

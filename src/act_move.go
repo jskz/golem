@@ -82,6 +82,11 @@ const (
 	TerrainTypeField                 = 13
 	TerrainTypeShore                 = 14
 	TerrainTypeShallowWater          = 15
+	TerrainTypeLightForest           = 16
+	TerrainTypeDenseForest           = 17
+	TerrainTypeHills                 = 18
+	TerrainTypeMountains             = 19
+	TerrainTypeSnowcappedMountains   = 20
 )
 
 type Terrain struct {

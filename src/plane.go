@@ -442,7 +442,7 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 
 			// If this terrain type is impassible, don't try to materialize it
 			if (translatedX >= 0 && translatedX < plane.Width && translatedY >= 0 && translatedY < plane.Height) &&
-				TerrainTable[plane.Map.Layers[z].Terrain[translatedY][translatedX]].Flags&TERRAIN_IMPASSABLE != 0 {
+				TerrainTable[plane.Map.Layers[z].Terrain[translatedY][translatedX]].Flags&TERRAIN_IMPASSABLE != 0 && false {
 				continue
 			}
 

@@ -630,9 +630,16 @@ func (game *Game) InitScripting() error {
 	terrainTypes.Set("TerrainTypeField", game.vm.ToValue(TerrainTypeField))
 	terrainTypes.Set("TerrainTypeShore", game.vm.ToValue(TerrainTypeShore))
 	terrainTypes.Set("TerrainTypeShallowWater", game.vm.ToValue(TerrainTypeShallowWater))
+	terrainTypes.Set("TerrainTypeLightForest", game.vm.ToValue(TerrainTypeLightForest))
+	terrainTypes.Set("TerrainTypeDenseForest", game.vm.ToValue(TerrainTypeDenseForest))
+	terrainTypes.Set("TerrainTypeHills", game.vm.ToValue(TerrainTypeHills))
+	terrainTypes.Set("TerrainTypeMountains", game.vm.ToValue(TerrainTypeMountains))
+	terrainTypes.Set("TerrainTypeSnowcappedMountains", game.vm.ToValue(TerrainTypeSnowcappedMountains))
 
 	utilObj := game.vm.NewObject()
 	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))
+	utilObj.Set("perlin2D", game.vm.ToValue(Noise2D))
+	utilObj.Set("generatePermutation", game.vm.ToValue(GeneratePermutation))
 
 	obj.Set("KnownLocations", knownLocationsConstantsObj)
 	obj.Set("ExitFlags", exitFlagsConstantsObj)
