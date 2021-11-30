@@ -21,15 +21,16 @@ type QuadTree struct {
 	Boundary *Rect       `json:"boundary"`
 	Nodes    *LinkedList `json:"data"`
 	Capacity int         `json:"capacity"`
+	Parent   *QuadTree   `json:"parent"`
 }
 
 const QuadTreeNodeMaxElements = 2
 
 type Rect struct {
-	X int `json:"x"`
-	Y int `json:"y"`
-	W int `json:"w"`
-	H int `json:"h"`
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+	W float64 `json:"w"`
+	H float64 `json:"h"`
 }
 
 type Point struct {
@@ -41,14 +42,14 @@ type Point struct {
 
 // Subdivide redistributes the nodes among four child trees for each subdivided rect
 func (qt *QuadTree) Subdivide() {
-	qt.Northwest = NewQuadTree(qt.Boundary.W, qt.Boundary.H)
-	qt.Northeast = NewQuadTree(qt.Boundary.W, qt.Boundary.H)
-	qt.Southwest = NewQuadTree(qt.Boundary.W, qt.Boundary.H)
-	qt.Southeast = NewQuadTree(qt.Boundary.W, qt.Boundary.H)
+	qt.Northwest = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
+	qt.Northeast = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
+	qt.Southwest = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
+	qt.Southeast = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
 }
 
 func (r *Rect) Contains(x int, y int) bool {
-	return x >= r.X && x <= r.X+r.W && y >= r.Y && y <= r.Y+r.H
+	return float64(x) >= r.X && float64(x) <= r.X+r.W && float64(y) >= r.Y && float64(y) <= r.Y+r.H
 
 }
 
@@ -88,8 +89,70 @@ func (qt *QuadTree) Insert(p *Point, value interface{}) bool {
 	return false
 }
 
+// Recursively collapse quads
+func (qt *QuadTree) Collapse() bool {
+	// Don't further collapse the root
+	if qt.Parent == nil {
+		return true
+	}
+
+	// Retrieve all points within this quad
+	results := qt.QueryRect(qt.Boundary)
+
+	// If the boundary is empty, then collapse again
+	if len(results) == 0 {
+		return qt.Parent.Collapse()
+	}
+
+	// If there are fewer results than the capacity of a single quad, grab them and terminate here
+	if len(results) < qt.Capacity {
+		qt.Northwest = nil
+		qt.Northeast = nil
+		qt.Southwest = nil
+		qt.Southeast = nil
+
+		qt.Nodes = NewLinkedList()
+
+		for _, p := range results {
+			qt.Nodes.Insert(p)
+		}
+
+		return true
+	}
+
+	// No operation
+	return true
+}
+
 // Remove removes a value from the quadtree, recursively removing nodes as necessary to "collapse" empty divisions
-func (qt *QuadTree) Remove(value interface{}) {
+func (qt *QuadTree) Remove(p *Point) bool {
+	// If point not in our boundary, we can't remove it
+	if !qt.Boundary.ContainsPoint(p) {
+		return false
+	}
+
+	if qt.Northwest == nil {
+		qt.Nodes.Remove(p)
+
+		if qt.Nodes.Count > 0 {
+			return true
+		}
+
+		return qt.Collapse()
+	}
+
+	// Try to remove from this tree's quadrants
+	if qt.Northwest.Remove(p) {
+		return true
+	} else if qt.Northeast.Remove(p) {
+		return true
+	} else if qt.Southwest.Remove(p) {
+		return true
+	} else if qt.Southeast.Remove(p) {
+		return true
+	}
+
+	return false
 }
 
 // QueryRect retrieves all data within the rect defined by r
@@ -124,11 +187,12 @@ func (qt *QuadTree) QueryRect(r *Rect) []*Point {
 }
 
 // NewQuadTree creates a new quadtree instance
-func NewQuadTree(width int, height int) *QuadTree {
+func NewQuadTree(parent *QuadTree, width float64, height float64) *QuadTree {
 	qt := &QuadTree{
 		Capacity: QuadTreeNodeMaxElements,
 		Nodes:    NewLinkedList(),
 		Boundary: &Rect{X: 0, Y: 0, W: width, H: height},
+		Parent:   parent,
 	}
 
 	return qt
