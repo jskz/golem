@@ -52,7 +52,11 @@ func (r *Rect) Contains(x int, y int) bool {
 
 }
 
-func (r *Rect) ContainsPoint(p Point) bool {
+func (r *Rect) ContainsRect(other *Rect) bool {
+	return (other.X+other.W) < r.X+r.W && other.X > r.X && other.Y > r.Y && other.Y+other.H < r.Y+r.H
+}
+
+func (r *Rect) ContainsPoint(p *Point) bool {
 	return r.Contains(p.X, p.Y)
 }
 
@@ -71,8 +75,32 @@ func (qt *QuadTree) Remove(value interface{}) {
 }
 
 // QueryRect retrieves all data within the rect defined by r
-func (qt *QuadTree) QueryRect(r Rect) []*Point {
+func (qt *QuadTree) QueryRect(r *Rect) []*Point {
 	results := make([]*Point, 0)
+
+	// This quadtree's boundary rect does not contain the query rect
+	if !qt.Boundary.ContainsRect(r) {
+		return results
+	}
+
+	for iter := qt.Nodes.Head; iter != nil; iter = iter.Next {
+		p := iter.Value.(*Point)
+
+		if r.ContainsPoint(p) {
+			results = append(results, p)
+		}
+	}
+
+	// This is a leaf, return results for this tree
+	if qt.Northwest == nil {
+		return results
+	}
+
+	// Recurse and append child tree query contents
+	results = append(results, qt.Northwest.QueryRect(r)...)
+	results = append(results, qt.Northeast.QueryRect(r)...)
+	results = append(results, qt.Southwest.QueryRect(r)...)
+	results = append(results, qt.Southeast.QueryRect(r)...)
 
 	return results
 }
