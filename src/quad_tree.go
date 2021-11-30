@@ -61,13 +61,31 @@ func (r *Rect) ContainsPoint(p *Point) bool {
 }
 
 // Insert adds a new value to the quadtree at point p
-func (qt *QuadTree) Insert(p *Point, value interface{}) {
-	if qt.Nodes.Count < qt.Capacity {
-		qt.Nodes.Insert(p)
-		return
+func (qt *QuadTree) Insert(p *Point, value interface{}) bool {
+	if !qt.Boundary.ContainsPoint(p) {
+		return false
 	}
 
-	qt.Subdivide()
+	if qt.Nodes.Count < qt.Capacity && qt.Northwest == nil {
+		qt.Nodes.Insert(p)
+		return true
+	}
+
+	if qt.Northwest == nil {
+		qt.Subdivide()
+	}
+
+	if qt.Northwest.Insert(p, value) {
+		return true
+	} else if qt.Northeast.Insert(p, value) {
+		return true
+	} else if qt.Southwest.Insert(p, value) {
+		return true
+	} else if qt.Southeast.Insert(p, value) {
+		return true
+	}
+
+	return false
 }
 
 // Remove removes a value from the quadtree, recursively removing nodes as necessary to "collapse" empty divisions
