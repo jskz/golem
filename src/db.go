@@ -26,6 +26,7 @@ func (game *Game) LoadTerrain() {
 		SELECT
 			id,
 			name,
+			glyph_colour,
 			map_glyph,
 			movement_cost,
 			flags
@@ -42,7 +43,7 @@ func (game *Game) LoadTerrain() {
 	for rows.Next() {
 		terrain := &Terrain{}
 
-		err := rows.Scan(&terrain.Id, &terrain.Name, &terrain.MapGlyph, &terrain.MovementCost, &terrain.Flags)
+		err := rows.Scan(&terrain.Id, &terrain.Name, &terrain.GlyphColour, &terrain.MapGlyph, &terrain.MovementCost, &terrain.Flags)
 		if err != nil {
 			log.Printf("Unable to scan terrain: %v.\r\n", err)
 			continue

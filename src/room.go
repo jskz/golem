@@ -29,19 +29,23 @@ const (
 	ROOM_SAFE       = 1 << 2
 	ROOM_DUNGEON    = 1 << 3
 	ROOM_EVIL_AURA  = 1 << 4
+	ROOM_PLANAR     = 1 << 5
 )
 
 type Room struct {
-	Game *Game `json:"game"`
-
-	Id   uint  `json:"id"`
-	Zone *Zone `json:"zone"`
+	Game  *Game  `json:"game"`
+	Plane *Plane `json:"plane"`
+	Id    uint   `json:"id"`
+	Zone  *Zone  `json:"zone"`
 
 	script *Script
 
 	Flags   int       `json:"flags"`
 	Virtual bool      `json:"virtual"`
 	Cell    *MazeCell `json:"cell"`
+	X       int       `json:"x"`
+	Y       int       `json:"y"`
+	Z       int       `json:"z"`
 
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -157,7 +161,9 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 }
 
 func (room *Room) IsEqual(oroom *Room) bool {
-	return oroom == room
+	return (oroom == room || ((room.Flags&ROOM_PLANAR != 0 && oroom.Flags&ROOM_PLANAR != 0) &&
+		(room.Plane == oroom.Plane) &&
+		(room.X == oroom.X && room.Y == oroom.Y && room.Z == oroom.Z)))
 }
 
 func (game *Game) FixExits() error {

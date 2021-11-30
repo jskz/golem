@@ -306,6 +306,7 @@ func (game *Game) Run() {
 
 		case planeId := <-game.planeGenerationCompleted:
 			plane := game.FindPlaneByID(planeId)
+
 			if plane != nil {
 				if plane.Scripts != nil {
 					plane.Scripts.tryEvaluate("onGenerationComplete", plane.Game.vm.ToValue(game), plane.Game.vm.ToValue(plane))

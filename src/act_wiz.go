@@ -495,14 +495,87 @@ func do_script(ch *Character, arguments string) {
 }
 
 func do_goto(ch *Character, arguments string) {
-	id, err := strconv.Atoi(arguments)
-	if err != nil || id <= 0 {
-		ch.Send("Goto which room ID?\r\n")
+	firstArgument, arguments := oneArgument(arguments)
+	secondArgument, _ := oneArgument(arguments)
+
+	if firstArgument == "plane" {
+		id, err := strconv.Atoi(secondArgument)
+		if err != nil || id <= 0 {
+			ch.Send("Goto which plane ID?\r\n")
+			return
+		}
+
+		var found *Plane = nil
+		for iter := ch.Game.Planes.Head; iter != nil; iter = iter.Next {
+			plane := iter.Value.(*Plane)
+
+			if plane.Id == id {
+				found = plane
+				break
+			}
+		}
+
+		if found == nil {
+			ch.Send("No such plane.\r\n")
+			return
+		}
+
+		destination := found.MaterializeRoom(0, 0, 0, true)
+
+		if ch.Room != nil && ch.Room.Characters != nil {
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				character := iter.Value.(*Character)
+				if character != ch {
+					character.Send(fmt.Sprintf("\r\n{W%s{W disappears in a puff of smoke.{x\r\n", ch.GetShortDescriptionUpper(character)))
+				}
+			}
+		}
+
+		if ch.Room != nil {
+			ch.Room.removeCharacter(ch)
+			destination.AddCharacter(ch)
+
+			for iter := destination.Characters.Head; iter != nil; iter = iter.Next {
+				character := iter.Value.(*Character)
+				if character != ch {
+					character.Send(fmt.Sprintf("\r\n{W%s{W appears in a puff of smoke.{x\r\n", ch.GetShortDescriptionUpper(character)))
+				}
+			}
+		}
+
+		do_look(ch, "")
 		return
 	}
 
-	room, err := ch.Game.LoadRoomIndex(uint(id))
-	if err != nil || room == nil {
+	var room *Room = nil
+
+	for iter := ch.Game.Characters.Head; iter != nil; iter = iter.Next {
+		gch := iter.Value.(*Character)
+
+		nameParts := strings.Split(gch.Name, " ")
+		for _, part := range nameParts {
+			if strings.Compare(strings.ToLower(part), firstArgument) == 0 {
+				room = gch.Room
+				break
+			}
+		}
+	}
+
+	if room == nil {
+		id, err := strconv.Atoi(firstArgument)
+		if err != nil || id <= 0 {
+			ch.Send("Goto which room?\r\n")
+			return
+		}
+
+		room, err = ch.Game.LoadRoomIndex(uint(id))
+		if err != nil {
+			ch.Send("No such room.\r\n")
+			return
+		}
+	}
+
+	if room == nil {
 		ch.Send("No such room.\r\n")
 		return
 	}

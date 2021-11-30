@@ -1059,7 +1059,7 @@ func NewCharacter() *Character {
 	character.Wiznet = false
 	character.Practices = 0
 	character.Position = PositionDead
-	character.output = make([]byte, 32768)
+	character.output = make([]byte, 65536)
 	character.outputCursor = 0
 	character.inputCursor = DefaultMaxLines
 	character.outputHead = 0

@@ -36,7 +36,7 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 	for i := 0; i < floorCount; i++ {
 		floor := game.NewMaze(dungeonWidth, dungeonHeight)
 		floor.generatePrimMaze()
-		floor.reify() /* Ensure the floor's rooms exist before we start populating them */
+		floor.reify(i) /* Ensure the floor's rooms exist before we start populating them */
 
 		if previousFloorExit != nil {
 			/* Dig a two-way closed door exit between this room and the "end" of the previous floor */

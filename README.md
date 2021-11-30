@@ -28,4 +28,8 @@ docker volume rm golem_db_data
 
 ## Video
 
-https://user-images.githubusercontent.com/5122630/139600932-cce046b9-a474-435e-b312-8c4edb316675.mp4
+https://user-images.githubusercontent.com/5122630/142783172-ff7281bc-9153-40c9-a839-81fd4970a2e6.mp4
+
+## Notes
+
+- Until 1.0, I'm playing fast and loose with the `migrations` directory and regularly editing old files.  After 1.0, the expected incremental migration with descriptive snake-case filename structure will be honoured.

@@ -8,9 +8,12 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"log"
+	"strings"
 	"sync"
+	"time"
 )
 
 type Plane struct {
@@ -27,8 +30,33 @@ type Plane struct {
 	SourceType string   `json:"sourceType"`
 	Scripts    *Script  `json:"scripts"`
 
+	Map     *Map        `json:"map"`
 	Maze    *MazeGrid   `json:"maze"`
 	Portals *LinkedList `json:"portals"`
+}
+
+type MapGrid struct {
+	Terrain [][]int `json:"terrain"`
+	Atlas   *Atlas  `json:"atlas"`
+	Width   int     `json:"width"`
+	Height  int     `json:"height"`
+}
+
+type Map struct {
+	Layers []*MapGrid `json:"layers"`
+}
+
+// Atlas will be a collection of quadtrees for a plane providing spacial indices to quickly lookup:
+// temporary instances of in-memory rooms, characters, objects, misc game entities within that plane;
+// these are unused interface stubs until quadtree branch is ready
+
+// least power/MVP approach until quadtree branch
+type Atlas struct {
+	Characters map[int]*LinkedList
+	Objects    map[int]*LinkedList
+	Rooms      map[int]*LinkedList
+	Exits      map[int]map[uint]*Exit
+	// portals, scripts, exits?
 }
 
 type Portal struct {
@@ -40,7 +68,8 @@ type Portal struct {
 
 /* plane flags */
 const (
-	PLANE_INITIALIZED = 0
+	PLANE_NONE        = 0
+	PLANE_INITIALIZED = 1
 )
 
 /* plane_type ENUM values */
@@ -63,6 +92,138 @@ const (
 	PortalTypeProcedural = "procedural"
 )
 
+func NewAtlas() *Atlas {
+	return &Atlas{
+		Characters: make(map[int]*LinkedList),
+		Objects:    make(map[int]*LinkedList),
+		Exits:      make(map[int]map[uint]*Exit),
+	}
+}
+
+func (plane *Plane) SaveBlob() error {
+	log.Printf("Saving blob for plane %d.\r\n", plane.Id)
+
+	var buf bytes.Buffer
+
+	for z := 0; z < plane.Depth; z++ {
+		for y := 0; y < plane.Height; y++ {
+			for x := 0; x < plane.Width; x++ {
+				buf.WriteByte(byte(plane.Map.Layers[z].Terrain[x][y]))
+			}
+		}
+	}
+
+	_, err := plane.Game.db.Exec(`
+		UPDATE
+			planes
+		SET
+			source_value = ?
+		WHERE
+			id = ?
+	`, buf.Bytes(), plane.Id)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	log.Printf("Saved blob %d.\r\n", plane.Id)
+	return nil
+}
+
+// Fill the source_value field for this plane with an appropriately sized binary blob of zeroes
+func (plane *Plane) InitializeBlob() ([]byte, int, error) {
+	log.Printf("Initializing new blob for plane %d.\r\n", plane.Id)
+
+	plane.Map = &Map{
+		Layers: make([]*MapGrid, 0),
+	}
+
+	var bytes []byte = make([]byte, 0)
+
+	for z := 0; z < plane.Depth; z++ {
+		grid := &MapGrid{Atlas: NewAtlas()}
+		grid.Terrain = make([][]int, plane.Height)
+
+		for y := 0; y < plane.Height; y++ {
+			grid.Terrain[y] = make([]int, plane.Width)
+
+			for x := 0; x < plane.Width; x++ {
+				grid.Terrain[y][x] = 8
+				bytes = append(bytes, 8)
+			}
+		}
+
+		plane.Map.Layers = append(plane.Map.Layers, grid)
+	}
+
+	_, err := plane.Game.db.Exec(`
+		UPDATE
+			planes
+		SET
+			source_value = ?
+		WHERE
+			id = ?
+	`, bytes, plane.Id)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return bytes, plane.Depth * plane.Width * plane.Height, nil
+}
+
+func (ch *Character) CreatePlaneMap() string {
+	if ch.Room == nil || ch.Room.Plane == nil {
+		return "Error retrieving plane map\r\n"
+	}
+
+	var buf strings.Builder
+
+	var cameraWidth int = 48
+	var cameraHeight int = 18
+	var cameraRange int = 9
+
+	cameraX := ch.Room.X
+	cameraY := ch.Room.Y
+	cameraZ := ch.Room.Z
+	lastColour := ""
+
+	for cY := cameraY - (cameraHeight / 2); cY < cameraY+(cameraHeight/2)+1; cY++ {
+		for cX := cameraX - (cameraWidth / 2); cX < cameraX+(cameraWidth/2); cX++ {
+			if cX < 0 || cX >= ch.Room.Plane.Width || cY < 0 || cY >= ch.Room.Plane.Height || Distance2D(float64(cameraX), float64(cameraY), float64(cX), float64(cY), 2.4, 1) > cameraRange {
+				buf.WriteString(" ")
+				lastColour = " "
+				continue
+			}
+
+			if ch.Room.X == cX && cY == ch.Room.Y {
+				buf.WriteString("{Y@")
+				lastColour = "{Y"
+				continue
+			}
+
+			otherCharacters, ok := ch.Room.Plane.Map.Layers[ch.Room.Z].Atlas.Characters[cY*ch.Room.Plane.Height+cX]
+			if ok {
+				if otherCharacters.Count > 0 {
+					buf.WriteString("{W@")
+					lastColour = "{W"
+					continue
+				}
+			}
+
+			if lastColour == "" || lastColour != TerrainTable[ch.Room.Plane.Map.Layers[cameraZ].Terrain[cY][cX]].GlyphColour {
+				lastColour = TerrainTable[ch.Room.Plane.Map.Layers[cameraZ].Terrain[cY][cX]].GlyphColour
+				buf.WriteString(lastColour)
+			}
+
+			buf.WriteString(TerrainTable[ch.Room.Plane.Map.Layers[cameraZ].Terrain[cY][cX]].MapGlyph)
+		}
+
+		buf.WriteString("\r\n")
+	}
+
+	return buf.String()
+}
+
 func (plane *Plane) generate() error {
 	game := plane.Game
 
@@ -71,6 +232,73 @@ func (plane *Plane) generate() error {
 	}
 
 	switch plane.PlaneType {
+	case PlaneTypeWilderness:
+		switch plane.SourceType {
+		case SourceTypeBlob:
+			log.Printf("Initializing a %dx%dx%d wilderness zone from a data blob for plane %d.\r\n", plane.Width, plane.Height, plane.Depth, plane.Id)
+
+			row := game.db.QueryRow(`
+				SELECT
+					(CASE
+						WHEN source_value IS NULL THEN -1
+						ELSE LENGTH(source_value)
+					END),
+					(CASE
+						WHEN source_value IS NULL THEN -1
+						ELSE source_value
+					END)
+				FROM
+					planes
+				WHERE
+					id = ?`,
+				plane.Id)
+
+			var blobSize int = 0
+			var blob []byte = make([]byte, plane.Depth*plane.Width*plane.Height)
+
+			err := row.Scan(&blobSize, &blob)
+			if err != nil {
+				return err
+			}
+
+			if blobSize == -1 {
+				blob, blobSize, err = plane.InitializeBlob()
+				if err != nil {
+					log.Printf("Plane %d remaining uninitialized after load with a NULL blob.\r\n", plane.Id)
+					return nil
+				}
+			}
+
+			planeMap := &Map{
+				Layers: make([]*MapGrid, 0),
+			}
+
+			for z := 0; z < plane.Depth; z++ {
+				grid := &MapGrid{Atlas: NewAtlas()}
+				grid.Terrain = make([][]int, plane.Height)
+
+				for y := 0; y < plane.Height; y++ {
+					grid.Terrain[y] = make([]int, plane.Width)
+
+					for x := 0; x < plane.Width; x++ {
+						grid.Terrain[y][x] = int(blob[x*plane.Height*plane.Depth+y*plane.Depth+z])
+					}
+				}
+
+				planeMap.Layers = append(planeMap.Layers, grid)
+			}
+
+			log.Printf("Plane %d (%d,%d) initialized from %d byte blob.\r\n", plane.Id, plane.Width, plane.Height, blobSize)
+
+			plane.Flags |= PLANE_INITIALIZED
+			plane.Map = planeMap
+
+			go func() {
+				// Code smell, but allow the main thread a little time to poll for this event
+				<-time.After(1 * time.Second)
+				game.planeGenerationCompleted <- plane.Id
+			}()
+		}
 	case PlaneTypeMaze:
 		switch plane.SourceType {
 		case SourceTypeProcedural:
@@ -84,7 +312,6 @@ func (plane *Plane) generate() error {
 				if err != nil {
 					log.Println(err)
 				}
-
 			*/
 
 			/* Exit will be self-referential and locked until the maze is done generating */
@@ -144,6 +371,134 @@ func (plane *Plane) generate() error {
 	return nil
 }
 
+func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
+	if plane.PlaneType == "dungeon" {
+		return plane.Dungeon.Floors[z].Grid[y][x].Room
+	}
+
+	if x < 0 || x > plane.Width || y < 0 || y > plane.Height || z < 0 || z > plane.Depth {
+		return nil
+	}
+
+	room := plane.Game.NewRoom()
+	room.Plane = plane
+	room.Id = 0
+	room.Name = "Holodeck"
+	room.Description = "If you are seeing this message, something has gone wrong."
+	room.Flags = ROOM_VIRTUAL | ROOM_PLANAR
+
+	var ok bool = false
+
+	room.Characters, ok = plane.Map.Layers[z].Atlas.Characters[y*plane.Height+x]
+	if !ok {
+		list := NewLinkedList()
+
+		plane.Map.Layers[z].Atlas.Characters[y*plane.Height+x] = list
+		room.Characters = list
+	}
+
+	ok = false
+	room.Objects, ok = plane.Map.Layers[z].Atlas.Objects[y*plane.Height+x]
+	if !ok {
+		list := NewLinkedList()
+
+		plane.Map.Layers[z].Atlas.Objects[y*plane.Height+x] = list
+		room.Characters = list
+	}
+
+	ok = false
+	room.Exit, ok = plane.Map.Layers[z].Atlas.Exits[y*plane.Height+x]
+	if !ok {
+		exits := make(map[uint]*Exit, DirectionMax)
+
+		plane.Map.Layers[z].Atlas.Exits[y*plane.Height+x] = exits
+		room.Exit = exits
+	}
+
+	room.X = x
+	room.Y = y
+	room.Z = z
+
+	if src {
+		/* Try to materialize adjacent (no ordinals) rooms and link them */
+		for direction := uint(DirectionNorth); direction < DirectionUp; direction++ {
+			var translatedX int = x
+			var translatedY int = y
+
+			switch direction {
+			case DirectionNorth:
+				translatedX = x
+				translatedY = y - 1
+			case DirectionEast:
+				translatedX = x + 1
+				translatedY = y
+			case DirectionSouth:
+				translatedX = x
+				translatedY = y + 1
+			case DirectionWest:
+				translatedX = x - 1
+				translatedY = y
+			}
+
+			// If this terrain type is impassible, don't try to materialize it
+			if (translatedX >= 0 && translatedX < plane.Width && translatedY >= 0 && translatedY < plane.Height) &&
+				TerrainTable[plane.Map.Layers[z].Terrain[translatedY][translatedX]].Flags&TERRAIN_IMPASSABLE != 0 {
+				continue
+			}
+
+			adj := plane.MaterializeRoom(translatedX, translatedY, z, false)
+			if adj == nil {
+				continue
+			}
+
+			_, ok := room.Exit[uint(direction)]
+			if ok {
+				continue
+			}
+
+			room.Exit[uint(direction)] = &Exit{
+				Id:        0,
+				To:        adj,
+				Direction: direction,
+				Flags:     0,
+			}
+
+			adj.Exit[ReverseDirection[uint(direction)]] = &Exit{
+				Id:        0,
+				To:        room,
+				Direction: direction,
+				Flags:     0,
+			}
+		}
+	}
+
+	return room
+}
+
+func (plane *Plane) GetTerrainRect(x int, y int, z int, w int, h int) [][]int {
+	var terrain [][]int = make([][]int, 0)
+
+	for rectY := y; rectY < y+h; rectY++ {
+		row := make([]int, w)
+
+		c := 0
+		for rectX := x; rectX < x+w; rectX++ {
+			if rectX < 0 || rectX >= plane.Width || rectY < 0 || rectY > plane.Height || z < 0 || z > plane.Depth {
+				row[c] = 0
+				c++
+				continue
+			}
+
+			row[c] = plane.Map.Layers[z].Terrain[rectY][rectX]
+			c++
+		}
+
+		terrain = append(terrain, row)
+	}
+
+	return terrain
+}
+
 func (game *Game) FindPlaneByID(id int) *Plane {
 	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
 		plane := iter.Value.(*Plane)
@@ -200,7 +555,7 @@ func (game *Game) LoadPlanes() error {
 			}
 		}
 
-		if plane.Zone == nil {
+		if zoneId != 0 && plane.Zone == nil {
 			return errors.New("trying to load plane with a bad zone")
 		}
 

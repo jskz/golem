@@ -197,11 +197,14 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 	return room
 }
 
-func (maze *MazeGrid) reify() {
+func (maze *MazeGrid) reify(z int) {
 	for y := 0; y < maze.Height; y++ {
 		for x := 0; x < maze.Width; x++ {
 			if !maze.Grid[x][y].Wall {
 				room := maze.createRoom(x, y)
+				room.X = x
+				room.Y = y
+				room.Z = z
 
 				for direction := DirectionNorth; direction < DirectionUp; direction++ {
 					var translatedX int = x
@@ -260,6 +263,7 @@ func (ch *Character) CreateMazeMap() string {
 			} else {
 				var terrain *Terrain = TerrainTable[maze.Grid[x][y].Terrain]
 
+				output.WriteString(terrain.GlyphColour)
 				output.WriteString(terrain.MapGlyph)
 			}
 		}

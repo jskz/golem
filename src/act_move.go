@@ -67,18 +67,32 @@ const (
 )
 
 const (
-	TerrainTypeCaveWall      = 1
-	TerrainTypeCaveDeepWall1 = 2
-	TerrainTypeCaveDeepWall2 = 3
-	TerrainTypeCaveDeepWall3 = 4
-	TerrainTypeCaveDeepWall4 = 5
-	TerrainTypeCaveDeepWall5 = 6
-	TerrainTypeCaveTunnel    = 7
+	TerrainTypeCaveWall              = 1
+	TerrainTypeCaveDeepWall1         = 2
+	TerrainTypeCaveDeepWall2         = 3
+	TerrainTypeCaveDeepWall3         = 4
+	TerrainTypeCaveDeepWall4         = 5
+	TerrainTypeCaveDeepWall5         = 6
+	TerrainTypeCaveTunnel            = 7
+	TerrainTypeOcean                 = 8
+	TerrainTypeOverworldCityExterior = 9
+	TerrainTypeOverworldCityInterior = 10
+	TerrainTypeOverworldCityEntrance = 11
+	TerrainTypePlains                = 12
+	TerrainTypeField                 = 13
+	TerrainTypeShore                 = 14
+	TerrainTypeShallowWater          = 15
+	TerrainTypeLightForest           = 16
+	TerrainTypeDenseForest           = 17
+	TerrainTypeHills                 = 18
+	TerrainTypeMountains             = 19
+	TerrainTypeSnowcappedMountains   = 20
 )
 
 type Terrain struct {
 	Id           int    `json:"id"`
 	Name         string `json:"name"`
+	GlyphColour  string `json:"glyphColour"`
 	MapGlyph     string `json:"mapGlyph"`
 	MovementCost int    `json:"movementCost"`
 	Flags        int    `json:"flags"`
@@ -140,7 +154,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	ch.Stamina -= MovementCost
 
-	/* Is the exit closed, etc. */
+	// Is the exit closed, etc.
 	from := ch.Room
 	from.removeCharacter(ch)
 	for iter := from.Characters.Head; iter != nil; iter = iter.Next {
@@ -150,6 +164,11 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	if from.script != nil {
 		from.script.tryEvaluate("onRoomLeave", ch.Game.vm.ToValue(from), ch.Game.vm.ToValue(ch))
+	}
+
+	// If destination room is planar, then try to fully materialize on the room that the player is about to move into
+	if exit.To.Flags&ROOM_PLANAR != 0 {
+		exit.To = exit.To.Plane.MaterializeRoom(exit.To.X, exit.To.Y, exit.To.Z, true)
 	}
 
 	exit.To.AddCharacter(ch)
@@ -295,6 +314,11 @@ func do_open(ch *Character, arguments string) {
 		return
 	} else if exit.Flags&EXIT_LOCKED != 0 {
 		ch.Send("It's locked.\r\n")
+		return
+	}
+
+	if exit.To == nil || exit.To.Exit[ReverseDirection[exit.Direction]] == nil {
+		ch.Send("{DA mysterious force prevents you from opening the door.{x\r\n")
 		return
 	}
 

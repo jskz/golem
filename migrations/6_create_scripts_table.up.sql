@@ -181,9 +181,119 @@ VALUES (1, 'limbo-developer-maze',
 
 INSERT INTO plane_script (id, plane_id, script_id) VALUES (1, 1, 1);
 
+INSERT INTO scripts (id, name, script) VALUES (2, 'overworld', 'function drawFilledRect(d, x, y, w, h, t, f) {
+  let j, s;
+
+  for (j = y; j < y + h; j++) {
+    for (s = x; s < x + w; s++) {
+      d[j][s] = f;
+    }
+  }
+
+  for (s = x; s <= x + w; s++) {
+    d[y][s] = t;
+    d[y + h][s] = t;
+  }
+
+  for (j = y; j < y + h; j++) {
+    d[j][x] = t;
+    d[j][x + w] = t;
+  }
+}
+
+module.exports = {
+  onGenerationComplete: function (p) {
+    try {
+        const BUILDING_POSITION = [49, 418],
+        BUILDING_WIDTH = 12,
+        BUILDING_HEIGHT = 6;
+        const w = p.width;
+        const h = p.height;
+        const terrain = p.map.layers[0].terrain;
+
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                let nx = x/w - 0.5, 
+                    ny = y/h - 0.5;
+                let n = Golem.util.perlin2D(nx * 1.25, ny * 1.25);
+
+                n += 1.0;
+                n /= 2.0;
+
+                let t = Golem.TerrainTypes.TerrainTypeOcean;
+
+                if(n > 0.47) {
+                    t = Golem.TerrainTypes.TerrainTypeShallowWater;
+                }
+                if (n > 0.485) {
+                    t = Golem.TerrainTypes.TerrainTypeShore;
+                }
+                if (n > 0.50) {
+                    t = Golem.TerrainTypes.TerrainTypePlains;
+                }
+                if (n > 0.53) {
+                    t = Golem.TerrainTypes.TerrainTypeField;
+                }
+                if (n > 0.60) {
+                    t = Golem.TerrainTypes.TerrainTypeLightForest;
+                }
+                if (n > 0.67) {
+                    t = Golem.TerrainTypes.TerrainTypeDenseForest;
+                }
+                if (n > 0.73) {
+                    t = Golem.TerrainTypes.TerrainTypeHills;
+                }
+                if (n > 0.85) {
+                    t = Golem.TerrainTypes.TerrainTypeMountains;
+                }
+                if (n > 1.1) {
+                    t = Golem.TerrainTypes.TerrainTypeSnowcappedMountains;
+                }
+
+                terrain[y][x] = t;
+            }
+        }
+
+        // Create a structure representing the developer area
+        drawFilledRect(
+        terrain,
+        BUILDING_POSITION[0],
+        BUILDING_POSITION[1],
+        BUILDING_WIDTH,
+        BUILDING_HEIGHT,
+        Golem.TerrainTypes.OverworldCityExterior,
+        Golem.TerrainTypes.OverworldCityInterior
+        );
+
+        // Create the entrance
+        const BOTTOM_WALL_Y = BUILDING_POSITION[1] + BUILDING_HEIGHT;
+        const BOTTOM_ENTRANCE_FRONT_X = BUILDING_POSITION[0] + 3;
+        const BOTTOM_ENTRANCE_FRONT_Y = BOTTOM_WALL_Y + 1;
+        
+        terrain[BOTTOM_WALL_Y][BOTTOM_ENTRANCE_FRONT_X] = Golem.TerrainTypes.OverworldCityEntrance;
+        const templeFront = p.materializeRoom(BOTTOM_ENTRANCE_FRONT_X, BOTTOM_ENTRANCE_FRONT_Y, 0, true);     
+
+        const foyer = Golem.game.loadRoomIndex(3);
+
+        foyer.exit[Golem.Directions.DirectionSouth] =
+            Golem.NewExit(
+                Golem.Directions.DirectionSouth,
+                templeFront,
+                Golem.ExitFlags.EXIT_IS_DOOR |
+                    Golem.ExitFlags.EXIT_CLOSED
+            );
+        templeFront.exit[Golem.Directions.DirectionNorth].to = foyer;
+        templeFront.exit[Golem.Directions.DirectionNorth].flags = Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED;
+    } catch(err) {
+      println(err.toString());
+    }
+  },
+};');
+
+INSERT INTO plane_script (id, plane_id, script_id) VALUES (2, 2, 2);
+
 INSERT INTO
-    scripts (id, name, script)
-VALUES (2, 'minor-healing-potion', 'module.exports = {
+    scripts (id, name, script) VALUES (3, 'minor-healing-potion', 'module.exports = {
     onUse: function(ch) {
         if(!ch.isEqual(this.carriedBy)) {
             ch.send("You aren\'t carrying that.\\r\\n");
@@ -200,6 +310,6 @@ VALUES (2, 'minor-healing-potion', 'module.exports = {
     }
 };');
 
-INSERT INTO object_script (id, `object_id`, script_id) VALUES (1, 5, 2);
+INSERT INTO object_script (id, `object_id`, script_id) VALUES (1, 5, 3);
 
 CREATE INDEX index_script_name ON scripts(name);
