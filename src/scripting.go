@@ -637,6 +637,8 @@ func (game *Game) InitScripting() error {
 	terrainTypes.Set("TerrainTypeSnowcappedMountains", game.vm.ToValue(TerrainTypeSnowcappedMountains))
 
 	utilObj := game.vm.NewObject()
+	utilObj.Set("createLinkedList", game.vm.ToValue(NewLinkedList))
+	utilObj.Set("createQuadTree", game.vm.ToValue(NewQuadTree))
 	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))
 	utilObj.Set("perlin2D", game.vm.ToValue(Perlin2D))
 
@@ -653,6 +655,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("WearLocations", wearLocationsConstantsObj)
 	obj.Set("HTTP", httpUtilityObj)
 	obj.Set("NewExit", game.vm.ToValue(game.NewExit))
+
 	obj.Set("util", utilObj)
 
 	sentryObj := game.vm.NewObject()
