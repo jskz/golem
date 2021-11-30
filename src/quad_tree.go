@@ -131,13 +131,16 @@ func (qt *QuadTree) Remove(p *Point) bool {
 		return false
 	}
 
+	// If we are in a leaf node, then remove the value
 	if qt.Northwest == nil {
 		qt.Nodes.Remove(p)
 
+		// If there are other siblings in this node, no operation
 		if qt.Nodes.Count > 0 {
 			return true
 		}
 
+		// Recursively attempt to collapse this quad's ancestry
 		return qt.Collapse()
 	}
 
