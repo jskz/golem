@@ -40,6 +40,10 @@ type Point struct {
 	Value interface{} `json:"value"`
 }
 
+func NewPoint(x int, y int, value interface{}) *Point {
+	return &Point{X: x, Y: y, Value: value}
+}
+
 // Subdivide redistributes the nodes among four child trees for each subdivided rect
 func (qt *QuadTree) Subdivide() bool {
 	if qt.Northwest != nil {
