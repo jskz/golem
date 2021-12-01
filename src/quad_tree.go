@@ -55,10 +55,10 @@ func (qt *QuadTree) Subdivide() bool {
 	qt.Southwest = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
 	qt.Southeast = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
 
-	topLeftRect := NewRect(qt.Boundary.X, qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
-	topRightRect := NewRect(qt.Boundary.X+qt.Boundary.W/2, qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
-	bottomLeftRect := NewRect(qt.Boundary.X, qt.Boundary.Y+qt.Boundary.H/2, qt.Boundary.W/2, qt.Boundary.H/2)
-	bottomRightRect := NewRect(qt.Boundary.X+qt.Boundary.W/2, qt.Boundary.Y+qt.Boundary.H/2, qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Northwest.Boundary = NewRect(qt.Boundary.X, qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Northeast.Boundary = NewRect(qt.Boundary.X+(qt.Boundary.W/2), qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Southwest.Boundary = NewRect(qt.Boundary.X, qt.Boundary.Y+(qt.Boundary.H/2), qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Southeast.Boundary = NewRect(qt.Boundary.X+(qt.Boundary.W/2), qt.Boundary.Y+(qt.Boundary.H/2), qt.Boundary.W/2, qt.Boundary.H/2)
 
 	// Repartition the nodes at this level to the appropriate child quad
 	for iter := qt.Nodes.Head; iter != nil; iter = iter.Next {
@@ -66,16 +66,16 @@ func (qt *QuadTree) Subdivide() bool {
 
 		qt.Nodes.Remove(point)
 
-		if topLeftRect.ContainsPoint(point) {
+		if qt.Northwest.Boundary.ContainsPoint(point) {
 			qt.Northwest.Nodes.Insert(point)
 			break
-		} else if topRightRect.ContainsPoint(point) {
+		} else if qt.Northeast.Boundary.ContainsPoint(point) {
 			qt.Northeast.Nodes.Insert(point)
 			break
-		} else if bottomLeftRect.ContainsPoint(point) {
+		} else if qt.Southwest.Boundary.ContainsPoint(point) {
 			qt.Southwest.Nodes.Insert(point)
 			break
-		} else if bottomRightRect.ContainsPoint(point) {
+		} else if qt.Southeast.Boundary.ContainsPoint(point) {
 			qt.Southeast.Nodes.Insert(point)
 			break
 		}
@@ -90,7 +90,20 @@ func NewRect(x float64, y float64, w float64, h float64) *Rect {
 
 func (r *Rect) Contains(x float64, y float64) bool {
 	return x >= r.X && x <= r.X+r.W && y >= r.Y && y <= r.Y+r.H
+}
 
+func (r *Rect) CollidesRect(other *Rect) bool {
+	minAx := r.X
+	minBx := other.X
+	maxAx := r.X + r.W
+	maxBx := other.X + other.W
+
+	minAy := r.Y
+	minBy := other.Y
+	maxAy := r.Y + r.H
+	maxBy := other.Y + other.H
+
+	return !(maxAx < minBx || minAx > maxBx || minAy > maxBy || maxAy < minBy)
 }
 
 func (r *Rect) ContainsRect(other *Rect) bool {
@@ -202,8 +215,8 @@ func (qt *QuadTree) Remove(p *Point) bool {
 func (qt *QuadTree) QueryRect(r *Rect) []*Point {
 	results := make([]*Point, 0)
 
-	// This quadtree's boundary rect does not contain the query rect
-	if !qt.Boundary.ContainsRect(r) {
+	// This quadtree's boundary rect does not intersect with the query rect
+	if !qt.Boundary.CollidesRect(r) {
 		return results
 	}
 
