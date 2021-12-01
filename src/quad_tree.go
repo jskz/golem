@@ -41,11 +41,43 @@ type Point struct {
 }
 
 // Subdivide redistributes the nodes among four child trees for each subdivided rect
-func (qt *QuadTree) Subdivide() {
+func (qt *QuadTree) Subdivide() bool {
+	if qt.Northwest != nil {
+		return false
+	}
+
 	qt.Northwest = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
 	qt.Northeast = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
 	qt.Southwest = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
 	qt.Southeast = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
+
+	topLeftRect := NewRect(qt.Boundary.X, qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
+	topRightRect := NewRect(qt.Boundary.X+qt.Boundary.W/2, qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
+	bottomLeftRect := NewRect(qt.Boundary.X, qt.Boundary.Y+qt.Boundary.H/2, qt.Boundary.W/2, qt.Boundary.H/2)
+	bottomRightRect := NewRect(qt.Boundary.X+qt.Boundary.W/2, qt.Boundary.Y+qt.Boundary.H/2, qt.Boundary.W/2, qt.Boundary.H/2)
+
+	// Repartition the nodes at this level to the appropriate child quad
+	for iter := qt.Nodes.Head; iter != nil; iter = iter.Next {
+		point := iter.Value.(*Point)
+
+		if topLeftRect.ContainsPoint(point) {
+			qt.Northwest.Nodes.Insert(point)
+		} else if topRightRect.ContainsPoint(point) {
+			qt.Northeast.Nodes.Insert(point)
+		} else if bottomLeftRect.ContainsPoint(point) {
+			qt.Southwest.Nodes.Insert(point)
+		} else if bottomRightRect.ContainsPoint(point) {
+			qt.Southeast.Nodes.Insert(point)
+		}
+	}
+
+	// Empty out the nodes list at this level
+	qt.Nodes = NewLinkedList()
+	return true
+}
+
+func NewRect(x float64, y float64, w float64, h float64) *Rect {
+	return &Rect{X: x, Y: y, W: w, H: h}
 }
 
 func (r *Rect) Contains(x int, y int) bool {
@@ -62,7 +94,7 @@ func (r *Rect) ContainsPoint(p *Point) bool {
 }
 
 // Insert adds a new value to the quadtree at point p
-func (qt *QuadTree) Insert(p *Point, value interface{}) bool {
+func (qt *QuadTree) Insert(p *Point) bool {
 	if !qt.Boundary.ContainsPoint(p) {
 		return false
 	}
@@ -76,13 +108,13 @@ func (qt *QuadTree) Insert(p *Point, value interface{}) bool {
 		qt.Subdivide()
 	}
 
-	if qt.Northwest.Insert(p, value) {
+	if qt.Northwest.Insert(p) {
 		return true
-	} else if qt.Northeast.Insert(p, value) {
+	} else if qt.Northeast.Insert(p) {
 		return true
-	} else if qt.Southwest.Insert(p, value) {
+	} else if qt.Southwest.Insert(p) {
 		return true
-	} else if qt.Southeast.Insert(p, value) {
+	} else if qt.Southeast.Insert(p) {
 		return true
 	}
 
