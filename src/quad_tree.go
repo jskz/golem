@@ -13,10 +13,10 @@ package main
  * room character/object/entity lists for a given room.
  */
 type QuadTree struct {
-	Northwest *QuadTree
-	Northeast *QuadTree
-	Southwest *QuadTree
-	Southeast *QuadTree
+	Northwest *QuadTree `json:"nw"`
+	Northeast *QuadTree `json:"ne"`
+	Southwest *QuadTree `json:"sw"`
+	Southeast *QuadTree `json:"se"`
 
 	Boundary *Rect       `json:"boundary"`
 	Nodes    *LinkedList `json:"data"`
@@ -24,7 +24,7 @@ type QuadTree struct {
 	Parent   *QuadTree   `json:"parent"`
 }
 
-const QuadTreeNodeMaxElements = 2
+const QuadTreeNodeMaxElements = 4
 
 type Rect struct {
 	X float64 `json:"x"`
@@ -64,19 +64,23 @@ func (qt *QuadTree) Subdivide() bool {
 	for iter := qt.Nodes.Head; iter != nil; iter = iter.Next {
 		point := iter.Value.(*Point)
 
+		qt.Nodes.Remove(point)
+
 		if topLeftRect.ContainsPoint(point) {
 			qt.Northwest.Nodes.Insert(point)
+			break
 		} else if topRightRect.ContainsPoint(point) {
 			qt.Northeast.Nodes.Insert(point)
+			break
 		} else if bottomLeftRect.ContainsPoint(point) {
 			qt.Southwest.Nodes.Insert(point)
+			break
 		} else if bottomRightRect.ContainsPoint(point) {
 			qt.Southeast.Nodes.Insert(point)
+			break
 		}
 	}
 
-	// Empty out the nodes list at this level
-	qt.Nodes = NewLinkedList()
 	return true
 }
 
