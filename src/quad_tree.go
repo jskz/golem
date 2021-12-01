@@ -50,10 +50,10 @@ func (qt *QuadTree) Subdivide() bool {
 		return false
 	}
 
-	qt.Northwest = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
-	qt.Northeast = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
-	qt.Southwest = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
-	qt.Southeast = NewQuadTree(qt, qt.Boundary.W, qt.Boundary.H)
+	qt.Northwest = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Northeast = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Southwest = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Southeast = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
 
 	topLeftRect := NewRect(qt.Boundary.X, qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
 	topRightRect := NewRect(qt.Boundary.X+qt.Boundary.W/2, qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
@@ -85,7 +85,7 @@ func NewRect(x float64, y float64, w float64, h float64) *Rect {
 }
 
 func (r *Rect) Contains(x float64, y float64) bool {
-	return float64(x) >= r.X && float64(x) <= r.X+r.W && float64(y) >= r.Y && float64(y) <= r.Y+r.H
+	return x >= r.X && x <= r.X+r.W && y >= r.Y && y <= r.Y+r.H
 
 }
 
