@@ -34,13 +34,13 @@ type Rect struct {
 }
 
 type Point struct {
-	X int `json:"x"`
-	Y int `json:"y"`
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
 
 	Value interface{} `json:"value"`
 }
 
-func NewPoint(x int, y int, value interface{}) *Point {
+func NewPoint(x float64, y float64, value interface{}) *Point {
 	return &Point{X: x, Y: y, Value: value}
 }
 
@@ -84,7 +84,7 @@ func NewRect(x float64, y float64, w float64, h float64) *Rect {
 	return &Rect{X: x, Y: y, W: w, H: h}
 }
 
-func (r *Rect) Contains(x int, y int) bool {
+func (r *Rect) Contains(x float64, y float64) bool {
 	return float64(x) >= r.X && float64(x) <= r.X+r.W && float64(y) >= r.Y && float64(y) <= r.Y+r.H
 
 }
