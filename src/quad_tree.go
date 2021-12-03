@@ -50,15 +50,20 @@ func (qt *QuadTree) Subdivide() bool {
 		return false
 	}
 
-	qt.Northwest = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
-	qt.Northeast = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
-	qt.Southwest = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
-	qt.Southeast = NewQuadTree(qt, qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Northwest = NewQuadTree(qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Northeast = NewQuadTree(qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Southwest = NewQuadTree(qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Southeast = NewQuadTree(qt.Boundary.W/2, qt.Boundary.H/2)
 
 	qt.Northwest.Boundary = NewRect(qt.Boundary.X, qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
 	qt.Northeast.Boundary = NewRect(qt.Boundary.X+(qt.Boundary.W/2), qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
 	qt.Southwest.Boundary = NewRect(qt.Boundary.X, qt.Boundary.Y+(qt.Boundary.H/2), qt.Boundary.W/2, qt.Boundary.H/2)
 	qt.Southeast.Boundary = NewRect(qt.Boundary.X+(qt.Boundary.W/2), qt.Boundary.Y+(qt.Boundary.H/2), qt.Boundary.W/2, qt.Boundary.H/2)
+
+	qt.Northwest.Parent = qt
+	qt.Northeast.Parent = qt
+	qt.Southwest.Parent = qt
+	qt.Southeast.Parent = qt
 
 	// Repartition the nodes at this level to the appropriate child quad
 	for iter := qt.Nodes.Head; iter != nil; iter = iter.Next {
@@ -243,12 +248,12 @@ func (qt *QuadTree) QueryRect(r *Rect) []*Point {
 }
 
 // NewQuadTree creates a new quadtree instance
-func NewQuadTree(parent *QuadTree, width float64, height float64) *QuadTree {
+func NewQuadTree(width float64, height float64) *QuadTree {
 	qt := &QuadTree{
 		Capacity: QuadTreeNodeMaxElements,
 		Nodes:    NewLinkedList(),
 		Boundary: &Rect{X: 0, Y: 0, W: width, H: height},
-		Parent:   parent,
+		Parent:   nil,
 	}
 
 	return qt
