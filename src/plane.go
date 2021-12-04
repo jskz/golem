@@ -104,6 +104,9 @@ func (plane *Plane) NewAtlas() *Atlas {
 		Characters: make(map[int]*LinkedList),
 		Objects:    make(map[int]*LinkedList),
 		Exits:      make(map[int]map[uint]*Exit),
+
+		CharacterTree: NewQuadTree(float64(plane.Width), float64(plane.Height)),
+		ObjectTree:    NewQuadTree(float64(plane.Width), float64(plane.Height)),
 	}
 }
 
