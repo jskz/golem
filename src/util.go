@@ -111,7 +111,9 @@ func AngleToDirection(angle float64) int {
 		return DirectionSouthwest
 	} else if angle < 315 {
 		return DirectionWest
-	} else {
+	} else if angle < 360 {
 		return DirectionNorthwest
 	}
+
+	return DirectionNorth
 }
