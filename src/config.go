@@ -27,6 +27,12 @@ type AppMySQLConfiguration struct {
 	Database string `json:"database"`
 }
 
+type AppRedisConfiguration struct {
+	Host     string `json:"host"`
+	Port     int    `json:"port"`
+	Password string `json:"password"`
+}
+
 type AppProfilingConfiguration struct {
 	Enabled bool `json:"enabled"`
 	Port    int  `json:"port"`
@@ -44,6 +50,7 @@ type AppWebConfiguration struct {
 type AppConfiguration struct {
 	Port                   int                       `json:"port"`
 	MySQLConfiguration     AppMySQLConfiguration     `json:"mysql"`
+	RedisConfiguration     AppRedisConfiguration     `json:"redis"`
 	SentryConfiguration    AppSentryConfiguration    `json:"sentry"`
 	ProfilingConfiguration AppProfilingConfiguration `json:"profiling"`
 	WebConfiguration       AppWebConfiguration       `json:"web"`
