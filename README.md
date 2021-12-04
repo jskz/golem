@@ -28,7 +28,7 @@ docker volume rm golem_db_data
 
 ## Video
 
-https://user-images.githubusercontent.com/5122630/142783172-ff7281bc-9153-40c9-a839-81fd4970a2e6.mp4
+https://user-images.githubusercontent.com/5122630/144722737-9cff11c9-9127-4d8a-a075-b32e82b7aaf5.mp4
 
 ## Notes
 
