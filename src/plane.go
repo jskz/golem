@@ -536,6 +536,18 @@ func (plane *Plane) GetTerrainRect(x int, y int, z int, w int, h int) [][]int {
 	return terrain
 }
 
+func (game *Game) FindPlaneByName(name string) *Plane {
+	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
+		plane := iter.Value.(*Plane)
+
+		if plane.Name == name {
+			return plane
+		}
+	}
+
+	return nil
+}
+
 func (game *Game) FindPlaneByID(id int) *Plane {
 	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
 		plane := iter.Value.(*Plane)

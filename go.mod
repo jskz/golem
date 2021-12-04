@@ -10,6 +10,7 @@ require (
 	github.com/getsentry/sentry-go v0.11.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-migrate/migrate v3.5.4+incompatible
+	github.com/gomodule/redigo v1.8.6 // indirect
 	golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/grpc v1.42.0 // indirect

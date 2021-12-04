@@ -8,7 +8,9 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 )
@@ -157,6 +159,56 @@ func (game *Game) handleWebhooks() {
 	defer func() {
 		recover()
 	}()
+
+	http.HandleFunc("/worldmap", func(w http.ResponseWriter, req *http.Request) {
+		type WorldMapCharacterPointData struct {
+			Name string `json:"name"`
+			X    int    `json:"x"`
+			Y    int    `json:"y"`
+		}
+
+		type WorldMapResponse struct {
+			Terrain    [][]int                      `json:"terrain"`
+			Characters []WorldMapCharacterPointData `json:"characters"`
+		}
+
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		overworld := game.FindPlaneByName("overworld")
+		if overworld == nil {
+			w.Header().Set("Content-Type", "text/plain")
+			w.Write([]byte("failed to find overworld plane"))
+			return
+		}
+
+		response := &WorldMapResponse{
+			Terrain:    overworld.Map.Layers[0].Terrain,
+			Characters: make([]WorldMapCharacterPointData, 0),
+		}
+
+		overworldCharacters := overworld.Map.Layers[0].Atlas.CharacterTree.QueryRect(overworld.Map.Layers[0].Atlas.CharacterTree.Boundary)
+
+		for _, ochPoint := range overworldCharacters {
+			och := ochPoint.Value.(*Character)
+			wmcpd := WorldMapCharacterPointData{}
+
+			wmcpd.X = int(ochPoint.X)
+			wmcpd.Y = int(ochPoint.Y)
+			wmcpd.Name = och.Name
+
+			response.Characters = append(response.Characters, wmcpd)
+		}
+
+		encoded, err := json.Marshal(response)
+		if err != nil {
+			w.Header().Set("Content-Type", "text/plain")
+			w.Write([]byte(fmt.Sprintf("failed to encode overwolrd terrain: %v", err)))
+			return
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(encoded)
+	})
 
 	http.HandleFunc("/webhook", func(w http.ResponseWriter, req *http.Request) {
 		keyParam := req.URL.Query().Get("key")

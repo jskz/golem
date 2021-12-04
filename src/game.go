@@ -22,13 +22,15 @@ import (
 	"github.com/golang-migrate/migrate"
 	"github.com/golang-migrate/migrate/database/mysql"
 	_ "github.com/golang-migrate/migrate/source/file"
+	"github.com/gomodule/redigo/redis"
 )
 
 type Game struct {
 	startedAt time.Time
 
-	db *sql.DB
-	vm *goja.Runtime
+	redis *redis.Pool
+	db    *sql.DB
+	vm    *goja.Runtime
 
 	Objects      *LinkedList `json:"objects"`
 	Characters   *LinkedList `json:"characters"`
@@ -93,6 +95,22 @@ func NewGame() (*Game, error) {
 		Config.MySQLConfiguration.Host,
 		Config.MySQLConfiguration.Port,
 		Config.MySQLConfiguration.Database))
+	if err != nil {
+		return nil, err
+	}
+
+	game.redis = &redis.Pool{
+		Dial: func() (redis.Conn, error) {
+			conn, err := redis.Dial("tcp", fmt.Sprintf("%s:%d", Config.RedisConfiguration.Host, Config.RedisConfiguration.Port))
+			if err != nil {
+				return nil, err
+			}
+
+			return conn, nil
+		},
+	}
+
+	_, err = game.redis.Get().Do("PING")
 	if err != nil {
 		return nil, err
 	}
