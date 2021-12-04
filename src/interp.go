@@ -43,6 +43,7 @@ func init() {
 	CommandTable["help"] = Command{Name: "help", CmdFunc: do_help}
 	CommandTable["look"] = Command{Name: "look", CmdFunc: do_look}
 	CommandTable["quit"] = Command{Name: "quit", CmdFunc: do_quit}
+	CommandTable["scan"] = Command{Name: "scan", CmdFunc: do_scan}
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
 	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}
 	CommandTable["time"] = Command{Name: "time", CmdFunc: do_time}

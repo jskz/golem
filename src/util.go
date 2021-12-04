@@ -92,11 +92,21 @@ func Distance2D(x float64, y float64, x2 float64, y2 float64, a float64, b float
 	return int(math.Sqrt(((((x2 - x) * (x2 - x)) / (a * a)) + ((y2-y)*(y2-y))/(b*b))))
 }
 
-func Angle2D(x float64, y float64, x2 float64, y2 float64) float64 {
-	return math.Atan2(y2-y, x2-x) * 180 / math.Pi
+func Angle2D(x float64, y float64, x2 float64, y2 float64) int {
+	dy := y2 - y
+	dx := x2 - x
+
+	radians := math.Atan2(-dx, dy)
+	degrees := radians * (180 / math.Pi)
+
+	if degrees < 0 {
+		degrees += 360
+	}
+
+	return int(degrees)
 }
 
-func AngleToDirection(angle float64) int {
+func AngleToDirection(angle int) int {
 	if angle < 45 {
 		return DirectionNorth
 	} else if angle < 90 {

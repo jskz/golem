@@ -149,6 +149,58 @@ func do_scan(ch *Character, arguments string) {
 			ch.Send("{DYou can't do that here.{x\r\n")
 			return
 		}
+
+		ch.Send("{CYou squint intently and scan the horizon in all directions:{x\r\n")
+
+		// Query for characters within the do_look camera viewport rect
+		var cameraWidth float64 = 48
+		var cameraHeight float64 = 18
+		var cameraRange int = 9
+		var output strings.Builder
+
+		q := NewRect(float64(ch.Room.X)-cameraWidth/2,
+			float64(ch.Room.Y)-cameraHeight/2,
+			cameraWidth,
+			cameraHeight)
+
+		nearbyCharacters := ch.Room.Plane.Map.Layers[ch.Room.Z].Atlas.CharacterTree.QueryRect(q)
+
+		for _, p := range nearbyCharacters {
+			pch := p.Value.(*Character)
+
+			if pch.IsEqual(ch) {
+				continue
+			}
+
+			// If falls outside of the camera ellipse range, skip
+			r := Distance2D(float64(ch.Room.X), float64(ch.Room.Y), float64(p.X), float64(p.Y), 2.4, 1)
+			if r > cameraRange {
+				continue
+			}
+
+			angle := Angle2D(
+				p.X,
+				p.Y,
+				float64(ch.Room.X),
+				float64(ch.Room.Y))
+			direction := AngleToDirection(angle)
+			distance := Distance2D(float64(ch.Room.X), float64(ch.Room.Y), float64(p.X), float64(p.Y), 1.0, 1.0)
+			var distancePlural string = "s"
+			if distance == 1 {
+				distancePlural = ""
+			}
+
+			output.WriteString(fmt.Sprintf(
+				"%s is %d room%s away at %d° (%s).\r\n",
+				pch.GetShortDescriptionUpper(ch),
+				distance,
+				distancePlural,
+				int(angle),
+				ExitName[uint(direction)],
+			))
+		}
+
+		ch.Send(output.String())
 	}
 }
 
