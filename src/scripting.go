@@ -649,6 +649,7 @@ func (game *Game) InitScripting() error {
 
 	obj.Set("KnownLocations", knownLocationsConstantsObj)
 	obj.Set("ExitFlags", exitFlagsConstantsObj)
+	obj.Set("ExitName", game.vm.ToValue(ExitName))
 	obj.Set("EffectTypes", effectTypes)
 	obj.Set("AffectedTypes", affectedTypes)
 	obj.Set("RoomFlags", roomFlagsConstantsObj)
