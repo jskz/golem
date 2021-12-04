@@ -95,3 +95,23 @@ func Distance2D(x float64, y float64, x2 float64, y2 float64, a float64, b float
 func Angle2D(x float64, y float64, x2 float64, y2 float64) float64 {
 	return math.Atan2(y2-y, x2-x) * 180 / math.Pi
 }
+
+func AngleToDirection(angle float64) int {
+	if angle < 45 {
+		return DirectionNorth
+	} else if angle < 90 {
+		return DirectionNortheast
+	} else if angle < 135 {
+		return DirectionEast
+	} else if angle < 180 {
+		return DirectionSoutheast
+	} else if angle < 225 {
+		return DirectionSouth
+	} else if angle < 270 {
+		return DirectionSouthwest
+	} else if angle < 315 {
+		return DirectionWest
+	} else {
+		return DirectionNorthwest
+	}
+}

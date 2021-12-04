@@ -645,6 +645,7 @@ func (game *Game) InitScripting() error {
 	utilObj.Set("angle2D", game.vm.ToValue(Angle2D))
 	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))
 	utilObj.Set("perlin2D", game.vm.ToValue(Perlin2D))
+	utilObj.Set("angleToDirection", game.vm.ToValue(AngleToDirection))
 
 	obj.Set("KnownLocations", knownLocationsConstantsObj)
 	obj.Set("ExitFlags", exitFlagsConstantsObj)

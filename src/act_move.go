@@ -27,30 +27,42 @@ const (
 )
 
 var ExitName = map[uint]string{
-	DirectionNorth: "north",
-	DirectionEast:  "east",
-	DirectionSouth: "south",
-	DirectionWest:  "west",
-	DirectionUp:    "up",
-	DirectionDown:  "down",
+	DirectionNorth:     "north",
+	DirectionEast:      "east",
+	DirectionSouth:     "south",
+	DirectionWest:      "west",
+	DirectionUp:        "up",
+	DirectionDown:      "down",
+	DirectionNortheast: "northeast",
+	DirectionSoutheast: "southeast",
+	DirectionSouthwest: "southwest",
+	DirectionNorthwest: "northwest",
 }
 
 var ExitCompassName = map[uint]string{
-	DirectionNorth: "N",
-	DirectionEast:  "E",
-	DirectionSouth: "S",
-	DirectionWest:  "W",
-	DirectionUp:    "U",
-	DirectionDown:  "D",
+	DirectionNorth:     "N",
+	DirectionEast:      "E",
+	DirectionSouth:     "S",
+	DirectionWest:      "W",
+	DirectionUp:        "U",
+	DirectionDown:      "D",
+	DirectionNortheast: "NE",
+	DirectionSoutheast: "SE",
+	DirectionSouthwest: "SW",
+	DirectionNorthwest: "NW",
 }
 
 var ReverseDirection = map[uint]uint{
-	DirectionNorth: DirectionSouth,
-	DirectionEast:  DirectionWest,
-	DirectionSouth: DirectionNorth,
-	DirectionWest:  DirectionEast,
-	DirectionUp:    DirectionDown,
-	DirectionDown:  DirectionUp,
+	DirectionNorth:     DirectionSouth,
+	DirectionEast:      DirectionWest,
+	DirectionSouth:     DirectionNorth,
+	DirectionWest:      DirectionEast,
+	DirectionUp:        DirectionDown,
+	DirectionDown:      DirectionUp,
+	DirectionNortheast: DirectionSouthwest,
+	DirectionSoutheast: DirectionNorthwest,
+	DirectionSouthwest: DirectionNortheast,
+	DirectionNorthwest: DirectionSoutheast,
 }
 
 const (
