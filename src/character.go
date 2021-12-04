@@ -703,25 +703,25 @@ func (ch *Character) flushOutput() {
 	}
 
 	if len(lines) <= maxLines {
-		ch.Client.send <- ch.output
+		ch.Client.Send(ch.output)
 		ch.clearOutputBuffer()
 		return
 	}
 
 	for index := ch.outputCursor; index <= ch.inputCursor; index++ {
 		if index >= len(lines) {
-			ch.Client.send <- page.Bytes()
+			ch.Client.Send(page.Bytes())
 			ch.clearOutputBuffer()
 			return
 		}
 
 		if index-ch.outputCursor >= maxLines {
-			ch.Client.send <- page.Bytes()
+			ch.Client.Send(page.Bytes())
 			ch.outputCursor += maxLines
 
 			amount := ch.outputCursor * 100 / ch.outputLines
 
-			ch.Client.send <- []byte(fmt.Sprintf("[ Press return to continue (%d%%) ]\r\n", amount))
+			ch.Client.Send([]byte(fmt.Sprintf("[ Press return to continue (%d%%) ]\r\n", amount)))
 			return
 		}
 

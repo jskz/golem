@@ -276,8 +276,8 @@ func (game *Game) Run() {
 
 			client.ConnectionState = ConnectionStateName
 
-			client.send <- Config.greeting
-			client.send <- []byte("By what name do you wish to be known? ")
+			client.Send(Config.greeting)
+			client.Send([]byte("By what name do you wish to be known? "))
 
 		case client := <-game.unregister:
 			delete(game.clients, client)

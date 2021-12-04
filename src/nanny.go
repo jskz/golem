@@ -24,7 +24,7 @@ const DefaultMaxLines = 50
 func (client *Client) displayPrompt() {
 	if client.Character == nil {
 		/* Something weird is going on: give a simple debug prompt */
-		client.send <- []byte("\r\n> ")
+		client.Send([]byte("\r\n> "))
 		return
 	}
 
@@ -394,6 +394,6 @@ func (game *Game) nanny(client *Client, message string) {
 	}
 
 	if client.ConnectionState != ConnectionStatePlaying && output.Len() > 0 {
-		client.send <- output.Bytes()
+		client.Send(output.Bytes())
 	}
 }

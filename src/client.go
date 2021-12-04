@@ -221,7 +221,9 @@ func (client *Client) readPump(game *Game) {
 		if telnetResponse.Len() > 0 {
 			responseBytes := telnetResponse.Bytes()
 
-			client.send <- responseBytes
+			if client.Send(responseBytes) {
+				break
+			}
 		}
 	}
 }
@@ -246,6 +248,17 @@ func (client *Client) writePump(game *Game) {
 			}
 		}
 	}
+}
+
+func (client *Client) Send(data []byte) (closed bool) {
+	defer func() {
+		if recover() != nil {
+			closed = true
+		}
+	}()
+
+	client.send <- data
+	return false
 }
 
 func (game *Game) checkReconnect(client *Client, name string) bool {
