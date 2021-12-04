@@ -69,21 +69,17 @@ func (qt *QuadTree) Subdivide() bool {
 	for iter := qt.Nodes.Head; iter != nil; iter = iter.Next {
 		point := iter.Value.(*Point)
 
-		qt.Nodes.Remove(point)
-
 		if qt.Northwest.Boundary.ContainsPoint(point) {
 			qt.Northwest.Nodes.Insert(point)
-			break
 		} else if qt.Northeast.Boundary.ContainsPoint(point) {
 			qt.Northeast.Nodes.Insert(point)
-			break
 		} else if qt.Southwest.Boundary.ContainsPoint(point) {
 			qt.Southwest.Nodes.Insert(point)
-			break
 		} else if qt.Southeast.Boundary.ContainsPoint(point) {
 			qt.Southeast.Nodes.Insert(point)
-			break
 		}
+
+		qt.Nodes.Remove(point)
 	}
 
 	return true
@@ -149,16 +145,11 @@ func (qt *QuadTree) Insert(p *Point) bool {
 
 // Recursively collapse quads
 func (qt *QuadTree) Collapse() bool {
-	// Don't further collapse the root
-	if qt.Parent == nil {
-		return true
-	}
-
 	// Retrieve all points within this quad
 	results := qt.QueryRect(qt.Boundary)
 
 	// If the boundary is empty, then collapse again
-	if len(results) == 0 {
+	if len(results) == 0 && qt.Parent != nil {
 		return qt.Parent.Collapse()
 	}
 
@@ -191,25 +182,27 @@ func (qt *QuadTree) Remove(p *Point) bool {
 
 	// If we are in a leaf node, then remove the value
 	if qt.Northwest == nil {
-		qt.Nodes.Remove(p)
+		if qt.Nodes.Contains(p) {
+			qt.Nodes.Remove(p)
 
-		// If there are other siblings in this node, no operation
-		if qt.Nodes.Count > 0 {
-			return true
+			if qt.Nodes.Count > 0 {
+				return true
+			}
+
+			return qt.Collapse()
 		}
 
-		// Recursively attempt to collapse this quad's ancestry
-		return qt.Collapse()
+		return false
 	}
 
 	// Try to remove from this tree's quadrants
-	if qt.Northwest.Remove(p) {
+	if qt.Northwest.Remove(p) == true {
 		return true
-	} else if qt.Northeast.Remove(p) {
+	} else if qt.Northeast.Remove(p) == true {
 		return true
-	} else if qt.Southwest.Remove(p) {
+	} else if qt.Southwest.Remove(p) == true {
 		return true
-	} else if qt.Southeast.Remove(p) {
+	} else if qt.Southeast.Remove(p) == true {
 		return true
 	}
 

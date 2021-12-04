@@ -22,9 +22,9 @@ func CreateTestPoints(n int, w int, h int) []*Point {
 }
 
 func TestQuadTreeInsert(t *testing.T) {
+	qt := NewQuadTree(128, 128)
 	examplePoints := CreateTestPoints(32, 128, 128)
 
-	qt := NewQuadTree(128, 128)
 	for _, p := range examplePoints {
 		qt.Insert(p)
 	}
@@ -49,4 +49,41 @@ func TestQuadTreeInsert(t *testing.T) {
 }
 
 func TestQuadTreeRemove(t *testing.T) {
+	qt := NewQuadTree(128, 128)
+	examplePoints := CreateTestPoints(32, 128, 128)
+
+	for _, p := range examplePoints {
+		qt.Insert(p)
+	}
+
+	// Remove a single point
+	var head *Point
+
+	head, examplePoints = examplePoints[0], examplePoints[1:]
+	qt.Remove(head)
+
+	results := qt.QueryRect(NewRect(0, 0, 128, 128))
+	if len(results) != 31 {
+		t.Errorf("Root quadtree boundary contained %d points, expected 31.", len(results))
+	}
+
+	// Remove the rest of the points
+	for _, removal := range examplePoints {
+		qt.Remove(removal)
+	}
+
+	results = qt.QueryRect(NewRect(0, 0, 128, 128))
+	if len(results) > 0 {
+		t.Errorf("Root quadtree boundary contained %d points, expected 0.", len(results))
+	}
+
+	// Is the tree now a leaf?
+	if qt.Northwest != nil {
+		t.Error("Tree still had child quadrants after removing all nodes")
+	}
+
+	// Is the leaf empty?
+	if qt.Nodes.Count != 0 {
+		t.Errorf("Root quadtree expected empty, had %d nodes.\r\n", qt.Nodes.Count)
+	}
 }

@@ -27,28 +27,30 @@ func NewLinkedList() *LinkedList {
 	return list
 }
 
-func (list *LinkedList) Remove(value interface{}) {
+func (list *LinkedList) Remove(value interface{}) bool {
 	var iter *LinkedListNode = list.Head
 
 	if list.Count == 0 || list.Head == nil {
-		return
+		return false
 	}
 
 	if list.Head.Value == value {
 		list.Head = list.Head.Next
 		list.Count--
-		return
+		return true
 	}
 
 	for iter.Next != nil {
 		if iter.Next.Value == value {
 			iter.Next = iter.Next.Next
 			list.Count--
-			return
+			return true
 		}
 
 		iter = iter.Next
 	}
+
+	return false
 }
 
 func (list *LinkedList) Insert(value interface{}) {
