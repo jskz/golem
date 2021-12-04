@@ -641,6 +641,8 @@ func (game *Game) InitScripting() error {
 	utilObj.Set("createQuadTree", game.vm.ToValue(NewQuadTree))
 	utilObj.Set("newRect2D", game.vm.ToValue(NewRect))
 	utilObj.Set("newPoint2D", game.vm.ToValue(NewPoint))
+
+	utilObj.Set("angle2D", game.vm.ToValue(Angle2D))
 	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))
 	utilObj.Set("perlin2D", game.vm.ToValue(Perlin2D))
 

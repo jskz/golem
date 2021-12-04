@@ -91,3 +91,7 @@ func SmootherStep2D(a0 float64, a1 float64, w float64) float64 {
 func Distance2D(x float64, y float64, x2 float64, y2 float64, a float64, b float64) int {
 	return int(math.Sqrt(((((x2 - x) * (x2 - x)) / (a * a)) + ((y2-y)*(y2-y))/(b*b))))
 }
+
+func Angle2D(x float64, y float64, x2 float64, y2 float64) float64 {
+	return math.Atan2(y2-y, x2-x) * 180 / math.Pi
+}
