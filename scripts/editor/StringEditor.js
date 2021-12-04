@@ -6,7 +6,7 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 Golem.StringEditor = function (client, string, callback) {
-    let _string = string;
+    let _string = String(string);
     let cursor = string.match(/[^\r\n]+/g).length;
 
     const commit = () => (string = String(_string));
@@ -61,7 +61,7 @@ Golem.StringEditor = function (client, string, callback) {
                 client.connectionHandler = null;
 
                 ch.send("{YExiting without writing changes.{x\r\n");
-                callback(client, _string);
+                callback(client, string);
             } else if(input === '!') {
                 ch.send("{YContents of the string editor buffer:{x\r\n");
 

@@ -14,6 +14,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/dop251/goja"
 )
 
 type Plane struct {
@@ -35,7 +37,17 @@ type Plane struct {
 	Portals *LinkedList `json:"portals"`
 }
 
+type PlaneObserver struct {
+	Plane *Plane `json:"plane"`
+	Rect  *Rect  `json:"rect"`
+
+	OnEnterCallback goja.Callable `json:"onEnterCallback"`
+	OnLeaveCallback goja.Callable `json:"onLeaveCallback"`
+}
+
 type MapGrid struct {
+	Observers []*PlaneObserver `json:"observers"`
+
 	Terrain [][]int `json:"terrain"`
 	Atlas   *Atlas  `json:"atlas"`
 	Width   int     `json:"width"`
@@ -108,6 +120,21 @@ func (plane *Plane) NewAtlas() *Atlas {
 		CharacterTree: NewQuadTree(float64(plane.Width), float64(plane.Height)),
 		ObjectTree:    NewQuadTree(float64(plane.Width), float64(plane.Height)),
 	}
+}
+
+func (obs *PlaneObserver) Dispose() {
+}
+
+func (layer *MapGrid) RegisterObserver(rect *Rect, options goja.Object, onEnterCallback goja.Callable, onLeaveCallback goja.Callable) goja.Value {
+	obs := &PlaneObserver{Plane: layer.Atlas.Plane, Rect: rect, OnEnterCallback: onEnterCallback, OnLeaveCallback: onLeaveCallback}
+	layer.Observers = append(layer.Observers, obs)
+
+	// TODO: Create a stateful "observer" object and pass back in retval:
+	//
+	// - a dispose() method to hang up this observer
+	// - a setRect() method to post-hoc move/resize the observer "camera"
+
+	return nil
 }
 
 func (plane *Plane) SaveBlob() error {

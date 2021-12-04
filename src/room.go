@@ -73,13 +73,72 @@ func (room *Room) removeObject(obj *ObjectInstance) {
 
 func (room *Room) AddCharacter(ch *Character) {
 	room.Characters.Insert(ch)
+	ch.Room = room
 
 	if room.Flags&ROOM_PLANAR != 0 && room.Plane != nil {
 		ch.PlaneIndex = &Point{X: float64(room.X), Y: float64(room.Y), Value: ch}
 		room.Plane.Map.Layers[room.Z].Atlas.CharacterTree.Insert(ch.PlaneIndex)
+
+		for _, obs := range room.Plane.Map.Layers[room.Z].Observers {
+			// If this obs does not contain the room, skip
+			if !obs.Rect.Contains(float64(room.X), float64(room.Y)) {
+				continue
+			}
+
+			var entering bool = true
+			var previousRoom *Room = nil
+
+			if len(ch.Trail) > 1 {
+				previousRoom = ch.Trail[0]
+			}
+
+			if previousRoom != nil {
+				if previousRoom.Flags&ROOM_PLANAR == 0 || previousRoom.Plane != room.Plane {
+					entering = true
+				} else if obs.Rect.Contains(float64(previousRoom.X), float64(previousRoom.Y)) && obs.Rect.Contains(float64(room.X), float64(room.Y)) {
+					entering = false
+				}
+			}
+
+			if entering {
+				obs.OnEnterCallback(room.Game.vm.ToValue(ch))
+			}
+		}
+
+		var previousRoom *Room = nil
+
+		if len(ch.Trail) > 1 {
+			previousRoom = ch.Trail[0]
+		}
+
+		if previousRoom != nil {
+			if previousRoom.Flags&ROOM_PLANAR != 0 {
+				for _, obs := range previousRoom.Plane.Map.Layers[previousRoom.Z].Observers {
+					var leaving bool = false
+
+					if previousRoom.Flags&ROOM_PLANAR == 0 || previousRoom.Plane != room.Plane {
+						leaving = true
+					} else if obs.Rect.Contains(float64(previousRoom.X), float64(previousRoom.Y)) && !obs.Rect.Contains(float64(room.X), float64(room.Y)) {
+						leaving = true
+					}
+
+					if leaving {
+						obs.OnLeaveCallback(room.Game.vm.ToValue(ch))
+					}
+				}
+			}
+		}
 	}
 
-	ch.Room = room
+	trail := make([]*Room, 0)
+	trail = append(trail, room)
+	trail = append(trail, ch.Trail...)
+
+	if len(trail) > 5 {
+		trail = trail[0:5]
+	}
+
+	ch.Trail = trail
 }
 
 func (room *Room) removeCharacter(ch *Character) {
