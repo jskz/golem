@@ -46,17 +46,21 @@ type Map struct {
 	Layers []*MapGrid `json:"layers"`
 }
 
-// Atlas will be a collection of quadtrees for a plane providing spacial indices to quickly lookup:
-// temporary instances of in-memory rooms, characters, objects, misc game entities within that plane;
-// these are unused interface stubs until quadtree branch is ready
-
-// least power/MVP approach until quadtree branch
+// The "Atlas" structure is:
+//
+// - A collection of maps for a Plane between (x, y) points expressed as an integer
+//   and linked lists for game objects: characters, objects, rooms, exits.
+// - A collection of related quadtrees allowing an interface for easy spatial queries on
+//   the same data.
 type Atlas struct {
+	// TODO: portals, scripts
 	Characters map[int]*LinkedList
 	Objects    map[int]*LinkedList
 	Rooms      map[int]*LinkedList
 	Exits      map[int]map[uint]*Exit
-	// portals, scripts, exits?
+
+	CharacterTree *QuadTree `json:"characterTree"`
+	ObjectTree    *QuadTree `json:"objectTree"`
 }
 
 type Portal struct {
