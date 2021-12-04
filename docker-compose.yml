@@ -1,8 +1,17 @@
 version: "3.9"
     
 services:
+  redis:
+    depends_on:
+      - mysql
+    image: redislabs/redisgears:latest
+    networks:
+      - overlay
+    ports:
+      - 6379:6379
   mysql:
     image: mysql:8.0
+    command: mysqld --default-authentication-plugin=mysql_native_password
     networks:
       - overlay
     volumes:
