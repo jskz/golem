@@ -74,11 +74,22 @@ func (room *Room) removeObject(obj *ObjectInstance) {
 func (room *Room) AddCharacter(ch *Character) {
 	room.Characters.Insert(ch)
 
+	if room.Flags&ROOM_PLANAR != 0 && room.Plane != nil {
+		ch.PlaneIndex = &Point{X: float64(room.X), Y: float64(room.Y), Value: ch}
+		room.Plane.Map.Layers[room.Z].Atlas.CharacterTree.Insert(ch.PlaneIndex)
+	}
+
 	ch.Room = room
 }
 
 func (room *Room) removeCharacter(ch *Character) {
 	room.Characters.Remove(ch)
+
+	// If the origin room was planar, remove this character from its atlas' character lookup quadtree
+	if room.Flags&ROOM_PLANAR != 0 && room.Plane != nil {
+		room.Plane.Map.Layers[room.Z].Atlas.CharacterTree.Remove(ch.PlaneIndex)
+	}
+
 	ch.Room = nil
 }
 
