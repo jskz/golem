@@ -130,6 +130,17 @@ func do_help(ch *Character, arguments string) {
 	ch.Send(buf.String())
 }
 
+// TODO: do_scan
+func do_scan(ch *Character, arguments string) {
+	// TODO: implement a path for 'scan' if in a traditional area: show some depth
+	// of adjacent characters in nearby rooms, text hint as to the # of rooms away
+
+	// TODO: implement a path for 'scan' if in a room flagged ROOM_PLANAR: query the atlas
+	// for characters within the some range, determine the angle between ch's position
+	// and the retrieved points; convert those angles to ordinal directions, use Distance2D
+	// to determine the same range of distances for the text hint
+}
+
 /* Display information about effects the player is affected by */
 func do_affect(ch *Character, arguments string) {
 	var buf strings.Builder
