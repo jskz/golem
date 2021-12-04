@@ -99,7 +99,7 @@ func Angle2D(x float64, y float64, x2 float64, y2 float64) int {
 	radians := math.Atan2(-dx, dy)
 	degrees := radians * (180 / math.Pi)
 
-	if degrees < 0 {
+	if degrees <= 0 {
 		degrees += 360
 	}
 
