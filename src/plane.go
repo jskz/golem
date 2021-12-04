@@ -53,6 +53,8 @@ type Map struct {
 // - A collection of related quadtrees allowing an interface for easy spatial queries on
 //   the same data.
 type Atlas struct {
+	Plane *Plane `json:plane"`
+
 	// TODO: portals, scripts
 	Characters map[int]*LinkedList
 	Objects    map[int]*LinkedList
@@ -96,8 +98,9 @@ const (
 	PortalTypeProcedural = "procedural"
 )
 
-func NewAtlas() *Atlas {
+func (plane *Plane) NewAtlas() *Atlas {
 	return &Atlas{
+		Plane:      plane,
 		Characters: make(map[int]*LinkedList),
 		Objects:    make(map[int]*LinkedList),
 		Exits:      make(map[int]map[uint]*Exit),
@@ -145,7 +148,7 @@ func (plane *Plane) InitializeBlob() ([]byte, int, error) {
 	var bytes []byte = make([]byte, 0)
 
 	for z := 0; z < plane.Depth; z++ {
-		grid := &MapGrid{Atlas: NewAtlas()}
+		grid := &MapGrid{Atlas: plane.NewAtlas()}
 		grid.Terrain = make([][]int, plane.Height)
 
 		for y := 0; y < plane.Height; y++ {
@@ -278,7 +281,7 @@ func (plane *Plane) generate() error {
 			}
 
 			for z := 0; z < plane.Depth; z++ {
-				grid := &MapGrid{Atlas: NewAtlas()}
+				grid := &MapGrid{Atlas: plane.NewAtlas()}
 				grid.Terrain = make([][]int, plane.Height)
 
 				for y := 0; y < plane.Height; y++ {
