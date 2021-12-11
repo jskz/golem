@@ -16,10 +16,11 @@ import (
 )
 
 type CastingContext struct {
-	Casting    *Skill    `json:"casting"`
-	Arguments  string    `json:"arguments"`
-	StartedAt  time.Time `json:"startedAt"`
-	Complexity int       `json:"complexity"`
+	Casting     *Skill    `json:"casting"`
+	Arguments   string    `json:"arguments"`
+	StartedAt   time.Time `json:"startedAt"`
+	Complexity  int       `json:"complexity"`
+	Proficiency int       `json:"ability"`
 }
 
 func (ch *Character) onCastingUpdate() {
@@ -99,10 +100,11 @@ func do_cast(ch *Character, arguments string) {
 	ch.Mana -= prof.Cost
 
 	ch.Casting = &CastingContext{
-		Casting:    found,
-		Arguments:  arguments,
-		StartedAt:  time.Now(),
-		Complexity: prof.Complexity,
+		Casting:     found,
+		Arguments:   arguments,
+		StartedAt:   time.Now(),
+		Complexity:  prof.Complexity,
+		Proficiency: prof.Proficiency,
 	}
 
 	ch.Send("{WYou start uttering the words of the spell...{x\r\n")
