@@ -4,6 +4,11 @@
         "enabled": false,
         "dsn": ""
     },
+    "redis": {
+        "host": "redis",
+        "port": 6379,
+        "password": "password"
+    },
     "mysql": {
         "host": "mysql",
         "port": 3306,
