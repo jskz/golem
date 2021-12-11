@@ -377,6 +377,25 @@ func (ch *Character) attachObject(obj *ObjectInstance) error {
 	return nil
 }
 
+func (ch *Character) DetachAllObjects() int {
+	result, err := ch.Game.db.Exec(`
+	DELETE FROM
+		player_character_object
+	WHERE
+		player_character_id = ?`,
+		ch.Id)
+	if err != nil {
+		return -1
+	}
+
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return -1
+	}
+
+	return int(rowsAffected)
+}
+
 func (ch *Character) DetachObject(obj *ObjectInstance) error {
 	result, err := ch.Game.db.Exec(`
 		DELETE FROM
@@ -384,7 +403,9 @@ func (ch *Character) DetachObject(obj *ObjectInstance) error {
 		WHERE
 			player_character_id = ?
 		AND
-			object_instance_id = ?`, ch.Id, obj.Id)
+			object_instance_id = ?`,
+		ch.Id,
+		obj.Id)
 	if err != nil {
 		return err
 	}

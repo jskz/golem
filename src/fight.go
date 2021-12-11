@@ -76,11 +76,15 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj.Flags = ITEM_DECAYS
 	obj.Ttl = 20
 	obj.WearLocation = -1
+
 	obj.Contents = NewLinkedList()
 	obj.Contents.Head = ch.Inventory.Head
 	obj.Contents.Count = ch.Inventory.Count
-
 	ch.Inventory = NewLinkedList()
+
+	if ch.Flags&CHAR_IS_PLAYER != 0 {
+		ch.DetachAllObjects()
+	}
 
 	// Also create a gold object corresponding to how much gold they had on their person
 	gobj := game.CreateGold(ch.Gold)
