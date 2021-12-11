@@ -129,12 +129,25 @@ func (layer *MapGrid) RegisterObserver(rect *Rect, options goja.Object, onEnterC
 	obs := &PlaneObserver{Plane: layer.Atlas.Plane, Rect: rect, OnEnterCallback: onEnterCallback, OnLeaveCallback: onLeaveCallback}
 	layer.Observers = append(layer.Observers, obs)
 
+	game := layer.Atlas.Plane.Game
+	observerHandle := game.vm.NewObject()
+
+	observerHandle.Set("dispose", game.vm.ToValue(func() goja.Value {
+		for i, observer := range layer.Observers {
+			if observer == obs {
+				layer.Observers = append(layer.Observers[:i], layer.Observers[i+1:]...)
+				return game.vm.ToValue(true)
+			}
+		}
+
+		return game.vm.ToValue(false)
+	}))
+
 	// TODO: Create a stateful "observer" object and pass back in retval:
 	//
-	// - a dispose() method to hang up this observer
 	// - a setRect() method to post-hoc move/resize the observer "camera"
 
-	return nil
+	return game.vm.ToValue(observerHandle)
 }
 
 func (plane *Plane) SaveBlob() error {
