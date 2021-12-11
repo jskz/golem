@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -20,7 +21,7 @@ type CastingContext struct {
 	Arguments   string    `json:"arguments"`
 	StartedAt   time.Time `json:"startedAt"`
 	Complexity  int       `json:"complexity"`
-	Proficiency int       `json:"ability"`
+	Proficiency int       `json:"proficiency"`
 }
 
 func (ch *Character) onCastingUpdate() {
@@ -44,6 +45,24 @@ func (ch *Character) onCastingUpdate() {
 		}
 
 		ch.Casting = nil
+		return
+	}
+
+	fizzleChance := rand.Intn(100)
+	if ch.Casting.Proficiency < fizzleChance {
+		ch.Send("\r\n{WYou lose your concentration and your magic spell fizzles out.{x\r\n")
+		if ch.Room != nil {
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				rch := iter.Value.(*Character)
+
+				if !rch.IsEqual(ch) {
+					rch.Send(fmt.Sprintf("\r\n{W%s{W seems to lose their concentration.{W{x\r\n", ch.GetShortDescriptionUpper(rch)))
+				}
+			}
+		}
+
+		ch.Casting = nil
+		return
 	}
 }
 
