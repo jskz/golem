@@ -707,3 +707,21 @@ func (game *Game) LoadDistricts() error {
 	log.Printf("Loaded %d districts from database.\r\n", count)
 	return nil
 }
+
+func (game *Game) FindDistrictByID(id int) *District {
+	for planeIter := game.Planes.Head; planeIter != nil; planeIter = planeIter.Next {
+		plane := planeIter.Value.(*Plane)
+
+		for _, layer := range plane.Map.Layers {
+			for districtIter := layer.Districts.Head; districtIter != nil; districtIter = districtIter.Next {
+				district := districtIter.Value.(*District)
+
+				if district.Id == id {
+					return district
+				}
+			}
+		}
+	}
+
+	return nil
+}
