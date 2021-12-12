@@ -13,7 +13,7 @@ function spell_cure_light(ch, args) {
         return;
     }
 
-    const amount = ~~(Math.random() * 5) + 5;
+    const amount = ~~(((Math.random() * 5) + 5) * (this.proficiency / 100));
 
     Golem.game.damage(null, target, false, -amount, Golem.Combat.DamageTypeExotic);
     target.send('{WYou feel a little bit better.{x\r\n');
