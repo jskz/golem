@@ -671,11 +671,22 @@ func (game *Game) LoadDistricts() error {
 		district.Plane = game.FindPlaneByID(planeId)
 
 		if district.Plane == nil {
-			log.Printf("Ignoring district loaded for plane with bad ID %d.\r\n", planeId)
+			log.Printf("Ignoring district with ID %d loaded for plane with bad ID %d.\r\n", district.Id, planeId)
 			continue
 		}
 
-		district.Plane.Map.Layers[z].Districts.Insert(district)
+		var layer *MapGrid = district.Plane.Map.Layers[z]
+
+		for iter := layer.Districts.Head; iter != nil; iter = iter.Next {
+			d := iter.Value.(*District)
+
+			if d.Rect.CollidesRect(district.Rect) {
+				log.Printf("District %d collides with an existing district, ignoring.\r\n", district.Id)
+				continue
+			}
+		}
+
+		layer.Districts.Insert(district)
 		count++
 	}
 
