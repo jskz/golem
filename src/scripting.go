@@ -266,6 +266,37 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		game.webhookScripts[webhookId] = game.Scripts[scriptId]
 	}
 
+	log.Println("Loading district-script relations from database...")
+	rows, err = game.db.Query(`
+		SELECT
+			district_script.district_id,
+			district_script.script_id
+		FROM
+			district_script
+	`)
+	if err != nil {
+		return err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var districtId int
+		var scriptId uint
+
+		err := rows.Scan(&districtId, &scriptId)
+		if err != nil {
+			return err
+		}
+
+		_, ok := game.Scripts[scriptId]
+		if !ok {
+			return errors.New("tried to load a webhook_script for a nonexistent script")
+		}
+
+		game.districtScripts[districtId] = game.Scripts[scriptId]
+	}
+
 	return nil
 }
 

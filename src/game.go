@@ -45,11 +45,12 @@ type Game struct {
 	shops       map[uint]*Shop
 	mobileShops map[uint]*Shop
 
-	eventHandlers  map[string]*LinkedList
-	Scripts        map[uint]*Script `json:"scripts"`
-	objectScripts  map[uint]*Script
-	webhookScripts map[int]*Script
-	webhooks       map[string]*Webhook
+	eventHandlers   map[string]*LinkedList
+	Scripts         map[uint]*Script `json:"scripts"`
+	objectScripts   map[uint]*Script
+	districtScripts map[int]*Script
+	webhookScripts  map[int]*Script
+	webhooks        map[string]*Webhook
 
 	register                 chan *Client
 	unregister               chan *Client

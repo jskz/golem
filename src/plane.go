@@ -38,9 +38,10 @@ type Plane struct {
 }
 
 type District struct {
-	Id    int    `json:"id"`
-	Plane *Plane `json:"plane"`
-	Rect  *Rect  `json:"rect"`
+	Id                 int            `json:"id"`
+	Plane              *Plane         `json:"plane"`
+	Rect               *Rect          `json:"rect"`
+	TerrainNameMapping map[int]string `json:"terrainNameMapping"`
 }
 
 type PlaneObserver struct {
@@ -676,7 +677,8 @@ func (game *Game) LoadDistricts() error {
 		var z int
 
 		district := &District{
-			Rect: &Rect{},
+			Rect:               &Rect{},
+			TerrainNameMapping: make(map[int]string),
 		}
 
 		rows.Scan(&district.Id, &planeId, &district.Rect.X, &district.Rect.Y, &z, &district.Rect.W, &district.Rect.H)
