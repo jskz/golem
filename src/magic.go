@@ -25,6 +25,23 @@ type CastingContext struct {
 }
 
 func (ch *Character) onCastingUpdate() {
+	fizzleChance := rand.Intn(100)
+	if ch.Casting.Proficiency < fizzleChance {
+		ch.Send("\r\n{WYou lose your concentration and your magic spell fizzles out.{x\r\n")
+		if ch.Room != nil {
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				rch := iter.Value.(*Character)
+
+				if !rch.IsEqual(ch) {
+					rch.Send(fmt.Sprintf("\r\n{W%s{W seems to lose their concentration.{W{x\r\n", ch.GetShortDescriptionUpper(rch)))
+				}
+			}
+		}
+
+		ch.Casting = nil
+		return
+	}
+
 	if int(time.Since(ch.Casting.StartedAt).Seconds()) > ch.Casting.Complexity {
 		ch.Send("\r\n{WYou finish casting the magic spell.{x\r\n")
 
@@ -45,24 +62,6 @@ func (ch *Character) onCastingUpdate() {
 		}
 
 		ch.Casting = nil
-		return
-	}
-
-	fizzleChance := rand.Intn(100)
-	if ch.Casting.Proficiency < fizzleChance {
-		ch.Send("\r\n{WYou lose your concentration and your magic spell fizzles out.{x\r\n")
-		if ch.Room != nil {
-			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value.(*Character)
-
-				if !rch.IsEqual(ch) {
-					rch.Send(fmt.Sprintf("\r\n{W%s{W seems to lose their concentration.{W{x\r\n", ch.GetShortDescriptionUpper(rch)))
-				}
-			}
-		}
-
-		ch.Casting = nil
-		return
 	}
 }
 
