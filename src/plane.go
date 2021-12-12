@@ -132,6 +132,18 @@ func (plane *Plane) NewAtlas() *Atlas {
 func (obs *PlaneObserver) Dispose() {
 }
 
+func (layer *MapGrid) FindDistrict(x int, y int) *District {
+	for iter := layer.Districts.Head; iter != nil; iter = iter.Next {
+		d := iter.Value.(*District)
+
+		if d.Rect.Contains(float64(x), float64(y)) {
+			return d
+		}
+	}
+
+	return nil
+}
+
 func (layer *MapGrid) RegisterObserver(rect *Rect, options goja.Object, onEnterCallback goja.Callable, onLeaveCallback goja.Callable) goja.Value {
 	obs := &PlaneObserver{Plane: layer.Atlas.Plane, Rect: rect, OnEnterCallback: onEnterCallback, OnLeaveCallback: onLeaveCallback}
 	layer.Observers = append(layer.Observers, obs)
