@@ -712,6 +712,10 @@ func (game *Game) FindDistrictByID(id int) *District {
 	for planeIter := game.Planes.Head; planeIter != nil; planeIter = planeIter.Next {
 		plane := planeIter.Value.(*Plane)
 
+		if plane.Map == nil || len(plane.Map.Layers) == 0 {
+			continue
+		}
+
 		for _, layer := range plane.Map.Layers {
 			for districtIter := layer.Districts.Head; districtIter != nil; districtIter = districtIter.Next {
 				district := districtIter.Value.(*District)

@@ -95,6 +95,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 	game.Scripts = make(map[uint]*Script)
 	game.objectScripts = make(map[uint]*Script)
 	game.webhookScripts = make(map[int]*Script)
+	game.districtScripts = make(map[int]*Script)
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -295,19 +296,6 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		}
 
 		game.districtScripts[districtId] = game.Scripts[scriptId]
-	}
-
-	for districtId, script := range game.districtScripts {
-		district := game.FindDistrictByID(districtId)
-		if district == nil {
-			log.Printf("Couldn't run district-script for nonexistent district id %d.\r\n", districtId)
-			continue
-		}
-
-		_, err := script.tryEvaluate("onStart", game.vm.ToValue(district))
-		if err != nil {
-			log.Printf("Script evaluation of %d for district %d onStart failed: %v\r\n", script.Id, districtId, err)
-		}
 	}
 
 	return nil
