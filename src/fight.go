@@ -86,6 +86,9 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 		ch.DetachAllObjects()
 	}
 
+	// Remove any gold on their person
+	ch.Gold = 0
+
 	// Also create a gold object corresponding to how much gold they had on their person
 	gobj := game.CreateGold(ch.Gold)
 	if gobj != nil {
