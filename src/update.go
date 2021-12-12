@@ -104,4 +104,18 @@ func (game *Game) ZoneUpdate() {
 			game.ResetZone(zone)
 		}
 	}
+
+	/* Run district update scripts */
+	for districtId, script := range game.districtScripts {
+		district := game.FindDistrictByID(districtId)
+		if district == nil {
+			log.Printf("Couldn't run district-script for nonexistent district id %d.\r\n", districtId)
+			continue
+		}
+
+		_, err := script.tryEvaluate("onUpdate", game.vm.ToValue(district))
+		if err != nil {
+			log.Printf("Script evaluation of %d for district %d onUpdate failed: %v\r\n", script.Id, districtId, err)
+		}
+	}
 }
