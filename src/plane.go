@@ -37,6 +37,12 @@ type Plane struct {
 	Portals *LinkedList `json:"portals"`
 }
 
+type District struct {
+	Id    int    `json:"id"`
+	Plane *Plane `json:"plane"`
+	Rect  *Rect  `json:"rect"`
+}
+
 type PlaneObserver struct {
 	Plane *Plane `json:"plane"`
 	Rect  *Rect  `json:"rect"`
@@ -47,6 +53,7 @@ type PlaneObserver struct {
 
 type MapGrid struct {
 	Observers []*PlaneObserver `json:"observers"`
+	Districts *LinkedList      `json:"districts"`
 
 	Terrain [][]int `json:"terrain"`
 	Atlas   *Atlas  `json:"atlas"`
@@ -191,7 +198,7 @@ func (plane *Plane) InitializeBlob() ([]byte, int, error) {
 	var bytes []byte = make([]byte, 0)
 
 	for z := 0; z < plane.Depth; z++ {
-		grid := &MapGrid{Atlas: plane.NewAtlas()}
+		grid := &MapGrid{Atlas: plane.NewAtlas(), Districts: NewLinkedList()}
 		grid.Terrain = make([][]int, plane.Height)
 
 		for y := 0; y < plane.Height; y++ {
@@ -324,7 +331,7 @@ func (plane *Plane) generate() error {
 			}
 
 			for z := 0; z < plane.Depth; z++ {
-				grid := &MapGrid{Atlas: plane.NewAtlas()}
+				grid := &MapGrid{Atlas: plane.NewAtlas(), Districts: NewLinkedList()}
 				grid.Terrain = make([][]int, plane.Height)
 
 				for y := 0; y < plane.Height; y++ {
@@ -625,5 +632,53 @@ func (game *Game) LoadPlanes() error {
 	}
 
 	log.Printf("Loaded %d planes from database.\r\n", game.Planes.Count)
+	return nil
+}
+
+func (game *Game) LoadDistricts() error {
+	log.Printf("Loading districts.\r\n")
+
+	rows, err := game.db.Query(`
+		SELECT
+			id,
+			plane_id,
+			x,
+			y,
+			z,
+			width,
+			height
+		FROM
+			districts
+	`)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	defer rows.Close()
+
+	count := 0
+
+	for rows.Next() {
+		var planeId int
+		var z int
+
+		district := &District{
+			Rect: &Rect{},
+		}
+
+		rows.Scan(&district.Id, &planeId, &district.Rect.X, &district.Rect.Y, &z, &district.Rect.W, &district.Rect.H)
+		district.Plane = game.FindPlaneByID(planeId)
+
+		if district.Plane == nil {
+			log.Printf("Ignoring district loaded for plane with bad ID %d.\r\n", planeId)
+			continue
+		}
+
+		district.Plane.Map.Layers[z].Districts.Insert(district)
+		count++
+	}
+
+	log.Printf("Loaded %d districts from database.\r\n", count)
 	return nil
 }

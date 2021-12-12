@@ -196,6 +196,12 @@ func NewGame() (*Game, error) {
 		}
 	}
 
+	/* Connect districts now that plane layers are initialized */
+	err = game.LoadDistricts()
+	if err != nil {
+		return nil, err
+	}
+
 	err = game.LoadShops()
 	if err != nil {
 		return nil, err
