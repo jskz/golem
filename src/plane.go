@@ -38,6 +38,7 @@ type Plane struct {
 }
 
 type District struct {
+	Layer              *MapGrid       `json:"layer"`
 	Id                 int            `json:"id"`
 	Plane              *Plane         `json:"plane"`
 	Rect               *Rect          `json:"rect"`
@@ -700,6 +701,7 @@ func (game *Game) LoadDistricts() error {
 			}
 		}
 
+		district.map = layer
 		layer.Districts.Insert(district)
 		count++
 	}
