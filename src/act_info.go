@@ -422,6 +422,7 @@ func do_look(ch *Character, arguments string) {
 		}
 	}
 
+	var roomName string = ch.Room.Name
 	var roomFlagDescriptionColour string = ""
 	var roomFlagDescription string = ""
 
@@ -430,7 +431,20 @@ func do_look(ch *Character, arguments string) {
 		roomFlagDescription = "This is a sanctuary."
 	}
 
-	buf.WriteString(fmt.Sprintf("\r\n{Y  %-50s {D-      %s{D      -\r\n", ch.Room.Name, lookCompassOutput[DirectionNorth]))
+	if ch.Room.Flags&ROOM_PLANAR != 0 {
+		district := ch.Room.Plane.Map.Layers[ch.Room.Z].FindDistrict(ch.Room.X, ch.Room.Y)
+
+		if district != nil {
+			t := ch.Room.Plane.Map.Layers[ch.Room.Z].Terrain[ch.Room.Y][ch.Room.X]
+			districtTerrainName, ok := district.TerrainNameMapping[t]
+
+			if ok {
+				roomName = districtTerrainName
+			}
+		}
+	}
+
+	buf.WriteString(fmt.Sprintf("\r\n{Y  %-50s {D-      %s{D      -\r\n", roomName, lookCompassOutput[DirectionNorth]))
 	buf.WriteString(fmt.Sprintf("{D(--------------------------------------------------) %s{D <-%s{D-{w({W*{w){D-%s{D-> %s\r\n", lookCompassOutput[DirectionWest], lookCompassOutput[DirectionUp], lookCompassOutput[DirectionDown], lookCompassOutput[DirectionEast]))
 	buf.WriteString(fmt.Sprintf("{D  %s%-50s {D-      %s{D      -\r\n", roomFlagDescriptionColour, roomFlagDescription, lookCompassOutput[DirectionSouth]))
 
