@@ -589,6 +589,7 @@ func (game *Game) InitScripting() error {
 	charFlagsConstantsObj := game.vm.NewObject()
 	charFlagsConstantsObj.Set("CHAR_AGGRESSIVE", CHAR_AGGRESSIVE)
 	charFlagsConstantsObj.Set("CHAR_PRACTICE", CHAR_PRACTICE)
+	charFlagsConstantsObj.Set("CHAR_IS_PLAYER", CHAR_IS_PLAYER)
 
 	roomFlagsConstantsObj := game.vm.NewObject()
 	roomFlagsConstantsObj.Set("ROOM_PERSISTENT", ROOM_PERSISTENT)

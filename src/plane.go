@@ -77,10 +77,10 @@ type Atlas struct {
 	Plane *Plane `json:plane"`
 
 	// TODO: portals, scripts
-	Characters map[int]*LinkedList
-	Objects    map[int]*LinkedList
-	Rooms      map[int]*LinkedList
-	Exits      map[int]map[uint]*Exit
+	Characters map[int]*LinkedList    `json:"characters"`
+	Objects    map[int]*LinkedList    `json:"objects"`
+	Rooms      map[int]*LinkedList    `json:"rooms"`
+	Exits      map[int]map[uint]*Exit `json:"exits"`
 
 	CharacterTree *QuadTree `json:"characterTree"`
 	ObjectTree    *QuadTree `json:"objectTree"`
@@ -474,7 +474,7 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 		list := NewLinkedList()
 
 		plane.Map.Layers[z].Atlas.Objects[y*plane.Height+x] = list
-		room.Characters = list
+		room.Objects = list
 	}
 
 	ok = false
@@ -701,7 +701,7 @@ func (game *Game) LoadDistricts() error {
 			}
 		}
 
-		district.map = layer
+		district.Layer = layer
 		layer.Districts.Insert(district)
 		count++
 	}
