@@ -304,7 +304,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 			continue
 		}
 
-		_, err := script.tryEvaluate("onStart", game.vm.ToValue(game))
+		_, err := script.tryEvaluate("onStart", game.vm.ToValue(district))
 		if err != nil {
 			log.Printf("Script evaluation of %d for district %d onStart failed: %v\r\n", script.Id, districtId, err)
 		}
