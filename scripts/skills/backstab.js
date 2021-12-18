@@ -11,6 +11,18 @@ function do_backstab(ch, args) {
         return;
     }
 
+    const weapon = ch.getEquipment(Golem.WearLocations.WearLocationWielded);
+    if(!weapon) {
+        ch.send("You can't backstab without a weapon.\r\n");
+        return;
+    }
+
+    const damageType = parseInt(weapon.value3);
+    if(damageType !== Golem.Combat.DamageTypeStab) {
+        ch.send(weapon.getShortDescriptionUpper() + "{x isn't a stabbing weapon.\r\n");
+        return;
+    }
+
     let victim = ch.findCharacterInRoom(args);
 
     if (!victim) {
