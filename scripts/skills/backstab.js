@@ -36,7 +36,7 @@ function do_backstab(ch, args) {
      *
      * In this "artful edge case", the victim will not receive a message - only the death ANSI.
      */
-    if((ch.proficiency === 100
+    if((this.proficiency === 100
     && ~~(Math.random() * 100) > 98
     && victim.level < ch.level)) {
         ch.send(
