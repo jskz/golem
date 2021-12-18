@@ -20,13 +20,27 @@ function do_bash(ch, args) {
 
     ch.stamina = Math.max(0, ch.stamina - 25);
     ch.send(
-        'You bash into ' +
+        '{RYou bash into ' +
             victim.getShortDescription(ch) +
-            ', sending them flying!\r\n'
+            '{R, sending them flying!{x\r\n'
     );
+
+    victim.send('{R' + ch.getShortDescriptionUpper(victim) + '{R bashes into you, sending you flying!{x\r\n');
+
+    for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+        const rch = iter.value;
+
+        if (!rch.isEqual(victim) && !rch.isEqual(ch)) {
+            rch.send(
+                '{R' + ch.getShortDescriptionUpper(rch) +
+                    '{R bashes into ' + victim.getShortDescriptionUpper(rch) + '{R, sending them flying!{x\r\n'
+            );
+        }
+    }
 
     const amount = ~~(((Math.random() * ch.level) * 1.5) * (this.proficiency / 100));
     Golem.game.damage(ch, victim, false, amount, Golem.Combat.DamageTypeBash);
+    ch.client.delay(2000);
 }
 
 Golem.registerSkillHandler('bash', do_bash);
