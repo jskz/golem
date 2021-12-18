@@ -20,7 +20,7 @@ function onCombatUpdate() {
                 }
 
                 let attackerRounds = 1,
-                    dexterityBonusRounds = parseInt((vch.dexterity - 10) / 4);
+                    dexterityBonusRounds = parseInt((vch.stats[Golem.StatTypes.STAT_DEXTERITY] - 10) / 4);
 
                 attackerRounds += dexterityBonusRounds;
                 
@@ -51,7 +51,7 @@ function onCombatUpdate() {
                         damageType = Golem.Combat.DamageTypeBash,
                         weapon = vch.getEquipment(Golem.WearLocations.WearLocationWielded);
                     if(!weapon) {
-                        damage += ~~(Math.random() * (vch.strength / 3));
+                        damage += ~~(Math.random() * (vch.stats[Golem.StatTypes.STAT_STRENGTH] / 3));
 
                         const unarmedCombatProficiency =
                             vch.findProficiencyByName('unarmed combat');

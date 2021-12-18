@@ -119,10 +119,10 @@ VALUES (1, 'limbo-developer-maze',
                                         }
 
                                         baseMobile.level = 10 * (z + 1);
-                                        baseMobile.dexterity = 15 + (2 * (z + 1));
+                                        baseMobile.stats[Golem.StatTypes.STAT_DEXTERITY] = 15 + (2 * (z + 1));
                                         baseMobile.health = 100 + (100 * (z * 10));
                                         baseMobile.maxHealth = 100 + (100 * (z * 10));
-                                        baseMobile.strength = 20 + (2 * (z + 1));
+                                        baseMobile.stats[Golem.StatTypes.STAT_STRENGTH] = 20 + (2 * (z + 1));
                                         baseMobile.experience = 4000 + (2000 * (z + 1));
 
                                         baseMobile.flags =

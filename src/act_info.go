@@ -236,32 +236,32 @@ func do_score(ch *Character, arguments string) {
 	currentStaminaColour := SeverityColourFromPercentage(staminaPercentage)
 
 	buf.WriteString("\r\n{D┌─ {WCharacter Information {D──────────────────┬─ {WStatistics{D ───────┐{x\r\n")
-	buf.WriteString(fmt.Sprintf("{D│ {CName:    {c%-13s                   {D│ Strength:       {M%2d{D │\r\n", ch.Name, ch.Strength))
+	buf.WriteString(fmt.Sprintf("{D│ {CName:    {c%-13s                   {D│ Strength:       {M%2d{D │\r\n", ch.Name, ch.Stats[STAT_STRENGTH]))
 	if ch.Level < LevelHero {
-		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d  {D[%8d exp. until next] {D│ Dexterity:      {M%2d{D │\r\n", ch.Level, ch.experienceRequiredForLevel(int(ch.Level+1))-int(ch.Experience), ch.Dexterity))
+		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d  {D[%8d exp. until next] {D│ Dexterity:      {M%2d{D │\r\n", ch.Level, ch.experienceRequiredForLevel(int(ch.Level+1))-int(ch.Experience), ch.Stats[STAT_DEXTERITY]))
 	} else {
-		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d                             {D│ Dexterity:      {M%2d{D │\r\n", ch.Level, ch.Dexterity))
+		buf.WriteString(fmt.Sprintf("{D│ {CLevel:   {c%-3d                             {D│ Dexterity:      {M%2d{D │\r\n", ch.Level, ch.Stats[STAT_DEXTERITY]))
 	}
-	buf.WriteString(fmt.Sprintf("{D│ {CRace:    {c%-21s           {D│ Intelligence:   {M%2d{D │\r\n", ch.Race.DisplayName, ch.Intelligence))
-	buf.WriteString(fmt.Sprintf("{D│ {CJob:     {c%-21s           {D│ Wisdom:         {M%2d{D │\r\n", ch.Job.DisplayName, ch.Wisdom))
+	buf.WriteString(fmt.Sprintf("{D│ {CRace:    {c%-21s           {D│ Intelligence:   {M%2d{D │\r\n", ch.Race.DisplayName, ch.Stats[STAT_INTELLIGENCE]))
+	buf.WriteString(fmt.Sprintf("{D│ {CJob:     {c%-21s           {D│ Wisdom:         {M%2d{D │\r\n", ch.Job.DisplayName, ch.Stats[STAT_WISDOM]))
 	buf.WriteString(fmt.Sprintf("{D│ {CHealth:  {c%s%-20s                {D│ Constitution:   {M%2d{D │\r\n",
 		currentHealthColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
 			ch.Health,
 			ch.MaxHealth),
-		ch.Constitution))
+		ch.Stats[STAT_CONSTITUTION]))
 	buf.WriteString(fmt.Sprintf("{D│ {CMana:    {c%s%-18s                  {D│ Charisma:       {M%2d{D │\r\n",
 		currentManaColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
 			ch.Mana,
 			ch.MaxMana),
-		ch.Charisma))
+		ch.Stats[STAT_CHARISMA]))
 	buf.WriteString(fmt.Sprintf("{D│ {CStamina: {c%s%-21s               {D│ Luck:           {M%2d{D │\r\n",
 		currentStaminaColour,
 		fmt.Sprintf("%-5d{w/{G%-5d",
 			ch.Stamina,
 			ch.MaxStamina),
-		ch.Luck))
+		ch.Stats[STAT_LUCK]))
 	buf.WriteString("{D└──────────────────────────────────────────┴────────────────────┘{x\r\n")
 
 	output := buf.String()

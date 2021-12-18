@@ -168,13 +168,10 @@ func (game *Game) nanny(client *Client, message string) {
 		client.ConnectionState = ConnectionStateConfirmName
 
 		client.Character.Practices = 100
-		client.Character.Strength = 10
-		client.Character.Dexterity = 10
-		client.Character.Intelligence = 10
-		client.Character.Wisdom = 10
-		client.Character.Constitution = 10
-		client.Character.Charisma = 10
-		client.Character.Luck = 10
+
+		for index, _ := range client.Character.Stats {
+			client.Character.Stats[index] = 10
+		}
 
 		client.Character.Health = 20
 		client.Character.MaxHealth = 20
@@ -343,12 +340,61 @@ func (game *Game) nanny(client *Client, message string) {
 			break
 		}
 
+		/* Start stat-rolling... */
+		output.WriteString("\r\nOk.  Rolling stats for a new character...\r\n")
+		output.WriteString("\r\nEach core attribute has a default range of 10-20.  A primary attribute\r\n")
+		output.WriteString("increases the base and max by two; matching race and job bonuses stack.\r\n")
+
+		output.WriteString(fmt.Sprintf("\r\nJob primary attribute:  %s\r\n", StatNameTable[client.Character.Job.PrimaryAttribute]))
+		output.WriteString(fmt.Sprintf("Race primary attribute: %s\r\n\r\n", StatNameTable[client.Character.Race.PrimaryAttribute]))
+
+		client.Character.RollStats()
+
+		for index := STAT_NONE + 1; index < STAT_MAX; index++ {
+			output.WriteString(fmt.Sprintf("%-15s %d\r\n", fmt.Sprintf("%s:", strings.ToTitle(StatNameTable[index])), client.Character.Stats[index]))
+		}
+
+		output.WriteString("\r\nAccept this stat roll? [y/N]")
+		client.ConnectionState = ConnectionStateRollingStats
+
+	case ConnectionStateRollingStats:
+		if !strings.HasPrefix(strings.ToLower(message), "y") && client.remainingRolls >= 0 {
+			client.ConnectionState = ConnectionStateRollingStats
+
+			client.Character.RollStats()
+
+			if client.remainingRolls == 0 {
+				output.WriteString("\r\nFinal roll:\r\n")
+			}
+
+			for index := STAT_NONE + 1; index < STAT_MAX; index++ {
+				output.WriteString(fmt.Sprintf("%-15s %d\r\n", fmt.Sprintf("%s:", strings.ToTitle(StatNameTable[index])), client.Character.Stats[index]))
+			}
+
+			if client.remainingRolls > 0 {
+				output.WriteString("\r\nAccept this stat roll? [y/N]")
+				output.WriteString(fmt.Sprintf("\r\n* After %d more rolls, you will be forced to accept.\r\n", client.remainingRolls))
+			} else {
+				output.WriteString("\r\n[ Press return to continue ]")
+			}
+
+			client.remainingRolls--
+			break
+		}
+
 		err := client.Character.Finalize()
 		if err != nil {
 			log.Printf("Unable to create new character %v, dropping connection.\r\n", client.Character)
 			client.conn.Close()
 			break
 		}
+
+		output.WriteString(fmt.Sprintf("Final stats for new character %s:\r\n\r\n", client.Character.Name))
+		for index := STAT_NONE + 1; index < STAT_MAX; index++ {
+			output.WriteString(fmt.Sprintf("%-15s %d\r\n", fmt.Sprintf("%s:", strings.ToTitle(StatNameTable[index])), client.Character.Stats[index]))
+		}
+
+		output.WriteString("\r\n")
 
 		client.ConnectionState = ConnectionStateMessageOfTheDay
 		output.WriteString(string(Config.motd))

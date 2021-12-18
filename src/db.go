@@ -65,7 +65,8 @@ func (game *Game) LoadRaceTable() {
 			id,
 			name,
 			display_name,
-			playable
+			playable,
+			primary_attribute
 		FROM
 			races
 		WHERE
@@ -79,13 +80,15 @@ func (game *Game) LoadRaceTable() {
 
 	for rows.Next() {
 		race := &Race{}
+		var primaryAttribute string = "none"
 
-		err := rows.Scan(&race.Id, &race.Name, &race.DisplayName, &race.Playable)
+		err := rows.Scan(&race.Id, &race.Name, &race.DisplayName, &race.Playable, &primaryAttribute)
 		if err != nil {
 			log.Printf("Unable to scan race row: %v.\r\n", err)
 			continue
 		}
 
+		race.PrimaryAttribute = FindStatByName(primaryAttribute)
 		Races.Insert(race)
 	}
 
@@ -103,7 +106,8 @@ func (game *Game) LoadJobTable() {
 			name,
 			display_name,
 			experience_required_modifier,
-			playable
+			playable,
+			primary_attribute
 		FROM
 			jobs
 		WHERE
@@ -117,14 +121,16 @@ func (game *Game) LoadJobTable() {
 
 	for rows.Next() {
 		job := &Job{}
+		var primaryAttribute string = "none"
 
-		err := rows.Scan(&job.Id, &job.Name, &job.DisplayName, &job.ExperienceRequiredModifier, &job.Playable)
+		err := rows.Scan(&job.Id, &job.Name, &job.DisplayName, &job.ExperienceRequiredModifier, &job.Playable, &primaryAttribute)
 		if err != nil {
 			log.Printf("Unable to scan job row: %v.\r\n", err)
 			continue
 		}
 
 		job.Skills = NewLinkedList()
+		job.PrimaryAttribute = FindStatByName(primaryAttribute)
 		Jobs.Insert(job)
 	}
 

@@ -33,13 +33,15 @@ type Job struct {
 	Playable                   bool        `json:"playable"`
 	ExperienceRequiredModifier float64     `json:"experience_required_modifier"`
 	Skills                     *LinkedList `json:"skills"`
+	PrimaryAttribute           int         `json:"primaryAttribute"`
 }
 
 type Race struct {
-	Id          uint   `json:"id"`
-	Name        string `json:"race"`
-	DisplayName string `json:"display_name"`
-	Playable    bool   `json:"playable"`
+	Id               uint   `json:"id"`
+	Name             string `json:"race"`
+	DisplayName      string `json:"display_name"`
+	Playable         bool   `json:"playable"`
+	PrimaryAttribute int    `json:"primaryAttribute"`
 }
 
 const LevelAdmin = 60
@@ -55,6 +57,18 @@ const (
 	CHAR_PRACTICE   = 1 << 5
 	CHAR_HEALER     = 1 << 6
 	CHAR_SHOPKEEPER = 1 << 7
+)
+
+const (
+	STAT_NONE         = 0
+	STAT_STRENGTH     = 1
+	STAT_DEXTERITY    = 2
+	STAT_INTELLIGENCE = 3
+	STAT_WISDOM       = 4
+	STAT_CONSTITUTION = 5
+	STAT_CHARISMA     = 6
+	STAT_LUCK         = 7
+	STAT_MAX          = 8
 )
 
 const (
@@ -100,6 +114,16 @@ const (
 	PositionFighting = 5
 	PositionStanding = 8
 )
+
+var StatNameTable map[int]string = map[int]string{
+	STAT_STRENGTH:     "strength",
+	STAT_DEXTERITY:    "dexterity",
+	STAT_CONSTITUTION: "constitution",
+	STAT_INTELLIGENCE: "intelligence",
+	STAT_WISDOM:       "wisdom",
+	STAT_CHARISMA:     "charisma",
+	STAT_LUCK:         "luck",
+}
 
 /*
  * This character structure is shared by both player-characters (human beings
@@ -161,14 +185,7 @@ type Character struct {
 
 	Position int
 
-	Strength     int `json:"strength"`
-	Dexterity    int `json:"dexterity"`
-	Intelligence int `json:"intelligence"`
-	Wisdom       int `json:"wisdom"`
-	Constitution int `json:"constitution"`
-	Charisma     int `json:"charisma"`
-	Luck         int `json:"luck"`
-
+	Stats   []int `json:"stats"`
 	Defense int
 
 	temporaryHash string
@@ -241,7 +258,7 @@ func (ch *Character) Finalize() error {
 			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
 			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck)
+	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK])
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -293,6 +310,43 @@ func (ch *Character) SavePlayerSkills() error {
 	return nil
 }
 
+func (ch *Character) RollStats() {
+	var statBase []int = make([]int, STAT_MAX)
+	var statMax []int = make([]int, STAT_MAX)
+
+	for index, _ := range statBase {
+		statBase[index] = 10
+		statMax[index] = 20
+
+		if ch.Job.PrimaryAttribute == index {
+			statBase[index] += 2
+			statMax[index] += 2
+		}
+
+		if ch.Race.PrimaryAttribute == index {
+			statBase[index] += 2
+			statMax[index] += 2
+		}
+	}
+
+	for index, base := range statBase {
+		max := statMax[index]
+		val := rand.Intn(max-base) + base
+
+		ch.Stats[index] = val
+	}
+}
+
+func FindStatByName(statName string) int {
+	for index, name := range StatNameTable {
+		if name == statName {
+			return index
+		}
+	}
+
+	return STAT_NONE
+}
+
 func (ch *Character) Save() bool {
 	if ch.Client == nil || ch.Game == nil {
 		/* If somehow an NPC were to try to save, do not allow it. */
@@ -331,7 +385,7 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.Wizard, roomId, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Strength, ch.Dexterity, ch.Intelligence, ch.Wisdom, ch.Constitution, ch.Charisma, ch.Luck, ch.Id)
+	`, ch.Wizard, roomId, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK], ch.Id)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -636,7 +690,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.Id, &ch.Name, &ch.Wizard, &roomId, &raceId, &jobId, &ch.Level, &ch.Gold, &ch.Experience, &ch.Practices, &ch.Health, &ch.MaxHealth, &ch.Mana, &ch.MaxMana, &ch.Stamina, &ch.MaxStamina, &ch.Strength, &ch.Dexterity, &ch.Intelligence, &ch.Wisdom, &ch.Constitution, &ch.Charisma, &ch.Luck)
+	err := row.Scan(&ch.Id, &ch.Name, &ch.Wizard, &roomId, &raceId, &jobId, &ch.Level, &ch.Gold, &ch.Experience, &ch.Practices, &ch.Health, &ch.MaxHealth, &ch.Mana, &ch.MaxMana, &ch.Stamina, &ch.MaxStamina, &ch.Stats[STAT_STRENGTH], &ch.Stats[STAT_DEXTERITY], &ch.Stats[STAT_INTELLIGENCE], &ch.Stats[STAT_WISDOM], &ch.Stats[STAT_CONSTITUTION], &ch.Stats[STAT_CHARISMA], &ch.Stats[STAT_LUCK])
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -1099,13 +1153,11 @@ func NewCharacter() *Character {
 	character.Skills = make(map[uint]*Proficiency)
 
 	character.Defense = 0
-	character.Strength = 10
-	character.Dexterity = 10
-	character.Intelligence = 10
-	character.Wisdom = 10
-	character.Constitution = 10
-	character.Charisma = 10
-	character.Luck = 10
+
+	character.Stats = make([]int, STAT_MAX)
+	for index := range character.Stats {
+		character.Stats[index] = 10
+	}
 
 	return character
 }

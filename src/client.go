@@ -58,6 +58,7 @@ const (
 	ConnectionStateConfirmRace     = 7
 	ConnectionStateChooseClass     = 8
 	ConnectionStateConfirmClass    = 9
+	ConnectionStateRollingStats    = 10
 	ConnectionStateMessageOfTheDay = 23
 	ConnectionStatePlaying         = 24
 	ConnectionStateMax             = 25
@@ -71,6 +72,7 @@ type Client struct {
 	ansiEnabled       bool
 	send              chan []byte
 	close             chan bool
+	remainingRolls    int
 	Character         *Character     `json:"character"`
 	ConnectionState   uint           `json:"connectionState"`
 	ConnectionHandler *goja.Callable `json:"connectionHandler"`
@@ -302,6 +304,7 @@ func (game *Game) handleConnection(conn net.Conn) {
 	client.send = make(chan []byte)
 	client.close = make(chan bool)
 	client.Character = nil
+	client.remainingRolls = 10
 	client.ConnectionState = ConnectionStateNone
 	client.ansiEnabled = true
 

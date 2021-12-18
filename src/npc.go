@@ -68,13 +68,13 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 		&ch.MaxMana,
 		&ch.Stamina,
 		&ch.MaxStamina,
-		&ch.Strength,
-		&ch.Dexterity,
-		&ch.Intelligence,
-		&ch.Wisdom,
-		&ch.Constitution,
-		&ch.Charisma,
-		&ch.Luck)
+		&ch.Stats[STAT_STRENGTH],
+		&ch.Stats[STAT_DEXTERITY],
+		&ch.Stats[STAT_INTELLIGENCE],
+		&ch.Stats[STAT_WISDOM],
+		&ch.Stats[STAT_CONSTITUTION],
+		&ch.Stats[STAT_CHARISMA],
+		&ch.Stats[STAT_LUCK])
 	if err != nil {
 		return nil, err
 	}
