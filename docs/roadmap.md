@@ -32,7 +32,7 @@ This will be a working document to track major feature development goals for eac
 
 ## 0.4 Pivot for Scope, Simplify
 
-- [ ] Gameplay pivots: always drop all loot on death, remove the experience points/leveling mechanic for now - we can make 1.0 work with skills/equipment/effects
+- [x] Gameplay pivots: harsher penalties always drop all loot, gold on death
 - [x] Ensure that the caster's proficiency details are passed into the script handler context for a given skill or spell for logic based on proficiency %
 - [x] Lean into content generation for the overworld map: Perlin noise to simulate some islands with a terrain gradient between shores, field, and trees of various density
 - [ ] Complete and merge the quadtree branch, "district" metadata for things like regional terrain name overrides, QueryRect for players/other objects, have "harder" regions with aggressive or passive NPCs, auto-generated rewards; no "resets" on overworld, run planar reset scripts on an interval instead
