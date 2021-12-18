@@ -61,6 +61,8 @@ CREATE TABLE races (
     `display_name` VARCHAR(64) NOT NULL,
     `playable` BOOLEAN NOT NULL,
 
+    `primary_attribute` ENUM('none', 'strength', 'dexterity', 'intelligence', 'wisdom', 'constitution', 'charisma', 'luck') DEFAULT 'none',
+
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
     
@@ -77,6 +79,8 @@ CREATE TABLE jobs (
     `display_name` VARCHAR(64) NOT NULL,
     `playable` BOOLEAN NOT NULL,
     `experience_required_modifier` FLOAT NOT NULL DEFAULT 1.0,
+
+    `primary_attribute` ENUM('none', 'strength', 'dexterity', 'intelligence', 'wisdom', 'constitution', 'charisma', 'luck') DEFAULT 'none',
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
