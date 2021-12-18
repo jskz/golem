@@ -49,7 +49,7 @@ This will be a working document to track major feature development goals for eac
 
 ## 0.7 Gameplay General Content Development Milestones
 
-- [ ] Stat rolling at character creation, stat buffing/nerfs on effect/enchantments
+- [x] Stat rolling at character creation, stat buffing/nerfs on effect/enchantments
 - [ ] Extra commands and UX for gameplay: combat experience, leveling/healing/item consumption gameplay loop considerations: "is it fun to hack-and-slash and navigate this as a game?"
 - [ ] Gameplay and content development: ensure that each player job choice has at least ten unique skills and/or spells
 
