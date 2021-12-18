@@ -13,8 +13,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"net"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dop251/goja"
@@ -73,6 +75,8 @@ type Client struct {
 	send              chan []byte
 	close             chan bool
 	remainingRolls    int
+	delayMutex        sync.Mutex
+	delay             int
 	Character         *Character     `json:"character"`
 	ConnectionState   uint           `json:"connectionState"`
 	ConnectionHandler *goja.Callable `json:"connectionHandler"`
@@ -176,6 +180,18 @@ func (client *Client) readPump(game *Game) {
 			clientMessage := ClientTextMessage{
 				client:  client,
 				message: trimmed,
+			}
+
+			client.delayMutex.Lock()
+			delay := client.delay
+			client.delayMutex.Unlock()
+
+			if delay > 0 {
+				<-time.After(time.Duration(delay) * time.Millisecond)
+
+				client.delayMutex.Lock()
+				client.delay = int(math.Max(0, float64(client.delay-delay)))
+				client.delayMutex.Unlock()
 			}
 
 			game.clientMessage <- clientMessage
@@ -294,6 +310,12 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 	return false
 }
 
+func (client *Client) Delay(ms int) {
+	client.delayMutex.Lock()
+	client.delay += ms
+	client.delayMutex.Unlock()
+}
+
 func (game *Game) handleConnection(conn net.Conn) {
 	defer func() {
 		recover()
@@ -306,6 +328,8 @@ func (game *Game) handleConnection(conn net.Conn) {
 	client.Character = nil
 	client.remainingRolls = 10
 	client.ConnectionState = ConnectionStateNone
+	client.delay = 0
+	client.delayMutex = sync.Mutex{}
 	client.ansiEnabled = true
 
 	/* Spawn two goroutines to handle client I/O */
