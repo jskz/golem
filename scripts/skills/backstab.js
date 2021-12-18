@@ -51,7 +51,7 @@ function do_backstab(ch, args) {
             if (!rch.isEqual(victim) && !rch.isEqual(ch)) {
                 rch.send(
                     '{D' + ch.getShortDescriptionUpper(rch) +
-                        '{D steps behind ' + victim.getShortDescription(rch) + '{D and pierces their heart, from behind!{x\r\n'
+                        '{D steps behind ' + victim.getShortDescription(rch) + '{D and pierces their heart!{x\r\n'
                 );
             }
         }
