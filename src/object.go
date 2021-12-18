@@ -128,6 +128,33 @@ var ObjectFlagTable []ObjectFlag = []ObjectFlag{
 	{Name: "hum", Flag: ITEM_HUM},
 }
 
+func (game *Game) NewObjectInstance(objectIndex uint) *ObjectInstance {
+	obj, err := game.LoadObjectIndex(objectIndex)
+	if err != nil {
+		log.Printf("Failed to create object instance from id %d: %v\r\n", objectIndex, err)
+		return nil
+	}
+
+	objectInstance := &ObjectInstance{
+		Game:             game,
+		ParentId:         obj.Id,
+		Description:      obj.Description,
+		ShortDescription: obj.ShortDescription,
+		LongDescription:  obj.LongDescription,
+		Name:             obj.Name,
+		WearLocation:     -1,
+		ItemType:         obj.ItemType,
+		CreatedAt:        time.Now(),
+		Flags:            obj.Flags,
+		Value0:           obj.Value0,
+		Value1:           obj.Value1,
+		Value2:           obj.Value2,
+		Value3:           obj.Value3,
+	}
+
+	return objectInstance
+}
+
 func (game *Game) CreateGold(amount int) *ObjectInstance {
 	if amount <= 0 {
 		return nil
