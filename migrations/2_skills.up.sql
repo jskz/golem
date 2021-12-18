@@ -66,6 +66,8 @@ INSERT INTO skills(id, name, type, intent) VALUES (11, 'fireshield', 'spell', 'c
 INSERT INTO skills(id, name, type, intent) VALUES (12, 'acrobatics', 'passive', 'none');
 INSERT INTO skills(id, name, type, intent) VALUES (13, 'amazement', 'spell', 'none');
 INSERT INTO skills(id, name, type, intent) VALUES (14, 'magical might', 'spell', 'curative');
+INSERT INTO skills(id, name, type, intent) VALUES (15, 'steal', 'skill', 'offensive');
+INSERT INTO skills(id, name, type, intent) VALUES (16, 'backstab', 'skill', 'offensive');
 
 /* Grant unarmed combat as a seed skill for all four base jobs with varying complexity and cost */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (1, 1, 2, 1, 1, 50);
@@ -77,10 +79,12 @@ INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (4, 
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (5, 1, 6, 1, 5, 50);
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (11, 1, 1, 20, 10, 50);
 
-/* Thief defaults: peek, dodge, acrobatics */
+/* Thief defaults: peek, dodge, steal, backstab, acrobatics */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (6, 2, 3, 1, 5, 5);
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (12, 2, 1, 5, 5, 5);
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (16, 2, 12, 25, 5, 5);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (19, 2, 15, 1, 2, 2);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (20, 2, 16, 5, 5, 2);
 
 /* Cleric defaults: armor, cure light, magic map, sanctuary */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (7, 4, 4, 1, 1, 50);
@@ -110,5 +114,7 @@ INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, prof
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (12, 1, 12, 2, 100);
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (13, 1, 13, 3, 100);
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (14, 1, 14, 3, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (15, 1, 15, 2, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (16, 1, 16, 2, 100);
 
 CREATE INDEX index_skill_name ON skills(name);
