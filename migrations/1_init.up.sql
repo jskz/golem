@@ -337,21 +337,21 @@ INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (14, 8, 1, 3
 
 /* Races */
 INSERT INTO
-    races(id, name, display_name, playable)
+    races(id, name, display_name, playable, primary_attribute)
 VALUES
-    (1, 'human', 'Human', 1),
-    (2, 'elf', 'Elf', 1),
-    (3, 'dwarf', 'Dwarf', 1),
-    (4, 'ogre', 'Ogre', 1);
+    (1, 'human', 'Human', 1, 'charisma'),
+    (2, 'elf', 'Elf', 1, 'intelligence'),
+    (3, 'dwarf', 'Dwarf', 1, 'constitution'),
+    (4, 'ogre', 'Ogre', 1, 'strength');
 
 /* Jobs */
 INSERT INTO
-    jobs(id, name, display_name, experience_required_modifier, playable)
+    jobs(id, name, display_name, experience_required_modifier, playable, primary_attribute)
 VALUES
-    (1, 'warrior', 'Warrior', 1.0, 1),
-    (2, 'thief', 'Thief', 1.1, 1),
-    (3, 'mage', 'Mage', 1.25, 1),
-    (4, 'cleric', 'Cleric', 1.5, 1);
+    (1, 'warrior', 'Warrior', 1.0, 1, 'strength'),
+    (2, 'thief', 'Thief', 1.1, 1, 'dexterity'),
+    (3, 'mage', 'Mage', 1.25, 1, 'intelligence'),
+    (4, 'cleric', 'Cleric', 1.5, 1, 'wisdom');
 
 /* Insert a testing admin character with details: Admin/password */
 INSERT INTO
