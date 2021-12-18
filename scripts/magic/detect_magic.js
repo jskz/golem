@@ -11,7 +11,8 @@ function spell_detect_magic(ch, args) {
         return;
     }
 
-    ch.addEffect(Golem.game.createEffect(Golem.EffectTypes.EffectTypeAffected,
+    ch.addEffect(Golem.game.createEffect('detect magic',
+        Golem.EffectTypes.EffectTypeAffected,
         Golem.AffectedTypes.AFFECT_DETECT_MAGIC,
         ch.level * 6, // duration
         ch.level,

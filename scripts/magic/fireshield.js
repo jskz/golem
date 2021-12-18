@@ -13,7 +13,9 @@ function spell_fireshield(ch, args) {
         return;
     }
 
-    target.addEffect(Golem.game.createEffect(Golem.EffectTypes.EffectTypeAffected,
+    target.addEffect(Golem.game.createEffect(
+        'fireshield',
+        Golem.EffectTypes.EffectTypeAffected,
         Golem.AffectedTypes.AFFECT_FIRESHIELD,
         ch.level, // duration
         ch.level,

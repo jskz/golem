@@ -22,12 +22,13 @@ import (
  * duration.
  */
 const (
-	EffectTypeAffected  = 0
-	EffectTypeEquipment = 1
-	EffectTypeImmunity  = 2
+	EffectTypeAffected = 0
+	EffectTypeStat     = 1
+	EffectTypeImmunity = 2
 )
 
 type Effect struct {
+	Name       string         `json:"name"`
 	EffectType int            `json:"effectType"`
 	Bits       int            `json:"bits"`
 	Duration   int            `json:"duration"`
@@ -52,12 +53,12 @@ type Effect struct {
  *
  * A level 25 +2 intelligence buffing enchantment for an armor with id 50 when worn:
  *
- * EffectType = "EffectTypeEquipment"
+ * EffectType = "EffectTypeStat"
  * Duration = -1
  * Level = 25
  * Modifier = 2
  * Location = WearLocationHead
- * Bits = MOD_INTELLIGENCE
+ * Bits = STAT_INTELLIGENCE
  */
 
 type AffectedFlag struct {
@@ -83,8 +84,9 @@ func GetAffectedFlagName(bit int) string {
 }
 
 // CreateEffect instances a new effect object; utility for scripting
-func (game *Game) CreateEffect(effectType int, bits int, duration int, level int, location int, modifier int, onComplete *goja.Callable) *Effect {
+func (game *Game) CreateEffect(name string, effectType int, bits int, duration int, level int, location int, modifier int, onComplete *goja.Callable) *Effect {
 	return &Effect{
+		Name:       name,
 		EffectType: effectType,
 		Bits:       bits,
 		Duration:   duration,

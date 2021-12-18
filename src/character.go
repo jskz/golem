@@ -337,6 +337,24 @@ func (ch *Character) RollStats() {
 	}
 }
 
+/* Return the base stat and the effect-modified stat for a character */
+func (ch *Character) GetStat(stat int) (int, int) {
+	var base int = ch.Stats[stat]
+	var modifiedSum int = 0
+
+	for iter := ch.Effects.Head; iter != nil; iter = iter.Next {
+		fx := iter.Value.(*Effect)
+
+		if fx.EffectType != EffectTypeStat || fx.Location != stat {
+			continue
+		}
+
+		modifiedSum += fx.Modifier
+	}
+
+	return base + modifiedSum, base
+}
+
 func FindStatByName(statName string) int {
 	for index, name := range StatNameTable {
 		if name == statName {

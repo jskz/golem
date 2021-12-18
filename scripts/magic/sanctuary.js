@@ -13,7 +13,9 @@ function spell_sanctuary(ch, args) {
         return;
     }
 
-    target.addEffect(Golem.game.createEffect(Golem.EffectTypes.EffectTypeAffected,
+    target.addEffect(Golem.game.createEffect(
+        'sanctuary',
+        Golem.EffectTypes.EffectTypeAffected,
         Golem.AffectedTypes.AFFECT_SANCTUARY,
         ch.level * 2, // duration
         ch.level,

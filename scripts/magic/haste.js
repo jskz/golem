@@ -13,7 +13,9 @@ function spell_haste(ch, args) {
         return;
     }
 
-    target.addEffect(Golem.game.createEffect(Golem.EffectTypes.EffectTypeAffected,
+    target.addEffect(Golem.game.createEffect(
+        'haste',
+        Golem.EffectTypes.EffectTypeAffected,
         Golem.AffectedTypes.AFFECT_HASTE,
         ch.level * 2, // duration
         ch.level,

@@ -630,7 +630,7 @@ func (game *Game) InitScripting() error {
 
 	effectTypes := game.vm.NewObject()
 	effectTypes.Set("EffectTypeAffected", game.vm.ToValue(EffectTypeAffected))
-	effectTypes.Set("EffectTypeEquipment", game.vm.ToValue(EffectTypeEquipment))
+	effectTypes.Set("EffectTypeStat", game.vm.ToValue(EffectTypeStat))
 	effectTypes.Set("EffectTypeImmunity", game.vm.ToValue(EffectTypeImmunity))
 
 	affectedTypes := game.vm.NewObject()
