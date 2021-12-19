@@ -57,6 +57,7 @@ function do_backstab(ch, args) {
         }
 
         Golem.game.damage(ch, victim, false, victim.health, Golem.Combat.DamageTypeStab);
+        ch.client.delay(2000);
         return;
     }
 
@@ -81,6 +82,7 @@ function do_backstab(ch, args) {
 
     const amount = ~~(((Math.random() * ch.level) * 5) * (this.proficiency / 100));
     Golem.game.damage(ch, victim, false, amount, Golem.Combat.DamageTypeStab);
+    ch.client.delay(2000);
 }
 
 Golem.registerSkillHandler('backstab', do_backstab);
