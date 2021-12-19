@@ -47,7 +47,7 @@ function do_stun(ch, args) {
         0,
         0,
         function() {
-            target.send("{YYour senses recover and you are no longer stunned.{x\r\n");
+            victim.send("{YYour senses recover and you are no longer stunned.{x\r\n");
 
             for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
                 const rch = iter.value;
