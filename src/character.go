@@ -103,6 +103,7 @@ const (
 	AFFECT_SILENCE      = 1 << 4
 	AFFECT_DETECT_MAGIC = 1 << 5
 	AFFECT_FIRESHIELD   = 1 << 6
+	AFFECT_PARALYSIS    = 1 << 7
 )
 
 const (

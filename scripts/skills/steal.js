@@ -8,6 +8,7 @@
 function do_steal(ch, args) {
     let victim =
         ch.fighting !== null ? ch.fighting : ch.findCharacterInRoom(args);
+
     if (!victim) {
         ch.send('Steal from who?\r\n');
         return;
