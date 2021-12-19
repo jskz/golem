@@ -9,7 +9,7 @@ function do_steal(ch, args) {
     let victim =
         ch.fighting !== null ? ch.fighting : ch.findCharacterInRoom(args);
 
-    if (!victim) {
+    if (!victim || victim.isEqual(ch)) {
         ch.send('Steal from who?\r\n');
         return;
     }

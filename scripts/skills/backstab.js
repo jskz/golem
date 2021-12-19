@@ -25,7 +25,7 @@ function do_backstab(ch, args) {
 
     let victim = ch.findCharacterInRoom(args);
 
-    if (!victim) {
+    if (!victim || victim.isEqual(ch)) {
         ch.send('Backstab who?\r\n');
         return;
     }

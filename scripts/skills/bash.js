@@ -8,7 +8,7 @@
 function do_bash(ch, args) {
     let victim =
         ch.fighting !== null ? ch.fighting : ch.findCharacterInRoom(args);
-    if (!victim) {
+    if (!victim || victim.isEqual(ch)) {
         ch.send('Bash who?\r\n');
         return;
     }
