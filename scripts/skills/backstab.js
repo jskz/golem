@@ -33,12 +33,15 @@ function do_backstab(ch, args) {
     /*
      * If the skill user is 100% proficient with backstab and the victim is of a level less
      * than the skill user, then allow for a 2% chance to instant-kill the target.
+     * 
+     * Sanctuary protects against instant-kill scenarios, so is checked here.
      *
      * In this "artful edge case", the victim will not receive a message - only the death ANSI.
      */
     if((this.proficiency === 100
     && ~~(Math.random() * 100) > 98
-    && victim.level < ch.level)) {
+    && victim.level < ch.level
+    && !(victim.affected & Golem.AffectedTypes.AFFECT_SANCTUARY))) {
         ch.send(
             '{DYou artfully stab ' +
                 victim.getShortDescription(ch) +
