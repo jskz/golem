@@ -252,12 +252,6 @@ func do_close(ch *Character, arguments string) {
 	} else if args == "d" || args == "down" {
 		exit = ch.Room.getExit(DirectionDown)
 	} else {
-		ch.Send("Close what?\r\n")
-		return
-	}
-
-	if exit == nil || exit.Flags&EXIT_IS_DOOR == 0 {
-
 		obj := ch.findObjectOnSelf(args)
 
 		if obj == nil {
@@ -286,6 +280,12 @@ func do_close(ch *Character, arguments string) {
 
 			return
 		}
+		return
+	}
+
+	if exit == nil || exit.Flags&EXIT_IS_DOOR == 0 {
+		ch.Send("You can't close that.\r\n")
+		return
 	}
 
 	if exit.Flags&EXIT_CLOSED != 0 {
@@ -339,11 +339,6 @@ func do_open(ch *Character, arguments string) {
 	} else if args == "d" || args == "down" {
 		exit = ch.Room.getExit(DirectionDown)
 	} else {
-		ch.Send("Open what?\r\n")
-		return
-	}
-
-	if exit == nil || exit.Flags&EXIT_IS_DOOR == 0 {
 		obj := ch.findObjectOnSelf(args)
 
 		if obj == nil {
@@ -377,6 +372,11 @@ func do_open(ch *Character, arguments string) {
 
 			return
 		}
+	}
+
+	if exit == nil || exit.Flags&EXIT_IS_DOOR == 0 {
+		ch.Send("You can't open that.\r\n")
+		return
 	}
 
 	if exit.Flags&EXIT_CLOSED == 0 {
