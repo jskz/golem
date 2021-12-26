@@ -48,6 +48,7 @@ type AppWebConfiguration struct {
 }
 
 type AppConfiguration struct {
+	HashSalt               string                    `json:"hashSalt"`
 	Port                   int                       `json:"port"`
 	MySQLConfiguration     AppMySQLConfiguration     `json:"mysql"`
 	RedisConfiguration     AppRedisConfiguration     `json:"redis"`
