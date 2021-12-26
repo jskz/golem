@@ -684,8 +684,7 @@ func do_take(ch *Character, arguments string) {
 				takingObj := iter.Value.(*ObjectInstance)
 
 				if takingObj.Flags&ITEM_TAKE == 0 {
-					ch.Send(fmt.Sprintf("You are unable to take %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
-					return
+					continue
 				}
 
 				if ch.Inventory.Count+1 > ch.getMaxItemsInventory() {
