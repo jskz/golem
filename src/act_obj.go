@@ -172,6 +172,11 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 		output.WriteString(fmt.Sprintf("{C%s{c contains the following items:\r\n", obj.GetShortDescriptionUpper(ch)))
 		ch.Send(output.String())
 
+		if obj.Flags&ITEM_CLOSED != 0 {
+			ch.Send(fmt.Sprintf("{C%s{c is closed.{x\r\n", obj.GetShortDescriptionUpper(ch)))
+			return
+		}
+
 		ch.showObjectList(obj.Contents)
 		return
 	}
