@@ -82,10 +82,11 @@ Golem.StringEditor = function (client, string, callback) {
                 }
 
                 ch.send("{WOk.  Cursor at " + lineNumber + ". Next line will write to line " + (parseInt(lineNumber) + 1) + "{x\r\n");
-                cursor = lineNumber;
+                cursor = parseInt(lineNumber);
             } else if(Golem.StringEditor.DeleteLineRegex.test(input)) {
-                const [_, lineNumber] = Golem.StringEditor.DeleteLineRegex.exec(input),
+                const [_, lineMatch] = Golem.StringEditor.DeleteLineRegex.exec(input),
                     lines = _string.match(/[^\r\n]+/g);
+                const lineNumber = parseInt(lineMatch);
 
                 if(lineNumber > Golem.StringEditor.MaxAllowedLines) return;
                 if(lines) {
