@@ -7,7 +7,8 @@
  */
 Golem.StringEditor = function (client, string, callback) {
     let _string = String(string);
-    let cursor = string.match(/[^\r\n]+/g).length;
+    let _initialLineMatches = string.match(/[^\r\n]+/g);
+    let cursor = _initialLineMatches ? _initialLineMatches.length : 0;
 
     const commit = () => (string = String(_string));
     const ch = client.character;
@@ -23,7 +24,7 @@ Golem.StringEditor = function (client, string, callback) {
     }
 
     ch.send(
-        "\r\n{Y?SINGLE ! PRINT | @ DISCARD/QUIT | $ WRITE/QUIT | :5 SET LINE | :d # DEL LINES\r\n" + 
+        "\r\n{Y! PRINT | @ DISCARD | $ WRITE | :# GOTO | :d# DELETE | :i# NEW LINES\r\n" +
         "-[ STRING EDITOR BUFFER ]---------------------------------------------{x\r\n");
     showEditorBuffer();
     ch.send("{Y----------------------------------------------------------------------{x\r\n");
@@ -67,8 +68,9 @@ Golem.StringEditor = function (client, string, callback) {
 
                 showEditorBuffer();
             } else if(Golem.StringEditor.LineNavigationRegex.test(input)) {
-                let [_, lineNumber] = Golem.StringEditor.LineNavigationRegex.exec(input);
+                let [_, lineMatch] = Golem.StringEditor.LineNavigationRegex.exec(input);
                 let m = null;
+                let lineNumber = parseInt(lineMatch);
                 
                 const lines = [];
 
@@ -82,7 +84,7 @@ Golem.StringEditor = function (client, string, callback) {
                 }
 
                 ch.send("{WOk.  Cursor at " + lineNumber + ". Next line will write to line " + (parseInt(lineNumber) + 1) + "{x\r\n");
-                cursor = parseInt(lineNumber);
+                cursor = lineNumber;
             } else if(Golem.StringEditor.DeleteLineRegex.test(input)) {
                 const [_, lineMatch] = Golem.StringEditor.DeleteLineRegex.exec(input),
                     lines = _string.match(/[^\r\n]+/g);
@@ -90,13 +92,39 @@ Golem.StringEditor = function (client, string, callback) {
 
                 if(lineNumber > Golem.StringEditor.MaxAllowedLines) return;
                 if(lines) {
+                    // lines in buffer prior to cursor
                     _string = lines.filter((_, index) => index < cursor)
+                        // remaining lines after current lines + number being deleted
                         .concat(lines.filter(
                             (_, index) => (index >= cursor + lineNumber)))
+                        // stringified
                         .join("\r\n");
                 }
 
-                ch.send("{WOk.  Deleted " + lineNumber + " lines from cursor " + lineNumber + "{x\r\n");
+                ch.send("{WOk.  Deleted " + lineNumber + " lines from line " + lineNumber + "{x\r\n");
+            } else if(Golem.StringEditor.InsertLineRegex.test(input)) {
+                const [_, lineMatch] = Golem.StringEditor.InsertLineRegex.exec(input),
+                    lines = _string.match(/[^\r\n]+/g);
+                const lineNumber = parseInt(lineMatch);
+
+                if(lines) {
+                    if(lines.length + lineNumber > Golem.StringEditor.MaxAllowedLines) return;
+
+                    // lines in buffer prior to the cursor
+                    _string = lines.filter((_, index) => index < cursor)
+                        // insert lineNumber empty lines
+                        .concat(
+                            [...Array(lineNumber)].map(_ => ("\r\n")))
+                        // remainder of original string
+                        .concat(lines.filter(
+                            (_, index) => (index >= cursor)))
+                        // stringified
+                        .join("\r\n");
+                } else {
+                    _string = "\r\n".repeat(lineNumber);
+                }
+
+                ch.send("{WOk.  Inserted " + lineNumber + " empty lines at line " + cursor + "{x\r\n");
             }
         } catch(err) {
             ch.send(err);
@@ -108,4 +136,5 @@ Golem.StringEditor.MaxAllowedLines = 256;
 Golem.StringEditor.MaxLineLength = 256;
 Golem.StringEditor.LinesRegex = new RegExp(/[^\r\n]+/igm);
 Golem.StringEditor.LineNavigationRegex = new RegExp(/^\:(\d+)/);
+Golem.StringEditor.InsertLineRegex = new RegExp(/^\:i(\d+)/);
 Golem.StringEditor.DeleteLineRegex = new RegExp(/^\:d(\d+)/);
