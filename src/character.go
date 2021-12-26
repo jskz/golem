@@ -11,7 +11,9 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"crypto/sha256"
 	"database/sql"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"math"
@@ -225,7 +227,10 @@ func (game *Game) AttemptLogin(username string, password string) bool {
 		return false
 	}
 
-	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password)) == nil
+	sha256Sum := sha256.Sum256([]byte(password + Config.HashSalt))
+	saltedHash := hex.EncodeToString(sha256Sum[:])
+
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(saltedHash)) == nil
 }
 
 func (ch *Character) onUpdate() {

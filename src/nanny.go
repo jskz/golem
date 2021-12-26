@@ -9,6 +9,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"strings"
@@ -199,7 +201,10 @@ func (game *Game) nanny(client *Client, message string) {
 
 	case ConnectionStateNewPassword:
 		client.ConnectionState = ConnectionStateConfirmPassword
-		ciphertext, err := bcrypt.GenerateFromPassword([]byte(message), 8)
+
+		sha256Sum := sha256.Sum256([]byte(message + Config.HashSalt))
+		saltedHash := hex.EncodeToString(sha256Sum[:])
+		ciphertext, err := bcrypt.GenerateFromPassword([]byte(saltedHash), 10)
 		if err != nil {
 			log.Println("Failed to bcrypt user password: ", err)
 			return
@@ -209,7 +214,10 @@ func (game *Game) nanny(client *Client, message string) {
 		output.WriteString("Please confirm your password: ")
 
 	case ConnectionStateConfirmPassword:
-		if bcrypt.CompareHashAndPassword([]byte(client.Character.temporaryHash), []byte(message)) != nil {
+		sha256Sum := sha256.Sum256([]byte(message + Config.HashSalt))
+		saltedHash := hex.EncodeToString(sha256Sum[:])
+
+		if bcrypt.CompareHashAndPassword([]byte(client.Character.temporaryHash), []byte(saltedHash)) != nil {
 			client.ConnectionState = ConnectionStateNewPassword
 			output.WriteString("Passwords didn't match.\r\nPlease choose a password: ")
 			break
