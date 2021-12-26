@@ -97,6 +97,7 @@ const (
 	ITEM_WEAR_FEET      = 1 << 15
 	ITEM_GLOW           = 1 << 16
 	ITEM_HUM            = 1 << 17
+	ITEM_CLOSED         = 1 << 18
 )
 
 const ObjectGoldSingle = 2
@@ -126,6 +127,7 @@ var ObjectFlagTable []ObjectFlag = []ObjectFlag{
 	{Name: "wear_feet", Flag: ITEM_WEAR_FEET},
 	{Name: "glow", Flag: ITEM_GLOW},
 	{Name: "hum", Flag: ITEM_HUM},
+	{Name: "closed", Flag: ITEM_CLOSED},
 }
 
 func (game *Game) NewObjectInstance(objectIndex uint) *ObjectInstance {
