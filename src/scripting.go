@@ -588,6 +588,8 @@ func (game *Game) InitScripting() error {
 	objectFlagsConstantsObj.Set("ITEM_GLOW", ITEM_GLOW)
 	objectFlagsConstantsObj.Set("ITEM_HUM", ITEM_HUM)
 	objectFlagsConstantsObj.Set("ITEM_CLOSED", ITEM_CLOSED)
+	objectFlagsConstantsObj.Set("ITEM_CLOSEABLE", ITEM_CLOSEABLE)
+	objectFlagsConstantsObj.Set("ITEM_LOCKED", ITEM_LOCKED)
 
 	charFlagsConstantsObj := game.vm.NewObject()
 	charFlagsConstantsObj.Set("CHAR_AGGRESSIVE", CHAR_AGGRESSIVE)
