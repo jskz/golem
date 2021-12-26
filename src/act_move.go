@@ -257,8 +257,35 @@ func do_close(ch *Character, arguments string) {
 	}
 
 	if exit == nil || exit.Flags&EXIT_IS_DOOR == 0 {
-		ch.Send("You can't close that.\r\n")
-		return
+
+		obj := ch.findObjectOnSelf(args)
+
+		if obj == nil {
+			obj = ch.findObjectInRoom(args)
+		}
+
+		if obj == nil || obj.Flags&ITEM_CLOSEABLE == 0 {
+			ch.Send("You can't close that.\r\n")
+			return
+		} else {
+			if obj.Flags&ITEM_CLOSED != 0 {
+				ch.Send("It's already closed.\r\n")
+				return
+			}
+
+			obj.Flags |= ITEM_CLOSED
+			ch.Send(fmt.Sprintf("You close %s{x.\r\n", obj.GetShortDescription(ch)))
+
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				rch := iter.Value.(*Character)
+
+				if !rch.IsEqual(ch) {
+					rch.Send(fmt.Sprintf("{W%s{W closes %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+				}
+			}
+
+			return
+		}
 	}
 
 	if exit.Flags&EXIT_CLOSED != 0 {
@@ -329,6 +356,11 @@ func do_open(ch *Character, arguments string) {
 		} else {
 			if obj.Flags&ITEM_CLOSED == 0 {
 				ch.Send("It's already open.\r\n")
+				return
+			}
+
+			if obj.Flags&ITEM_LOCKED != 0 {
+				ch.Send("It's locked.\r\n")
 				return
 			}
 
