@@ -679,45 +679,143 @@ func do_take(ch *Character, arguments string) {
 			}
 		}
 
-		var takingObj *ObjectInstance = takingFrom.findObjectInSelf(ch, firstArgument)
-		if takingObj == nil {
-			ch.Send(fmt.Sprintf("No such item found in %s.\r\n", takingFrom.GetShortDescription(ch)))
-			return
-		}
+		if firstArgument == "all" {
+			for iter := takingFrom.Contents.Head; iter != nil; iter = iter.Next {
+				takingObj := iter.Value.(*ObjectInstance)
 
-		if takingObj.Flags&ITEM_TAKE == 0 {
-			ch.Send(fmt.Sprintf("You are unable to take %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
-			return
-		}
+				if takingObj.Flags&ITEM_TAKE == 0 {
+					ch.Send(fmt.Sprintf("You are unable to take %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+					return
+				}
 
-		if ch.Inventory.Count+1 > ch.getMaxItemsInventory() {
-			ch.Send("You can't carry any more.\r\n")
-			return
-		}
+				if ch.Inventory.Count+1 > ch.getMaxItemsInventory() {
+					ch.Send("You can't carry any more.\r\n")
+					break
+				}
 
-		if takingObj.ItemType != ItemTypeCurrency {
-			err := ch.attachObject(takingObj)
-			if err != nil {
-				ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+				if takingObj.ItemType != ItemTypeCurrency {
+					err := ch.attachObject(takingObj)
+					if err != nil {
+						ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+						return
+					}
+				}
+
+				takingFrom.removeObject(takingObj)
+
+				if takingObj.ItemType != ItemTypeCurrency {
+					ch.addObject(takingObj)
+				} else {
+					ch.Gold = ch.Gold + takingObj.Value0
+					ch.Game.Objects.Remove(takingObj)
+				}
+
+				ch.Send(fmt.Sprintf("You take %s{x from %s{x.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+				for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+					rch := iter.Value.(*Character)
+
+					if rch != ch {
+						rch.Send(fmt.Sprintf("%s{x takes %s{x from %s{x.\r\n", ch.GetShortDescriptionUpper(rch), takingObj.GetShortDescription(rch), takingFrom.GetShortDescription(rch)))
+					}
+				}
+			}
+
+			return
+		} else {
+			var takingObj *ObjectInstance = takingFrom.findObjectInSelf(ch, firstArgument)
+			if takingObj == nil {
+				ch.Send(fmt.Sprintf("No such item found in %s.\r\n", takingFrom.GetShortDescription(ch)))
 				return
+			}
+
+			if takingObj.Flags&ITEM_TAKE == 0 {
+				ch.Send(fmt.Sprintf("You are unable to take %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+				return
+			}
+
+			if ch.Inventory.Count+1 > ch.getMaxItemsInventory() {
+				ch.Send("You can't carry any more.\r\n")
+				return
+			}
+
+			if takingObj.ItemType != ItemTypeCurrency {
+				err := ch.attachObject(takingObj)
+				if err != nil {
+					ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+					return
+				}
+			}
+
+			takingFrom.removeObject(takingObj)
+
+			if takingObj.ItemType != ItemTypeCurrency {
+				ch.addObject(takingObj)
+			} else {
+				ch.Gold = ch.Gold + takingObj.Value0
+				ch.Game.Objects.Remove(takingObj)
+			}
+
+			ch.Send(fmt.Sprintf("You take %s{x from %s{x.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
+			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+				rch := iter.Value.(*Character)
+
+				if rch != ch {
+					rch.Send(fmt.Sprintf("%s{x takes %s{x from %s{x.\r\n", ch.GetShortDescriptionUpper(rch), takingObj.GetShortDescription(rch), takingFrom.GetShortDescription(rch)))
+				}
 			}
 		}
 
-		takingFrom.removeObject(takingObj)
+		return
+	}
 
-		if takingObj.ItemType != ItemTypeCurrency {
-			ch.addObject(takingObj)
-		} else {
-			ch.Gold = ch.Gold + takingObj.Value0
-			ch.Game.Objects.Remove(takingObj)
-		}
+	if firstArgument == "all" {
+		for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
+			found := iter.Value.(*ObjectInstance)
 
-		ch.Send(fmt.Sprintf("You take %s{x from %s{x.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
-		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value.(*Character)
+			if found.Flags&ITEM_TAKE == 0 {
+				continue
+			}
 
-			if rch != ch {
-				rch.Send(fmt.Sprintf("%s{x takes %s{x from %s{x.\r\n", ch.GetShortDescriptionUpper(rch), takingObj.GetShortDescription(rch), takingFrom.GetShortDescription(rch)))
+			if ch.Inventory.Count+1 > ch.getMaxItemsInventory() {
+				ch.Send("You can't carry any more.\r\n")
+				break
+			}
+
+			/* TODO: Check if object can be taken, weight limits, etc */
+			if ch.Flags&CHAR_IS_PLAYER != 0 {
+				if found.ItemType != ItemTypeCurrency {
+					err := ch.attachObject(found)
+					if err != nil {
+						log.Println(err)
+						ch.Send("A strange force prevents you from taking that.\r\n")
+						break
+					}
+
+				}
+
+				ch.Room.removeObject(found)
+			} else {
+				ch.Room.removeObject(found)
+			}
+
+			if found.ItemType != ItemTypeCurrency {
+				ch.addObject(found)
+			} else {
+				ch.Gold = ch.Gold + found.Value0
+				ch.Game.Objects.Remove(found)
+			}
+
+			ch.Send(fmt.Sprintf("You take %s{x.\r\n", found.ShortDescription))
+			outString := fmt.Sprintf("\r\n%s{x takes %s{x.\r\n", ch.Name, found.ShortDescription)
+
+			if ch.Room != nil {
+				for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+					rch := iter.Value.(*Character)
+
+					if rch != ch {
+						rch.Send(outString)
+					}
+				}
 			}
 		}
 
