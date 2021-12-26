@@ -902,6 +902,39 @@ func do_drop(ch *Character, arguments string) {
 	firstArgument, arguments := OneArgument(arguments)
 	secondArgument, _ := OneArgument(arguments)
 
+	if firstArgument == "all" {
+		if ch.Inventory.Count == 0 {
+			ch.Send("You aren't carrying anything.\r\n")
+			return
+		}
+
+		for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
+			obj := iter.Value.(*ObjectInstance)
+
+			// TODO: check that we have not exceeded the room object capacity, etc...
+
+			err := ch.DetachObject(obj)
+			if err != nil {
+				log.Printf("Warning: failed to detach object from PC on drop all: %v\r\n", err)
+			}
+
+			ch.RemoveObject(obj)
+			ch.Room.addObject(obj)
+
+			ch.Send(fmt.Sprintf("You drop %s{x.\r\n", obj.GetShortDescription(ch)))
+
+			for roomIter := ch.Room.Characters.Head; roomIter != nil; roomIter = roomIter.Next {
+				rch := roomIter.Value.(*Character)
+
+				if !rch.IsEqual(ch) {
+					rch.Send(fmt.Sprintf("%s{x drops %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+				}
+			}
+		}
+
+		return
+	}
+
 	if secondArgument == "gold" {
 		amount, err := strconv.Atoi(firstArgument)
 		if err != nil {
