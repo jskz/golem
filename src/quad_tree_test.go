@@ -10,6 +10,7 @@ package main
 import (
 	"math/rand"
 	"testing"
+	"time"
 )
 
 type ExampleStructure struct {
@@ -20,8 +21,10 @@ type ExampleStructure struct {
 func CreateTestPoints(n int, w int, h int) []*Point {
 	points := []*Point{}
 
+	r := rand.New(rand.NewSource(time.Now().Unix()))
+
 	for i := 0; i < n; i++ {
-		p := &Point{X: float64(rand.Intn(w)), Y: float64(rand.Intn(h)), Value: &ExampleStructure{Id: i}}
+		p := &Point{X: float64(r.Intn(w)), Y: float64(r.Intn(h)), Value: &ExampleStructure{Id: i}}
 		points = append(points, p)
 	}
 
