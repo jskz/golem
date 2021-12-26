@@ -32,7 +32,7 @@ var oneArgumentTests = []oneArgumentTest{
 		`'power word test' target`,
 	},
 	{
-		`'power word test' target`,
+		`'power word test'     target`,
 		`power word test`,
 		`target`,
 	},
@@ -43,6 +43,11 @@ var oneArgumentTests = []oneArgumentTest{
 	},
 	{
 		`'second arg'`,
+		`second arg`,
+		``,
+	},
+	{
+		`'second arg'     `,
 		`second arg`,
 		``,
 	},

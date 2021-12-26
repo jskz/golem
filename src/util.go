@@ -69,7 +69,7 @@ func OneArgument(args string) (string, string) {
 		}
 	}
 
-	if quoted && end+1 < len(args) {
+	if quoted && end < len(args) {
 		end++
 	}
 
