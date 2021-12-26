@@ -81,7 +81,7 @@ func do_cast(ch *Character, arguments string) {
 		return
 	}
 
-	arg, arguments := oneArgument(arguments)
+	arg, arguments := OneArgument(arguments)
 
 	if ch.Casting != nil {
 		ch.Send("You are already in the middle of casting another spell!\r\n")

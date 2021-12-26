@@ -179,7 +179,7 @@ func do_buy(ch *Character, arguments string) {
 		return
 	}
 
-	secondArgument, _ := oneArgument(arguments)
+	secondArgument, _ := OneArgument(arguments)
 	if secondArgument == "" {
 		ch.Send("Buy requires a numeric argument.\r\n")
 		return

@@ -183,7 +183,7 @@ func do_group(ch *Character, arguments string) {
 		return
 	}
 
-	arg, _ := oneArgument(arguments)
+	arg, _ := OneArgument(arguments)
 	target := ch.FindCharacterInRoom(arg)
 
 	if target == nil {

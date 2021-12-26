@@ -265,7 +265,7 @@ func do_wear(ch *Character, arguments string) {
 		return
 	}
 
-	firstArgument, _ := oneArgument(arguments)
+	firstArgument, _ := OneArgument(arguments)
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
@@ -586,7 +586,7 @@ func do_remove(ch *Character, arguments string) {
 		return
 	}
 
-	firstArgument, _ := oneArgument(arguments)
+	firstArgument, _ := OneArgument(arguments)
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
@@ -628,7 +628,7 @@ func do_use(ch *Character, arguments string) {
 		return
 	}
 
-	firstArgument, _ := oneArgument(arguments)
+	firstArgument, _ := OneArgument(arguments)
 	var using *ObjectInstance = ch.findObjectInRoom(firstArgument)
 	if using == nil {
 		using = ch.findObjectOnSelf(firstArgument)
@@ -665,8 +665,8 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
-	firstArgument, arguments = oneArgument(arguments)
-	secondArgument, _ = oneArgument(arguments)
+	firstArgument, arguments = OneArgument(arguments)
+	secondArgument, _ = OneArgument(arguments)
 
 	if secondArgument != "" {
 		/* Trying to take the object "firstArgument" from within the object "secondArgument" */
@@ -785,9 +785,9 @@ func do_give(ch *Character, arguments string) {
 		return
 	}
 
-	firstArgument, arguments := oneArgument(arguments)
-	secondArgument, arguments := oneArgument(arguments)
-	thirdArgument, _ := oneArgument(arguments)
+	firstArgument, arguments := OneArgument(arguments)
+	secondArgument, arguments := OneArgument(arguments)
+	thirdArgument, _ := OneArgument(arguments)
 
 	if ch.Room == nil {
 		return
@@ -899,8 +899,8 @@ func do_drop(ch *Character, arguments string) {
 		return
 	}
 
-	firstArgument, arguments := oneArgument(arguments)
-	secondArgument, _ := oneArgument(arguments)
+	firstArgument, arguments := OneArgument(arguments)
+	secondArgument, _ := OneArgument(arguments)
 
 	if secondArgument == "gold" {
 		amount, err := strconv.Atoi(firstArgument)

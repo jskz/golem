@@ -173,7 +173,7 @@ func do_webhook(ch *Character, arguments string) {
 		return
 	}
 
-	firstArgument, arguments := oneArgument(arguments)
+	firstArgument, arguments := OneArgument(arguments)
 
 	command := strings.ToLower(firstArgument)
 	switch command {
@@ -200,7 +200,7 @@ func do_webhook(ch *Character, arguments string) {
 		ch.Send(fmt.Sprintf("Successfully created a new webhook with URL:\r\n{Y%swebhook?key=%s{x\r\n", Config.WebConfiguration.PublicRoot, webhook.Uuid))
 
 	case "disconnect":
-		secondArgument, arguments := oneArgument(arguments)
+		secondArgument, arguments := OneArgument(arguments)
 		if secondArgument == "" {
 			ch.Send("Disconnect requires two ID arguments, webhook_id and script_id.\r\n")
 			break
@@ -212,7 +212,7 @@ func do_webhook(ch *Character, arguments string) {
 			break
 		}
 
-		thirdArgument, _ := oneArgument(arguments)
+		thirdArgument, _ := OneArgument(arguments)
 		if secondArgument == "" {
 			ch.Send("Disconnect requires two ID arguments, webhook_id and script_id.\r\n")
 			break
@@ -246,7 +246,7 @@ func do_webhook(ch *Character, arguments string) {
 		ch.Send("Could not find that webhook to detach that script.\r\n")
 
 	case "connect":
-		secondArgument, arguments := oneArgument(arguments)
+		secondArgument, arguments := OneArgument(arguments)
 		if secondArgument == "" {
 			ch.Send("Connect requires two ID arguments, webhook_id and script_id.\r\n")
 			break
@@ -258,7 +258,7 @@ func do_webhook(ch *Character, arguments string) {
 			break
 		}
 
-		thirdArgument, _ := oneArgument(arguments)
+		thirdArgument, _ := OneArgument(arguments)
 		if secondArgument == "" {
 			ch.Send("Connect requires two ID arguments, webhook_id and script_id.\r\n")
 			break
@@ -292,7 +292,7 @@ func do_webhook(ch *Character, arguments string) {
 		ch.Send("Could not find that webhook to attach that script.\r\n")
 
 	case "delete":
-		secondArgument, _ := oneArgument(arguments)
+		secondArgument, _ := OneArgument(arguments)
 		if secondArgument == "" {
 			ch.Send("Delete requires an ID argument.\r\n")
 			break
@@ -320,7 +320,7 @@ func do_webhook(ch *Character, arguments string) {
 		ch.Send("A webook with that ID could not be found.\r\n")
 
 	case "show":
-		secondArgument, _ := oneArgument(arguments)
+		secondArgument, _ := OneArgument(arguments)
 		if secondArgument == "" {
 			ch.Send("Show requires an ID argument.\r\n")
 			break
@@ -368,7 +368,7 @@ func do_script(ch *Character, arguments string) {
 		return
 	}
 
-	firstArgument, arguments := oneArgument(arguments)
+	firstArgument, arguments := OneArgument(arguments)
 
 	command := strings.ToLower(firstArgument)
 	switch command {
@@ -386,7 +386,7 @@ func do_script(ch *Character, arguments string) {
 		ch.Send(output.String())
 
 	case "create":
-		secondArgument, _ := oneArgument(arguments)
+		secondArgument, _ := OneArgument(arguments)
 		if secondArgument == "" {
 			ch.Send("Create requires a script name string argument.\r\n")
 			break
@@ -401,7 +401,7 @@ func do_script(ch *Character, arguments string) {
 		ch.Send(fmt.Sprintf("Successfully created a new script with ID %d.{x\r\n", script.Id))
 
 	case "edit":
-		secondArgument, _ := oneArgument(arguments)
+		secondArgument, _ := OneArgument(arguments)
 		if secondArgument == "" {
 			ch.Send("Delete requires an ID argument.\r\n")
 			break
@@ -462,7 +462,7 @@ func do_script(ch *Character, arguments string) {
 		}
 
 	case "delete":
-		secondArgument, _ := oneArgument(arguments)
+		secondArgument, _ := OneArgument(arguments)
 		if secondArgument == "" {
 			ch.Send("Delete requires an ID argument.\r\n")
 			break
@@ -495,8 +495,8 @@ func do_script(ch *Character, arguments string) {
 }
 
 func do_goto(ch *Character, arguments string) {
-	firstArgument, arguments := oneArgument(arguments)
-	secondArgument, _ := oneArgument(arguments)
+	firstArgument, arguments := OneArgument(arguments)
+	secondArgument, _ := OneArgument(arguments)
 
 	if firstArgument == "plane" {
 		id, err := strconv.Atoi(secondArgument)

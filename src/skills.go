@@ -186,7 +186,7 @@ func do_practice(ch *Character, arguments string) {
 	var output strings.Builder
 	var count int = 0
 
-	firstArgument, _ = oneArgument(arguments)
+	firstArgument, _ = OneArgument(arguments)
 
 	if firstArgument != "" {
 		var trainerFound bool = false
