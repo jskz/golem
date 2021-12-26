@@ -51,6 +51,26 @@ var oneArgumentTests = []oneArgumentTest{
 		`second arg`,
 		``,
 	},
+	{
+		`    first second   third   `,
+		`first`,
+		`second   third`,
+	},
+	{
+		`    'first second'   third   `,
+		`first second`,
+		`third`,
+	},
+	{
+		`second third`,
+		`second`,
+		`third`,
+	},
+	{
+		`'mismatched quote" another'`,
+		`mismatched quote`,
+		`another'`,
+	},
 }
 
 func TestOneArgument(t *testing.T) {

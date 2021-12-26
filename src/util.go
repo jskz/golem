@@ -46,7 +46,8 @@ func SimplePOST(url string, data string) (string, error) {
 	return string(body), nil
 }
 
-func OneArgument(args string) (string, string) {
+func OneArgument(input string) (string, string) {
+	var args string = strings.TrimSpace(input)
 	var buf strings.Builder
 	var quoted bool = false
 	var end int = len(args)
