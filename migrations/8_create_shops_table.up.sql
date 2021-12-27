@@ -30,7 +30,8 @@ CREATE TABLE shop_object (
 
 INSERT INTO shops (id, mobile_id) VALUES (1, 3);
 
-INSERT INTO shop_object (id, shop_id, `object_id`, price) VALUES (6, 1, 7, 1000);
+INSERT INTO shop_object (id, shop_id, `object_id`, price) VALUES (7, 1, 7, 1000);
+INSERT INTO shop_object (id, shop_id, `object_id`, price) VALUES (6, 1, 12, 250);
 INSERT INTO shop_object (id, shop_id, `object_id`, price) VALUES (5, 1, 6, 200);
 INSERT INTO shop_object (id, shop_id, `object_id`, price) VALUES (4, 1, 9, 150);
 INSERT INTO shop_object (id, shop_id, `object_id`, price) VALUES (3, 1, 8, 100);
