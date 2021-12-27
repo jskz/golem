@@ -1117,6 +1117,10 @@ func (ch *Character) findObjectOnSelf(argument string) *ObjectInstance {
 	return nil
 }
 
+func (ch *Character) InSameGroup(other *Character) bool {
+	return ch.IsEqual(other) || (ch.Group != nil && ch.Group.Contains(other))
+}
+
 func (ch *Character) FindCharacterInRoom(argument string) *Character {
 	processed := strings.ToLower(argument)
 
