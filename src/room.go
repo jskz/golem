@@ -69,6 +69,8 @@ func (room *Room) removeObject(obj *ObjectInstance) {
 	room.Objects.Remove(obj)
 
 	obj.InRoom = nil
+	obj.CarriedBy = nil
+	obj.Inside = nil
 }
 
 func (room *Room) AddCharacter(ch *Character) {

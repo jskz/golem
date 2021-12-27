@@ -722,13 +722,12 @@ func do_put(ch *Character, arguments string) {
 		return
 	}
 
-	// if the object was being carried by the player and will no longer be after the put, then detach it
-	if placingObj.CarriedBy != nil && placingObj.CarriedBy.IsEqual(ch) && placingIn.CarriedBy == nil {
+	ch.RemoveObject(placingObj)
+	if placingIn.CarriedBy != ch {
 		ch.DetachObject(placingObj)
 	}
 
-	ch.RemoveObject(placingObj)
-	placingIn.Contents.Insert(placingObj)
+	placingIn.addObject(placingObj)
 
 	ch.Send(fmt.Sprintf("You put %s{x inside of %s{x.\r\n", placingObj.GetShortDescription(ch), placingIn.GetShortDescription(ch)))
 
@@ -786,7 +785,7 @@ func do_take(ch *Character, arguments string) {
 					break
 				}
 
-				if takingObj.ItemType != ItemTypeCurrency {
+				if takingObj.ItemType != ItemTypeCurrency && takingFrom.CarriedBy != ch {
 					err := ch.attachObject(takingObj)
 					if err != nil {
 						ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
@@ -831,7 +830,7 @@ func do_take(ch *Character, arguments string) {
 				return
 			}
 
-			if takingObj.ItemType != ItemTypeCurrency {
+			if takingObj.ItemType != ItemTypeCurrency && takingFrom.CarriedBy != ch {
 				err := ch.attachObject(takingObj)
 				if err != nil {
 					ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))

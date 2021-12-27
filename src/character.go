@@ -442,12 +442,25 @@ func (ch *Character) attachObject(obj *ObjectInstance) error {
 		return err
 	}
 
-	_, err = ch.Game.db.Exec(`
+	var attachingValues strings.Builder
+	attachingValues.WriteString(fmt.Sprintf("(%d,%d),", ch.Id, obj.Id))
+
+	if obj.Contents != nil {
+		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
+			contained := iter.Value.(*ObjectInstance)
+
+			attachingValues.WriteString(fmt.Sprintf("(%d,%d),", ch.Id, contained.Id))
+		}
+	}
+
+	attachingValuesString := strings.TrimRight(attachingValues.String(), ",")
+
+	_, err = ch.Game.db.Exec(fmt.Sprintf(`
 	INSERT INTO
 		player_character_object(player_character_id, object_instance_id)
 	VALUES
-		(?, ?)
-	`, ch.Id, obj.Id)
+		%s
+	`, attachingValuesString))
 	if err != nil {
 		return err
 	}
@@ -475,15 +488,29 @@ func (ch *Character) DetachAllObjects() int {
 }
 
 func (ch *Character) DetachObject(obj *ObjectInstance) error {
-	result, err := ch.Game.db.Exec(`
-		DELETE FROM
-			player_character_object
-		WHERE
-			player_character_id = ?
-		AND
-			object_instance_id = ?`,
-		ch.Id,
-		obj.Id)
+	var detachingIds strings.Builder
+	detachingIds.WriteString(fmt.Sprintf("%d,", obj.Id))
+
+	if obj.Contents != nil {
+		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
+			contained := iter.Value.(*ObjectInstance)
+
+			detachingIds.WriteString(fmt.Sprintf("%d,", contained.Id))
+		}
+	}
+
+	detachingIdsString := strings.TrimRight(detachingIds.String(), ",")
+
+	result, err := ch.Game.db.Exec(
+		fmt.Sprintf(`
+			DELETE FROM
+				player_character_object
+			WHERE
+				player_character_id = ?
+			AND
+				object_instance_id IN (%s)`,
+			detachingIdsString),
+		ch.Id)
 	if err != nil {
 		return err
 	}
@@ -528,23 +555,46 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 			continue
 		}
 
-		_, err = tx.ExecContext(ctx, `
-			UPDATE
-				object_instances
-			SET
-				name = ?,
-				short_description = ?,
-				long_description = ?,
-				description = ?,
-				wear_location = ?,
-				flags = ?,
-				value_1 = ?,
-				value_2 = ?,
-				value_3 = ?,
-				value_4 = ?
-			WHERE
-				id = ?
-		`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Id)
+		if obj.Inside != nil {
+			_, err = tx.ExecContext(ctx, `
+				UPDATE
+					object_instances
+				SET
+					name = ?,
+					short_description = ?,
+					long_description = ?,
+					description = ?,
+					wear_location = ?,
+					flags = ?,
+					value_1 = ?,
+					value_2 = ?,
+					value_3 = ?,
+					value_4 = ?,
+					inside_object_instance_id = ?
+				WHERE
+					id = ?
+			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Inside.Id, obj.Id)
+		} else {
+			_, err = tx.ExecContext(ctx, `
+				UPDATE
+					object_instances
+				SET
+					name = ?,
+					short_description = ?,
+					long_description = ?,
+					description = ?,
+					wear_location = ?,
+					flags = ?,
+					value_1 = ?,
+					value_2 = ?,
+					value_3 = ?,
+					value_4 = ?,
+					inside_object_instance_id = NULL
+				WHERE
+					id = ?
+			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Id)
+		}
+
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -584,6 +634,8 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			object_instances.id = player_character_object.object_instance_id
 		WHERE
 			player_character_object.player_character_id = ?
+		AND
+			object_instances.inside_object_instance_id IS NULL
 	`, ch.Id)
 	if err != nil {
 		return err
@@ -994,6 +1046,8 @@ func (ch *Character) RemoveObject(obj *ObjectInstance) {
 	ch.Inventory.Remove(obj)
 
 	obj.CarriedBy = nil
+	obj.Inside = nil
+	obj.InRoom = nil
 }
 
 func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *ObjectInstance {
