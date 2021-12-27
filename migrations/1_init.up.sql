@@ -306,6 +306,7 @@ INSERT INTO objects(id, zone_id, name, short_description, long_description, desc
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (8, 1, 'black cowl', 'a black cowl', 'A black cloth hood has been discarded here.', 'The perfect concealment for a brigand or other stalker of the night.', 69, 'armor', 1, 2, 2, 1);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (9, 1, 'mithril vest', 'a mithril vest', 'A vest of mithril links sits here.', 'A vest formed with links of mithril providing some defense against slashing weapons.', 261, 'armor', 15, 15, 15, 2);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (10, 1, 'leather boots', 'a pair of leather boots', 'Some unopinionated leather boots were left here.', 'These plain leather boots are only arguably better than nothing.', 32773, 'armor', 2, 2, 2, 1);
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (11, 1, 'treasure chest secure weatherworn weather worn', 'a weatherworn treasure chest', 'A treasure chest is securely anchored here, in space.', 'A weatherworn treasure chest of unknown origin fixed by magical force within the ethereal void invites community loot-sharing.', 786432, 'container', 200, 5000, 20, 20);
 
 /* developer office <-> limbo */
 INSERT INTO exits(id, room_id, to_room_id, direction, flags) VALUES (1, 1, 2, 0, 3);
@@ -392,6 +393,10 @@ INSERT INTO
     resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
 VALUES
     (4, 1, 1, 'object', 4, 1, 1, 1);
+INSERT INTO
+    resets(id, zone_id, room_id, type, value_1, value_2, value_3, value_4)
+VALUES
+    (5, 1, 1, 'object', 11, 1, 1, 1);
 
 CREATE INDEX index_pc_username ON player_characters(username);
 CREATE INDEX index_race_name ON races(name);
