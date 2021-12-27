@@ -168,16 +168,22 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 		break
 	}
 
-	if obj.Contents != nil && obj.Contents.Count > 0 {
-		output.WriteString(fmt.Sprintf("{C%s{c contains the following items:\r\n", obj.GetShortDescriptionUpper(ch)))
-		ch.Send(output.String())
-
+	if obj.ItemType == ItemTypeContainer {
 		if obj.Flags&ITEM_CLOSED != 0 {
-			ch.Send(fmt.Sprintf("{C%s{c is closed.{x\r\n", obj.GetShortDescriptionUpper(ch)))
+			output.WriteString(fmt.Sprintf("{C%s{c is closed.{x\r\n", obj.GetShortDescriptionUpper(ch)))
+			ch.Send(output.String())
+
 			return
 		}
 
-		ch.showObjectList(obj.Contents)
+		output.WriteString(fmt.Sprintf("{C%s{c contains the following items:\r\n", obj.GetShortDescriptionUpper(ch)))
+		ch.Send(output.String())
+
+		if obj.Contents != nil && obj.Contents.Count > 0 {
+			ch.showObjectList(obj.Contents)
+			return
+		}
+
 		return
 	}
 
