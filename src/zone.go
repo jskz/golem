@@ -79,6 +79,7 @@ func (game *Game) ResetRoom(room *Room) {
 					Contents:         NewLinkedList(),
 					Inside:           nil,
 					CarriedBy:        nil,
+					Flags:            objIndex.Flags,
 					Name:             objIndex.Name,
 					ShortDescription: objIndex.ShortDescription,
 					LongDescription:  objIndex.LongDescription,
