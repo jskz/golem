@@ -67,6 +67,7 @@ func init() {
 	CommandTable["give"] = Command{Name: "give", CmdFunc: do_give}
 	CommandTable["take"] = Command{Name: "take", CmdFunc: do_take}
 	CommandTable["drop"] = Command{Name: "drop", CmdFunc: do_drop}
+	CommandTable["put"] = Command{Name: "put", CmdFunc: do_put}
 	CommandTable["use"] = Command{Name: "use", CmdFunc: do_use}
 
 	/* act_wiz.go */

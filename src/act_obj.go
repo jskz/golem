@@ -620,7 +620,6 @@ func do_remove(ch *Character, arguments string) {
 	}
 
 	ch.Send("You aren't wearing that.\r\n")
-	return
 }
 
 func do_use(ch *Character, arguments string) {
@@ -654,6 +653,77 @@ func do_use(ch *Character, arguments string) {
 	if err != nil {
 		ch.Send("You can't use that.\r\n")
 		return
+	}
+}
+
+// for placing an object inside of another object, if possible
+func do_put(ch *Character, arguments string) {
+	var firstArgument string = ""
+	var secondArgument string = ""
+
+	if len(arguments) < 1 {
+		ch.Send("Put what where?\r\n")
+		return
+	}
+
+	firstArgument, arguments = OneArgument(arguments)
+	secondArgument, _ = OneArgument(arguments)
+
+	if firstArgument == "" || secondArgument == "" {
+		ch.Send("Put what where?\r\n")
+		return
+	}
+
+	/* Trying to place object "firstArgument" inside object "secondArgument" */
+	var placingIn *ObjectInstance = ch.findObjectOnSelf(secondArgument)
+	if placingIn == nil {
+		placingIn = ch.findObjectInRoom(secondArgument)
+		if placingIn == nil {
+			ch.Send("No such container found.\r\n")
+			return
+		}
+	}
+
+	if placingIn.ItemType != ItemTypeContainer {
+		ch.Send(fmt.Sprintf("%s{x is not a container.\r\n", placingIn.GetShortDescriptionUpper(ch)))
+		return
+	}
+
+	if placingIn.Flags&ITEM_CLOSED != 0 {
+		ch.Send(fmt.Sprintf("%s{x is closed.\r\n", placingIn.GetShortDescriptionUpper(ch)))
+		return
+	}
+
+	/* Can only place objects that we are holding */
+	var placingObj *ObjectInstance = ch.findObjectOnSelf(firstArgument)
+	if placingObj == nil {
+		ch.Send("No such item in your inventory.\r\n")
+		return
+	}
+
+	// TODO: one of the value fields for container objects will be used as a capacity; enforce it here */
+	// something like
+	// if placingIn.Contents.Count + 1 > placingIn.Value3 {
+	//     ch.Send(fmt.Sprintf("No more items will fit inside %s.\r\n", placingIn.GetShortDescription(ch)))
+	//     return
+	// }
+
+	// if the object was being carried by the player and will no longer be after the put, then detach it
+	if placingObj.CarriedBy != nil && placingObj.CarriedBy.IsEqual(ch) && placingIn.CarriedBy == nil {
+		ch.DetachObject(placingObj)
+	}
+
+	ch.RemoveObject(placingObj)
+	placingIn.Contents.Insert(placingObj)
+
+	ch.Send(fmt.Sprintf("You put %s{x inside of %s{x.\r\n", placingObj.GetShortDescription(ch), placingIn.GetShortDescription(ch)))
+
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+
+		if rch != ch {
+			rch.Send(fmt.Sprintf("%s{x puts %s{x inside of %s{x.\r\n", ch.GetShortDescriptionUpper(rch), placingObj.GetShortDescription(rch), placingIn.GetShortDescription(rch)))
+		}
 	}
 }
 
@@ -1019,7 +1089,6 @@ func do_drop(ch *Character, arguments string) {
 			obj := iter.Value.(*ObjectInstance)
 
 			// TODO: check that we have not exceeded the room object capacity, etc...
-
 			err := ch.DetachObject(obj)
 			if err != nil {
 				log.Printf("Warning: failed to detach object from PC on drop all: %v\r\n", err)
