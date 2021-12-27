@@ -684,6 +684,11 @@ func do_take(ch *Character, arguments string) {
 			}
 		}
 
+		if takingFrom.Flags&ITEM_CLOSED != 0 {
+			ch.Send(fmt.Sprintf("%s is closed.\r\n", takingFrom.GetShortDescriptionUpper(ch)))
+			return
+		}
+
 		if firstArgument == "all" {
 			for iter := takingFrom.Contents.Head; iter != nil; iter = iter.Next {
 				takingObj := iter.Value.(*ObjectInstance)
