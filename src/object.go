@@ -100,6 +100,7 @@ const (
 	ITEM_CLOSED         = 1 << 18
 	ITEM_CLOSEABLE      = 1 << 19
 	ITEM_LOCKED         = 1 << 20
+	ITEM_PERSISTENT     = 1 << 21
 )
 
 const ObjectGoldSingle = 2
@@ -132,6 +133,7 @@ var ObjectFlagTable []ObjectFlag = []ObjectFlag{
 	{Name: "closed", Flag: ITEM_CLOSED},
 	{Name: "closeable", Flag: ITEM_CLOSEABLE},
 	{Name: "locked", Flag: ITEM_LOCKED},
+	{Name: "persistent", Flag: ITEM_PERSISTENT},
 }
 
 func (game *Game) NewObjectInstance(objectIndex uint) *ObjectInstance {
