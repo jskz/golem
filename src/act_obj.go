@@ -707,12 +707,10 @@ func do_put(ch *Character, arguments string) {
 		return
 	}
 
-	// TODO: one of the value fields for container objects will be used as a capacity; enforce it here */
-	// something like
-	// if placingIn.Contents.Count + 1 > placingIn.Value3 {
-	//     ch.Send(fmt.Sprintf("No more items will fit inside %s.\r\n", placingIn.GetShortDescription(ch)))
-	//     return
-	// }
+	if placingIn.Contents.Count+1 > placingIn.Value0 {
+		ch.Send(fmt.Sprintf("No more items will fit inside %s.\r\n", placingIn.GetShortDescription(ch)))
+		return
+	}
 
 	// if the object was being carried by the player and will no longer be after the put, then detach it
 	if placingObj.CarriedBy != nil && placingObj.CarriedBy.IsEqual(ch) && placingIn.CarriedBy == nil {
