@@ -153,11 +153,6 @@ function do_medit(ch, args) {
             ch.send("Ok.\r\n");
             break;
 
-        case 'strength':
-            target.stats[Golem.StatTypes.STAT_STRENGTH] = parseInt(xxs);
-            ch.send("Ok.\r\n");
-            break;
-
         case 'dexterity':
             target.stats[Golem.StatTypes.STAT_DEXTERITY] = parseInt(xxs);
             ch.send("Ok.\r\n");
