@@ -32,6 +32,15 @@ const (
 	ROOM_PLANAR     = 1 << 5
 )
 
+var RoomFlagTable []Flag = []Flag{
+	{Name: "persistent", Flag: ROOM_PERSISTENT},
+	{Name: "virtual", Flag: ROOM_VIRTUAL},
+	{Name: "safe", Flag: ROOM_SAFE},
+	{Name: "dungeon", Flag: ROOM_DUNGEON},
+	{Name: "evil_aura", Flag: ROOM_EVIL_AURA},
+	{Name: "planar", Flag: ROOM_PLANAR},
+}
+
 type Room struct {
 	Game  *Game  `json:"game"`
 	Plane *Plane `json:"plane"`
@@ -71,6 +80,16 @@ func (room *Room) removeObject(obj *ObjectInstance) {
 	obj.InRoom = nil
 	obj.CarriedBy = nil
 	obj.Inside = nil
+}
+
+func FindRoomFlag(flag string) *Flag {
+	for _, f := range RoomFlagTable {
+		if strings.EqualFold(f.Name, flag) {
+			return &f
+		}
+	}
+
+	return nil
 }
 
 func (room *Room) AddCharacter(ch *Character) {

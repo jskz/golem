@@ -21,7 +21,7 @@ function do_xedit(ch, args) {
             `{WExit editor usage:
 {Gxedit delete <direction> - {gDestroy a permanent exit
 {Gxedit dig <direction> - {gTry to create a new zone room in a direction
-{Gxedit flags <direction> <flag name> - {gToggle a flag for a given direction 
+{Gxedit flag <direction> <flag name> - {gToggle a flag for a given direction
 `);
     }
 

@@ -60,13 +60,7 @@ type Effect struct {
  * Location = WearLocationHead
  * Bits = STAT_INTELLIGENCE
  */
-
-type AffectedFlag struct {
-	Name string `json:"name"`
-	Flag int    `json:"flag"`
-}
-
-var AffectedFlagTable []AffectedFlag = []AffectedFlag{
+var AffectedFlagTable []Flag = []Flag{
 	{Name: "sanctuary", Flag: AFFECT_SANCTUARY},
 	{Name: "haste", Flag: AFFECT_HASTE},
 	{Name: "detect_magic", Flag: AFFECT_DETECT_MAGIC},

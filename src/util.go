@@ -16,6 +16,11 @@ import (
 	"unicode"
 )
 
+type Flag struct {
+	Name string `json:"name"`
+	Flag int    `json:"flag"`
+}
+
 func SimpleGET(url string, data string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
