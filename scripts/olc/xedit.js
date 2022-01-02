@@ -22,6 +22,7 @@ function do_xedit(ch, args) {
 {Gxedit delete <direction>           - {gBi-directionally delete an exit
 {Gxedit dig <direction>              - {gTry to create a dig a new room
 {Gxedit flag <direction> <flag name> - {gToggle a flag for a given direction
+{Gxedit link <direction> <id>        - {gCreate a two-way exit to an existing room
 {Gxedit unlink <direction>           - {gUnlink this room's side of an exit
 `);
     }
@@ -144,6 +145,62 @@ function do_xedit(ch, args) {
                 }
 
                 newRoom.exit[Golem.util.reverseDirection[dir]] = reverseExit;
+                ch.send("Ok.\r\n");
+                return;
+            }
+
+        case 'link':
+            {
+                let [direction, xss] = Golem.util.oneArgument(rest);
+
+                if(!VALID_DIRECTIONS.includes(direction)) {
+                    ch.send("That's not a valid direction.\r\n");
+                    return;
+                }
+
+                const dir = DIRECTION_TO_VALUE[direction];
+                if(ch.room.exit[dir]) {
+                    ch.send("You can't link with a direction that already has an exit here.\r\n");
+                    return;
+                }
+
+                const toRoom = Golem.game.loadRoomIndex(parseInt(xss));
+                if(!toRoom) {
+                    ch.send("Failed to find that existing room index.\r\n");
+                    return;
+                }
+
+                if(toRoom.exit[Golem.util.reverseDirection[dir]]) {
+                    ch.send("That room has an existing exit in the reverse-direction from this direction.\r\n");
+                    return;
+                }
+
+                const exit = Golem.NewExit(
+                    ch.room,
+                    dir,
+                    toRoom,
+                    0
+                );
+
+                if(exit.finalize()) {
+                    ch.send("Something went wrong trying to save an exit to a new room.\r\n");
+                    return;
+                }
+
+                ch.room.exit[dir] = exit;
+                const reverseExit = Golem.NewExit(
+                    toRoom,
+                    Golem.util.reverseDirection[dir],
+                    ch.room,
+                    0
+                );
+
+                if(reverseExit.finalize()) {
+                    ch.send("Something went wrong trying to save a reverse-exit from the new room to your current room.\r\n");
+                    return;
+                }
+
+                toRoom.exit[Golem.util.reverseDirection[dir]] = reverseExit;
                 ch.send("Ok.\r\n");
                 return;
             }
