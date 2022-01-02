@@ -6,7 +6,7 @@ require (
 	github.com/containerd/containerd v1.5.7 // indirect
 	github.com/docker/docker v20.10.10+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
-	github.com/dop251/goja v0.0.0-20211217115348-3f9136fa235d
+	github.com/dop251/goja v0.0.0-20220102113305-2298ace6d09d
 	github.com/getsentry/sentry-go v0.12.0
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/golang-migrate/migrate v3.5.4+incompatible
