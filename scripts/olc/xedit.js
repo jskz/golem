@@ -19,9 +19,10 @@ function do_xedit(ch, args) {
     function displayUsage() {
         ch.send(
             `{WExit editor usage:
-{Gxedit delete <direction> - {gDestroy a permanent exit
-{Gxedit dig <direction> - {gTry to create a new zone room in a direction
+{Gxedit delete <direction>           - {gBi-directionally delete an exit
+{Gxedit dig <direction>              - {gTry to create a dig a new room
 {Gxedit flag <direction> <flag name> - {gToggle a flag for a given direction
+{Gxedit unlink <direction>           - {gUnlink this room's side of an exit
 `);
     }
 
@@ -35,6 +36,66 @@ function do_xedit(ch, args) {
     let [firstArgument, rest] = Golem.util.oneArgument(args);
 
     switch (firstArgument) {
+        case 'delete':
+            {
+                let [direction, _] = Golem.util.oneArgument(rest);
+
+                if(!VALID_DIRECTIONS.includes(direction)) {
+                    ch.send("That's not a valid direction.\r\n");
+                    return;
+                }
+
+                const dir = DIRECTION_TO_VALUE[direction];
+                if(!ch.room.exit[dir]) {
+                    ch.send("There is no exit in that direction here.\r\n");
+                    return;
+                }
+
+                const reverseExit = ch.room.exit[dir].to.exit[Golem.util.reverseDirection[dir]];
+                if(reverseExit) {
+                    if(reverseExit.delete()) {
+                        ch.send("Failed to delete reverse exit.\r\n");
+                        return;
+                    }
+
+                    delete ch.room.exit[dir].to.exit[Golem.util.reverseDirection[dir]];
+                }
+
+                if(ch.room.exit[dir].delete()) {
+                    ch.send("Failed to delete exit.\r\n");
+                    return;
+                }
+
+                delete ch.room.exit[dir];
+                ch.send("Ok.\r\n");
+                return;
+            }
+
+        case 'unlink':
+            {
+                let [direction, _] = Golem.util.oneArgument(rest);
+
+                if(!VALID_DIRECTIONS.includes(direction)) {
+                    ch.send("That's not a valid direction.\r\n");
+                    return;
+                }
+
+                const dir = DIRECTION_TO_VALUE[direction];
+                if(!ch.room.exit[dir]) {
+                    ch.send("There is no exit in that direction here.\r\n");
+                    return;
+                }
+
+                if(ch.room.exit[dir].delete()) {
+                    ch.send("Failed to delete exit.\r\n");
+                    return;
+                }
+
+                delete ch.room.exit[dir];
+                ch.send("Ok.\r\n");
+                return;
+            }
+
         case 'dig':
             {
                 let [direction, _] = Golem.util.oneArgument(rest);

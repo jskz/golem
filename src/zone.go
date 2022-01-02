@@ -230,6 +230,8 @@ func (zone *Zone) CreateRoom() (*Room, error) {
 		return nil, err
 	}
 
+	zone.Game.world[availableId] = room
+
 	return room, nil
 }
 
