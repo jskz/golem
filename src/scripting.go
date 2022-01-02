@@ -698,6 +698,8 @@ func (game *Game) InitScripting() error {
 	utilObj.Set("angleToDirection", game.vm.ToValue(AngleToDirection))
 	utilObj.Set("oneArgument", game.vm.ToValue(OneArgument))
 	utilObj.Set("reverseDirection", game.vm.ToValue(ReverseDirection))
+	utilObj.Set("findCharacterFlag", game.vm.ToValue(FindCharacterFlag))
+	utilObj.Set("findObjectFlag", game.vm.ToValue(FindObjectFlag))
 	utilObj.Set("findExitFlag", game.vm.ToValue(FindExitFlag))
 	utilObj.Set("findRoomFlag", game.vm.ToValue(FindRoomFlag))
 

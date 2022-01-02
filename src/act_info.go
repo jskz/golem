@@ -387,12 +387,12 @@ func do_look(ch *Character, arguments string) {
 	}
 
 	if len(arguments) > 0 {
-		var found *ObjectInstance = ch.findObjectOnSelf(arguments)
+		var found *ObjectInstance = ch.FindObjectOnSelf(arguments)
 		if found != nil {
 			obj = found
 		}
 
-		found = ch.findObjectInRoom(arguments)
+		found = ch.FindObjectInRoom(arguments)
 		if found != nil {
 			obj = found
 		}

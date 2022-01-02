@@ -271,10 +271,10 @@ func do_close(ch *Character, arguments string) {
 	} else if args == "d" || args == "down" {
 		exit = ch.Room.getExit(DirectionDown)
 	} else {
-		obj := ch.findObjectOnSelf(args)
+		obj := ch.FindObjectOnSelf(args)
 
 		if obj == nil {
-			obj = ch.findObjectInRoom(args)
+			obj = ch.FindObjectInRoom(args)
 		}
 
 		if obj == nil || obj.Flags&ITEM_CLOSEABLE == 0 {
@@ -358,10 +358,10 @@ func do_open(ch *Character, arguments string) {
 	} else if args == "d" || args == "down" {
 		exit = ch.Room.getExit(DirectionDown)
 	} else {
-		obj := ch.findObjectOnSelf(args)
+		obj := ch.FindObjectOnSelf(args)
 
 		if obj == nil {
-			obj = ch.findObjectInRoom(args)
+			obj = ch.FindObjectInRoom(args)
 		}
 
 		if obj == nil || obj.Flags&ITEM_CLOSEABLE == 0 {

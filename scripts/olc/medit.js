@@ -10,12 +10,13 @@ function do_medit(ch, args) {
         ch.send(
             `{WMobile editor usage:
                 
-{Gmedit <target> save        - {gSave mobile instance properties globally
-{Gmedit <target> description - {gString editor for mobile's description
+{Gmedit <target> save             - {gSave mobile instance properties globally
+{Gmedit <target> flag <flag name> - {gToggle target flag by name
+{Gmedit <target> description      - {gString editor for mobile's description
 
 {WThe following values may be used in a general way with the syntax:
 {Gmedit <target> <attribute> <value>
-{Wto set that target's specified attribute to the given value.
+{Wto set the target character's specified attribute to the given value.
 
 {GThe following attributes are available:{g
   name health max_health mana max_mana stamina max_stamina gold level

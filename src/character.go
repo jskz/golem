@@ -62,6 +62,17 @@ const (
 	CHAR_SHOPKEEPER = 1 << 7
 )
 
+var CharacterFlagTable []Flag = []Flag{
+	{Name: "is_player", Flag: CHAR_IS_PLAYER},
+	{Name: "sentinel", Flag: CHAR_SENTINEL},
+	{Name: "stay_area", Flag: CHAR_STAY_AREA},
+	{Name: "aggressive", Flag: CHAR_AGGRESSIVE},
+	{Name: "train", Flag: CHAR_TRAIN},
+	{Name: "practice", Flag: CHAR_PRACTICE},
+	{Name: "healer", Flag: CHAR_HEALER},
+	{Name: "shopkeeper", Flag: CHAR_SHOPKEEPER},
+}
+
 const (
 	STAT_NONE         = 0
 	STAT_STRENGTH     = 1
@@ -232,6 +243,16 @@ func (game *Game) AttemptLogin(username string, password string) bool {
 	saltedHash := hex.EncodeToString(sha256Sum[:])
 
 	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(saltedHash)) == nil
+}
+
+func FindCharacterFlag(flag string) *Flag {
+	for _, f := range CharacterFlagTable {
+		if strings.EqualFold(f.Name, flag) {
+			return &f
+		}
+	}
+
+	return nil
 }
 
 func (ch *Character) onUpdate() {
@@ -1072,7 +1093,7 @@ func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *Obj
 	return nil
 }
 
-func (ch *Character) findObjectInRoom(argument string) *ObjectInstance {
+func (ch *Character) FindObjectInRoom(argument string) *ObjectInstance {
 	processed := strings.ToLower(argument)
 
 	if ch.Room == nil || len(processed) < 1 {
@@ -1093,7 +1114,7 @@ func (ch *Character) findObjectInRoom(argument string) *ObjectInstance {
 	return nil
 }
 
-func (ch *Character) findObjectOnSelf(argument string) *ObjectInstance {
+func (ch *Character) FindObjectOnSelf(argument string) *ObjectInstance {
 	processed := strings.ToLower(argument)
 
 	if ch.Room == nil || len(processed) < 1 {

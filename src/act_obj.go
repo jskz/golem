@@ -639,9 +639,9 @@ func do_use(ch *Character, arguments string) {
 	}
 
 	firstArgument, _ := OneArgument(arguments)
-	var using *ObjectInstance = ch.findObjectOnSelf(firstArgument)
+	var using *ObjectInstance = ch.FindObjectOnSelf(firstArgument)
 	if using == nil {
-		using = ch.findObjectInRoom(firstArgument)
+		using = ch.FindObjectInRoom(firstArgument)
 
 		if using == nil {
 			ch.Send("No such item found.\r\n")
@@ -681,9 +681,9 @@ func do_put(ch *Character, arguments string) {
 	}
 
 	/* Trying to place object "firstArgument" inside object "secondArgument" */
-	var placingIn *ObjectInstance = ch.findObjectOnSelf(secondArgument)
+	var placingIn *ObjectInstance = ch.FindObjectOnSelf(secondArgument)
 	if placingIn == nil {
-		placingIn = ch.findObjectInRoom(secondArgument)
+		placingIn = ch.FindObjectInRoom(secondArgument)
 		if placingIn == nil {
 			ch.Send("No such container found.\r\n")
 			return
@@ -701,7 +701,7 @@ func do_put(ch *Character, arguments string) {
 	}
 
 	/* Can only place objects that we are holding */
-	var placingObj *ObjectInstance = ch.findObjectOnSelf(firstArgument)
+	var placingObj *ObjectInstance = ch.FindObjectOnSelf(firstArgument)
 	if placingObj == nil {
 		ch.Send("No such item in your inventory.\r\n")
 		return
@@ -758,9 +758,9 @@ func do_take(ch *Character, arguments string) {
 
 	if secondArgument != "" {
 		/* Trying to take the object "firstArgument" from within the object "secondArgument" */
-		var takingFrom *ObjectInstance = ch.findObjectInRoom(secondArgument)
+		var takingFrom *ObjectInstance = ch.FindObjectInRoom(secondArgument)
 		if takingFrom == nil {
-			takingFrom = ch.findObjectOnSelf(secondArgument)
+			takingFrom = ch.FindObjectOnSelf(secondArgument)
 			if takingFrom == nil {
 				ch.Send("No such item found.\r\n")
 				return
@@ -914,7 +914,7 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
-	var found *ObjectInstance = ch.findObjectInRoom(firstArgument)
+	var found *ObjectInstance = ch.FindObjectInRoom(firstArgument)
 	if found == nil {
 		ch.Send("No such item found.\r\n")
 		return
@@ -1028,7 +1028,7 @@ func do_give(ch *Character, arguments string) {
 		return
 	}
 
-	var found *ObjectInstance = ch.findObjectOnSelf(firstArgument)
+	var found *ObjectInstance = ch.FindObjectOnSelf(firstArgument)
 	if found == nil {
 		ch.Send("No such item in your inventory.\r\n")
 		return
@@ -1180,7 +1180,7 @@ func do_drop(ch *Character, arguments string) {
 		return
 	}
 
-	var found *ObjectInstance = ch.findObjectOnSelf(firstArgument)
+	var found *ObjectInstance = ch.FindObjectOnSelf(firstArgument)
 	if found == nil {
 		ch.Send("No such item in your inventory.\r\n")
 		return

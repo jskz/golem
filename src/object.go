@@ -136,6 +136,16 @@ var ObjectFlagTable []ObjectFlag = []ObjectFlag{
 	{Name: "persistent", Flag: ITEM_PERSISTENT},
 }
 
+func FindObjectFlag(flag string) *ObjectFlag {
+	for _, f := range ObjectFlagTable {
+		if strings.EqualFold(f.Name, flag) {
+			return &f
+		}
+	}
+
+	return nil
+}
+
 func (game *Game) NewObjectInstance(objectIndex uint) *ObjectInstance {
 	obj, err := game.LoadObjectIndex(objectIndex)
 	if err != nil {
