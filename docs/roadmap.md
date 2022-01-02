@@ -39,7 +39,7 @@ This will be a working document to track major feature development goals for eac
 
 ## 0.5 Online Creation Milestones
 
-- [ ] Online Creation (OLC) command set: redit, medit, oedit, reset, digging two-way exits from a room
+- [x] Online Creation (OLC) command set: redit, medit, oedit, reset, xedit for rooms, mobiles, objects, resets, and exits respectively
 - [x] World persistence updates: currently mobile, room, and object instances have only read operations defined
 
 ## 0.6 Procedural Content Development Milestones
