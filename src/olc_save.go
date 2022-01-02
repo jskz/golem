@@ -7,7 +7,13 @@
  */
 package main
 
+import "errors"
+
 func (room *Room) Save() error {
+	if room.Flags&ROOM_VIRTUAL != 0 || room.Flags&ROOM_PLANAR != 0 {
+		return errors.New("attempt to save a virtual room")
+	}
+
 	_, err := room.Game.db.Exec(`
 		UPDATE
 			rooms
