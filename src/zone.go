@@ -262,6 +262,7 @@ func (zone *Zone) CreateRoom() (*Room, error) {
 	room.Exit = make(map[uint]*Exit)
 	room.Characters = NewLinkedList()
 	room.Objects = NewLinkedList()
+	room.Resets = NewLinkedList()
 
 	_, err = tx.Exec(`
 		INSERT INTO
