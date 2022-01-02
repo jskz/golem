@@ -173,12 +173,12 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		return false
 	}
 
-	if exit.Flags&EXIT_CLOSED != 0 {
+	if exit.Flags&EXIT_CLOSED != 0 && ch.Level <= LevelHero {
 		ch.Send("{RIt is closed.{x\r\n")
 		return false
 	}
 
-	if ch.Stamina-MovementCost < 0 {
+	if ch.Stamina-MovementCost < 0 && ch.Level <= LevelHero {
 		ch.Send("{DYou are too exhausted to move!{x\r\n")
 		return false
 	}
