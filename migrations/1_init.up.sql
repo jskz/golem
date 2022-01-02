@@ -36,7 +36,7 @@ CREATE TABLE rooms (
 );
 
 CREATE TABLE exits (
-    `id` BIGINT NOT NULL,
+    `id` BIGINT NOT NULL AUTO_INCREMENT,
 
     `room_id` BIGINT NOT NULL,
     `to_room_id` BIGINT NULL,

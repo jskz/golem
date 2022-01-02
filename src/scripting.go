@@ -697,6 +697,7 @@ func (game *Game) InitScripting() error {
 	utilObj.Set("perlin2D", game.vm.ToValue(Perlin2D))
 	utilObj.Set("angleToDirection", game.vm.ToValue(AngleToDirection))
 	utilObj.Set("oneArgument", game.vm.ToValue(OneArgument))
+	utilObj.Set("reverseDirection", game.vm.ToValue(ReverseDirection))
 
 	levelConstantsObj := game.vm.NewObject()
 	levelConstantsObj.Set("LevelAdmin", LevelAdmin)
