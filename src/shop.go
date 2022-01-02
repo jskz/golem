@@ -233,7 +233,7 @@ func do_buy(ch *Character, arguments string) {
 				WearLocation:     -1,
 			}
 
-			err := ch.attachObject(obj)
+			err := ch.AttachObject(obj)
 			if err != nil {
 				ch.Send("{RA mysterious force prevents you from buying that.{x\r\n")
 				return
@@ -249,7 +249,7 @@ func do_buy(ch *Character, arguments string) {
 				}
 			}
 
-			ch.addObject(obj)
+			ch.AddObject(obj)
 			ch.Game.Objects.Insert(obj)
 			ch.Gold -= listing.Price
 			return

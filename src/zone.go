@@ -94,7 +94,7 @@ func (game *Game) ResetRoom(room *Room) {
 					WearLocation:     -1,
 				}
 
-				room.addObject(obj)
+				room.AddObject(obj)
 				game.Objects.Insert(obj)
 			}
 

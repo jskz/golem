@@ -437,7 +437,7 @@ func (ch *Character) Save() bool {
 	return true
 }
 
-func (ch *Character) attachObject(obj *ObjectInstance) error {
+func (ch *Character) AttachObject(obj *ObjectInstance) error {
 	err := obj.reify()
 	if err != nil {
 		return err
@@ -659,7 +659,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			return err
 		}
 
-		ch.addObject(obj)
+		ch.AddObject(obj)
 	}
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
@@ -705,7 +705,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 				return err
 			}
 
-			obj.addObject(containedObj)
+			obj.AddObject(containedObj)
 		}
 	}
 
@@ -1035,7 +1035,7 @@ func (ch *Character) getLongDescription(viewer *Character) string {
 	return ch.LongDescription
 }
 
-func (ch *Character) addObject(obj *ObjectInstance) {
+func (ch *Character) AddObject(obj *ObjectInstance) {
 	ch.Inventory.Insert(obj)
 
 	obj.CarriedBy = ch

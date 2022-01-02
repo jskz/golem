@@ -66,7 +66,7 @@ type Room struct {
 	Exit map[uint]*Exit `json:"exit"`
 }
 
-func (room *Room) addObject(obj *ObjectInstance) {
+func (room *Room) AddObject(obj *ObjectInstance) {
 	room.Objects.Insert(obj)
 
 	obj.Inside = nil

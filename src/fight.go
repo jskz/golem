@@ -155,12 +155,12 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 			corpse := game.createCorpse(target)
 
 			room.removeCharacter(target)
-			room.addObject(corpse)
+			room.AddObject(corpse)
 
 			ch.Game.Objects.Insert(corpse)
 
 			blood := game.createBlood(1)
-			room.addObject(blood)
+			room.AddObject(blood)
 
 			ch.Game.Objects.Insert(blood)
 

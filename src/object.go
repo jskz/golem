@@ -386,7 +386,7 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 	return nil
 }
 
-func (container *ObjectInstance) addObject(obj *ObjectInstance) {
+func (container *ObjectInstance) AddObject(obj *ObjectInstance) {
 	container.Contents.Insert(obj)
 
 	obj.Inside = container

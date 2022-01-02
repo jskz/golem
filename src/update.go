@@ -78,7 +78,7 @@ func (game *Game) objectUpdate() {
 						game.Objects.Insert(contentObj)
 					}
 
-					obj.InRoom.addObject(contentObj)
+					obj.InRoom.AddObject(contentObj)
 				}
 			}
 

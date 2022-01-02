@@ -639,9 +639,9 @@ func do_use(ch *Character, arguments string) {
 	}
 
 	firstArgument, _ := OneArgument(arguments)
-	var using *ObjectInstance = ch.findObjectInRoom(firstArgument)
+	var using *ObjectInstance = ch.findObjectOnSelf(firstArgument)
 	if using == nil {
-		using = ch.findObjectOnSelf(firstArgument)
+		using = ch.findObjectInRoom(firstArgument)
 
 		if using == nil {
 			ch.Send("No such item found.\r\n")
@@ -727,7 +727,7 @@ func do_put(ch *Character, arguments string) {
 		ch.DetachObject(placingObj)
 	}
 
-	placingIn.addObject(placingObj)
+	placingIn.AddObject(placingObj)
 
 	ch.Send(fmt.Sprintf("You put %s{x inside of %s{x.\r\n", placingObj.GetShortDescription(ch), placingIn.GetShortDescription(ch)))
 
@@ -786,7 +786,7 @@ func do_take(ch *Character, arguments string) {
 				}
 
 				if takingObj.ItemType != ItemTypeCurrency && takingFrom.CarriedBy != ch {
-					err := ch.attachObject(takingObj)
+					err := ch.AttachObject(takingObj)
 					if err != nil {
 						ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
 						return
@@ -796,7 +796,7 @@ func do_take(ch *Character, arguments string) {
 				takingFrom.removeObject(takingObj)
 
 				if takingObj.ItemType != ItemTypeCurrency {
-					ch.addObject(takingObj)
+					ch.AddObject(takingObj)
 				} else {
 					ch.Gold = ch.Gold + takingObj.Value0
 					ch.Game.Objects.Remove(takingObj)
@@ -831,7 +831,7 @@ func do_take(ch *Character, arguments string) {
 			}
 
 			if takingObj.ItemType != ItemTypeCurrency && takingFrom.CarriedBy != ch {
-				err := ch.attachObject(takingObj)
+				err := ch.AttachObject(takingObj)
 				if err != nil {
 					ch.Send(fmt.Sprintf("A strange force prevents you from removing %s from %s.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
 					return
@@ -841,7 +841,7 @@ func do_take(ch *Character, arguments string) {
 			takingFrom.removeObject(takingObj)
 
 			if takingObj.ItemType != ItemTypeCurrency {
-				ch.addObject(takingObj)
+				ch.AddObject(takingObj)
 			} else {
 				ch.Gold = ch.Gold + takingObj.Value0
 				ch.Game.Objects.Remove(takingObj)
@@ -876,7 +876,7 @@ func do_take(ch *Character, arguments string) {
 			/* TODO: Check if object can be taken, weight limits, etc */
 			if ch.Flags&CHAR_IS_PLAYER != 0 {
 				if found.ItemType != ItemTypeCurrency {
-					err := ch.attachObject(found)
+					err := ch.AttachObject(found)
 					if err != nil {
 						log.Println(err)
 						ch.Send("A strange force prevents you from taking that.\r\n")
@@ -891,7 +891,7 @@ func do_take(ch *Character, arguments string) {
 			}
 
 			if found.ItemType != ItemTypeCurrency {
-				ch.addObject(found)
+				ch.AddObject(found)
 			} else {
 				ch.Gold = ch.Gold + found.Value0
 				ch.Game.Objects.Remove(found)
@@ -933,7 +933,7 @@ func do_take(ch *Character, arguments string) {
 	/* TODO: Check if object can be taken, weight limits, etc */
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
 		if found.ItemType != ItemTypeCurrency {
-			err := ch.attachObject(found)
+			err := ch.AttachObject(found)
 			if err != nil {
 				log.Println(err)
 				ch.Send("A strange force prevents you from taking that.\r\n")
@@ -948,7 +948,7 @@ func do_take(ch *Character, arguments string) {
 	}
 
 	if found.ItemType != ItemTypeCurrency {
-		ch.addObject(found)
+		ch.AddObject(found)
 	} else {
 		ch.Gold = ch.Gold + found.Value0
 		ch.Game.Objects.Remove(found)
@@ -1056,14 +1056,14 @@ func do_give(ch *Character, arguments string) {
 	}
 
 	if target.Flags&CHAR_IS_PLAYER != 0 {
-		err := target.attachObject(found)
+		err := target.AttachObject(found)
 		if err != nil {
 			ch.Send("A strange force prevents you from releasing your grip.\r\n")
 			return
 		}
 	}
 
-	target.addObject(found)
+	target.AddObject(found)
 
 	ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", found.GetShortDescription(ch), target.GetShortDescription(ch)))
 	target.Send(fmt.Sprintf("%s{x gives you %s{x.\r\n", ch.GetShortDescriptionUpper(target), found.GetShortDescription(target)))
@@ -1108,7 +1108,7 @@ func do_drop(ch *Character, arguments string) {
 			}
 
 			ch.RemoveObject(obj)
-			ch.Room.addObject(obj)
+			ch.Room.AddObject(obj)
 
 			ch.Send(fmt.Sprintf("You drop %s{x.\r\n", obj.GetShortDescription(ch)))
 
@@ -1194,10 +1194,10 @@ func do_drop(ch *Character, arguments string) {
 		}
 
 		ch.RemoveObject(found)
-		ch.Room.addObject(found)
+		ch.Room.AddObject(found)
 	} else {
 		ch.RemoveObject(found)
-		ch.Room.addObject(found)
+		ch.Room.AddObject(found)
 	}
 
 	ch.Send(fmt.Sprintf("You drop %s{x.\r\n", found.ShortDescription))
