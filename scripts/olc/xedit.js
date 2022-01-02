@@ -6,6 +6,8 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function do_xedit(ch, args) {
+    const VALID_DIRECTIONS = ['north', 'east', 'south', 'west', 'up', 'down'];
+
     function displayUsage() {
         ch.send(
             `{WExit editor usage:
@@ -15,7 +17,9 @@ function do_xedit(ch, args) {
 `);
     }
 
-    if (!ch.room) {
+    if (!ch.room
+    || ch.room.flags & Golem.RoomFlags.ROOM_PLANAR
+    || ch.room.flags & Golem.RoomFlags.ROOM_VIRTUAL) {
         ch.send("You can't do that here.\r\n");
         return;
     }
@@ -23,6 +27,17 @@ function do_xedit(ch, args) {
     let [firstArgument, rest] = Golem.util.oneArgument(args);
 
     switch (firstArgument) {
+        case 'dig':
+            let [direction, _] = Golem.util.oneArgument(rest);
+
+            if(!VALID_DIRECTIONS.includes(direction)) {
+                ch.send("That's not a valid direction.\r\n");
+                return;
+            }
+
+            ch.send("Trying to dig " + direction + "\r\n");
+            break;
+
         default:
             displayUsage();
             break;

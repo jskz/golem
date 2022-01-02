@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"time"
@@ -149,6 +150,87 @@ func (game *Game) ResetZone(zone *Zone) {
 	}
 
 	zone.LastReset = time.Now()
+}
+
+// If possible, create a new room record for this zone and return its instance
+func (zone *Zone) CreateRoom() (*Room, error) {
+	ctx := context.Background()
+
+	tx, err := zone.Game.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var availableId uint = 0
+
+	row := tx.QueryRow(`
+	/*
+	* Zones are not intended to be larger than a few hundred rooms at most and will never
+	* exceed the recursion depth limit; first, create the sequence of numbers in the low-high
+	* range for this zone's specified range.
+	*/
+	WITH RECURSIVE room_ids AS (
+		SELECT (
+			SELECT low FROM zones WHERE zones.id = ?
+		) AS value
+		UNION ALL
+		SELECT value + 1 AS value
+		FROM room_ids
+		WHERE room_ids.value < (
+			SELECT high FROM zones WHERE zones.id = ?
+		)
+	)
+	SELECT
+		value
+	FROM
+		room_ids
+	WHERE
+		value
+	/* Exclude the set of this zone's room IDs */
+	NOT IN (
+		SELECT
+			rooms.id
+		FROM
+			rooms
+		INNER JOIN
+			zones ON zones.id = rooms.zone_id
+	);`, zone.Id, zone.Id)
+
+	err = row.Scan(&availableId)
+	if err != nil {
+		tx.Rollback()
+
+		return nil, err
+	}
+
+	room := zone.Game.NewRoom()
+	room.Id = availableId
+	room.Zone = zone
+	room.Name = "Empty Room"
+	room.Flags = 0
+	room.Description = "This room-in-development needs a description!"
+	room.Exit = make(map[uint]*Exit)
+	room.Characters = NewLinkedList()
+	room.Objects = NewLinkedList()
+
+	_, err = tx.Exec(`
+		INSERT INTO
+			rooms(id, zone_id, flags, name, description)
+		VALUES
+			(?, ?, ?, ?, ?)
+	`, availableId, zone.Id, room.Flags, room.Name, room.Description)
+	if err != nil {
+		tx.Rollback()
+
+		return nil, err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+
+	return room, nil
 }
 
 func (zone *Zone) FindAvailableRoomID() (int, error) {
