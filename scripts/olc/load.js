@@ -31,11 +31,28 @@ function do_load(ch, args) {
                     return;
                 }
 
-                ch.send("Ok.\r\n");
+                const mob = Golem.game.loadMobileIndex(parseInt(rest));
+                if(!mob) {
+                    ch.send("Failed.\r\n");
+                    return;
+                }
+
+                ch.room.addCharacter(mob);
+                Golem.game.characters.insert(mob);
+
+                for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+                    const rch = iter.value;
+
+                    if (!rch.isEqual(mob)) {
+                        rch.send(
+                            '{W' + mob.getShortDescriptionUpper(rch) + '{W appears in a puff of smoke!{x\r\n'
+                        );
+                    }
+                }
+
                 return;
             }
             
-            break;
         case 'obj':
             {
                 if (!rest.length) {
@@ -50,25 +67,25 @@ function do_load(ch, args) {
                     return;
                 }
 
-                try {
-                    if(obj.flags & Golem.ObjectFlags.ITEM_TAKE) {
-                        ch.attachObject(obj);
-                        ch.addObject(obj);
-                        Golem.game.objects.insert(obj);
-                        ch.send("Ok.\r\n");
-                        return;
-                    }
-
+                if(obj.flags & Golem.ObjectFlags.ITEM_TAKE) {
+                    ch.attachObject(obj);
+                    ch.addObject(obj);
+                    Golem.game.objects.insert(obj);
+                } else {
                     ch.room.addObject(obj);
                     Golem.game.objects.insert(obj);
-                    ch.send("Ok.\r\n");
-                } catch(err) {
-                    ch.send(err.toString());
                 }
+
+                for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+                    const rch = iter.value;
+
+                    rch.send(
+                        '{W' + obj.getShortDescriptionUpper(rch) + '{W appears in a puff of smoke!{x\r\n'
+                    );
+                }
+
                 return;
             }
-
-            break;
 
         default:
             displayUsage();
