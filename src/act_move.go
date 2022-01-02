@@ -235,7 +235,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 		if character != ch {
 			/* If the entering player is a PC, this is a hostile NPC, and that hostile NPC is not currently preoccupied with another combat, then let's rum	ble. */
-			if (ch.Flags&CHAR_IS_PLAYER != 0) && (character.Flags&CHAR_IS_PLAYER == 0) && (character.Flags&CHAR_AGGRESSIVE != 0) && (character.Fighting == nil) {
+			if (ch.Flags&CHAR_IS_PLAYER != 0) && (character.Flags&CHAR_IS_PLAYER == 0) && (character.Flags&CHAR_AGGRESSIVE != 0) && (character.Fighting == nil) && ch.Level <= LevelHero {
 				do_kill(character, ch.Name)
 			}
 		}
