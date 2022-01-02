@@ -228,7 +228,7 @@ func (maze *MazeGrid) reify(z int) {
 					if maze.isValidPosition(translatedX, translatedY) && !maze.Grid[translatedX][translatedY].Wall {
 						to := maze.createRoom(translatedX, translatedY)
 
-						exit := &Exit{}
+						exit := &Exit{Room: room}
 						exit.To = to
 						exit.Direction = uint(direction)
 

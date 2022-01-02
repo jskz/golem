@@ -273,12 +273,12 @@ func (game *Game) FixExits() error {
 			continue
 		}
 
-		from, err := game.LoadRoomIndex(uint(roomId))
+		exit.Room, err = game.LoadRoomIndex(uint(roomId))
 		if err != nil {
 			continue
 		}
 
-		from.Exit[exit.Direction] = exit
+		exit.Room.Exit[exit.Direction] = exit
 	}
 
 	return nil

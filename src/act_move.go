@@ -112,13 +112,15 @@ type Terrain struct {
 
 type Exit struct {
 	Id        uint  `json:"id"`
+	Room      *Room `json:"room"`
 	Direction uint  `json:"direction"`
 	To        *Room `json:"to"`
 	Flags     int   `json:"flags"`
 }
 
-func (game *Game) NewExit(direction uint, to *Room, flags int) *Exit {
+func (game *Game) NewExit(from *Room, direction uint, to *Room, flags int) *Exit {
 	return &Exit{
+		Room:      from,
 		Id:        0,
 		To:        to,
 		Direction: direction,

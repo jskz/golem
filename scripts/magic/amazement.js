@@ -33,6 +33,7 @@ function spell_amazement(ch) {
             ].room;
 
         ch.room.exit[Golem.Directions.DirectionDown] = Golem.NewExit(
+            ch.room,
             Golem.Directions.DirectionDown,
             mazeEntrance,
             Golem.ExitFlags.EXIT_IS_DOOR | Golem.ExitFlags.EXIT_CLOSED
@@ -40,6 +41,7 @@ function spell_amazement(ch) {
 
         mazeEntrance.exit[Golem.Directions.DirectionUp] =
             Golem.NewExit(
+                mazeEntrance,
                 Golem.Directions.DirectionUp,
                 ch.room,
                 Golem.ExitFlags.EXIT_IS_DOOR |

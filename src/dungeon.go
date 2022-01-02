@@ -41,6 +41,7 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 		if previousFloorExit != nil {
 			/* Dig a two-way closed door exit between this room and the "end" of the previous floor */
 			previousFloorExit.Exit[DirectionDown] = &Exit{
+				Room:      previousFloorExit,
 				Id:        0,
 				Direction: DirectionDown,
 				To:        floor.Grid[floor.EntryX][floor.EntryY].Room,
@@ -48,6 +49,7 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 			}
 
 			floor.Grid[floor.EntryX][floor.EntryY].Room.Exit[DirectionUp] = &Exit{
+				Room:      floor.Grid[floor.EntryX][floor.EntryY].Room,
 				Id:        0,
 				Direction: DirectionUp,
 				To:        previousFloorExit,

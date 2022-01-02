@@ -30,3 +30,7 @@ func (room *Room) Save() error {
 
 	return nil
 }
+
+func (exit *Exit) Save() error {
+	return nil
+}

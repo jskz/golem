@@ -145,6 +145,7 @@ VALUES (1, 'limbo-developer-maze',
 
         if (limbo) {
             limbo.exit[Golem.Directions.DirectionDown] = Golem.NewExit(
+                limbo,
                 Golem.Directions.DirectionDown,
                 limbo,
                 Golem.ExitFlags.EXIT_IS_DOOR |
@@ -163,6 +164,7 @@ VALUES (1, 'limbo-developer-maze',
                 limbo.exit[Golem.Directions.DirectionDown].to = dungeonEntrance;
                 dungeonEntrance.exit[Golem.Directions.DirectionUp] =
                     Golem.NewExit(
+                        dungeonEntrance,
                         Golem.Directions.DirectionUp,
                         limbo,
                         Golem.ExitFlags.EXIT_IS_DOOR |
@@ -277,6 +279,7 @@ module.exports = {
 
         foyer.exit[Golem.Directions.DirectionSouth] =
             Golem.NewExit(
+                foyer,
                 Golem.Directions.DirectionSouth,
                 templeFront,
                 Golem.ExitFlags.EXIT_IS_DOOR |
