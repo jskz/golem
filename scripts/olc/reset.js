@@ -11,9 +11,11 @@ function do_reset(ch, args) {
         ch.send(
             `{WReset editor usage:
 
-{Greset list   - {gDisplay all resets for the current room
-{Greset room   - {gTrigger a reset for this room immediately
-{Greset delete - {gDelete a room reset by its {Greset list{g position{x
+{Greset list                         - {gDisplay all resets for this room
+{Greset room                         - {gTrigger a reset for this room now
+{Greset delete <#>                   - {gDelete a reset by its {Greset list{g position{x
+{Greset mob <id> <unused> <room max> - {gCreate and save a new NPC reset here{x
+{Greset obj <id> <unused> <room max> - {gCreate and save a new object reset here{x
 `);
     }
     
@@ -43,6 +45,24 @@ function do_reset(ch, args) {
     }
 
     switch (firstArgument) {
+        case 'obj':
+        case 'mob':
+            {
+                const [entityId, xs] = Golem.util.oneArgument(rest);
+                const [_, xxs] = Golem.util.oneArgument(xs);
+                const [maxInRoom] = Golem.util.oneArgument(xxs);
+
+                const result = ch.room.createReset(firstArgument === 'mob' ? 0 : 1, entityId, -1, maxInRoom);
+                if(result) {
+                    ch.room.resets.insert(result);
+                    ch.send("Ok.\r\n");
+                    return;
+                }
+
+                ch.send("Failed.\r\n");
+                return;
+            }
+
         case 'delete':
             {
                 if(!ch.room.resets.count) {

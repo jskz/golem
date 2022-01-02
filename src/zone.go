@@ -46,6 +46,56 @@ type Reset struct {
 	Value3 int `json:"value3"`
 }
 
+func (room *Room) CreateReset(resetType uint, v0, v1, v2, v3 int) *Reset {
+	if room.Flags&ROOM_VIRTUAL != 0 || room.Flags&ROOM_PLANAR != 0 || room.Zone == nil || room.Zone.Id == 0 {
+		return nil
+	}
+
+	var typeString string = ""
+	switch resetType {
+	case ResetTypeMobile:
+		typeString = "mobile"
+	case ResetTypeObject:
+		typeString = "object"
+	default:
+		return nil
+	}
+
+	res, err := room.Game.db.Exec(`
+	INSERT INTO
+		resets(zone_id, room_id, type, value_1, value_2, value_3, value_4)
+	VALUES
+		(?, ?, ?, ?, ?, ?, ?)
+	`, room.Zone.Id, room.Id, typeString, v0, v1, v2, v3)
+	if err != nil {
+		return nil
+	}
+
+	lastInsertId, err := res.LastInsertId()
+	if err != nil {
+		return nil
+	}
+
+	reset := &Reset{
+		Id:   uint(lastInsertId),
+		Zone: room.Zone,
+		Room: room,
+
+		ResetType: resetType,
+
+		Value0: v0,
+		Value1: v1,
+		Value2: v2,
+		Value3: v3,
+	}
+
+	if err != nil {
+		return nil
+	}
+
+	return reset
+}
+
 func (game *Game) ResetRoom(room *Room) {
 	for iter := room.Resets.Head; iter != nil; iter = iter.Next {
 		reset := iter.Value.(*Reset)
