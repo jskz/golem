@@ -72,6 +72,13 @@ const (
 	EXIT_HIDDEN  = 1 << 3
 )
 
+var ExitFlagTable []Flag = []Flag{
+	{Name: "is_door", Flag: EXIT_IS_DOOR},
+	{Name: "closed", Flag: EXIT_CLOSED},
+	{Name: "locked", Flag: EXIT_LOCKED},
+	{Name: "hidden", Flag: EXIT_HIDDEN},
+}
+
 const (
 	TERRAIN_IMPASSABLE    = 1
 	TERRAIN_SHALLOW_WATER = 1 << 1
@@ -130,6 +137,16 @@ func (game *Game) NewExit(from *Room, direction uint, to *Room, flags int) *Exit
 
 func (room *Room) getExit(direction uint) *Exit {
 	return room.Exit[direction]
+}
+
+func FindExitFlag(flag string) *Flag {
+	for _, f := range ExitFlagTable {
+		if strings.EqualFold(f.Name, flag) {
+			return &f
+		}
+	}
+
+	return nil
 }
 
 func (ch *Character) move(direction uint, follow bool) bool {

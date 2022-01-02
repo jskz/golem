@@ -36,54 +36,95 @@ function do_xedit(ch, args) {
 
     switch (firstArgument) {
         case 'dig':
-            let [direction, _] = Golem.util.oneArgument(rest);
+            {
+                let [direction, _] = Golem.util.oneArgument(rest);
 
-            if(!VALID_DIRECTIONS.includes(direction)) {
-                ch.send("That's not a valid direction.\r\n");
+                if(!VALID_DIRECTIONS.includes(direction)) {
+                    ch.send("That's not a valid direction.\r\n");
+                    return;
+                }
+
+                const dir = DIRECTION_TO_VALUE[direction];
+                if(ch.room.exit[dir]) {
+                    ch.send("You can't dig in a direction that already has an exit.\r\n");
+                    return;
+                }
+
+                const newRoom = ch.room.zone.createRoom();
+
+                if(!newRoom) {
+                    ch.send("Something went wrong trying to dig a new room.\r\n");
+                    return;
+                }
+
+                const exit = Golem.NewExit(
+                    ch.room,
+                    dir,
+                    newRoom,
+                    0
+                );
+
+                if(exit.finalize()) {
+                    ch.send("Something went wrong trying to save an exit to a new room.\r\n");
+                    return;
+                }
+
+                ch.room.exit[dir] = exit;
+                const reverseExit = Golem.NewExit(
+                    newRoom,
+                    Golem.util.reverseDirection[dir],
+                    ch.room,
+                    0
+                );
+
+                if(reverseExit.finalize()) {
+                    ch.send("Something went wrong trying to save a reverse-exit from the new room to your current room.\r\n");
+                    return;
+                }
+
+                newRoom.exit[Golem.util.reverseDirection[dir]] = reverseExit;
+                ch.send("Ok.\r\n");
                 return;
             }
 
-            const dir = DIRECTION_TO_VALUE[direction];
-            if(ch.room.exit[dir]) {
-                ch.send("You can't dig in a direction that already has an exit.\r\n");
+        case 'flag':
+            {
+                let [direction, flagName] = Golem.util.oneArgument(rest);
+
+                if(!VALID_DIRECTIONS.includes(direction)) {
+                    ch.send("That's not a valid direction.\r\n");
+                    return;
+                }
+
+                const dir = DIRECTION_TO_VALUE[direction];
+                const exitFlag = Golem.util.findExitFlag(flagName);
+
+                if(!exitFlag) {
+                    ch.send("That's not a valid exit flag.\r\n");
+                    return;
+                }
+
+                if(ch.room.exit[dir].flags & exitFlag.flag) {
+                    ch.room.exit[dir].flags &= ~exitFlag.flag;
+
+                    if(ch.room.exit[dir].save()) {
+                        ch.send("Something went wrong trying to save this exit flag update.\r\n");
+                        return;
+                    }
+
+                    ch.send("Ok.  Disabled " + exitFlag.name + " on exit " + direction + ".\r\n");
+                    return;
+                }
+
+                ch.room.exit[dir].flags |= exitFlag.flag;
+                if(ch.room.exit[dir].save()) {
+                    ch.send("Something went wrong trying to save this exit flag update.\r\n");
+                    return;
+                }
+
+                ch.send("Ok.  Enabled " + exitFlag.name + " on exit " + direction + ".\r\n");
                 return;
             }
-
-            const newRoom = ch.room.zone.createRoom();
-
-            if(!newRoom) {
-                ch.send("Something went wrong trying to dig a new room.\r\n");
-                return;
-            }
-
-            const exit = Golem.NewExit(
-                ch.room,
-                dir,
-                newRoom,
-                0
-            );
-
-            if(exit.finalize()) {
-                ch.send("Something went wrong trying to save an exit to a new room.\r\n");
-                return;
-            }
-
-            ch.room.exit[dir] = exit;
-            const reverseExit = Golem.NewExit(
-                newRoom,
-                Golem.util.reverseDirection[dir],
-                ch.room,
-                0
-            );
-
-            if(reverseExit.finalize()) {
-                ch.send("Something went wrong trying to save a reverse-exit from the new room to your current room.\r\n");
-                return;
-            }
-
-            newRoom.exit[Golem.util.reverseDirection[dir]] = reverseExit;
-            ch.send("Ok.\r\n");
-            break;
 
         default:
             displayUsage();
