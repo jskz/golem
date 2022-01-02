@@ -47,6 +47,7 @@ type Race struct {
 }
 
 const LevelAdmin = 60
+const LevelBuilder = 55
 const LevelHero = 50
 
 /* These flag constants are shared by both PCs and NPCs */

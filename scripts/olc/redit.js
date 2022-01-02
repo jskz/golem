@@ -23,6 +23,7 @@ function do_redit(ch, args) {
     let [firstArgument, rest] = Golem.util.oneArgument(args);
 
     switch (firstArgument) {
+        // update the room name with remaining argument string, if there is any
         case 'name':
             if (!rest.length) {
                 ch.send("A room name argument is required.\r\nExample: redit name New Room Name Here\r\n");
@@ -33,6 +34,7 @@ function do_redit(ch, args) {
             ch.send("Ok.\r\n");
             break;
 
+        // use the string editor utility to edit the room description string, updating it on completion
         case 'description':
             Golem.StringEditor(ch.client,
                 ch.room.description,
@@ -42,6 +44,7 @@ function do_redit(ch, args) {
                 });
             break;
 
+        // try to save room to database
         case 'save':
             const err = ch.room.save();
             if (!err) {
@@ -58,4 +61,4 @@ function do_redit(ch, args) {
     }
 }
 
-Golem.registerPlayerCommand('redit', do_redit);
+Golem.registerPlayerCommand('redit', do_redit, Golem.Levels.LevelBuilder);

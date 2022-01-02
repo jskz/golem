@@ -554,18 +554,17 @@ func (game *Game) InitScripting() error {
 		return game.vm.ToValue(game.RegisterSpellHandler(spellName, fn))
 	}))
 
-	obj.Set("registerPlayerCommand", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
+	obj.Set("registerPlayerCommand", game.vm.ToValue(func(name goja.Value, fn goja.Callable, minimumLevel goja.Value) goja.Value {
 		command := strings.ToLower(name.String())
 		scriptedCommand := Command{
 			Name:         command,
 			Scripted:     true,
 			CmdFunc:      nil,
-			MinimumLevel: 0,
+			MinimumLevel: uint(minimumLevel.ToInteger()),
 			Callback:     fn,
 		}
 
 		CommandTable[command] = scriptedCommand
-
 		return game.vm.ToValue(scriptedCommand)
 	}))
 
@@ -699,6 +698,11 @@ func (game *Game) InitScripting() error {
 	utilObj.Set("angleToDirection", game.vm.ToValue(AngleToDirection))
 	utilObj.Set("oneArgument", game.vm.ToValue(OneArgument))
 
+	levelConstantsObj := game.vm.NewObject()
+	levelConstantsObj.Set("LevelAdmin", LevelAdmin)
+	levelConstantsObj.Set("LevelBuilder", LevelBuilder)
+	levelConstantsObj.Set("LevelHero", LevelHero)
+
 	obj.Set("KnownLocations", knownLocationsConstantsObj)
 	obj.Set("ExitFlags", exitFlagsConstantsObj)
 	obj.Set("ExitName", game.vm.ToValue(ExitName))
@@ -714,6 +718,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("WearLocations", wearLocationsConstantsObj)
 	obj.Set("HTTP", httpUtilityObj)
 	obj.Set("NewExit", game.vm.ToValue(game.NewExit))
+	obj.Set("Levels", levelConstantsObj)
 
 	obj.Set("util", utilObj)
 
