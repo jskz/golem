@@ -34,16 +34,16 @@ const (
 )
 
 type Reset struct {
-	Id   uint
-	Zone *Zone
-	Room *Room
+	Id   uint  `json:"id"`
+	Zone *Zone `json:"zone"`
+	Room *Room `json:"room"`
 
-	ResetType uint
+	ResetType uint `json:"resetType"`
 
-	Value0 int
-	Value1 int
-	Value2 int
-	Value3 int
+	Value0 int `json:"value0"`
+	Value1 int `json:"value1"`
+	Value2 int `json:"value2"`
+	Value3 int `json:"value3"`
 }
 
 func (game *Game) ResetRoom(room *Room) {

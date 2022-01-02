@@ -26,6 +26,26 @@ function do_reset(ch, args) {
     let [firstArgument, rest] = Golem.util.oneArgument(args);
 
     switch (firstArgument) {
+        case 'list':
+            let i = 1;
+            for(let iter = ch.room.resets.head; iter != null; iter = iter.next) {
+                const reset = iter.value;
+
+                switch(reset.resetType) {
+                    case 0:
+                        ch.send("#" + i + ". mobile reset with ID " + reset.value0 + ", not exceeding a count of " + reset.value2 + "\r\n");
+                        break;
+                    case 1:
+                        ch.send("#" + i + ". object reset with ID " + reset.value0 + ", not exceeding a count of " + reset.value2 + "\r\n");
+                        break;
+                    default:
+                        break;
+                }
+
+                i++;
+            }
+            break;
+
         case 'room':
             Golem.game.resetRoom(ch.room);
             ch.send("You reset the room.\r\n");
