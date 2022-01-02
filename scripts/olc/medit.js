@@ -69,6 +69,28 @@ function do_medit(ch, args) {
             ch.send("Ok.\r\n");
             break;
 
+        case 'flag':
+            if (!xxs.length) {
+                ch.send("A mobile flag argument to toggle is required.\r\nExample: medit troll flag aggressive\n");
+                return;
+            }
+
+            const flag = Golem.util.findCharacterFlag(xxs);
+            if(!flag) {
+                ch.send("No such character flag exists.\r\n");
+                return;
+            }
+
+            if(!(target.flags & flag.flag)) {
+                target.flags |= flag.flag;
+                ch.send("Ok.  Enabled character flag " + flag.name + " on " + target.getShortDescription(ch) + ".\r\n");
+                return;
+            }
+
+            target.flags &= ~(flag.flag);
+            ch.send("Ok.  Disabled character flag " + flag.name + " on " + target.getShortDescription(ch) + ".\r\n");
+            return;
+
         case 'short_description':
             if(target.flags & Golem.CharacterFlags.CHAR_IS_PLAYER) {
                 ch.send("Failed: not an NPC.\r\n");
