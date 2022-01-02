@@ -8,10 +8,10 @@
 function do_redit(ch, args) {
     function displayUsage() {
         ch.send(
-            `Usage:
-    redit name <room name> - Set room name
-    redit description - String editor for room description
-    redit save - Save room to database
+            `{WRoom editor usage:
+{Gredit name <room name> - {gSet room name
+{Gredit description      - {gString editor for room description
+{Gredit save             - {gSave room to database{x
 `);
     }
 
@@ -31,6 +31,15 @@ function do_redit(ch, args) {
 
             ch.room.name = rest;
             ch.send("Ok.\r\n");
+            break;
+
+        case 'description':
+            Golem.StringEditor(ch.client,
+                ch.room.description,
+                (_, string) => {
+                    ch.room.description = string;
+                    ch.send("Ok.\r\n");
+                });
             break;
 
         case 'save':
