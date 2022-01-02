@@ -131,6 +131,20 @@ func (ch *Character) Sync() error {
 	return nil
 }
 
+func (reset *Reset) Delete() error {
+	_, err := reset.Zone.Game.db.Exec(`
+		DELETE FROM
+			resets
+		WHERE
+			id = ?
+	`, reset.Id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (exit *Exit) Delete() error {
 	_, err := exit.Room.Game.db.Exec(`
 		DELETE FROM
