@@ -151,6 +151,50 @@ func (game *Game) ResetZone(zone *Zone) {
 	zone.LastReset = time.Now()
 }
 
+func (zone *Zone) FindAvailableRoomID() (int, error) {
+	var availableId int = 0
+
+	row := zone.Game.db.QueryRow(`
+	/*
+	* Zones are not intended to be larger than a few hundred rooms at most and will never
+	* exceed the recursion depth limit; first, create the sequence of numbers in the low-high
+	* range for this zone's specified range.
+	*/
+	WITH RECURSIVE room_ids AS (
+		SELECT (
+			SELECT low FROM zones WHERE zones.id = ?
+		) AS value
+		UNION ALL
+		SELECT value + 1 AS value
+		FROM room_ids
+		WHERE room_ids.value < (
+			SELECT high FROM zones WHERE zones.id = ?
+		)
+	)
+	SELECT
+		value
+	FROM
+		room_ids
+	WHERE
+		value
+	/* Exclude the set of this zone's room IDs */
+	NOT IN (
+		SELECT
+			rooms.id
+		FROM
+			rooms
+		INNER JOIN
+			zones ON zones.id = rooms.zone_id
+	);`, zone.Id, zone.Id)
+
+	err := row.Scan(&availableId)
+	if err != nil {
+		return 0, err
+	}
+
+	return availableId, nil
+}
+
 func (game *Game) LoadZones() error {
 	log.Printf("Loading zones.\r\n")
 
