@@ -113,7 +113,6 @@ function do_xedit(ch, args) {
                 }
 
                 const newRoom = ch.room.zone.createRoom();
-
                 if(!newRoom) {
                     ch.send("Something went wrong trying to dig a new room.\r\n");
                     return;

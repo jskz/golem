@@ -34,6 +34,27 @@ func (room *Room) Save() error {
 	return nil
 }
 
+func (zone *Zone) Save() error {
+	_, err := zone.Game.db.Exec(`
+		UPDATE
+			zones
+		SET
+			name = ?,
+			who_description = ?,
+			low = ?,
+			high = ?,
+			reset_message = ?,
+			reset_frequency = ?
+		WHERE
+			id = ?
+	`, zone.Name, zone.WhoDescription, zone.ResetMessage, zone.ResetFrequency, zone.Id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Updates an object's parent index with this instance's properties
 func (obj *ObjectInstance) Sync() error {
 	if obj.ParentId == 0 {

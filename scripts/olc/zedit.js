@@ -10,7 +10,7 @@ function do_zedit(ch, args) {
         ch.send(
             `{WZone editor usage:
                 
-{Gzedit save             - {gSave zone properties
+{Gzedit save             - {gSave zone properties to database
 {x`);
     }
 

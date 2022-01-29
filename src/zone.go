@@ -96,6 +96,12 @@ func (room *Room) CreateReset(resetType uint, v0, v1, v2, v3 int) *Reset {
 	return reset
 }
 
+func (game *Game) CreateZone() *Zone {
+	zone := &Zone{}
+
+	return zone
+}
+
 func (game *Game) ResetRoom(room *Room) {
 	for iter := room.Resets.Head; iter != nil; iter = iter.Next {
 		reset := iter.Value.(*Reset)
