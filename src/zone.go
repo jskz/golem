@@ -121,11 +121,6 @@ func (game *Game) CreateZone() *Zone {
 	}
 
 	zone.Id = int(lastInsertId)
-
-	if err != nil {
-		return nil
-	}
-
 	return zone
 }
 
