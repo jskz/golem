@@ -43,8 +43,8 @@ function spell_chain_lightning(ch, args) {
                     if (!rch.isEqual(target)) {
                         rch.send(
                             '{WThe magical bolt arcs from ' +
-                                target.getShortDescriptionUpper(rch) +
-                                '{W to ' + otherGroupMembers[choice].getShortDescriptionUpper(rch) + '{W with an instantaneous, ear-splitting BANG!{x\r\n'
+                                target.getShortDescription(rch) +
+                                '{W to ' + otherGroupMembers[choice].getShortDescription(rch) + '{W with an instantaneous, ear-splitting BANG!{x\r\n'
                         );
                     }
                 }
