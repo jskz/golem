@@ -27,6 +27,9 @@ function spell_chain_lightning(ch, args) {
 
         const amount = ~~(Math.random() * 50) + 10;
         Golem.game.damage(ch, target, false, amount, Golem.Combat.DamageTypeExotic);
+        if(!target || !target.room.isEqual(ch.room)) {
+            return;
+        }
 
         // 40% chance to recurse to a random other group member of the target, if the target is in a group
         if(Math.random() >= 0.6 && target.group) {
