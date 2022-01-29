@@ -98,6 +98,33 @@ func (room *Room) CreateReset(resetType uint, v0, v1, v2, v3 int) *Reset {
 
 func (game *Game) CreateZone() *Zone {
 	zone := &Zone{}
+	zone.Name = "Untitled Zone"
+	zone.WhoDescription = "Void"
+	zone.Low = 0
+	zone.High = 0
+	zone.ResetMessage = "Tick-tock."
+	zone.ResetFrequency = 15
+
+	res, err := game.db.Exec(`
+	INSERT INTO
+		zones(name, who_description, low, high, reset_message, reset_frequency)
+	VALUES
+		(?, ?, ?, ?, ?, ?)
+	`, zone.Name, zone.WhoDescription, zone.Low, zone.High, zone.ResetMessage, zone.ResetFrequency)
+	if err != nil {
+		return nil
+	}
+
+	lastInsertId, err := res.LastInsertId()
+	if err != nil {
+		return nil
+	}
+
+	zone.Id = int(lastInsertId)
+
+	if err != nil {
+		return nil
+	}
 
 	return zone
 }

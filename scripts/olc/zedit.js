@@ -10,13 +10,9 @@ function do_zedit(ch, args) {
         ch.send(
             `{WZone editor usage:
                 
-{Gzedit save             - {gSave zone properties to database
+{Gzedit save          - {gSave zone properties to database
+{Gzedit create        - {gCreate a new zone
 {x`);
-    }
-
-    if (!ch.room) {
-        ch.send("You can't do that here.\r\n");
-        return;
     }
 
     let [firstArgument, xs] = Golem.util.oneArgument(args);
@@ -28,7 +24,29 @@ function do_zedit(ch, args) {
     }
 
     switch (firstArgument) {
+        case 'create':
+            const newZone = Golem.game.createZone();
+            if(!newZone) {
+                ch.send("Something went wrong trying to create a new zone.\r\n");
+                return;
+            }
+
+            ch.send(`Created a new zone with ID ${newZone.id}.\r\n`);
+            return;
+
         case 'save':
+            if (!ch.room
+            || ch.room.flags & Golem.RoomFlags.ROOM_PLANAR
+            || ch.room.flags & Golem.RoomFlags.ROOM_VIRTUAL) {
+                ch.send("You can't do that here.\r\n");
+                return;
+            }
+
+            if(ch.room.zone.save()) {
+                ch.send("Something went wrong trying to save this zone.\r\n");
+                return;
+            }
+
             ch.send("Ok.\r\n");
             return;
 

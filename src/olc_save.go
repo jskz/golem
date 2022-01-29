@@ -47,7 +47,7 @@ func (zone *Zone) Save() error {
 			reset_frequency = ?
 		WHERE
 			id = ?
-	`, zone.Name, zone.WhoDescription, zone.ResetMessage, zone.ResetFrequency, zone.Id)
+	`, zone.Name, zone.WhoDescription, zone.Low, zone.High, zone.ResetMessage, zone.ResetFrequency, zone.Id)
 	if err != nil {
 		return err
 	}
