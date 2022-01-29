@@ -9,7 +9,8 @@ function do_zedit(ch, args) {
     function displayUsage() {
         ch.send(
             `{WZone editor usage:
-                
+
+{Gzones               - {gDisplay a list of all zones
 {Gzedit save          - {gSave zone properties to database
 {Gzedit create        - {gCreate a new zone
 {x`);
