@@ -33,7 +33,7 @@ function spell_chain_lightning(ch, args) {
 
         // 40% chance to recurse to a random other group member of the target, if the target is in a group
         if(Math.random() >= 0.6 && target.group) {
-            const otherGroupMembers = target.group.values().filter(groupMember => !groupMember.isEqual(target));
+            const otherGroupMembers = target.group.values().filter(groupMember => !groupMember.isEqual(target) && groupMember.room?.isEqual(ch.room));
             
             // only if there are other members in the party - can't chain to yourself, but it is valid to
             // chain back & forth until recursive depth is exhausted
