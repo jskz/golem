@@ -88,7 +88,7 @@ VALUES (1, 'limbo-developer-maze',
                         if (!cell.wall && cell.room) {
                             cell.room.flags = Golem.RoomFlags.ROOM_VIRTUAL | Golem.RoomFlags.ROOM_DUNGEON;
 
-                            if(z > 1) {
+                            if(z > 2) {
                                 cell.room.flags |= Golem.RoomFlags.ROOM_EVIL_AURA;
                             }
 
