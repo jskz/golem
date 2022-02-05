@@ -20,10 +20,15 @@ function onCombatUpdate() {
                 }
 
                 let attackerRounds = 1,
+                    attackerChanceToHit = 100,
                     dexterityBonusRounds = parseInt((vch.getStat(Golem.StatTypes.STAT_DEXTERITY)[0] - 10) / 4);
 
                 attackerRounds += dexterityBonusRounds;
                 
+                if(vch.affected & Golem.AffectedTypes.AFFECT_BLINDNESS) {
+                    attackerChanceToHit /= 4;
+                }
+
                 if(vch.affected & Golem.AffectedTypes.AFFECT_HASTE) {
                     // TODO: allow interface for getting effect level versus player level; i.e., 
                     // max level haste spell = 2 or 3 extra rounds, lowest level = just 1
@@ -78,6 +83,13 @@ function onCombatUpdate() {
 
                         damageType = v3;
                         damage = sum;
+                    }
+
+                    /* Did we miss with this attack? */
+                    if(Math.random() > attackerChanceToHit / 100) {
+                        vch.send('{DYou miss ' + victim.getShortDescription(vch) + '{D.{x\r\n');
+                        victim.send('{D' + vch.getShortDescriptionUpper(victim) + ' {Dmisses while trying to attack you!{x\r\n');
+                        continue;
                     }
 
                     /* Check victim dodge skill */
