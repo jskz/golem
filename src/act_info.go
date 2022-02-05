@@ -386,7 +386,7 @@ func do_look(ch *Character, arguments string) {
 		return
 	}
 
-	if ch.Affected&AFFECT_BLINDNESS != 0 {
+	if !ch.Room.Visisble(ch) {
 		ch.Send("{DYou can't see anything!{x\r\n")
 		return
 	}

@@ -92,6 +92,14 @@ func FindRoomFlag(flag string) *Flag {
 	return nil
 }
 
+func (room *Room) Visisble(viewer *Character) bool {
+	if viewer.Affected&AFFECT_BLINDNESS != 0 {
+		return false
+	}
+
+	return true
+}
+
 func (room *Room) AddCharacter(ch *Character) {
 	room.Characters.Insert(ch)
 	ch.Room = room
