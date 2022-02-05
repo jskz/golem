@@ -361,7 +361,7 @@ func (obj *ObjectInstance) GetShortDescriptionUpper(viewer *Character) string {
 
 func (obj *ObjectInstance) Visible(viewer *Character) bool {
 	if viewer.Affected&AFFECT_BLINDNESS != 0 {
-		return true
+		return false
 	}
 
 	return true

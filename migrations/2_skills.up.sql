@@ -71,6 +71,7 @@ INSERT INTO skills(id, name, type, intent) VALUES (16, 'backstab', 'skill', 'off
 INSERT INTO skills(id, name, type, intent) VALUES (17, 'stun', 'skill', 'offensive');
 INSERT INTO skills(id, name, type, intent) VALUES (18, 'group heal', 'spell', 'curative');
 INSERT INTO skills(id, name, type, intent) VALUES (19, 'chain lightning', 'spell', 'offensive');
+INSERT INTO skills(id, name, type, intent) VALUES (20, 'blindness', 'spell', 'offensive');
 
 /* Grant unarmed combat as a seed skill for all four base jobs with varying complexity and cost */
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (1, 1, 2, 1, 1, 50);
@@ -104,6 +105,7 @@ INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (15,
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (18, 3, 14, 10, 3, 75);
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (17, 3, 13, 50, 20, 500);
 INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (23, 3, 19, 30, 3, 150);
+INSERT INTO job_skill(id, job_id, skill_id, level, complexity, cost) VALUES (24, 3, 20, 20, 2, 100);
 
 /* Grant some skills mastered to the seed admin user as well */
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (1, 1, 1, 2, 100);
@@ -124,6 +126,7 @@ INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, prof
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (16, 1, 16, 2, 100);
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (17, 1, 17, 1, 100);
 INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (18, 1, 18, 4, 100);
-INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (19, 1, 19, 4, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (19, 1, 19, 3, 100);
+INSERT INTO pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency) VALUES (20, 1, 20, 3, 100);
 
 CREATE INDEX index_skill_name ON skills(name);
