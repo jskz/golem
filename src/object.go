@@ -336,10 +336,18 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 }
 
 func (obj *ObjectInstance) GetShortDescription(viewer *Character) string {
+	if !obj.Visible(viewer) {
+		return "something"
+	}
+
 	return obj.ShortDescription
 }
 
 func (obj *ObjectInstance) GetShortDescriptionUpper(viewer *Character) string {
+	if !obj.Visible(viewer) {
+		return "Something"
+	}
+
 	var short string = obj.GetShortDescription(viewer)
 
 	if short == "" {
@@ -349,6 +357,14 @@ func (obj *ObjectInstance) GetShortDescriptionUpper(viewer *Character) string {
 	runes := []rune(short)
 	runes[0] = unicode.ToUpper(runes[0])
 	return string(runes)
+}
+
+func (obj *ObjectInstance) Visible(viewer *Character) bool {
+	if viewer.Affected&AFFECT_BLINDNESS != 0 {
+		return true
+	}
+
+	return true
 }
 
 func (obj *ObjectInstance) reify() error {
