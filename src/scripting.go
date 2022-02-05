@@ -647,6 +647,7 @@ func (game *Game) InitScripting() error {
 	affectedTypes.Set("AFFECT_DETECT_MAGIC", game.vm.ToValue(AFFECT_DETECT_MAGIC))
 	affectedTypes.Set("AFFECT_FIRESHIELD", game.vm.ToValue(AFFECT_FIRESHIELD))
 	affectedTypes.Set("AFFECT_PARALYSIS", game.vm.ToValue(AFFECT_PARALYSIS))
+	affectedTypes.Set("AFFECT_BLINDNESS", game.vm.ToValue(AFFECT_BLINDNESS))
 
 	statTypes := game.vm.NewObject()
 	statTypes.Set("STAT_NONE", game.vm.ToValue(STAT_NONE))

@@ -118,6 +118,7 @@ const (
 	AFFECT_DETECT_MAGIC = 1 << 5
 	AFFECT_FIRESHIELD   = 1 << 6
 	AFFECT_PARALYSIS    = 1 << 7
+	AFFECT_BLINDNESS    = 1 << 8
 )
 
 const (
