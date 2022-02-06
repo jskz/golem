@@ -25,7 +25,9 @@ function onCombatUpdate() {
 
                 attackerRounds += dexterityBonusRounds;
                 
-                if(vch.affected & Golem.AffectedTypes.AFFECT_BLINDNESS) {
+                // TODO: expand on second condition if the *attacker* has some enhanced vision to see in the dark
+                // when that functionality exists
+                if(vch.affected & Golem.AffectedTypes.AFFECT_BLINDNESS || !vch.room.activeLightSourcePresent()) {
                     attackerChanceToHit /= 4;
                 }
 
