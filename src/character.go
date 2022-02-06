@@ -311,6 +311,22 @@ func (ch *Character) Finalize() error {
 	return nil
 }
 
+func (ch *Character) Visible(viewer *Character) bool {
+	if viewer.IsEqual(ch) {
+		return true
+	}
+
+	if viewer.Affected&AFFECT_BLINDNESS != 0 {
+		return false
+	}
+
+	if viewer.Room != nil && viewer.Room.Flags&ROOM_DARK != 0 && !viewer.Room.ActiveLightSourcePresent() {
+		return false
+	}
+
+	return true
+}
+
 func (ch *Character) GetEquippedLightSource() *ObjectInstance {
 	var obj *ObjectInstance = ch.GetEquipment(WearLocationHeld)
 
@@ -1042,6 +1058,10 @@ func (ch *Character) getMaxCarryWeight() float64 {
 }
 
 func (ch *Character) GetShortDescription(viewer *Character) string {
+	if !ch.Visible(viewer) {
+		return "someone"
+	}
+
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
 		return ch.Name
 	}
@@ -1050,6 +1070,10 @@ func (ch *Character) GetShortDescription(viewer *Character) string {
 }
 
 func (ch *Character) GetShortDescriptionUpper(viewer *Character) string {
+	if !ch.Visible(viewer) {
+		return "Someone"
+	}
+
 	var short string = ch.GetShortDescription(viewer)
 
 	if short == "" {
