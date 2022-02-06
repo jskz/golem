@@ -364,6 +364,10 @@ func (obj *ObjectInstance) Visible(viewer *Character) bool {
 		return false
 	}
 
+	if viewer.Room != nil && viewer.Room.Flags&ROOM_DARK != 0 && !viewer.Room.ActiveLightSourcePresent() {
+		return false
+	}
+
 	return true
 }
 

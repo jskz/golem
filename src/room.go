@@ -30,6 +30,7 @@ const (
 	ROOM_DUNGEON    = 1 << 3
 	ROOM_EVIL_AURA  = 1 << 4
 	ROOM_PLANAR     = 1 << 5
+	ROOM_DARK       = 1 << 6
 )
 
 var RoomFlagTable []Flag = []Flag{
@@ -39,6 +40,7 @@ var RoomFlagTable []Flag = []Flag{
 	{Name: "dungeon", Flag: ROOM_DUNGEON},
 	{Name: "evil_aura", Flag: ROOM_EVIL_AURA},
 	{Name: "planar", Flag: ROOM_PLANAR},
+	{Name: "dark", Flag: ROOM_DARK},
 }
 
 type Room struct {
@@ -92,8 +94,24 @@ func FindRoomFlag(flag string) *Flag {
 	return nil
 }
 
-func (room *Room) Visisble(viewer *Character) bool {
+func (room *Room) ActiveLightSourcePresent() bool {
+	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+
+		if rch.HasEquippedLightSource() {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (room *Room) Visible(viewer *Character) bool {
 	if viewer.Affected&AFFECT_BLINDNESS != 0 {
+		return false
+	}
+
+	if room.Flags&ROOM_DARK != 0 && !room.ActiveLightSourcePresent() {
 		return false
 	}
 

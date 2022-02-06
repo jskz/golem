@@ -311,6 +311,26 @@ func (ch *Character) Finalize() error {
 	return nil
 }
 
+func (ch *Character) GetEquippedLightSource() *ObjectInstance {
+	var obj *ObjectInstance = ch.GetEquipment(WearLocationHeld)
+
+	if obj != nil && obj.ItemType == ItemTypeLight {
+		return obj
+	}
+
+	return nil
+}
+
+func (ch *Character) HasEquippedLightSource() bool {
+	var obj *ObjectInstance = ch.GetEquipment(WearLocationHeld)
+
+	if obj != nil && obj.ItemType == ItemTypeLight {
+		return true
+	}
+
+	return false
+}
+
 func (ch *Character) SavePlayerSkills() error {
 	var proficiencyValues strings.Builder
 
