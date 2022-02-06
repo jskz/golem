@@ -95,6 +95,10 @@ func FindRoomFlag(flag string) *Flag {
 }
 
 func (room *Room) ActiveLightSourcePresent() bool {
+	if room.Flags&ROOM_DARK == 0 {
+		return true
+	}
+
 	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
