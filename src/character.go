@@ -28,7 +28,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var IndexedArgumentRegexp *regexp.Regexp = regexp.MustCompile("^[0-9].(.*)$")
+var IndexedArgumentRegexp *regexp.Regexp = regexp.MustCompile("^[0-9]+.(.*)$")
 
 const UnauthenticatedUsername = "unnamed"
 
