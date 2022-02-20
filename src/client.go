@@ -67,7 +67,6 @@ const (
 
 /* Instance of a client connection */
 type Client struct {
-	id                string
 	sessionStartedAt  time.Time
 	conn              net.Conn
 	ansiEnabled       bool
