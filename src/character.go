@@ -18,6 +18,8 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -25,6 +27,8 @@ import (
 	"github.com/dop251/goja"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var IndexedArgumentRegexp *regexp.Regexp = regexp.MustCompile("^[0-9].(.*)$")
 
 const UnauthenticatedUsername = "unnamed"
 
@@ -1118,10 +1122,24 @@ func (ch *Character) RemoveObject(obj *ObjectInstance) {
 }
 
 func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *ObjectInstance {
+	var desiredIndex int = 1
+	var i int = 1
+	var err error = nil
+
 	processed := strings.ToLower(argument)
 
 	if ch.Room == nil || len(processed) < 1 || obj.Contents == nil || obj.Contents.Count < 1 {
 		return nil
+	}
+
+	if IndexedArgumentRegexp.MatchString(processed) {
+		splitArguments := strings.Split(processed, ".")
+		desiredIndex, err = strconv.Atoi(splitArguments[0])
+		if err != nil {
+			return nil
+		}
+
+		processed = splitArguments[1]
 	}
 
 	for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
@@ -1129,8 +1147,13 @@ func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *Obj
 
 		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
-			if strings.Compare(strings.ToLower(part), processed) == 0 {
-				return obj
+			if strings.EqualFold(part, processed) {
+				if i == desiredIndex {
+					return obj
+				} else {
+					i++
+					continue
+				}
 			}
 		}
 	}
@@ -1139,10 +1162,24 @@ func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *Obj
 }
 
 func (ch *Character) FindObjectInRoom(argument string) *ObjectInstance {
+	var desiredIndex int = 1
+	var i int = 1
+	var err error = nil
+
 	processed := strings.ToLower(argument)
 
 	if ch.Room == nil || len(processed) < 1 {
 		return nil
+	}
+
+	if IndexedArgumentRegexp.MatchString(processed) {
+		splitArguments := strings.Split(processed, ".")
+		desiredIndex, err = strconv.Atoi(splitArguments[0])
+		if err != nil {
+			return nil
+		}
+
+		processed = splitArguments[1]
 	}
 
 	for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
@@ -1150,8 +1187,13 @@ func (ch *Character) FindObjectInRoom(argument string) *ObjectInstance {
 
 		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
-			if strings.Compare(strings.ToLower(part), processed) == 0 {
-				return obj
+			if strings.EqualFold(part, processed) {
+				if i == desiredIndex {
+					return obj
+				} else {
+					i++
+					continue
+				}
 			}
 		}
 	}
@@ -1160,10 +1202,23 @@ func (ch *Character) FindObjectInRoom(argument string) *ObjectInstance {
 }
 
 func (ch *Character) FindObjectOnSelf(argument string) *ObjectInstance {
-	processed := strings.ToLower(argument)
+	var desiredIndex int = 1
+	var i int = 1
+	var processed string = strings.ToLower(argument)
+	var err error = nil
 
 	if ch.Room == nil || len(processed) < 1 {
 		return nil
+	}
+
+	if IndexedArgumentRegexp.MatchString(processed) {
+		splitArguments := strings.Split(processed, ".")
+		desiredIndex, err = strconv.Atoi(splitArguments[0])
+		if err != nil {
+			return nil
+		}
+
+		processed = splitArguments[1]
 	}
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
@@ -1175,8 +1230,13 @@ func (ch *Character) FindObjectOnSelf(argument string) *ObjectInstance {
 
 		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
-			if strings.Compare(strings.ToLower(part), processed) == 0 {
-				return obj
+			if strings.EqualFold(part, processed) {
+				if i == desiredIndex {
+					return obj
+				} else {
+					i++
+					continue
+				}
 			}
 		}
 	}
@@ -1189,7 +1249,10 @@ func (ch *Character) InSameGroup(other *Character) bool {
 }
 
 func (ch *Character) FindCharacterInRoom(argument string) *Character {
-	processed := strings.ToLower(argument)
+	var desiredIndex int = 1
+	var i int = 1
+	var processed string = strings.ToLower(argument)
+	var err error = nil
 
 	if processed == "self" {
 		return ch
@@ -1199,13 +1262,28 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 		return nil
 	}
 
+	if IndexedArgumentRegexp.MatchString(processed) {
+		splitArguments := strings.Split(processed, ".")
+		desiredIndex, err = strconv.Atoi(splitArguments[0])
+		if err != nil {
+			return nil
+		}
+
+		processed = splitArguments[1]
+	}
+
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 		rch := iter.Value.(*Character)
 
 		nameParts := strings.Split(rch.Name, " ")
 		for _, part := range nameParts {
-			if strings.Compare(strings.ToLower(part), processed) == 0 {
-				return rch
+			if strings.EqualFold(part, processed) {
+				if i == desiredIndex {
+					return rch
+				} else {
+					i++
+					continue
+				}
 			}
 		}
 	}
