@@ -194,7 +194,7 @@ func (game *Game) nanny(client *Client, message string) {
 	case ConnectionStateConfirmName:
 		if !strings.HasPrefix(strings.ToLower(message), "y") {
 			client.ConnectionState = ConnectionStateName
-			client.Character.Name = UnauthenticatedUsername
+			client.Character.Name = ""
 			output.WriteString("\r\nBy what name do you wish to be known? ")
 			break
 		}

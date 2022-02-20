@@ -30,8 +30,6 @@ import (
 
 var IndexedArgumentRegexp *regexp.Regexp = regexp.MustCompile("^[0-9]+.(.*)$")
 
-const UnauthenticatedUsername = "unnamed"
-
 type Job struct {
 	Id                         uint        `json:"id"`
 	Name                       string      `json:"name"`
@@ -1025,7 +1023,7 @@ func (ch *Character) Write(data []byte) (n int, err error) {
  */
 func (game *Game) IsValidPCName(name string) bool {
 	/* Length bounds */
-	if len(name) < 3 || len(name) > 14 || name == UnauthenticatedUsername {
+	if len(name) < 3 || len(name) > 14 {
 		return false
 	}
 
@@ -1371,7 +1369,7 @@ func NewCharacter() *Character {
 	character.outputHead = 0
 
 	character.Affected = 0
-	character.Name = UnauthenticatedUsername
+	character.Name = ""
 	character.Client = nil
 	character.Level = 0
 	character.Experience = 0
