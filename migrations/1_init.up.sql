@@ -359,7 +359,7 @@ VALUES
 INSERT INTO
     player_characters(id, username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 VALUES
-    (1, 'Admin', '$2a$10$MyXwV9I9wR1quCNCdX0QAuNMhFQnxlqwleyFqCI98yJs7RW/C8LDG', 1, 1, 1, 3, 60, 5000, 0, 0, 100, 100, 5000, 5000, 5000, 5000, 18, 18, 18, 18, 18, 18, 18);
+    (1, 'Admin', '$2a$10$cGUzx9usCZkiu..nkXchourkR3nmHgztXAkeW0MNBKU2S9K8ELD7C', 1, 1, 1, 3, 60, 5000, 0, 0, 100, 100, 5000, 5000, 5000, 5000, 18, 18, 18, 18, 18, 18, 18);
 
 /* Test NPC in Limbo area */
 INSERT INTO
