@@ -153,6 +153,11 @@ func (game *Game) nanny(client *Client, message string) {
 		}
 
 		if character != nil {
+			if character.Client != nil && character.Client.ConnectionState < ConnectionStatePlaying {
+				output.WriteString("Invalid name, please try another.\r\n\r\nBy what name do you wish to be known? ")
+				break
+			}
+
 			client.Character = character
 			client.Character.Flags |= CHAR_IS_PLAYER
 			output.WriteString("Password: ")
