@@ -474,3 +474,15 @@ func (game *Game) LoadResets() error {
 	log.Printf("Loaded %d resets from database.\r\n", resetCount)
 	return nil
 }
+
+func (game *Game) FindZoneByID(id int) *Zone {
+	for zoneIter := game.Zones.Head; zoneIter != nil; zoneIter = zoneIter.Next {
+		zone := zoneIter.Value.(*Zone)
+
+		if zone.Id == id {
+			return zone
+		}
+	}
+
+	return nil
+}
