@@ -3,7 +3,8 @@ module github.com/jskz/golem
 go 1.16
 
 require (
-	github.com/containerd/containerd v1.5.7 // indirect
+	github.com/containerd/containerd v1.5.9 // indirect
+	github.com/docker/distribution v2.8.0+incompatible // indirect
 	github.com/docker/docker v20.10.10+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
 	github.com/dop251/goja v0.0.0-20220214123719-b09a6bfa842f
