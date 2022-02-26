@@ -216,6 +216,22 @@ func (game *Game) ResetRoom(room *Room) {
 	}
 }
 
+func (game *Game) ValidZoneRange(low uint, high uint) bool {
+	if low <= 0 || high <= 0 || high < low || low >= 2147483647 || high >= 2147483647 {
+		return false
+	}
+
+	for zoneIter := game.Zones.Head; zoneIter != nil; zoneIter = zoneIter.Next {
+		zone := zoneIter.Value.(*Zone)
+
+		if low <= zone.High && zone.Low <= high {
+			return false
+		}
+	}
+
+	return true
+}
+
 func (game *Game) ResetZone(zone *Zone) {
 	for id := zone.Low; id <= zone.High; id++ {
 		room, err := game.LoadRoomIndex(id)
