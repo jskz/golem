@@ -13,6 +13,13 @@ function do_zedit(ch, args) {
 {Gzones               - {gDisplay a list of all zones
 {Gzedit save          - {gSave zone properties to database
 {Gzedit create        - {gCreate a new zone
+
+{WThe following values may be used in a general way with the syntax:
+{Gzedit <zone_id> <attribute> <value>
+{Wto set a zone's specified attribute to the given value.
+
+{GThe following attributes are available:{g
+    name who_description reset_message reset_frequency
 {x`);
     }
 
@@ -52,8 +59,48 @@ function do_zedit(ch, args) {
             return;
 
         default:
-            displayUsage();
-            return;
+            {
+                const zoneId = parseInt(firstArgument);
+                const zone = Golem.game.findZoneByID(zoneId);
+
+                if(!zone) {
+                    ch.send("No such zone.\r\n");
+                    return;
+                }
+
+                switch(secondArgument) {
+                    case 'name':
+                        zone.name = xxs;
+                        ch.send("Ok.\r\n");
+                        break;
+
+                    case 'who_description':
+                        zone.whoDescription = xxs;
+                        ch.send("Ok.\r\n");
+                        break;
+
+                    case 'reset_frequency':
+                        const newFrequency = parseInt(xxs);
+
+                        if(isNaN(newFrequency)) {
+                            ch.send("Please provide an integer reset frequency in minutes.\r\n");
+                            return;
+                        }
+
+                        zone.resetFrequency = newFrequency;
+                        ch.send("Ok.\r\n");
+                        break;
+
+                    case 'reset_message':
+                        zone.resetMessage = xxs;
+                        ch.send("Ok.\r\n");
+                        break;
+
+                    default:
+                        displayUsage();
+                        return;
+                }
+            }
     }
 }
 
