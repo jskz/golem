@@ -104,6 +104,7 @@ func (game *Game) CreateZone() *Zone {
 	zone.High = 0
 	zone.ResetMessage = "Tick-tock."
 	zone.ResetFrequency = 15
+	zone.LastReset = time.Now()
 
 	res, err := game.db.Exec(`
 	INSERT INTO
@@ -121,6 +122,7 @@ func (game *Game) CreateZone() *Zone {
 	}
 
 	zone.Id = int(lastInsertId)
+	game.Zones.Insert(zone)
 	return zone
 }
 
