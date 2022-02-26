@@ -19,7 +19,7 @@ function do_zedit(ch, args) {
 {Wto set a zone's specified attribute to the given value.
 
 {GThe following attributes are available:{g
-    name who_description reset_message reset_frequency
+    name who_description reset_message reset_frequency lo_hi
 {x`);
     }
 
@@ -93,6 +93,28 @@ function do_zedit(ch, args) {
 
                     case 'reset_message':
                         zone.resetMessage = xxs;
+                        ch.send("Ok.\r\n");
+                        break;
+
+                    case 'lo_hi':
+                        let [thirdArgument, xxxs] = Golem.util.oneArgument(xxs);
+
+                        const low = parseInt(thirdArgument);
+                        const high = parseInt(xxxs);
+
+                        if(isNaN(low) || isNaN(high)) {
+                            ch.send("Please provide two integer values for zone low and high IDs.\r\n");
+                            return;
+                        }
+
+                        if(!Golem.game.validZoneRange(low, high)) {
+                            ch.send("Please provide a valid low-high ID range which does not overlap an existing zone.\r\n");
+                            return;
+                        }
+
+                        zone.low = low;
+                        zone.high = high;
+                        
                         ch.send("Ok.\r\n");
                         break;
 
