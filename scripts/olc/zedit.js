@@ -10,9 +10,9 @@ function do_zedit(ch, args) {
         ch.send(
             `{WZone editor usage:
 
-{Gzones               - {gDisplay a list of all zones
-{Gzedit save          - {gSave zone properties to database
-{Gzedit create        - {gCreate a new zone
+{Gzones                 - {gDisplay a list of all zones
+{Gzedit <zone_id> save  - {gSave a zone's properties to database
+{Gzedit create          - {gCreate a new zone
 
 {WThe following values may be used in a general way with the syntax:
 {Gzedit <zone_id> <attribute> <value>
@@ -26,7 +26,7 @@ function do_zedit(ch, args) {
     let [firstArgument, xs] = Golem.util.oneArgument(args);
     let [secondArgument, xxs] = Golem.util.oneArgument(xs);
 
-    if(!args.length) {
+    if (!args.length) {
         displayUsage();
         return;
     }
@@ -34,7 +34,7 @@ function do_zedit(ch, args) {
     switch (firstArgument) {
         case 'create':
             const newZone = Golem.game.createZone();
-            if(!newZone) {
+            if (!newZone) {
                 ch.send("Something went wrong trying to create a new zone.\r\n");
                 return;
             }
@@ -42,59 +42,43 @@ function do_zedit(ch, args) {
             ch.send(`Created a new zone with ID ${newZone.id}.\r\n`);
             return;
 
-        case 'save':
-            if (!ch.room
-            || ch.room.flags & Golem.RoomFlags.ROOM_PLANAR
-            || ch.room.flags & Golem.RoomFlags.ROOM_VIRTUAL) {
-                ch.send("You can't do that here.\r\n");
-                return;
-            }
-
-            if(ch.room.zone.save()) {
-                ch.send("Something went wrong trying to save this zone.\r\n");
-                return;
-            }
-
-            ch.send("Ok.\r\n");
-            return;
-
         default:
             {
                 const zoneId = parseInt(firstArgument);
                 const zone = Golem.game.findZoneByID(zoneId);
 
-                if(!zone) {
+                if (!zone) {
                     ch.send("No such zone.\r\n");
                     return;
                 }
 
-                switch(secondArgument) {
+                switch (secondArgument) {
                     case 'name':
                         zone.name = xxs;
                         ch.send("Ok.\r\n");
-                        break;
+                        return;
 
                     case 'who_description':
                         zone.whoDescription = xxs;
                         ch.send("Ok.\r\n");
-                        break;
+                        return;
 
                     case 'reset_frequency':
                         const newFrequency = parseInt(xxs);
 
-                        if(isNaN(newFrequency)) {
+                        if (isNaN(newFrequency)) {
                             ch.send("Please provide an integer reset frequency in minutes.\r\n");
                             return;
                         }
 
                         zone.resetFrequency = newFrequency;
                         ch.send("Ok.\r\n");
-                        break;
+                        return;
 
                     case 'reset_message':
                         zone.resetMessage = xxs;
                         ch.send("Ok.\r\n");
-                        break;
+                        return;
 
                     case 'lo_hi':
                         let [thirdArgument, xxxs] = Golem.util.oneArgument(xxs);
@@ -102,21 +86,30 @@ function do_zedit(ch, args) {
                         const low = parseInt(thirdArgument);
                         const high = parseInt(xxxs);
 
-                        if(isNaN(low) || isNaN(high)) {
+                        if (isNaN(low) || isNaN(high)) {
                             ch.send("Please provide two integer values for zone low and high IDs.\r\n");
                             return;
                         }
 
-                        if(!Golem.game.validZoneRange(low, high)) {
+                        if (!Golem.game.validZoneRange(low, high)) {
                             ch.send("Please provide a valid low-high ID range which does not overlap an existing zone.\r\n");
                             return;
                         }
 
                         zone.low = low;
                         zone.high = high;
-                        
+
                         ch.send("Ok.\r\n");
-                        break;
+                        return;
+
+                    case 'save':
+                        if (zone.save()) {
+                            ch.send("Something went wrong trying to save this zone.\r\n");
+                            return;
+                        }
+
+                        ch.send("Ok.\r\n");
+                        return;
 
                     default:
                         displayUsage();
@@ -124,6 +117,8 @@ function do_zedit(ch, args) {
                 }
             }
     }
+
+    return;
 }
 
 Golem.registerPlayerCommand('zedit', do_zedit, Golem.Levels.LevelAdmin);
