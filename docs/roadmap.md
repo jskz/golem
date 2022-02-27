@@ -35,12 +35,13 @@ This will be a working document to track major feature development goals for eac
 - [x] Gameplay pivots: harsher penalties always drop all loot, gold on death
 - [x] Ensure that the caster's proficiency details are passed into the script handler context for a given skill or spell for logic based on proficiency %
 - [x] Lean into content generation for the overworld map: Perlin noise to simulate some islands with a terrain gradient between shores, field, and trees of various density
-- [ ] Complete and merge the quadtree branch, "district" metadata for things like regional terrain name overrides, QueryRect for players/other objects, have "harder" regions with aggressive or passive NPCs, auto-generated rewards; no "resets" on overworld, run planar reset scripts on an interval instead
+- [x] Complete and merge the quadtree branch, "district" metadata for things like regional terrain name overrides, QueryRect for players/other objects, no "resets" on overworld - run planar reset scripts on an interval instead
 
 ## 0.5 Online Creation Milestones
 
-- [x] Online Creation (OLC) command set: redit, medit, oedit, reset, xedit for rooms, mobiles, objects, resets, and exits respectively
+- [x] Online Creation (OLC) command set: redit, medit, oedit, reset, xedit, zedit for rooms, mobiles, objects, resets, and exits respectively
 - [x] World persistence updates: currently mobile, room, and object instances have only read operations defined
+- [ ] OLC commands to create new entities in-place: zedit create, mcreate, ocreate
 
 ## 0.6 Procedural Content Development Milestones
 
