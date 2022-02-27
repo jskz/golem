@@ -22,7 +22,7 @@ type Dungeon struct {
 	Abyss    *Room       `json:"abyss"`
 }
 
-func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeight int) *Dungeon {
+func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeight int, inverted bool) *Dungeon {
 	dungeon := &Dungeon{Game: game}
 	dungeon.Floors = make([]*MazeGrid, 0)
 
@@ -39,19 +39,27 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 		floor.reify(i) /* Ensure the floor's rooms exist before we start populating them */
 
 		if previousFloorExit != nil {
+			var floorExitDirection uint = DirectionDown
+			var floorExitReverseDirection uint = DirectionUp
+
+			if inverted {
+				floorExitDirection = DirectionUp
+				floorExitReverseDirection = DirectionDown
+			}
+
 			/* Dig a two-way closed door exit between this room and the "end" of the previous floor */
-			previousFloorExit.Exit[DirectionDown] = &Exit{
+			previousFloorExit.Exit[floorExitDirection] = &Exit{
 				Room:      previousFloorExit,
 				Id:        0,
-				Direction: DirectionDown,
+				Direction: floorExitDirection,
 				To:        floor.Grid[floor.EntryX][floor.EntryY].Room,
 				Flags:     EXIT_IS_DOOR | EXIT_CLOSED,
 			}
 
-			floor.Grid[floor.EntryX][floor.EntryY].Room.Exit[DirectionUp] = &Exit{
+			floor.Grid[floor.EntryX][floor.EntryY].Room.Exit[floorExitReverseDirection] = &Exit{
 				Room:      floor.Grid[floor.EntryX][floor.EntryY].Room,
 				Id:        0,
-				Direction: DirectionUp,
+				Direction: floorExitReverseDirection,
 				To:        previousFloorExit,
 				Flags:     EXIT_IS_DOOR | EXIT_CLOSED,
 			}

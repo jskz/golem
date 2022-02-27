@@ -18,7 +18,7 @@ function spell_amazement(ch) {
         return;
     }
 
-    const maze = Golem.game.generateDungeon(2, 32, 32);
+    const maze = Golem.game.generateDungeon(2, 32, 32, false);
     if(ch.room.flags & Golem.RoomFlags.ROOM_PLANAR) {
         ch.room.plane.map.layers[ch.room.z].terrain[ch.room.y][ch.room.x] = Golem.TerrainTypes.TerrainTypeCaveDeepWall1;
     }

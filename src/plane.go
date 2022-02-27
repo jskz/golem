@@ -403,7 +403,7 @@ func (plane *Plane) generate() error {
 				wg.Add(1)
 
 				go func() {
-					dungeon = game.GenerateDungeon(plane.Depth, plane.Width, plane.Height)
+					dungeon = game.GenerateDungeon(plane.Depth, plane.Width, plane.Height, false)
 
 					wg.Done()
 				}()
