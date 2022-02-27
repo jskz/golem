@@ -98,6 +98,7 @@ func (room *Room) CreateReset(resetType uint, v0, v1, v2, v3 int) *Reset {
 
 func (game *Game) CreateZone() *Zone {
 	zone := &Zone{}
+	zone.Game = game
 	zone.Name = "Untitled Zone"
 	zone.WhoDescription = "Void"
 	zone.Low = 0
