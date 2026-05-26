@@ -299,7 +299,6 @@ func do_close(ch *Character, arguments string) {
 
 			return
 		}
-		return
 	}
 
 	if exit == nil || exit.Flags&EXIT_IS_DOOR == 0 {
