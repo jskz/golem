@@ -86,16 +86,16 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 		ch.DetachAllObjects()
 	}
 
-	// Remove any gold on their person
-	ch.Gold = 0
-
-	// Also create a gold object corresponding to how much gold they had on their person
+	// Create a gold object corresponding to how much gold they had on their person
 	gobj := game.CreateGold(ch.Gold)
 	if gobj != nil {
 		obj.Contents.Insert(gobj)
 
 		ch.Game.Objects.Insert(gobj)
 	}
+
+	// Remove any gold on their person
+	ch.Gold = 0
 
 	return obj
 }
