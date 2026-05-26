@@ -119,7 +119,7 @@ func (client *Client) readPump(game *Game) {
 				return
 			}
 
-			switch nextByte[0] {
+			switch nextByte[1] {
 			case TelnetDONT:
 				length = 3
 				requestOption, err := reader.Peek(3)
@@ -148,7 +148,7 @@ func (client *Client) readPump(game *Game) {
 					break
 				}
 
-				clientRequests = append(clientWill, requestOption[2])
+				clientRequests = append(clientRequests, requestOption[2])
 
 			/*
 			 * To fix: I believe we are now only grabbing the first IAC command each time now - it still seems
@@ -157,7 +157,7 @@ func (client *Client) readPump(game *Game) {
 			case TelnetIAC:
 				break
 			default:
-				log.Printf("Unknown IAC code: %d.\r\n", nextByte[0])
+				log.Printf("Unknown IAC code: %d.\r\n", nextByte[1])
 			}
 
 			reader.Discard(length)
