@@ -256,7 +256,7 @@ func do_flee(ch *Character, arguments string) {
 		}
 	}
 
-	if rand.Intn(10) < 7 {
+	if len(exits) == 0 || rand.Intn(10) < 7 {
 		ch.Send("{RYou panic and attempt to flee, but can't get away!{x\r\n")
 
 		/* Announce player's failed flee attempt to others in the room */
