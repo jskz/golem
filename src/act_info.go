@@ -91,7 +91,6 @@ func (ch *Character) examineCharacter(other *Character) {
 func do_help(ch *Character, arguments string) {
 	var buf strings.Builder
 	var index int = 0
-
 	var commands []string = []string{}
 
 	for _, command := range CommandTable {
@@ -111,7 +110,7 @@ func do_help(ch *Character, arguments string) {
 	sort.Strings(commands)
 
 	for _, command := range commands {
-		if ch.Level <= CommandTable[command].MinimumLevel || CommandTable[command].Hidden {
+		if ch.Level < CommandTable[command].MinimumLevel || CommandTable[command].Hidden {
 			continue
 		}
 
