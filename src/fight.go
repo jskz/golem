@@ -171,7 +171,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 				character := iter.Value.(*Character)
 				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.GetShortDescriptionUpper(character)))
 
-				if character.Fighting.IsEqual(target) {
+				if character.Fighting != nil && character.Fighting.IsEqual(target) {
 					character.Fighting = nil
 				}
 			}
