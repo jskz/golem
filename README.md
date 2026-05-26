@@ -4,6 +4,10 @@
 
 Golem is a from-scratch attempt at a Diku-like MUD implemented with [Go](https://golang.org/) in 2021.
 
+## Build Status
+
+[![master CI status](https://github.com/jskz/golem/actions/workflows/build-and-push-image.yml/badge.svg?branch=master)](https://github.com/jskz/golem/actions/workflows/build-and-push-image.yml)
+
 ## Docker-based Setup
 
 ## Retrieve, Build, Start
