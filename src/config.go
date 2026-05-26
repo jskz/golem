@@ -95,7 +95,6 @@ func init() {
 		}
 
 		log.Printf("Enabled Sentry error reporting.\r\n")
-		defer sentry.Flush(5 * time.Second)
 	}
 
 	/* Read greeting */
@@ -117,5 +116,11 @@ func init() {
 	if err != nil {
 		log.Printf("Warning: failed to read death ANSI file: %v.\r\n", err)
 		Config.death = []byte(string(""))
+	}
+}
+
+func flushSentry() {
+	if Config.SentryConfiguration.Enabled {
+		sentry.Flush(5 * time.Second)
 	}
 }
