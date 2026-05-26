@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"runtime/debug"
 )
 
 type Webhook struct {
@@ -21,7 +22,10 @@ type Webhook struct {
 	Uuid string `json:"uuid"`
 }
 
-const WebhookKeyLength = 36
+const (
+	WebhookKeyLength     = 36
+	webhookListenAddress = ":9000"
+)
 
 func (game *Game) LoadWebhooks() error {
 	log.Printf("Loading webhooks.\r\n")
@@ -156,71 +160,94 @@ func (game *Game) CreateWebhook() (*Webhook, error) {
 }
 
 func (game *Game) handleWebhooks() {
-	defer func() {
-		recover()
-	}()
+	server := &http.Server{
+		Addr:    webhookListenAddress,
+		Handler: recoverHTTPPanics(game.webhookMux()),
+	}
 
-	http.HandleFunc("/worldmap", func(w http.ResponseWriter, req *http.Request) {
-		type WorldMapCharacterPointData struct {
-			Name string `json:"name"`
-			X    int    `json:"x"`
-			Y    int    `json:"y"`
-		}
+	if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+		log.Printf("Webhook HTTP server failed: %v\r\n", err)
+	}
+}
 
-		type WorldMapResponse struct {
-			Terrain    [][]int                      `json:"terrain"`
-			Characters []WorldMapCharacterPointData `json:"characters"`
-		}
+func (game *Game) webhookMux() http.Handler {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/worldmap", game.handleWorldMap)
+	mux.HandleFunc("/webhook", game.handleWebhook)
+	return mux
+}
 
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+func recoverHTTPPanics(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		defer func() {
+			if recovered := recover(); recovered != nil {
+				log.Printf("Webhook HTTP handler panicked on %s %s: %v\r\n%s", req.Method, req.URL.Path, recovered, debug.Stack())
+				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			}
+		}()
 
-		overworld := game.FindPlaneByName("overworld")
-		if overworld == nil {
-			w.Header().Set("Content-Type", "text/plain")
-			w.Write([]byte("failed to find overworld plane"))
-			return
-		}
-
-		response := &WorldMapResponse{
-			Terrain:    overworld.Map.Layers[0].Terrain,
-			Characters: make([]WorldMapCharacterPointData, 0),
-		}
-
-		overworldCharacters := overworld.Map.Layers[0].Atlas.CharacterTree.QueryRect(overworld.Map.Layers[0].Atlas.CharacterTree.Boundary)
-
-		for _, ochPoint := range overworldCharacters {
-			och := ochPoint.Value.(*Character)
-			wmcpd := WorldMapCharacterPointData{}
-
-			wmcpd.X = int(ochPoint.X)
-			wmcpd.Y = int(ochPoint.Y)
-			wmcpd.Name = och.Name
-
-			response.Characters = append(response.Characters, wmcpd)
-		}
-
-		encoded, err := json.Marshal(response)
-		if err != nil {
-			w.Header().Set("Content-Type", "text/plain")
-			w.Write([]byte(fmt.Sprintf("failed to encode overwolrd terrain: %v", err)))
-			return
-		}
-
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(encoded)
+		next.ServeHTTP(w, req)
 	})
+}
 
-	http.HandleFunc("/webhook", func(w http.ResponseWriter, req *http.Request) {
-		keyParam := req.URL.Query().Get("key")
+func (game *Game) handleWorldMap(w http.ResponseWriter, req *http.Request) {
+	type WorldMapCharacterPointData struct {
+		Name string `json:"name"`
+		X    int    `json:"x"`
+		Y    int    `json:"y"`
+	}
 
-		if len(keyParam) != WebhookKeyLength {
-			log.Print("Ignoring a webhook key submitted without a length of 36.\r\n")
-			return
-		}
+	type WorldMapResponse struct {
+		Terrain    [][]int                      `json:"terrain"`
+		Characters []WorldMapCharacterPointData `json:"characters"`
+	}
 
-		log.Printf("Got a webhook request with key: %s\r\n", keyParam)
-		game.webhookMessage <- keyParam
-	})
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	http.ListenAndServe(":9000", nil)
+	overworld := game.FindPlaneByName("overworld")
+	if overworld == nil {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte("failed to find overworld plane"))
+		return
+	}
+
+	response := &WorldMapResponse{
+		Terrain:    overworld.Map.Layers[0].Terrain,
+		Characters: make([]WorldMapCharacterPointData, 0),
+	}
+
+	overworldCharacters := overworld.Map.Layers[0].Atlas.CharacterTree.QueryRect(overworld.Map.Layers[0].Atlas.CharacterTree.Boundary)
+
+	for _, ochPoint := range overworldCharacters {
+		och := ochPoint.Value.(*Character)
+		wmcpd := WorldMapCharacterPointData{}
+
+		wmcpd.X = int(ochPoint.X)
+		wmcpd.Y = int(ochPoint.Y)
+		wmcpd.Name = och.Name
+
+		response.Characters = append(response.Characters, wmcpd)
+	}
+
+	encoded, err := json.Marshal(response)
+	if err != nil {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(fmt.Sprintf("failed to encode overwolrd terrain: %v", err)))
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(encoded)
+}
+
+func (game *Game) handleWebhook(w http.ResponseWriter, req *http.Request) {
+	keyParam := req.URL.Query().Get("key")
+
+	if len(keyParam) != WebhookKeyLength {
+		log.Print("Ignoring a webhook key submitted without a length of 36.\r\n")
+		return
+	}
+
+	log.Print("Got a webhook request with a valid-length key.\r\n")
+	game.webhookMessage <- keyParam
 }
