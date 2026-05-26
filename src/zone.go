@@ -410,6 +410,10 @@ func (game *Game) LoadZones() error {
 		game.Zones.Insert(zone)
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	log.Printf("Loaded %d zones from database.\r\n", game.Zones.Count)
 	return nil
 }
@@ -484,6 +488,10 @@ func (game *Game) LoadResets() error {
 				resetCount++
 			}
 		}
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
 	}
 
 	log.Printf("Loaded %d resets from database.\r\n", resetCount)

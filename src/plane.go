@@ -647,6 +647,10 @@ func (game *Game) LoadPlanes() error {
 		game.Planes.Insert(plane)
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	log.Printf("Loaded %d planes from database.\r\n", game.Planes.Count)
 	return nil
 }
@@ -684,7 +688,11 @@ func (game *Game) LoadDistricts() error {
 			TerrainNameMapping: make(map[int]string),
 		}
 
-		rows.Scan(&district.Id, &planeId, &district.Rect.X, &district.Rect.Y, &z, &district.Rect.W, &district.Rect.H)
+		err := rows.Scan(&district.Id, &planeId, &district.Rect.X, &district.Rect.Y, &z, &district.Rect.W, &district.Rect.H)
+		if err != nil {
+			return err
+		}
+
 		district.Plane = game.FindPlaneByID(planeId)
 
 		if district.Plane == nil {
@@ -706,6 +714,10 @@ func (game *Game) LoadDistricts() error {
 		district.Layer = layer
 		layer.Districts.Insert(district)
 		count++
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
 	}
 
 	log.Printf("Loaded %d districts from database.\r\n", count)

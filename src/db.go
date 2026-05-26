@@ -17,7 +17,7 @@ var TerrainTable map[int]*Terrain
 var Jobs *LinkedList
 var Races *LinkedList
 
-func (game *Game) LoadTerrain() {
+func (game *Game) LoadTerrain() error {
 	log.Printf("Loading terrain types.\r\n")
 
 	TerrainTable = make(map[int]*Terrain)
@@ -35,7 +35,7 @@ func (game *Game) LoadTerrain() {
 	`)
 	if err != nil {
 		log.Println(err)
-		return
+		return err
 	}
 
 	defer rows.Close()
@@ -52,10 +52,15 @@ func (game *Game) LoadTerrain() {
 		TerrainTable[terrain.Id] = terrain
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	log.Printf("Loaded %d terrain types from database.\r\n", len(TerrainTable))
+	return nil
 }
 
-func (game *Game) LoadRaceTable() {
+func (game *Game) LoadRaceTable() error {
 	log.Printf("Loading races.\r\n")
 
 	Races = NewLinkedList()
@@ -73,7 +78,7 @@ func (game *Game) LoadRaceTable() {
 			deleted_at IS NULL
 	`)
 	if err != nil {
-		return
+		return err
 	}
 
 	defer rows.Close()
@@ -92,10 +97,15 @@ func (game *Game) LoadRaceTable() {
 		Races.Insert(race)
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	log.Printf("Loaded %d races from database.\r\n", Races.Count)
+	return nil
 }
 
-func (game *Game) LoadJobTable() {
+func (game *Game) LoadJobTable() error {
 	log.Printf("Loading jobs.\r\n")
 
 	Jobs = NewLinkedList()
@@ -114,7 +124,7 @@ func (game *Game) LoadJobTable() {
 			deleted_at IS NULL
 	`)
 	if err != nil {
-		return
+		return err
 	}
 
 	defer rows.Close()
@@ -134,7 +144,12 @@ func (game *Game) LoadJobTable() {
 		Jobs.Insert(job)
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	log.Printf("Loaded %d jobs from database.\r\n", Jobs.Count)
+	return nil
 }
 
 /* Load job-skill relationships */
@@ -186,6 +201,10 @@ func (game *Game) LoadJobSkills() error {
 
 		jobSkill.Job.Skills.Insert(jobSkill)
 		results++
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
 	}
 
 	log.Printf("Loaded %d job-skill relations from database.\r\n", results)

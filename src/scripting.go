@@ -129,6 +129,10 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		game.Scripts[script.Id] = script
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	log.Printf("Loaded %d scripts from database.\r\n", len(game.Scripts))
 
 	log.Println("Loading object-script relations from database...")
@@ -161,6 +165,10 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		}
 
 		game.objectScripts[objectId] = game.Scripts[scriptId]
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
 	}
 
 	log.Println("Loading room-script relations from database...")
@@ -200,6 +208,10 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		room.script = game.Scripts[scriptId]
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	log.Println("Loading plane-script relations from database...")
 	rows, err = game.db.Query(`
 		SELECT
@@ -236,6 +248,10 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		plane.Scripts = game.Scripts[scriptId]
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	log.Println("Loading webhook-script relations from database...")
 	rows, err = game.db.Query(`
 		SELECT
@@ -265,6 +281,10 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		}
 
 		game.webhookScripts[webhookId] = game.Scripts[scriptId]
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
 	}
 
 	log.Println("Loading district-script relations from database...")
@@ -298,7 +318,7 @@ func (game *Game) LoadScriptsFromDatabase() error {
 		game.districtScripts[districtId] = game.Scripts[scriptId]
 	}
 
-	return nil
+	return rows.Err()
 }
 
 func (game *Game) setTimeout(cb goja.Callable, delay int64) goja.Value {

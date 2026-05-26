@@ -61,6 +61,10 @@ func (game *Game) LoadShops() error {
 		game.mobileShops[shop.MobileId] = shop
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	log.Print("Loading shop-object relations.\r\n")
 	rows, err = game.db.Query(`
 		SELECT
@@ -101,6 +105,10 @@ func (game *Game) LoadShops() error {
 		shopListing.Shop.Listings.Insert(shopListing)
 		objectIds[int(objectId)] = uint(shopListing.Id)
 		shopListingIds[shopListing.Id] = objectId
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
 	}
 
 	/*

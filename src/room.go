@@ -316,7 +316,11 @@ func (game *Game) FixExits() error {
 		var roomId int
 		var toRoomId int
 
-		rows.Scan(&exit.Id, &roomId, &toRoomId, &exit.Direction, &exit.Flags)
+		err = rows.Scan(&exit.Id, &roomId, &toRoomId, &exit.Direction, &exit.Flags)
+		if err != nil {
+			return err
+		}
+
 		exit.To, err = game.LoadRoomIndex(uint(toRoomId))
 		if err != nil {
 			continue
@@ -330,7 +334,7 @@ func (game *Game) FixExits() error {
 		exit.Room.Exit[exit.Direction] = exit
 	}
 
-	return nil
+	return rows.Err()
 }
 
 /*

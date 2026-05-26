@@ -54,7 +54,7 @@ func (game *Game) LoadWebhooks() error {
 		game.webhooks[webhook.Uuid] = webhook
 	}
 
-	return nil
+	return rows.Err()
 }
 
 func (game *Game) DeleteWebhook(webhook *Webhook) error {

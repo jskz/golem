@@ -297,6 +297,10 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 		objects = append(objects, obj)
 	}
 
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
 	return objects, nil
 }
 

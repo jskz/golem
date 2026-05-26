@@ -144,9 +144,20 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
-	game.LoadTerrain()
-	game.LoadRaceTable()
-	game.LoadJobTable()
+	err = game.LoadTerrain()
+	if err != nil {
+		return nil, err
+	}
+
+	err = game.LoadRaceTable()
+	if err != nil {
+		return nil, err
+	}
+
+	err = game.LoadJobTable()
+	if err != nil {
+		return nil, err
+	}
 
 	err = game.LoadSkills()
 	if err != nil {

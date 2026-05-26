@@ -334,7 +334,7 @@ func (game *Game) LoadSkills() error {
 		game.skills[skill.Id] = skill
 	}
 
-	return nil
+	return rows.Err()
 }
 
 func (ch *Character) LoadPlayerSkills() error {
@@ -390,5 +390,5 @@ func (ch *Character) LoadPlayerSkills() error {
 		ch.Skills[proficiency.SkillId] = proficiency
 	}
 
-	return nil
+	return rows.Err()
 }

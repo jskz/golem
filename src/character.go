@@ -722,6 +722,10 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 		ch.AddObject(obj)
 	}
 
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 		obj := iter.Value.(*ObjectInstance)
 
@@ -766,6 +770,10 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			}
 
 			obj.AddObject(containedObj)
+		}
+
+		if err := rows.Err(); err != nil {
+			return err
 		}
 	}
 
