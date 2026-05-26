@@ -311,6 +311,11 @@ func do_close(ch *Character, arguments string) {
 		return
 	}
 
+	if exit.To == nil || exit.To.Exit[ReverseDirection[exit.Direction]] == nil {
+		ch.Send("{DA mysterious force prevents you from closing the door.{x\r\n")
+		return
+	}
+
 	exit.Flags |= EXIT_CLOSED
 	exit.To.Exit[ReverseDirection[exit.Direction]].Flags |= EXIT_CLOSED
 
