@@ -10,7 +10,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -464,28 +463,22 @@ func (game *Game) LoadScripts() error {
 
 func (game *Game) LoadScriptsFromDirectory(directory string) error {
 	log.Printf("Loading scripts from directory %s:\r\n", directory)
-	scripts, err := ioutil.ReadDir(directory)
+	scripts, err := os.ReadDir(directory)
 	if err != nil {
 		return err
 	}
 
-	for _, filename := range scripts {
-		path := fmt.Sprintf("%s/%s", directory, filename.Name())
+	for _, script := range scripts {
+		path := fmt.Sprintf("%s/%s", directory, script.Name())
 
-		file, err := os.Stat(path)
-		if err != nil {
-			return err
-		}
-
-		fileFlags := file.Mode()
-		if fileFlags.IsDir() {
-			err := game.LoadScriptsFromDirectory(fmt.Sprintf("%s/%s", directory, filename.Name()))
+		if script.IsDir() {
+			err := game.LoadScriptsFromDirectory(path)
 			if err != nil {
 				return err
 			}
 		} else {
 			log.Printf("Loading script: %s\r\n", path)
-			bytes, err := ioutil.ReadFile(path)
+			bytes, err := os.ReadFile(path)
 			if err != nil {
 				return err
 			}
