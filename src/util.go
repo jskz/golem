@@ -9,7 +9,8 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
+	"fmt"
+	"io"
 	"math"
 	"net/http"
 	"strings"
@@ -21,18 +22,13 @@ type Flag struct {
 	Flag int    `json:"flag"`
 }
 
-func SimpleGET(url string, data string) (string, error) {
+func SimpleGET(url string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-
-	return string(body), nil
+	return readSimpleHTTPResponse(resp)
 }
 
 func SimplePOST(url string, data string) (string, error) {
@@ -43,9 +39,19 @@ func SimplePOST(url string, data string) (string, error) {
 		return "", err
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	return readSimpleHTTPResponse(resp)
+}
+
+func readSimpleHTTPResponse(resp *http.Response) (string, error) {
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("http request failed with status %s", resp.Status)
 	}
 
 	return string(body), nil
