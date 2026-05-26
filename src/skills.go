@@ -353,7 +353,8 @@ func (ch *Character) LoadPlayerSkills() error {
 		INNER JOIN
 			job_skill
 		ON
-			job_skill.id = pc_skill_proficiency.player_character_id
+			job_skill.job_id = pc_skill_proficiency.job_id
+			AND job_skill.skill_id = pc_skill_proficiency.skill_id
 		WHERE
 			pc_skill_proficiency.player_character_id = ?
 	`, ch.Id)
