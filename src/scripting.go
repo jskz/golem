@@ -515,8 +515,10 @@ func (game *Game) InitScripting() error {
 	}))
 
 	obj.Set("clearScriptedCommandHandlers", game.vm.ToValue(func() goja.Value {
-		for _, cmd := range CommandTable {
-			cmd.Callback = nil
+		for name, cmd := range CommandTable {
+			if cmd.Scripted {
+				delete(CommandTable, name)
+			}
 		}
 
 		return game.vm.ToValue(true)
