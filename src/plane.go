@@ -74,7 +74,7 @@ type Map struct {
 // - A collection of related quadtrees allowing an interface for easy spatial queries on
 //   the same data.
 type Atlas struct {
-	Plane *Plane `json:plane"`
+	Plane *Plane `json:"plane"`
 
 	// TODO: portals, scripts
 	Characters map[int]*LinkedList    `json:"characters"`
