@@ -89,10 +89,6 @@ func (room *Room) CreateReset(resetType uint, v0, v1, v2, v3 int) *Reset {
 		Value3: v3,
 	}
 
-	if err != nil {
-		return nil
-	}
-
 	return reset
 }
 
