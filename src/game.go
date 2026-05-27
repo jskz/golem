@@ -25,6 +25,11 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
+const (
+	databaseConnectMaxAttempts = 30
+	databaseConnectRetryDelay  = 2 * time.Second
+)
+
 type Game struct {
 	startedAt time.Time
 
@@ -90,12 +95,7 @@ func NewGame() (*Game, error) {
 	game.Planes = NewLinkedList()
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
-	game.db, err = sql.Open("mysql", fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true&parseTime=true",
-		Config.MySQLConfiguration.User,
-		Config.MySQLConfiguration.Password,
-		Config.MySQLConfiguration.Host,
-		Config.MySQLConfiguration.Port,
-		Config.MySQLConfiguration.Database))
+	game.db, err = openDatabaseWithRetry()
 	if err != nil {
 		return nil, err
 	}
@@ -116,18 +116,12 @@ func NewGame() (*Game, error) {
 		return nil, err
 	}
 
-	/* Validate we can interact with the DSN */
-	err = game.db.Ping()
+	/* Attempt new migrations at startup */
+	driver, err := mysql.WithInstance(game.db, &mysql.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	game.db.SetConnMaxLifetime(time.Second * 30)
-	game.db.SetMaxOpenConns(10)
-	game.db.SetMaxIdleConns(10)
-
-	/* Attempt new migrations at startup */
-	driver, _ := mysql.WithInstance(game.db, &mysql.Config{})
 	m, err := migrate.NewWithDatabaseInstance(
 		"file://migrations",
 		"mysql",
@@ -239,6 +233,51 @@ func NewGame() (*Game, error) {
 	}
 
 	return game, nil
+}
+
+func openDatabaseWithRetry() (*sql.DB, error) {
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true&parseTime=true",
+		Config.MySQLConfiguration.User,
+		Config.MySQLConfiguration.Password,
+		Config.MySQLConfiguration.Host,
+		Config.MySQLConfiguration.Port,
+		Config.MySQLConfiguration.Database)
+
+	var err error
+
+	for attempt := 1; attempt <= databaseConnectMaxAttempts; attempt++ {
+		db, openErr := sql.Open("mysql", dsn)
+		if openErr == nil {
+			db.SetConnMaxLifetime(time.Second * 30)
+			db.SetMaxOpenConns(10)
+			db.SetMaxIdleConns(10)
+
+			err = db.Ping()
+			if err == nil {
+				if attempt > 1 {
+					log.Printf("Connected to database after %d attempts.\r\n", attempt)
+				}
+
+				return db, nil
+			}
+
+			db.Close()
+		} else {
+			err = openErr
+		}
+
+		if attempt < databaseConnectMaxAttempts {
+			log.Printf("Database connection attempt %d/%d failed: %v. Retrying in %s.\r\n",
+				attempt,
+				databaseConnectMaxAttempts,
+				err,
+				databaseConnectRetryDelay,
+			)
+			time.Sleep(databaseConnectRetryDelay)
+		}
+	}
+
+	return nil, fmt.Errorf("failed to connect to database after %d attempts: %w", databaseConnectMaxAttempts, err)
 }
 
 /* Game loop */
