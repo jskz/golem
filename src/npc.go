@@ -79,7 +79,7 @@ func (game *Game) LoadMobileIndex(index uint) (*Character, error) {
 		return nil, err
 	}
 
-	ch.Race = FindRaceByID(jobId)
+	ch.Race = FindRaceByID(raceId)
 	if ch.Race == nil {
 		return nil, errors.New("failed to load race")
 	}
