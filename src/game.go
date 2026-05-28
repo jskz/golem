@@ -63,6 +63,7 @@ type Game struct {
 	shutdownRequest          chan bool
 	clientMessage            chan ClientTextMessage
 	webhookMessage           chan string
+	worldMapRequest          chan worldMapRequest
 	planeGenerationCompleted chan int
 }
 
@@ -85,6 +86,7 @@ func NewGame() (*Game, error) {
 	game.quitRequest = make(chan *Client)
 	game.shutdownRequest = make(chan bool)
 	game.webhookMessage = make(chan string)
+	game.worldMapRequest = make(chan worldMapRequest)
 	game.clientMessage = make(chan ClientTextMessage)
 	game.planeGenerationCompleted = make(chan int)
 
@@ -355,6 +357,10 @@ func (game *Game) Run() {
 			if err != nil {
 				log.Printf("Script evaluation for webhook onGET request failed: %v\r\n", err)
 			}
+
+		case request := <-game.worldMapRequest:
+			response, err := game.buildWorldMapResponse()
+			request.response <- worldMapResult{response: response, err: err}
 
 		case client := <-game.register:
 			game.clients[client] = true

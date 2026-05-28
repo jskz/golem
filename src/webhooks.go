@@ -22,9 +22,34 @@ type Webhook struct {
 	Uuid string `json:"uuid"`
 }
 
+type WorldMapCharacterPointData struct {
+	Name string `json:"name"`
+	X    int    `json:"x"`
+	Y    int    `json:"y"`
+}
+
+type WorldMapResponse struct {
+	Terrain    [][]int                      `json:"terrain"`
+	Characters []WorldMapCharacterPointData `json:"characters"`
+}
+
+type worldMapRequest struct {
+	response chan worldMapResult
+}
+
+type worldMapResult struct {
+	response *WorldMapResponse
+	err      error
+}
+
 const (
 	WebhookKeyLength     = 36
 	webhookListenAddress = ":9000"
+)
+
+var (
+	errWorldMapOverworldNotFound    = errors.New("failed to find overworld plane")
+	errWorldMapOverworldUnavailable = errors.New("failed to load overworld map")
 )
 
 func (game *Game) LoadWebhooks() error {
@@ -191,53 +216,93 @@ func recoverHTTPPanics(next http.Handler) http.Handler {
 }
 
 func (game *Game) handleWorldMap(w http.ResponseWriter, req *http.Request) {
-	type WorldMapCharacterPointData struct {
-		Name string `json:"name"`
-		X    int    `json:"x"`
-		Y    int    `json:"y"`
-	}
-
-	type WorldMapResponse struct {
-		Terrain    [][]int                      `json:"terrain"`
-		Characters []WorldMapCharacterPointData `json:"characters"`
-	}
-
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 
-	overworld := game.FindPlaneByName("overworld")
-	if overworld == nil {
-		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte("failed to find overworld plane"))
+	if game.worldMapRequest == nil {
+		http.Error(w, "world map service is unavailable", http.StatusServiceUnavailable)
 		return
 	}
 
-	response := &WorldMapResponse{
-		Terrain:    overworld.Map.Layers[0].Terrain,
-		Characters: make([]WorldMapCharacterPointData, 0),
+	request := worldMapRequest{response: make(chan worldMapResult, 1)}
+
+	select {
+	case game.worldMapRequest <- request:
+	case <-req.Context().Done():
+		return
 	}
 
-	overworldCharacters := overworld.Map.Layers[0].Atlas.CharacterTree.QueryRect(overworld.Map.Layers[0].Atlas.CharacterTree.Boundary)
+	var result worldMapResult
 
-	for _, ochPoint := range overworldCharacters {
-		och := ochPoint.Value.(*Character)
-		wmcpd := WorldMapCharacterPointData{}
-
-		wmcpd.X = int(ochPoint.X)
-		wmcpd.Y = int(ochPoint.Y)
-		wmcpd.Name = och.Name
-
-		response.Characters = append(response.Characters, wmcpd)
+	select {
+	case result = <-request.response:
+	case <-req.Context().Done():
+		return
 	}
 
-	encoded, err := json.Marshal(response)
+	if result.err != nil {
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write([]byte(result.err.Error()))
+		return
+	}
+
+	encoded, err := json.Marshal(result.response)
 	if err != nil {
 		w.Header().Set("Content-Type", "text/plain")
-		w.Write([]byte(fmt.Sprintf("failed to encode overwolrd terrain: %v", err)))
+		w.Write([]byte(fmt.Sprintf("failed to encode overworld terrain: %v", err)))
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(encoded)
+}
+
+func (game *Game) buildWorldMapResponse() (*WorldMapResponse, error) {
+	overworld := game.FindPlaneByName("overworld")
+	if overworld == nil {
+		return nil, errWorldMapOverworldNotFound
+	}
+
+	if overworld.Map == nil || len(overworld.Map.Layers) == 0 || overworld.Map.Layers[0] == nil {
+		return nil, errWorldMapOverworldUnavailable
+	}
+
+	layer := overworld.Map.Layers[0]
+	response := &WorldMapResponse{
+		Terrain:    copyWorldMapTerrain(layer.Terrain),
+		Characters: make([]WorldMapCharacterPointData, 0),
+	}
+
+	if layer.Atlas == nil || layer.Atlas.CharacterTree == nil || layer.Atlas.CharacterTree.Boundary == nil {
+		return response, nil
+	}
+
+	overworldCharacters := layer.Atlas.CharacterTree.QueryRect(layer.Atlas.CharacterTree.Boundary)
+	response.Characters = make([]WorldMapCharacterPointData, 0, len(overworldCharacters))
+
+	for _, ochPoint := range overworldCharacters {
+		och, ok := ochPoint.Value.(*Character)
+		if !ok || och == nil {
+			continue
+		}
+
+		response.Characters = append(response.Characters, WorldMapCharacterPointData{
+			X:    int(ochPoint.X),
+			Y:    int(ochPoint.Y),
+			Name: och.Name,
+		})
+	}
+
+	return response, nil
+}
+
+func copyWorldMapTerrain(terrain [][]int) [][]int {
+	copied := make([][]int, len(terrain))
+
+	for y := range terrain {
+		copied[y] = append([]int(nil), terrain[y]...)
+	}
+
+	return copied
 }
 
 func (game *Game) handleWebhook(w http.ResponseWriter, req *http.Request) {
