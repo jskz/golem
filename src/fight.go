@@ -91,7 +91,7 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	if gobj != nil {
 		obj.Contents.Insert(gobj)
 
-		ch.Game.Objects.Insert(gobj)
+		game.Objects.Insert(gobj)
 	}
 
 	// Remove any gold on their person
@@ -157,12 +157,12 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 			room.removeCharacter(target)
 			room.AddObject(corpse)
 
-			ch.Game.Objects.Insert(corpse)
+			game.Objects.Insert(corpse)
 
 			blood := game.createBlood(1)
 			room.AddObject(blood)
 
-			ch.Game.Objects.Insert(blood)
+			game.Objects.Insert(blood)
 
 			target.Fighting = nil
 			target.Combat = nil
