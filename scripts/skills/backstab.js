@@ -19,7 +19,7 @@ function do_backstab(ch, args) {
 
     const damageType = parseInt(weapon.value3);
     if (damageType !== Golem.Combat.DamageTypeStab) {
-        ch.send(weapon.getShortDescriptionUpper() + "{x isn't a stabbing weapon.\r\n");
+        ch.send(weapon.getShortDescriptionUpper(ch) + "{x isn't a stabbing weapon.\r\n");
         return;
     }
 
