@@ -881,23 +881,24 @@ func (ch *Character) clearOutputBuffer() {
 }
 
 func (ch *Character) flushOutput() {
-	if ch.output[0] == 0 {
+	if ch.outputHead == 0 {
 		return
 	}
 
 	var page bytes.Buffer
 	var lines []string
 	var maxLines int = DefaultMaxLines
+	output := ch.output[:ch.outputHead]
 
-	scan := bufio.NewScanner(strings.NewReader(string(ch.output)))
+	scan := bufio.NewScanner(bytes.NewReader(output))
 	scan.Split(func(data []byte, eof bool) (advance int, token []byte, err error) {
 		if eof && len(data) == 0 {
 			return 0, nil, nil
 		}
 
 		if i := bytes.IndexByte(data, '\n'); i >= 0 {
-			if len(data) > 0 && data[len(data)-1] == '\r' {
-				return i + 1, data[0 : len(data)-1], nil
+			if i > 0 && data[i-1] == '\r' {
+				return i + 1, data[0 : i-1], nil
 			}
 
 			return i + 1, data[0:i], nil
@@ -920,11 +921,13 @@ func (ch *Character) flushOutput() {
 
 	ch.outputLines = len(lines)
 	if ch.outputLines <= 1 {
+		ch.Client.Send(output)
+		ch.clearOutputBuffer()
 		return
 	}
 
 	if len(lines) <= maxLines {
-		ch.Client.Send(ch.output)
+		ch.Client.Send(output)
 		ch.clearOutputBuffer()
 		return
 	}
