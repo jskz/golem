@@ -8,7 +8,6 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"log"
 	"strings"
@@ -131,6 +130,82 @@ func (plane *Plane) NewAtlas() *Atlas {
 	}
 }
 
+func (plane *Plane) terrainBlobSize() int {
+	return plane.Depth * plane.Height * plane.Width
+}
+
+func (plane *Plane) terrainBlobIndex(x int, y int, z int) int {
+	return z*plane.Height*plane.Width + y*plane.Width + x
+}
+
+func (plane *Plane) newMapGrid() *MapGrid {
+	grid := &MapGrid{Atlas: plane.NewAtlas(), Districts: NewLinkedList()}
+	grid.Terrain = make([][]int, plane.Height)
+
+	for y := 0; y < plane.Height; y++ {
+		grid.Terrain[y] = make([]int, plane.Width)
+	}
+
+	return grid
+}
+
+func (plane *Plane) terrainMapFromBlob(blob []byte) *Map {
+	planeMap := &Map{
+		Layers: make([]*MapGrid, 0, plane.Depth),
+	}
+
+	for z := 0; z < plane.Depth; z++ {
+		grid := plane.newMapGrid()
+
+		for y := 0; y < plane.Height; y++ {
+			for x := 0; x < plane.Width; x++ {
+				grid.Terrain[y][x] = int(blob[plane.terrainBlobIndex(x, y, z)])
+			}
+		}
+
+		planeMap.Layers = append(planeMap.Layers, grid)
+	}
+
+	return planeMap
+}
+
+func (plane *Plane) initializeTerrainBlob(defaultTerrain int) ([]byte, int) {
+	plane.Map = &Map{
+		Layers: make([]*MapGrid, 0, plane.Depth),
+	}
+
+	blob := make([]byte, plane.terrainBlobSize())
+
+	for z := 0; z < plane.Depth; z++ {
+		grid := plane.newMapGrid()
+
+		for y := 0; y < plane.Height; y++ {
+			for x := 0; x < plane.Width; x++ {
+				grid.Terrain[y][x] = defaultTerrain
+				blob[plane.terrainBlobIndex(x, y, z)] = byte(defaultTerrain)
+			}
+		}
+
+		plane.Map.Layers = append(plane.Map.Layers, grid)
+	}
+
+	return blob, len(blob)
+}
+
+func (plane *Plane) terrainBlobFromMap() []byte {
+	blob := make([]byte, plane.terrainBlobSize())
+
+	for z := 0; z < plane.Depth; z++ {
+		for y := 0; y < plane.Height; y++ {
+			for x := 0; x < plane.Width; x++ {
+				blob[plane.terrainBlobIndex(x, y, z)] = byte(plane.Map.Layers[z].Terrain[y][x])
+			}
+		}
+	}
+
+	return blob
+}
+
 func (obs *PlaneObserver) Dispose() {
 }
 
@@ -174,15 +249,7 @@ func (layer *MapGrid) RegisterObserver(rect *Rect, options goja.Object, onEnterC
 func (plane *Plane) SaveBlob() error {
 	log.Printf("Saving blob for plane %d.\r\n", plane.Id)
 
-	var buf bytes.Buffer
-
-	for z := 0; z < plane.Depth; z++ {
-		for y := 0; y < plane.Height; y++ {
-			for x := 0; x < plane.Width; x++ {
-				buf.WriteByte(byte(plane.Map.Layers[z].Terrain[x][y]))
-			}
-		}
-	}
+	blob := plane.terrainBlobFromMap()
 
 	_, err := plane.Game.db.Exec(`
 		UPDATE
@@ -191,7 +258,7 @@ func (plane *Plane) SaveBlob() error {
 			source_value = ?
 		WHERE
 			id = ?
-	`, buf.Bytes(), plane.Id)
+	`, blob, plane.Id)
 	if err != nil {
 		log.Println(err)
 		return err
@@ -201,31 +268,11 @@ func (plane *Plane) SaveBlob() error {
 	return nil
 }
 
-// Fill the source_value field for this plane with an appropriately sized binary blob of zeroes
+// Fill the source_value field for this plane with an appropriately sized binary blob.
 func (plane *Plane) InitializeBlob() ([]byte, int, error) {
 	log.Printf("Initializing new blob for plane %d.\r\n", plane.Id)
 
-	plane.Map = &Map{
-		Layers: make([]*MapGrid, 0),
-	}
-
-	var bytes []byte = make([]byte, 0)
-
-	for z := 0; z < plane.Depth; z++ {
-		grid := &MapGrid{Atlas: plane.NewAtlas(), Districts: NewLinkedList()}
-		grid.Terrain = make([][]int, plane.Height)
-
-		for y := 0; y < plane.Height; y++ {
-			grid.Terrain[y] = make([]int, plane.Width)
-
-			for x := 0; x < plane.Width; x++ {
-				grid.Terrain[y][x] = 8
-				bytes = append(bytes, 8)
-			}
-		}
-
-		plane.Map.Layers = append(plane.Map.Layers, grid)
-	}
+	blob, blobSize := plane.initializeTerrainBlob(TerrainTypeOcean)
 
 	_, err := plane.Game.db.Exec(`
 		UPDATE
@@ -234,12 +281,12 @@ func (plane *Plane) InitializeBlob() ([]byte, int, error) {
 			source_value = ?
 		WHERE
 			id = ?
-	`, bytes, plane.Id)
+	`, blob, plane.Id)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	return bytes, plane.Depth * plane.Width * plane.Height, nil
+	return blob, blobSize, nil
 }
 
 func (ch *Character) CreatePlaneMap() string {
@@ -340,24 +387,7 @@ func (plane *Plane) generate() error {
 				}
 			}
 
-			planeMap := &Map{
-				Layers: make([]*MapGrid, 0),
-			}
-
-			for z := 0; z < plane.Depth; z++ {
-				grid := &MapGrid{Atlas: plane.NewAtlas(), Districts: NewLinkedList()}
-				grid.Terrain = make([][]int, plane.Height)
-
-				for y := 0; y < plane.Height; y++ {
-					grid.Terrain[y] = make([]int, plane.Width)
-
-					for x := 0; x < plane.Width; x++ {
-						grid.Terrain[y][x] = int(blob[x*plane.Height*plane.Depth+y*plane.Depth+z])
-					}
-				}
-
-				planeMap.Layers = append(planeMap.Layers, grid)
-			}
+			planeMap := plane.terrainMapFromBlob(blob)
 
 			log.Printf("Plane %d (%d,%d) initialized from %d byte blob.\r\n", plane.Id, plane.Width, plane.Height, blobSize)
 
