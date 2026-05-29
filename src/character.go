@@ -209,6 +209,81 @@ type Character struct {
 	temporaryHash string
 }
 
+type playerCharacterLocation struct {
+	RoomId  uint
+	PlaneId sql.NullInt64
+	PlaneX  sql.NullInt64
+	PlaneY  sql.NullInt64
+	PlaneZ  sql.NullInt64
+}
+
+func validLocationInt(value int) sql.NullInt64 {
+	return sql.NullInt64{Int64: int64(value), Valid: true}
+}
+
+func (location playerCharacterLocation) hasPlaneCoordinates() bool {
+	return location.PlaneId.Valid && location.PlaneX.Valid && location.PlaneY.Valid && location.PlaneZ.Valid
+}
+
+func (ch *Character) playerLocation() playerCharacterLocation {
+	location := playerCharacterLocation{RoomId: RoomLimbo}
+
+	if ch.Room == nil {
+		return location
+	}
+
+	if ch.Room.Id != 0 {
+		location.RoomId = ch.Room.Id
+	}
+
+	if ch.Room.Flags&ROOM_PLANAR == 0 || ch.Room.Plane == nil || !ch.Room.Plane.SupportsPersistentCoordinates() {
+		return location
+	}
+
+	if ch.Room.Plane.Id <= 0 || !ch.Room.Plane.containsCoordinates(ch.Room.X, ch.Room.Y, ch.Room.Z) {
+		return location
+	}
+
+	location.PlaneId = validLocationInt(ch.Room.Plane.Id)
+	location.PlaneX = validLocationInt(ch.Room.X)
+	location.PlaneY = validLocationInt(ch.Room.Y)
+	location.PlaneZ = validLocationInt(ch.Room.Z)
+
+	return location
+}
+
+func (game *Game) loadPlayerRoom(location playerCharacterLocation) (*Room, error) {
+	if location.RoomId == 0 {
+		location.RoomId = RoomLimbo
+	}
+
+	if location.hasPlaneCoordinates() {
+		plane := game.FindPlaneByID(int(location.PlaneId.Int64))
+		if plane == nil {
+			log.Printf("Ignoring saved player location for missing plane %d.\r\n", location.PlaneId.Int64)
+		} else if !plane.SupportsPersistentCoordinates() {
+			log.Printf("Ignoring saved player location for non-persistent plane %d.\r\n", plane.Id)
+		} else {
+			x := int(location.PlaneX.Int64)
+			y := int(location.PlaneY.Int64)
+			z := int(location.PlaneZ.Int64)
+
+			if !plane.containsCoordinates(x, y, z) {
+				log.Printf("Ignoring saved player location outside plane %d at (%d, %d, %d).\r\n", plane.Id, x, y, z)
+			} else {
+				room := plane.MaterializeRoom(x, y, z, true)
+				if room != nil {
+					return room, nil
+				}
+
+				log.Printf("Unable to materialize saved player location in plane %d at (%d, %d, %d).\r\n", plane.Id, x, y, z)
+			}
+		}
+	}
+
+	return game.LoadRoomIndex(location.RoomId)
+}
+
 func (ch *Character) IsEqual(och *Character) bool {
 	return och == ch
 }
@@ -438,16 +513,17 @@ func (ch *Character) Save() bool {
 		return false
 	}
 
-	var roomId uint = RoomLimbo
-	if ch.Room != nil {
-		roomId = ch.Room.Id
-	}
+	location := ch.playerLocation()
 	result, err := ch.Game.db.Exec(`
 		UPDATE
 			player_characters
 		SET
 			wizard = ?,
 			room_id = ?,
+			plane_id = ?,
+			plane_x = ?,
+			plane_y = ?,
+			plane_z = ?,
 			race_id = ?,
 			job_id = ?,
 			level = ?,
@@ -470,7 +546,34 @@ func (ch *Character) Save() bool {
 			updated_at = NOW()
 		WHERE
 			id = ?
-	`, ch.Wizard, roomId, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK], ch.Id)
+	`,
+		ch.Wizard,
+		location.RoomId,
+		location.PlaneId,
+		location.PlaneX,
+		location.PlaneY,
+		location.PlaneZ,
+		ch.Race.Id,
+		ch.Job.Id,
+		ch.Level,
+		ch.Gold,
+		ch.Experience,
+		ch.Practices,
+		ch.Health,
+		ch.MaxHealth,
+		ch.Mana,
+		ch.MaxMana,
+		ch.Stamina,
+		ch.MaxStamina,
+		ch.Stats[STAT_STRENGTH],
+		ch.Stats[STAT_DEXTERITY],
+		ch.Stats[STAT_INTELLIGENCE],
+		ch.Stats[STAT_WISDOM],
+		ch.Stats[STAT_CONSTITUTION],
+		ch.Stats[STAT_CHARISMA],
+		ch.Stats[STAT_LUCK],
+		ch.Id,
+	)
 	if err != nil {
 		log.Printf("Failed to save character: %v.\r\n", err)
 		return false
@@ -801,6 +904,10 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 			username,
 			wizard,
 			room_id,
+			plane_id,
+			plane_x,
+			plane_y,
+			plane_z,
 			race_id,
 			job_id,
 			level,
@@ -831,11 +938,39 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	ch := NewCharacter()
 	ch.Game = game
 
-	var roomId uint
+	location := playerCharacterLocation{}
 	var raceId uint
 	var jobId uint
 
-	err := row.Scan(&ch.Id, &ch.Name, &ch.Wizard, &roomId, &raceId, &jobId, &ch.Level, &ch.Gold, &ch.Experience, &ch.Practices, &ch.Health, &ch.MaxHealth, &ch.Mana, &ch.MaxMana, &ch.Stamina, &ch.MaxStamina, &ch.Stats[STAT_STRENGTH], &ch.Stats[STAT_DEXTERITY], &ch.Stats[STAT_INTELLIGENCE], &ch.Stats[STAT_WISDOM], &ch.Stats[STAT_CONSTITUTION], &ch.Stats[STAT_CHARISMA], &ch.Stats[STAT_LUCK])
+	err := row.Scan(
+		&ch.Id,
+		&ch.Name,
+		&ch.Wizard,
+		&location.RoomId,
+		&location.PlaneId,
+		&location.PlaneX,
+		&location.PlaneY,
+		&location.PlaneZ,
+		&raceId,
+		&jobId,
+		&ch.Level,
+		&ch.Gold,
+		&ch.Experience,
+		&ch.Practices,
+		&ch.Health,
+		&ch.MaxHealth,
+		&ch.Mana,
+		&ch.MaxMana,
+		&ch.Stamina,
+		&ch.MaxStamina,
+		&ch.Stats[STAT_STRENGTH],
+		&ch.Stats[STAT_DEXTERITY],
+		&ch.Stats[STAT_INTELLIGENCE],
+		&ch.Stats[STAT_WISDOM],
+		&ch.Stats[STAT_CONSTITUTION],
+		&ch.Stats[STAT_CHARISMA],
+		&ch.Stats[STAT_LUCK],
+	)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -855,7 +990,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 		return nil, nil, fmt.Errorf("failed to load job %d", jobId)
 	}
 
-	room, err := game.LoadRoomIndex(roomId)
+	room, err := game.loadPlayerRoom(location)
 	if err != nil {
 		return nil, nil, err
 	}

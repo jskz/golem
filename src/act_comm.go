@@ -93,7 +93,10 @@ func do_save(ch *Character, arguments string) {
 }
 
 func do_quit(ch *Character, arguments string) {
-	ch.Save()
+	if !ch.Save() {
+		ch.Send("A strange force prevents you from quitting safely.\r\n")
+		return
+	}
 
 	/* If this character is leading a group, disband it */
 	if ch.Group != nil {

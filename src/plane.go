@@ -68,10 +68,10 @@ type Map struct {
 
 // The "Atlas" structure is:
 //
-// - A collection of maps for a Plane between (x, y) points expressed as an integer
-//   and linked lists for game objects: characters, objects, rooms, exits.
-// - A collection of related quadtrees allowing an interface for easy spatial queries on
-//   the same data.
+//   - A collection of maps for a Plane between (x, y) points expressed as an integer
+//     and linked lists for game objects: characters, objects, rooms, exits.
+//   - A collection of related quadtrees allowing an interface for easy spatial queries on
+//     the same data.
 type Atlas struct {
 	Plane *Plane `json:"plane"`
 
@@ -117,6 +117,14 @@ const (
 	PortalTypeFixed      = "fixed"
 	PortalTypeProcedural = "procedural"
 )
+
+func (plane *Plane) SupportsPersistentCoordinates() bool {
+	if plane == nil {
+		return false
+	}
+
+	return plane.SourceType == SourceTypeBlob
+}
 
 func (plane *Plane) NewAtlas() *Atlas {
 	return &Atlas{
