@@ -19,10 +19,9 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 
-	"github.com/golang-migrate/migrate"
-	"github.com/golang-migrate/migrate/database/mysql"
-	_ "github.com/golang-migrate/migrate/source/file"
-	"github.com/gomodule/redigo/redis"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/mysql"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 const (
@@ -33,9 +32,8 @@ const (
 type Game struct {
 	startedAt time.Time
 
-	redis *redis.Pool
-	db    *sql.DB
-	vm    *goja.Runtime
+	db *sql.DB
+	vm *goja.Runtime
 
 	Objects      *LinkedList `json:"objects"`
 	Characters   *LinkedList `json:"characters"`
@@ -98,22 +96,6 @@ func NewGame() (*Game, error) {
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
 	game.db, err = openDatabaseWithRetry()
-	if err != nil {
-		return nil, err
-	}
-
-	game.redis = &redis.Pool{
-		Dial: func() (redis.Conn, error) {
-			conn, err := redis.Dial("tcp", fmt.Sprintf("%s:%d", Config.RedisConfiguration.Host, Config.RedisConfiguration.Port))
-			if err != nil {
-				return nil, err
-			}
-
-			return conn, nil
-		},
-	}
-
-	_, err = game.redis.Get().Do("PING")
 	if err != nil {
 		return nil, err
 	}
