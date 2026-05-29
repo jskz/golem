@@ -483,8 +483,21 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 		return nil
 	}
 
-	if plane.PlaneType == "dungeon" {
-		return plane.Dungeon.Floors[z].Grid[y][x].Room
+	if plane.PlaneType == PlaneTypeMaze {
+		if plane.Dungeon == nil || z >= len(plane.Dungeon.Floors) || plane.Dungeon.Floors[z] == nil {
+			return nil
+		}
+
+		floor := plane.Dungeon.Floors[z]
+		if x >= len(floor.Grid) || floor.Grid[x] == nil || y >= len(floor.Grid[x]) || floor.Grid[x][y] == nil {
+			return nil
+		}
+
+		return floor.Grid[x][y].Room
+	}
+
+	if plane.Map == nil || z >= len(plane.Map.Layers) || plane.Map.Layers[z] == nil {
+		return nil
 	}
 
 	room := plane.Game.NewRoom()

@@ -520,7 +520,17 @@ func do_goto(ch *Character, arguments string) {
 			return
 		}
 
-		destination := found.MaterializeRoom(0, 0, 0, true)
+		var destination *Room
+		if found.PlaneType == PlaneTypeMaze && found.Dungeon != nil {
+			destination = found.Dungeon.Entrance
+		} else {
+			destination = found.MaterializeRoom(0, 0, 0, true)
+		}
+
+		if destination == nil {
+			ch.Send("Unable to materialize a room for that plane.\r\n")
+			return
+		}
 
 		if ch.Room != nil && ch.Room.Characters != nil {
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
