@@ -138,6 +138,12 @@ func (plane *Plane) terrainBlobIndex(x int, y int, z int) int {
 	return z*plane.Height*plane.Width + y*plane.Width + x
 }
 
+func (plane *Plane) containsCoordinates(x int, y int, z int) bool {
+	return x >= 0 && x < plane.Width &&
+		y >= 0 && y < plane.Height &&
+		z >= 0 && z < plane.Depth
+}
+
 func (plane *Plane) newMapGrid() *MapGrid {
 	grid := &MapGrid{Atlas: plane.NewAtlas(), Districts: NewLinkedList()}
 	grid.Terrain = make([][]int, plane.Height)
@@ -473,12 +479,12 @@ func (plane *Plane) generate() error {
 }
 
 func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
-	if plane.PlaneType == "dungeon" {
-		return plane.Dungeon.Floors[z].Grid[y][x].Room
+	if !plane.containsCoordinates(x, y, z) {
+		return nil
 	}
 
-	if x < 0 || x > plane.Width || y < 0 || y > plane.Height || z < 0 || z > plane.Depth {
-		return nil
+	if plane.PlaneType == "dungeon" {
+		return plane.Dungeon.Floors[z].Grid[y][x].Room
 	}
 
 	room := plane.Game.NewRoom()
@@ -586,7 +592,7 @@ func (plane *Plane) GetTerrainRect(x int, y int, z int, w int, h int) [][]int {
 
 		c := 0
 		for rectX := x; rectX < x+w; rectX++ {
-			if rectX < 0 || rectX >= plane.Width || rectY < 0 || rectY > plane.Height || z < 0 || z > plane.Depth {
+			if !plane.containsCoordinates(rectX, rectY, z) {
 				row[c] = 0
 				c++
 				continue
