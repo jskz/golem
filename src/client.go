@@ -71,7 +71,9 @@ type Client struct {
 	conn              net.Conn
 	ansiEnabled       bool
 	send              chan []byte
-	close             chan bool
+	close             chan struct{}
+	closeOnce         sync.Once
+	unregisterOnce    sync.Once
 	remainingRolls    int
 	delayMutex        sync.Mutex
 	delayUntil        time.Time
@@ -87,7 +89,8 @@ type ClientTextMessage struct {
 
 func (client *Client) readPump(game *Game) {
 	defer func() {
-		client.conn.Close()
+		client.Close()
+		client.unregister(game)
 	}()
 
 	reader := bufio.NewReader(client.conn)
@@ -96,7 +99,6 @@ func (client *Client) readPump(game *Game) {
 		firstByte, err := reader.Peek(1)
 		if err != nil {
 			if err == io.EOF {
-				game.unregister <- client
 				return
 			}
 
@@ -242,9 +244,10 @@ func (client *Client) readPump(game *Game) {
 
 func (client *Client) writePump(game *Game) {
 	defer func() {
+		client.Close()
 		close(client.send)
 
-		game.unregister <- client
+		client.unregister(game)
 	}()
 
 	for {
@@ -252,7 +255,11 @@ func (client *Client) writePump(game *Game) {
 		case <-client.close:
 			return
 
-		case outgoing := <-client.send:
+		case outgoing, ok := <-client.send:
+			if !ok {
+				return
+			}
+
 			_, err := client.conn.Write(outgoing)
 			if err != nil {
 				log.Printf("Error writing to socket: %v\r\n", err)
@@ -262,6 +269,19 @@ func (client *Client) writePump(game *Game) {
 	}
 }
 
+func (client *Client) Close() {
+	client.closeOnce.Do(func() {
+		close(client.close)
+		client.conn.Close()
+	})
+}
+
+func (client *Client) unregister(game *Game) {
+	client.unregisterOnce.Do(func() {
+		game.unregister <- client
+	})
+}
+
 func (client *Client) Send(data []byte) (closed bool) {
 	defer func() {
 		if recover() != nil {
@@ -269,7 +289,18 @@ func (client *Client) Send(data []byte) (closed bool) {
 		}
 	}()
 
-	client.send <- data
+	select {
+	case <-client.close:
+		return true
+	default:
+	}
+
+	select {
+	case <-client.close:
+		return true
+	case client.send <- data:
+	}
+
 	return false
 }
 
@@ -318,7 +349,7 @@ func (game *Game) handleConnection(conn net.Conn) {
 	client := &Client{sessionStartedAt: time.Now()}
 	client.conn = conn
 	client.send = make(chan []byte)
-	client.close = make(chan bool)
+	client.close = make(chan struct{})
 	client.Character = nil
 	client.remainingRolls = 10
 	client.ConnectionState = ConnectionStateNone
@@ -326,9 +357,10 @@ func (game *Game) handleConnection(conn net.Conn) {
 	client.delayMutex = sync.Mutex{}
 	client.ansiEnabled = true
 
-	/* Spawn two goroutines to handle client I/O */
-	go client.readPump(game)
+	/* Spawn goroutines to handle client I/O */
 	go client.writePump(game)
 
 	game.register <- client
+
+	go client.readPump(game)
 }

@@ -131,11 +131,12 @@ func do_quit(ch *Character, arguments string) {
 	ch.Client.ConnectionState = ConnectionStateNone
 	ch.Send("{WLeaving for the real world...{x\r\n")
 
+	client := ch.Client
+
 	go func() {
 		/* Allow output to flush */
 		<-time.After(80 * time.Millisecond)
-		ch.Client.close <- true
-		ch.Client.conn.Close()
+		client.Close()
 	}()
 }
 

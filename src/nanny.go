@@ -121,9 +121,7 @@ func (game *Game) nanny(client *Client, message string) {
 
 		for other := range game.clients {
 			if other != client && other.Character != nil && other.Character.Name == client.Character.Name {
-				delete(game.clients, other)
-
-				other.conn.Close()
+				other.Close()
 			}
 		}
 
@@ -398,7 +396,7 @@ func (game *Game) nanny(client *Client, message string) {
 		err := client.Character.Finalize()
 		if err != nil {
 			log.Printf("Unable to create new character %v, dropping connection.\r\n", client.Character)
-			client.conn.Close()
+			client.Close()
 			break
 		}
 

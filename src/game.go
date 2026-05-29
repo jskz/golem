@@ -375,29 +375,14 @@ func (game *Game) Run() {
 			client.Send([]byte("By what name do you wish to be known? "))
 
 		case client := <-game.unregister:
-			delete(game.clients, client)
-
-			var logOutput string
-
-			if client.Character != nil {
-				logOutput = fmt.Sprintf("Lost connection with %s@%s.\r\n", client.Character.Name, client.conn.RemoteAddr().String())
-
-				client.Character.Client = nil
-				log.Print(logOutput)
-				game.broadcast(logOutput, WiznetBroadcastFilter)
-				break
-			}
-
-			logOutput = fmt.Sprintf("Lost connection with %s.\r\n", client.conn.RemoteAddr().String())
-			log.Print(logOutput)
-			game.broadcast(logOutput, WiznetBroadcastFilter)
+			game.unregisterClient(client)
 
 		case quit := <-game.quitRequest:
 			if quit.Character != nil {
 				quit.Character.flushOutput()
 			}
 
-			quit.conn.Close()
+			quit.Close()
 
 		case planeId := <-game.planeGenerationCompleted:
 			plane := game.FindPlaneByID(planeId)
@@ -413,4 +398,26 @@ func (game *Game) Run() {
 			return
 		}
 	}
+}
+
+func (game *Game) unregisterClient(client *Client) {
+	delete(game.clients, client)
+
+	var logOutput string
+
+	if client.Character != nil {
+		logOutput = fmt.Sprintf("Lost connection with %s@%s.\r\n", client.Character.Name, client.conn.RemoteAddr().String())
+
+		if client.Character.Client == client {
+			client.Character.Client = nil
+		}
+
+		log.Print(logOutput)
+		game.broadcast(logOutput, WiznetBroadcastFilter)
+		return
+	}
+
+	logOutput = fmt.Sprintf("Lost connection with %s.\r\n", client.conn.RemoteAddr().String())
+	log.Print(logOutput)
+	game.broadcast(logOutput, WiznetBroadcastFilter)
 }
