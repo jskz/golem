@@ -15,7 +15,6 @@ import (
 	"log"
 	"strings"
 
-	"github.com/getsentry/sentry-go"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -73,30 +72,6 @@ func (client *Client) displayPrompt() {
 
 func (game *Game) nanny(client *Client, message string) {
 	var output bytes.Buffer
-
-	if Config.SentryConfiguration.Enabled {
-		defer sentry.Recover()
-
-		sentry.ConfigureScope(func(scope *sentry.Scope) {
-			ctx := make(map[string]interface{})
-
-			ctx["remote_address"] = client.conn.RemoteAddr().String()
-
-			if client.Character != nil {
-				ctx["name"] = client.Character.Name
-				ctx["id"] = client.Character.Id
-
-				if client.Character.Room != nil {
-					ctx["room_id"] = client.Character.Room.Id
-					ctx["room_name"] = client.Character.Room.Name
-				}
-			}
-
-			ctx["input"] = message
-
-			scope.SetContext("client", ctx)
-		})
-	}
 
 	/*
 	 * The "nanny" handles line-based input from the client according to its connection state.

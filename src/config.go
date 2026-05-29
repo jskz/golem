@@ -11,9 +11,6 @@ import (
 	"encoding/json"
 	"log"
 	"os"
-	"time"
-
-	"github.com/getsentry/sentry-go"
 )
 
 var Config *AppConfiguration
@@ -32,11 +29,6 @@ type AppProfilingConfiguration struct {
 	Port    int  `json:"port"`
 }
 
-type AppSentryConfiguration struct {
-	DSN     string `json:"dsn"`
-	Enabled bool   `json:"enabled"`
-}
-
 type AppWebConfiguration struct {
 	PublicRoot string `json:"publicRoot"`
 }
@@ -45,7 +37,6 @@ type AppConfiguration struct {
 	HashSalt               string                    `json:"hashSalt"`
 	Port                   int                       `json:"port"`
 	MySQLConfiguration     AppMySQLConfiguration     `json:"mysql"`
-	SentryConfiguration    AppSentryConfiguration    `json:"sentry"`
 	ProfilingConfiguration AppProfilingConfiguration `json:"profiling"`
 	WebConfiguration       AppWebConfiguration       `json:"web"`
 
@@ -78,18 +69,6 @@ func init() {
 		}
 	}
 
-	if Config.SentryConfiguration.Enabled {
-		err := sentry.Init(sentry.ClientOptions{
-			Dsn: Config.SentryConfiguration.DSN,
-		})
-
-		if err != nil {
-			log.Panicf("failed to initialize Sentry: %v.\r\n", err)
-		}
-
-		log.Printf("Enabled Sentry error reporting.\r\n")
-	}
-
 	/* Read greeting */
 	Config.greeting, err = os.ReadFile("etc/GREETING.ANS")
 	if err != nil {
@@ -109,11 +88,5 @@ func init() {
 	if err != nil {
 		log.Printf("Warning: failed to read death ANSI file: %v.\r\n", err)
 		Config.death = []byte(string(""))
-	}
-}
-
-func flushSentry() {
-	if Config.SentryConfiguration.Enabled {
-		sentry.Flush(5 * time.Second)
 	}
 }

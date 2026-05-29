@@ -1,10 +1,6 @@
 {
     "port": 4000,
     "hashSalt": "place-a-sufficiently-random-string-here",
-    "sentry": {
-        "enabled": false,
-        "dsn": ""
-    },
     "mysql": {
         "host": "mysql",
         "port": 3306,

@@ -27,7 +27,6 @@ func main() {
 
 func run() int {
 	rand.Seed(time.Now().UnixNano())
-	defer flushSentry()
 
 	/* Game instance will encapsulate both the world and player session management */
 	game, err := NewGame()
