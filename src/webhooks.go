@@ -8,6 +8,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -142,13 +143,17 @@ func (webhook *Webhook) AttachScript(script *Script) error {
 }
 
 func (game *Game) CreateWebhook() (*Webhook, error) {
-	/* Try to create the new webhook in-DB first, retrieving its MySQL-generated UUID */
+	uuidString, err := newWebhookUUID()
+	if err != nil {
+		return nil, err
+	}
+
 	res, err := game.db.Exec(`
 	INSERT INTO
 		webhooks(uuid)
 	VALUES
-		(UUID())
-	`)
+		(?)
+	`, uuidString)
 	if err != nil {
 		return nil, err
 	}
@@ -160,28 +165,27 @@ func (game *Game) CreateWebhook() (*Webhook, error) {
 		return nil, err
 	}
 
-	var uuidString string = ""
-
-	uuid := game.db.QueryRow(`
-	SELECT
-		uuid
-	FROM
-		webhooks
-	WHERE
-		id = ?`,
-		insertId)
-	err = uuid.Scan(&uuidString)
-	if err != nil {
-		log.Println(err)
-		return nil, err
-	}
-
-	if uuidString == "" {
-		return nil, errors.New("unable to retrieve webhook UUID from fresh webhook")
-	}
-
 	game.webhooks[uuidString] = &Webhook{Id: int(insertId), Uuid: uuidString, Game: game}
 	return game.webhooks[uuidString], nil
+}
+
+func newWebhookUUID() (string, error) {
+	uuidBytes := make([]byte, 16)
+	_, err := rand.Read(uuidBytes)
+	if err != nil {
+		return "", err
+	}
+
+	uuidBytes[6] = (uuidBytes[6] & 0x0f) | 0x40
+	uuidBytes[8] = (uuidBytes[8] & 0x3f) | 0x80
+
+	return fmt.Sprintf("%08x-%04x-%04x-%04x-%012x",
+		uuidBytes[0:4],
+		uuidBytes[4:6],
+		uuidBytes[6:8],
+		uuidBytes[8:10],
+		uuidBytes[10:16],
+	), nil
 }
 
 func (game *Game) handleWebhooks() {

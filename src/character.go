@@ -425,31 +425,78 @@ func (ch *Character) HasEquippedLightSource() bool {
 }
 
 func (ch *Character) SavePlayerSkills() error {
-	var proficiencyValues strings.Builder
-
 	if len(ch.Skills) == 0 {
 		return nil
 	}
 
-	for _, proficiency := range ch.Skills {
-		proficiencyValues.WriteString(fmt.Sprintf("(%d, %d, %d, %d, %d),", proficiency.Id, ch.Id, proficiency.SkillId, proficiency.Job.Id, proficiency.Proficiency))
-	}
-
-	proficiencyValuesString := strings.TrimRight(proficiencyValues.String(), ",")
-	_, err := ch.Game.db.Exec(fmt.Sprintf(`
-	INSERT INTO
-		pc_skill_proficiency (id, player_character_id, skill_id, job_id, proficiency)
-	VALUES
-		%s
-	ON DUPLICATE KEY
-		UPDATE
-			proficiency = VALUES(proficiency)`,
-		proficiencyValuesString))
+	ctx := context.Background()
+	tx, err := ch.Game.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	for _, proficiency := range ch.Skills {
+		if proficiency.Id == 0 {
+			res, err := tx.ExecContext(ctx, `
+			INSERT INTO
+				pc_skill_proficiency(player_character_id, skill_id, job_id, proficiency)
+			VALUES
+				(?, ?, ?, ?)
+			`, ch.Id, proficiency.SkillId, proficiency.Job.Id, proficiency.Proficiency)
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			insertId, err := res.LastInsertId()
+			if err != nil {
+				tx.Rollback()
+				return err
+			}
+
+			proficiency.Id = uint(insertId)
+			continue
+		}
+
+		res, err := tx.ExecContext(ctx, `
+			UPDATE
+				pc_skill_proficiency
+			SET
+				player_character_id = ?,
+				skill_id = ?,
+				job_id = ?,
+				proficiency = ?
+			WHERE
+				id = ?
+		`, ch.Id, proficiency.SkillId, proficiency.Job.Id, proficiency.Proficiency, proficiency.Id)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		rowsAffected, err := res.RowsAffected()
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+
+		if rowsAffected > 0 {
+			continue
+		}
+
+		_, err = tx.ExecContext(ctx, `
+			INSERT INTO
+				pc_skill_proficiency(id, player_character_id, skill_id, job_id, proficiency)
+			VALUES
+				(?, ?, ?, ?, ?)
+		`, proficiency.Id, ch.Id, proficiency.SkillId, proficiency.Job.Id, proficiency.Proficiency)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (ch *Character) RollStats() {
@@ -543,7 +590,7 @@ func (ch *Character) Save() bool {
 			stat_con = ?,
 			stat_cha = ?,
 			stat_lck = ?,
-			updated_at = NOW()
+			updated_at = CURRENT_TIMESTAMP
 		WHERE
 			id = ?
 	`,

@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dop251/goja"
@@ -20,13 +21,17 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database"
 	"github.com/golang-migrate/migrate/v4/database/mysql"
+	"github.com/golang-migrate/migrate/v4/database/sqlite"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
 const (
 	databaseConnectMaxAttempts = 30
 	databaseConnectRetryDelay  = 2 * time.Second
+	databaseDriverMySQL        = "mysql"
+	databaseDriverSQLite       = "sqlite"
 )
 
 type Game struct {
@@ -101,24 +106,8 @@ func NewGame() (*Game, error) {
 	}
 
 	/* Attempt new migrations at startup */
-	driver, err := mysql.WithInstance(game.db, &mysql.Config{})
+	err = runDatabaseMigrations(game.db)
 	if err != nil {
-		return nil, err
-	}
-
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
-		"mysql",
-		driver,
-	)
-	if err != nil {
-		return nil, err
-	}
-
-	log.Printf("Running pending migrations.\r\n")
-
-	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
 		return nil, err
 	}
 
@@ -220,24 +209,24 @@ func NewGame() (*Game, error) {
 }
 
 func openDatabaseWithRetry() (*sql.DB, error) {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true&parseTime=true",
-		Config.MySQLConfiguration.User,
-		Config.MySQLConfiguration.Password,
-		Config.MySQLConfiguration.Host,
-		Config.MySQLConfiguration.Port,
-		Config.MySQLConfiguration.Database)
+	driverName, dsn, err := databaseConnectionInfo(Config.DatabaseConfiguration)
+	if err != nil {
+		return nil, err
+	}
 
-	var err error
+	var connectErr error
 
 	for attempt := 1; attempt <= databaseConnectMaxAttempts; attempt++ {
-		db, openErr := sql.Open("mysql", dsn)
+		db, openErr := sql.Open(driverName, dsn)
 		if openErr == nil {
-			db.SetConnMaxLifetime(time.Second * 30)
-			db.SetMaxOpenConns(10)
-			db.SetMaxIdleConns(10)
+			configureDatabasePool(db, driverName)
 
-			err = db.Ping()
-			if err == nil {
+			connectErr = db.Ping()
+			if connectErr == nil {
+				connectErr = configureDatabaseConnection(db, driverName)
+			}
+
+			if connectErr == nil {
 				if attempt > 1 {
 					log.Printf("Connected to database after %d attempts.\r\n", attempt)
 				}
@@ -247,21 +236,123 @@ func openDatabaseWithRetry() (*sql.DB, error) {
 
 			db.Close()
 		} else {
-			err = openErr
+			connectErr = openErr
 		}
 
 		if attempt < databaseConnectMaxAttempts {
 			log.Printf("Database connection attempt %d/%d failed: %v. Retrying in %s.\r\n",
 				attempt,
 				databaseConnectMaxAttempts,
-				err,
+				connectErr,
 				databaseConnectRetryDelay,
 			)
 			time.Sleep(databaseConnectRetryDelay)
 		}
 	}
 
-	return nil, fmt.Errorf("failed to connect to database after %d attempts: %w", databaseConnectMaxAttempts, err)
+	return nil, fmt.Errorf("failed to connect to database after %d attempts: %w", databaseConnectMaxAttempts, connectErr)
+}
+
+func databaseConnectionInfo(config AppDatabaseConfiguration) (string, string, error) {
+	driverName := strings.ToLower(strings.TrimSpace(config.Driver))
+	if driverName == "" {
+		driverName = databaseDriverMySQL
+	}
+
+	switch driverName {
+	case databaseDriverMySQL:
+		if config.DSN != "" {
+			return driverName, config.DSN, nil
+		}
+
+		return driverName, fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?multiStatements=true&parseTime=true",
+			config.User,
+			config.Password,
+			config.Host,
+			config.Port,
+			config.Database), nil
+
+	case databaseDriverSQLite:
+		if config.DSN != "" {
+			return driverName, config.DSN, nil
+		}
+
+		if config.Path == "" {
+			return "", "", fmt.Errorf("sqlite database path must be configured")
+		}
+
+		return driverName, config.Path, nil
+
+	default:
+		return "", "", fmt.Errorf("unsupported database driver %q", config.Driver)
+	}
+}
+
+func configureDatabasePool(db *sql.DB, driverName string) {
+	switch driverName {
+	case databaseDriverSQLite:
+		db.SetMaxOpenConns(1)
+		db.SetMaxIdleConns(1)
+	default:
+		db.SetConnMaxLifetime(time.Second * 30)
+		db.SetMaxOpenConns(10)
+		db.SetMaxIdleConns(10)
+	}
+}
+
+func configureDatabaseConnection(db *sql.DB, driverName string) error {
+	if driverName != databaseDriverSQLite {
+		return nil
+	}
+
+	_, err := db.Exec("PRAGMA foreign_keys = ON")
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec("PRAGMA busy_timeout = 5000")
+	return err
+}
+
+func runDatabaseMigrations(db *sql.DB) error {
+	driver, databaseName, migrationSource, err := databaseMigrationDriver(db, Config.DatabaseConfiguration)
+	if err != nil {
+		return err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(migrationSource, databaseName, driver)
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Running pending migrations.\r\n")
+
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+
+	return nil
+}
+
+func databaseMigrationDriver(db *sql.DB, config AppDatabaseConfiguration) (database.Driver, string, string, error) {
+	driverName := strings.ToLower(strings.TrimSpace(config.Driver))
+	if driverName == "" {
+		driverName = databaseDriverMySQL
+	}
+
+	switch driverName {
+	case databaseDriverMySQL:
+		driver, err := mysql.WithInstance(db, &mysql.Config{})
+		return driver, databaseDriverMySQL, "file://migrations", err
+
+	case databaseDriverSQLite:
+		driver, err := sqlite.WithInstance(db, &sqlite.Config{})
+		return driver, databaseDriverSQLite, "file://migrations/sqlite", err
+
+	default:
+		return nil, "", "", fmt.Errorf("unsupported database driver %q", config.Driver)
+	}
 }
 
 /* Game loop */

@@ -290,6 +290,12 @@ func (room *Room) IsEqual(oroom *Room) bool {
 func (game *Game) FixExits() error {
 	log.Printf("Fixing exits.\r\n")
 
+	type exitRecord struct {
+		exit     *Exit
+		roomId   int
+		toRoomId int
+	}
+
 	rows, err := game.db.Query(`
 		SELECT
 			id,
@@ -308,9 +314,9 @@ func (game *Game) FixExits() error {
 
 	defer rows.Close()
 
-	for rows.Next() {
-		var err error
+	exitRecords := make([]exitRecord, 0)
 
+	for rows.Next() {
 		exit := &Exit{}
 
 		var roomId int
@@ -321,12 +327,30 @@ func (game *Game) FixExits() error {
 			return err
 		}
 
-		exit.To, err = game.LoadRoomIndex(uint(toRoomId))
+		exitRecords = append(exitRecords, exitRecord{
+			exit:     exit,
+			roomId:   roomId,
+			toRoomId: toRoomId,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	if err := rows.Close(); err != nil {
+		return err
+	}
+
+	for _, record := range exitRecords {
+		exit := record.exit
+
+		exit.To, err = game.LoadRoomIndex(uint(record.toRoomId))
 		if err != nil {
 			continue
 		}
 
-		exit.Room, err = game.LoadRoomIndex(uint(roomId))
+		exit.Room, err = game.LoadRoomIndex(uint(record.roomId))
 		if err != nil {
 			continue
 		}
@@ -334,7 +358,7 @@ func (game *Game) FixExits() error {
 		exit.Room.Exit[exit.Direction] = exit
 	}
 
-	return rows.Err()
+	return nil
 }
 
 /*

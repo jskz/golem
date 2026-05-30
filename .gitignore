@@ -5,6 +5,7 @@
 !.prettierrc
 
 etc/config.json
+etc/*.sqlite*
 
 /golem.exe
 /golem
