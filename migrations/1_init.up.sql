@@ -1,5 +1,5 @@
 CREATE TABLE zones (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `name` VARCHAR(255),
     `who_description` VARCHAR(7),
@@ -9,16 +9,14 @@ CREATE TABLE zones (
     `reset_frequency` INT NOT NULL,
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
-    `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id)
+    `deleted_by` BIGINT DEFAULT NULL
 );
 
 CREATE TABLE rooms (
-    `id` BIGINT NOT NULL,
+    `id` INTEGER PRIMARY KEY,
     `zone_id` BIGINT NOT NULL,
 
     `name` VARCHAR(255),
@@ -26,17 +24,15 @@ CREATE TABLE rooms (
     `flags` INT,
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id),
     FOREIGN KEY (zone_id) REFERENCES zones(id)
 );
 
 CREATE TABLE exits (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `room_id` BIGINT NOT NULL,
     `to_room_id` BIGINT NULL,
@@ -44,56 +40,50 @@ CREATE TABLE exits (
     `flags` INT NOT NULL,
     
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id),
     FOREIGN KEY (room_id) REFERENCES rooms(id),
     FOREIGN KEY (to_room_id) REFERENCES rooms(id)
 );
 
 CREATE TABLE races (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `name` VARCHAR(64) NOT NULL,
     `display_name` VARCHAR(64) NOT NULL,
     `playable` BOOLEAN NOT NULL,
 
-    `primary_attribute` ENUM('none', 'strength', 'dexterity', 'intelligence', 'wisdom', 'constitution', 'charisma', 'luck') DEFAULT 'none',
+    `primary_attribute` TEXT DEFAULT 'none',
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
-    `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id)
+    `deleted_by` BIGINT DEFAULT NULL
 );
 
 CREATE TABLE jobs (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `name` VARCHAR(64) NOT NULL,
     `display_name` VARCHAR(64) NOT NULL,
     `playable` BOOLEAN NOT NULL,
     `experience_required_modifier` FLOAT NOT NULL DEFAULT 1.0,
 
-    `primary_attribute` ENUM('none', 'strength', 'dexterity', 'intelligence', 'wisdom', 'constitution', 'charisma', 'luck') DEFAULT 'none',
+    `primary_attribute` TEXT DEFAULT 'none',
 
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
-    `deleted_by` BIGINT DEFAULT NULL,
-    
-    PRIMARY KEY (id)
+    `deleted_by` BIGINT DEFAULT NULL
 );
 
 CREATE TABLE player_characters (
     /* Identity and authentication */
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
     `username` VARCHAR(64) NOT NULL,
     `password_hash` VARCHAR(60) NOT NULL,
 
@@ -130,19 +120,17 @@ CREATE TABLE player_characters (
 
     /* Timestamps & soft deletion */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id),
     FOREIGN KEY (room_id) REFERENCES rooms(id),
     FOREIGN KEY (race_id) REFERENCES races(id),
     FOREIGN KEY (job_id) REFERENCES jobs(id)
 );
 
 CREATE TABLE mobiles (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `name` VARCHAR(255) NOT NULL,
     `short_description` TEXT,
@@ -177,22 +165,20 @@ CREATE TABLE mobiles (
     
     /* Timestamps & soft deletion */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id),
     FOREIGN KEY (race_id) REFERENCES races(id),
     FOREIGN KEY (job_id) REFERENCES jobs(id)
 );
 
 CREATE TABLE resets (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
     `zone_id` BIGINT NOT NULL,
     `room_id` BIGINT NOT NULL,
 
-    `type` ENUM('mobile', 'room', 'object') NOT NULL,
+    `type` TEXT NOT NULL,
 
     `value_1` INT,
     `value_2` INT,
@@ -201,18 +187,16 @@ CREATE TABLE resets (
     
     /* Timestamps & soft deletion */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id),
     FOREIGN KEY (room_id) REFERENCES rooms(id),
     FOREIGN KEY (zone_id) REFERENCES zones(id)
 );
 
 CREATE TABLE objects (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
     `zone_id` BIGINT NOT NULL,
 
     `name` VARCHAR(255) NOT NULL,
@@ -221,7 +205,7 @@ CREATE TABLE objects (
     `description` TEXT,
     `flags` INT,
 
-    `item_type` ENUM ('protoplasm', 'light', 'potion', 'food', 'furniture', 'drink_container', 'scroll', 'container', 'armor', 'weapon', 'sign', 'treasure', 'reagent', 'artifact', 'currency') NOT NULL DEFAULT 'protoplasm',
+    `item_type` TEXT NOT NULL DEFAULT 'protoplasm',
     `value_1` INT,
     `value_2` INT,
     `value_3` INT,
@@ -229,17 +213,15 @@ CREATE TABLE objects (
     
     /* Timestamps & soft deletion */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id),
     FOREIGN KEY (zone_id) REFERENCES zones(id)
 );
 
 CREATE TABLE object_instances (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
     `parent_id` BIGINT,
 
     `name` VARCHAR(255) NOT NULL,
@@ -249,7 +231,7 @@ CREATE TABLE object_instances (
     `flags` INT,
     `wear_location` INT DEFAULT -1,
 
-    `item_type` ENUM ('protoplasm', 'light', 'potion', 'food', 'furniture', 'drink_container', 'scroll', 'container', 'armor', 'weapon', 'sign', 'treasure', 'reagent', 'artifact', 'currency') NOT NULL DEFAULT 'protoplasm',
+    `item_type` TEXT NOT NULL DEFAULT 'protoplasm',
 
     `value_1` INT,
     `value_2` INT,
@@ -258,28 +240,24 @@ CREATE TABLE object_instances (
     
     /* Timestamps & soft deletion */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
-    `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id)
+    `deleted_by` BIGINT DEFAULT NULL
 );
 
 CREATE TABLE player_character_object (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `player_character_id` BIGINT NOT NULL,
     `object_instance_id` BIGINT NOT NULL,
     
     /* Timestamps & soft deletion */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id),
     FOREIGN KEY (player_character_id) REFERENCES player_characters(id),
     FOREIGN KEY (object_instance_id) REFERENCES object_instances(id)
 );
@@ -294,14 +272,14 @@ INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (4, 1, 'Featurel
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (5, 1, 'Featureless Corridor in Space', 'Flickering torches in the void serve as guideposts marking lanes throughout the astral void, linking discrete spaces.', 4);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (6, 1, 'A Cell', 'A foul stink fills the musty, stale air of a prison cell profaned by unspeakable experiments.', 0);
 INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (7, 1, 'Training Room', 'Part library, part study, part workshop, this chamber has been set aside for all pursuits of self-mastery.', 4);
-INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (8, 1, 'Trading Post', "A station for commerce has somehow taken shape in the astral void.", 4);
+INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (8, 1, 'Trading Post', 'A station for commerce has somehow taken shape in the astral void.', 4);
 
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!', 0, 'protoplasm', 0, 0, 0, 0);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (2, 1, 'gold coin', 'a gold coin', 'A gold coin lies on the ground here.', 'A single gold coin.', 0, 'currency', 0, 0, 0, 0);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (3, 1, 'gold coins pile', '%d gold coins', 'There is a pile of gold coins here.', 'A pile of %d gold coins.', 0, 'currency', 0, 0, 0, 0);
-INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (4, 1, 'sign post signpost', 'a signpost', 'A signpost hangs in the aether beside a foreboding trapdoor.', "{YWelcome to Golem!{x\r\n\r\n{CThis pre-alpha MUD is in active development.\r\n\r\nBeneath this safe zone welcome lobby is a test dungeon with multiple floors\r\nwhose mazes are regenerated each reboot.\r\n\r\nFind updates and information on development at https://github.com/jskz/golem\r\n\r\n{WProblems? {wFeel free to {Wcontact{w the developer at {Wjames@jskarzin.org{w.{x", 0, 'sign', 0, 0, 0, 0);
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (4, 1, 'sign post signpost', 'a signpost', 'A signpost hangs in the aether beside a foreboding trapdoor.', '{YWelcome to Golem!{x\r\n\r\n{CThis pre-alpha MUD is in active development.\r\n\r\nBeneath this safe zone welcome lobby is a test dungeon with multiple floors\r\nwhose mazes are regenerated each reboot.\r\n\r\nFind updates and information on development at https://github.com/jskz/golem\r\n\r\n{WProblems? {wFeel free to {Wcontact{w the developer at {Wjames@jskarzin.org{w.{x', 0, 'sign', 0, 0, 0, 0);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (5, 1, 'minor healing potion', 'a potion of minor healing', 'A hazy cyan potion lays here.', '{CTh{cis fo{Cgg{Wy c{wyan l{Wi{Cq{cu{Cid is a life-giving elixir, but the taste is not so great.{x', 1, 'potion', 0, 0, 0, 0);
-INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (6, 1, 'swashbuckler cutlass sword', "a swashbuckler's cutlass", "A sword with a large, basket-guarded hilt was left here.", "The preferred sword of the pirate, with a pronounced basket guard at the hilt.", 7, 'weapon', 3, 6, 5, 1);
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (6, 1, 'swashbuckler cutlass sword', 'a swashbuckler''s cutlass', 'A sword with a large, basket-guarded hilt was left here.', 'The preferred sword of the pirate, with a pronounced basket guard at the hilt.', 7, 'weapon', 3, 6, 5, 1);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (7, 1, 'wizard wizardry pointed hat cone', 'a pointed hat', 'An unassuming cone encircled by a wide brim suggests wizardry afoot.', 'An i-conic cap perfectly fit for the magical mindspace.', 69, 'armor', 3, 3, 3, 10);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (8, 1, 'black cowl', 'a black cowl', 'A black cloth hood has been discarded here.', 'The perfect concealment for a brigand or other stalker of the night.', 69, 'armor', 1, 2, 2, 1);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (9, 1, 'mithril vest', 'a mithril vest', 'A vest of mithril links sits here.', 'A vest formed with links of mithril providing some defense against slashing weapons.', 261, 'armor', 15, 15, 15, 2);
@@ -370,7 +348,7 @@ VALUES
 INSERT INTO
     mobiles(id, name, short_description, long_description, description, flags, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 VALUES
-    (2, 'guild master guildmaster', 'the guildmaster', 'The guildmaster waits patiently to counsel and guide.', "An inviting figure waits patiently to train your fundamentals.", 32, 1, 1, 50, 1250, 15, 15, 100, 100, 100, 100, 12, 12, 12, 12, 12, 12, 10);
+    (2, 'guild master guildmaster', 'the guildmaster', 'The guildmaster waits patiently to counsel and guide.', 'An inviting figure waits patiently to train your fundamentals.', 32, 1, 1, 50, 1250, 15, 15, 100, 100, 100, 100, 12, 12, 12, 12, 12, 12, 10);
 
 INSERT INTO
     mobiles(id, name, short_description, long_description, description, flags, race_id, job_id, level, experience, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)

@@ -1,4 +1,4 @@
-DROP INDEX index_script_name ON scripts;
+DROP INDEX IF EXISTS `index_script_name`;
 
 DROP TABLE mobile_script;
 DROP TABLE room_script;

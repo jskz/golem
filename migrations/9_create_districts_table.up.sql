@@ -1,7 +1,7 @@
 CREATE TABLE districts (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
-    `plane_id` BIGINT NOT NULL UNIQUE,
+    `plane_id` BIGINT NOT NULL,
     
     `x` INT NOT NULL,
     `y` INT NOT NULL,
@@ -9,25 +9,21 @@ CREATE TABLE districts (
     `width` INT NOT NULL,
     `height` INT NOT NULL,
 
-    FOREIGN KEY (plane_id) REFERENCES planes(id),
-
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (id)
+    FOREIGN KEY (plane_id) REFERENCES planes(id)
 );
 
 CREATE TABLE district_script (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
     `district_id` BIGINT NOT NULL,
     `script_id` BIGINT NOT NULL,
 
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-
-    PRIMARY KEY (id),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (district_id) REFERENCES districts(id) ON DELETE CASCADE,
     FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE
 );

@@ -1,19 +1,17 @@
 CREATE TABLE shops (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `mobile_id` BIGINT NOT NULL UNIQUE,
 
-    FOREIGN KEY (mobile_id) REFERENCES mobiles(id),
-
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
-    PRIMARY KEY (id)
+    FOREIGN KEY (mobile_id) REFERENCES mobiles(id)
 );
 
 CREATE TABLE shop_object (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `shop_id` BIGINT NOT NULL,
     `object_id` BIGINT NOT NULL,
@@ -21,9 +19,7 @@ CREATE TABLE shop_object (
 
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-
-    PRIMARY KEY (id),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (shop_id) REFERENCES shops(id) ON DELETE CASCADE,
     FOREIGN KEY (`object_id`) REFERENCES objects(id) ON DELETE CASCADE
 );

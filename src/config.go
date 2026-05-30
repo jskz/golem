@@ -15,24 +15,13 @@ import (
 
 var Config *AppConfiguration
 
-/* Structure corresponding to JSON configuration file */
-type AppMySQLConfiguration struct {
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	Database string `json:"database"`
-}
+const defaultDatabasePath = "etc/golem.sqlite3"
 
+/* Structure corresponding to JSON configuration file */
 type AppDatabaseConfiguration struct {
-	Driver   string `json:"driver"`
-	DSN      string `json:"dsn"`
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	Database string `json:"database"`
-	Path     string `json:"path"`
+	Driver string `json:"driver"`
+	DSN    string `json:"dsn"`
+	Path   string `json:"path"`
 }
 
 type AppProfilingConfiguration struct {
@@ -48,7 +37,6 @@ type AppConfiguration struct {
 	HashSalt               string                    `json:"hashSalt"`
 	Port                   int                       `json:"port"`
 	DatabaseConfiguration  AppDatabaseConfiguration  `json:"database"`
-	MySQLConfiguration     AppMySQLConfiguration     `json:"mysql"`
 	ProfilingConfiguration AppProfilingConfiguration `json:"profiling"`
 	WebConfiguration       AppWebConfiguration       `json:"web"`
 
@@ -63,27 +51,20 @@ func init() {
 	Config = &AppConfiguration{
 		Port:                  4000,
 		DatabaseConfiguration: defaultDatabaseConfiguration(),
-		MySQLConfiguration:    defaultMySQLConfiguration(),
 	}
 
 	/* Attempt read of config JSON file */
 	configBytes, err := os.ReadFile("etc/config.json")
 	if err != nil {
 		log.Printf("Warning: failed to read local config file: %v.\r\n", err)
-		Config.normalizeDatabaseConfiguration(nil)
+		Config.normalizeDatabaseConfiguration()
 	} else {
-		var configFields map[string]json.RawMessage
-		err = json.Unmarshal(configBytes, &configFields)
-		if err != nil {
-			panic("Malformed config file.")
-		}
-
 		err = json.Unmarshal(configBytes, Config)
 		if err != nil {
 			panic("Malformed config file.")
 		}
 
-		Config.normalizeDatabaseConfiguration(configFields)
+		Config.normalizeDatabaseConfiguration()
 	}
 
 	/* Read greeting */
@@ -108,57 +89,19 @@ func init() {
 	}
 }
 
-func defaultMySQLConfiguration() AppMySQLConfiguration {
-	return AppMySQLConfiguration{
-		Host:     "mysql",
-		Port:     3306,
-		User:     "username",
-		Password: "password",
-		Database: "database",
-	}
-}
-
 func defaultDatabaseConfiguration() AppDatabaseConfiguration {
-	mysqlConfig := defaultMySQLConfiguration()
-
 	return AppDatabaseConfiguration{
-		Driver:   databaseDriverMySQL,
-		Host:     mysqlConfig.Host,
-		Port:     mysqlConfig.Port,
-		User:     mysqlConfig.User,
-		Password: mysqlConfig.Password,
-		Database: mysqlConfig.Database,
-		Path:     "etc/golem.sqlite3",
+		Driver: databaseDriverSQLite,
+		Path:   defaultDatabasePath,
 	}
 }
 
-func databaseConfigurationFromMySQL(mysqlConfig AppMySQLConfiguration) AppDatabaseConfiguration {
-	return AppDatabaseConfiguration{
-		Driver:   databaseDriverMySQL,
-		Host:     mysqlConfig.Host,
-		Port:     mysqlConfig.Port,
-		User:     mysqlConfig.User,
-		Password: mysqlConfig.Password,
-		Database: mysqlConfig.Database,
-		Path:     "etc/golem.sqlite3",
-	}
-}
-
-func (config *AppConfiguration) normalizeDatabaseConfiguration(fields map[string]json.RawMessage) {
-	if fields != nil {
-		_, hasDatabaseConfig := fields["database"]
-		_, hasLegacyMySQLConfig := fields["mysql"]
-
-		if !hasDatabaseConfig && hasLegacyMySQLConfig {
-			config.DatabaseConfiguration = databaseConfigurationFromMySQL(config.MySQLConfiguration)
-		}
-	}
-
+func (config *AppConfiguration) normalizeDatabaseConfiguration() {
 	if config.DatabaseConfiguration.Driver == "" {
-		config.DatabaseConfiguration.Driver = databaseDriverMySQL
+		config.DatabaseConfiguration.Driver = databaseDriverSQLite
 	}
 
 	if config.DatabaseConfiguration.Path == "" {
-		config.DatabaseConfiguration.Path = "etc/golem.sqlite3"
+		config.DatabaseConfiguration.Path = defaultDatabasePath
 	}
 }

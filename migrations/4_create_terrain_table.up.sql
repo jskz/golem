@@ -1,5 +1,5 @@
 CREATE TABLE terrain (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `name` VARCHAR(64) NOT NULL UNIQUE,
     `glyph_colour` VARCHAR(32) NOT NULL,
@@ -9,9 +9,7 @@ CREATE TABLE terrain (
 
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-
-    PRIMARY KEY (id)
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 INSERT INTO terrain(id, name, glyph_colour, map_glyph, movement_cost, flags) VALUES (1, 'cave-wall', '{D', '#', -1, 0);

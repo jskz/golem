@@ -1,7 +1,5 @@
-ALTER TABLE player_characters DROP FOREIGN KEY `fk_player_characters_plane_id`;
-DROP INDEX `index_pc_plane_id` ON player_characters;
-ALTER TABLE player_characters
-    DROP COLUMN `plane_z`,
-    DROP COLUMN `plane_y`,
-    DROP COLUMN `plane_x`,
-    DROP COLUMN `plane_id`;
+DROP INDEX IF EXISTS `index_pc_plane_id`;
+ALTER TABLE player_characters DROP COLUMN `plane_z`;
+ALTER TABLE player_characters DROP COLUMN `plane_y`;
+ALTER TABLE player_characters DROP COLUMN `plane_x`;
+ALTER TABLE player_characters DROP COLUMN `plane_id`;

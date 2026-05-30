@@ -1,1 +1,1 @@
-ALTER TABLE `object_instances` DROP `inside_object_instance_id`;
+ALTER TABLE `object_instances` DROP COLUMN `inside_object_instance_id`;

@@ -1,6 +1,6 @@
-DROP INDEX index_pc_username ON player_characters;
-DROP INDEX index_race_name ON races;
-DROP INDEX index_job_name ON jobs;
+DROP INDEX IF EXISTS `index_pc_username`;
+DROP INDEX IF EXISTS `index_race_name`;
+DROP INDEX IF EXISTS `index_job_name`;
 
 DROP TABLE exits;
 DROP TABLE player_character_object;

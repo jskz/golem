@@ -1,19 +1,17 @@
 CREATE TABLE skills (
-    `id` BIGINT NOT NULL,
+    `id` INTEGER PRIMARY KEY,
 
     `name` VARCHAR(255) NOT NULL UNIQUE,
-    `type` ENUM('skill', 'spell', 'passive'),
-    `intent` ENUM('offensive', 'curative', 'none') DEFAULT 'none',
+    `type` TEXT,
+    `intent` TEXT DEFAULT 'none',
     
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-
-    PRIMARY KEY (id)
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE job_skill (
-    `id` BIGINT NOT NULL,
+    `id` INTEGER PRIMARY KEY,
 
     `job_id` BIGINT NOT NULL,
     `skill_id` BIGINT NOT NULL,
@@ -24,18 +22,16 @@ CREATE TABLE job_skill (
     
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     `deleted_at` TIMESTAMP NULL DEFAULT NULL,
     `deleted_by` BIGINT DEFAULT NULL,
-
-    PRIMARY KEY (id),
     FOREIGN KEY (job_id) REFERENCES jobs(id),
     FOREIGN KEY (skill_id) REFERENCES skills(id)
 );
 
 CREATE TABLE pc_skill_proficiency (
-    `id` BIGINT NOT NULL AUTO_INCREMENT,
+    `id` INTEGER PRIMARY KEY,
 
     `player_character_id` BIGINT NOT NULL,
     `skill_id` BIGINT NOT NULL,
@@ -44,9 +40,7 @@ CREATE TABLE pc_skill_proficiency (
 
     /* Timestamps */
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-    `updated_at` TIMESTAMP NOT NULL DEFAULT NOW() ON UPDATE NOW(),
-
-    PRIMARY KEY (id),
+    `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (player_character_id) REFERENCES player_characters(id),
     FOREIGN KEY (job_id) REFERENCES jobs(id),
     FOREIGN KEY (skill_id) REFERENCES skills(id)
