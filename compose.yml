@@ -26,6 +26,7 @@ services:
       - "9000:9000"
     volumes:
       - ./etc:/app/etc
+      - ./migrations:/app/migrations
       - ./scripts:/app/scripts
 
 networks:

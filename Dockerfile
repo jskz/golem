@@ -15,9 +15,6 @@
   RUN adduser -D -H -s /sbin/nologin golem
 
   COPY --from=build /out/golem /app/golem
-  COPY etc /app/etc
-  COPY migrations /app/migrations
-  COPY scripts /app/scripts
 
   USER golem
 
