@@ -66,17 +66,40 @@ func (obj *ObjectInstance) location() objectLocation {
 	}
 }
 
+func (location objectLocation) persistedOwner() *Character {
+	if location.carrier != nil {
+		if location.carrier.Flags&CHAR_IS_PLAYER != 0 {
+			return location.carrier
+		}
+
+		return nil
+	}
+
+	if location.container != nil {
+		return location.container.persistedOwner()
+	}
+
+	return nil
+}
+
 func (game *Game) decayObject(obj *ObjectInstance) {
 	location := obj.location()
+	var movedContents []*ObjectInstance
 
 	game.sendDecayMessage(obj, location)
 
 	if obj.ItemType == ItemTypeContainer && obj.Contents != nil {
-		game.moveDecayedContainerContents(obj, location)
+		movedContents = game.moveDecayedContainerContents(obj, location)
 	}
 
 	obj.removeFromLocation()
 	game.Objects.Remove(obj)
+
+	game.syncDecayedContainerContents(movedContents, location)
+
+	if err := game.deletePersistedObjectInstance(obj); err != nil {
+		log.Printf("Warning: failed to delete decayed object instance %d: %v\r\n", obj.Id, err)
+	}
 }
 
 func (game *Game) removeCharacterFromWorld(ch *Character) {
@@ -124,6 +147,10 @@ func (game *Game) removeObjectFromWorld(obj *ObjectInstance) {
 
 	obj.removeFromLocation()
 	game.Objects.Remove(obj)
+
+	if err := game.deletePersistedObjectInstance(obj); err != nil {
+		log.Printf("Warning: failed to delete removed object instance %d: %v\r\n", obj.Id, err)
+	}
 }
 
 func (game *Game) sendDecayMessage(obj *ObjectInstance, location objectLocation) {
@@ -146,15 +173,54 @@ func (game *Game) sendDecayMessage(obj *ObjectInstance, location objectLocation)
 	}
 }
 
-func (game *Game) moveDecayedContainerContents(container *ObjectInstance, location objectLocation) {
+func (game *Game) moveDecayedContainerContents(container *ObjectInstance, location objectLocation) []*ObjectInstance {
+	movedContents := make([]*ObjectInstance, 0)
+
 	for contentIter := container.Contents.Head; contentIter != nil; {
 		next := contentIter.Next
 		contentObj := contentIter.Value.(*ObjectInstance)
 
 		container.removeObject(contentObj)
 		game.moveDecayedContainerContent(contentObj, location)
+		movedContents = append(movedContents, contentObj)
 
 		contentIter = next
+	}
+
+	return movedContents
+}
+
+func (game *Game) syncDecayedContainerContents(contents []*ObjectInstance, location objectLocation) {
+	if len(contents) == 0 {
+		return
+	}
+
+	if game == nil || game.db == nil {
+		return
+	}
+
+	if owner := location.persistedOwner(); owner != nil {
+		if err := game.SavePlayerInventory(owner); err != nil {
+			log.Printf("Warning: failed to save decayed container contents for %s: %v\r\n", owner.Name, err)
+		}
+
+		for _, obj := range contents {
+			if obj.persistedOwner() != nil {
+				continue
+			}
+
+			if err := game.deletePersistedObjectTree(obj); err != nil {
+				log.Printf("Warning: failed to delete moved object instance %d after container decay: %v\r\n", obj.Id, err)
+			}
+		}
+
+		return
+	}
+
+	for _, obj := range contents {
+		if err := game.deletePersistedObjectTree(obj); err != nil {
+			log.Printf("Warning: failed to delete moved object instance %d after container decay: %v\r\n", obj.Id, err)
+		}
 	}
 }
 

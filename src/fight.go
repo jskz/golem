@@ -9,6 +9,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -84,6 +85,15 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 			carriedObjects = append(carriedObjects, iter.Value.(*ObjectInstance))
 		}
 
+		if ch.Flags&CHAR_IS_PLAYER != 0 {
+			for _, carriedObj := range carriedObjects {
+				err := ch.DetachObject(carriedObj)
+				if err != nil {
+					log.Printf("Warning: failed to detach object from slain PC: %v\r\n", err)
+				}
+			}
+		}
+
 		for _, carriedObj := range carriedObjects {
 			ch.RemoveObject(carriedObj)
 		}
@@ -91,10 +101,6 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 		for i := len(carriedObjects) - 1; i >= 0; i-- {
 			obj.AddObject(carriedObjects[i])
 		}
-	}
-
-	if ch.Flags&CHAR_IS_PLAYER != 0 {
-		ch.DetachAllObjects()
 	}
 
 	// Create a gold object corresponding to how much gold they had on their person

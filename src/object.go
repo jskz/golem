@@ -470,6 +470,96 @@ func (obj *ObjectInstance) objectInstanceIDs() []uint {
 	return ids
 }
 
+func (obj *ObjectInstance) resetObjectInstanceIDs() {
+	if obj == nil {
+		return
+	}
+
+	obj.Id = 0
+
+	if obj.Contents != nil {
+		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
+			containedObject := iter.Value.(*ObjectInstance)
+			containedObject.resetObjectInstanceIDs()
+		}
+	}
+}
+
+func (obj *ObjectInstance) persistedOwner() *Character {
+	for current := obj; current != nil; current = current.Inside {
+		if current.CarriedBy == nil {
+			continue
+		}
+
+		if current.CarriedBy.Flags&CHAR_IS_PLAYER != 0 {
+			return current.CarriedBy
+		}
+
+		return nil
+	}
+
+	return nil
+}
+
+func (game *Game) deletePersistedObjectInstance(obj *ObjectInstance) error {
+	if obj == nil || obj.Id == 0 {
+		return nil
+	}
+
+	err := game.deletePersistedObjectInstanceIDs([]uint{obj.Id})
+	if err != nil {
+		return err
+	}
+
+	obj.Id = 0
+	return nil
+}
+
+func (game *Game) deletePersistedObjectTree(obj *ObjectInstance) error {
+	if obj == nil {
+		return nil
+	}
+
+	err := game.deletePersistedObjectInstanceIDs(obj.objectInstanceIDs())
+	if err != nil {
+		return err
+	}
+
+	obj.resetObjectInstanceIDs()
+	return nil
+}
+
+func (game *Game) deletePersistedObjectInstanceIDs(ids []uint) error {
+	if game == nil || game.db == nil {
+		return nil
+	}
+
+	ids = compactObjectInstanceIDs(ids)
+	if len(ids) == 0 {
+		return nil
+	}
+
+	ctx := context.Background()
+	tx, err := game.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	err = deleteObjectInstancesTx(ctx, tx, ids)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
+
 func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 	if obj == nil || obj.Id > 0 {
 		return nil

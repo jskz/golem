@@ -713,8 +713,19 @@ func (ch *Character) TransferObjectTo(target *Character, obj *ObjectInstance) er
 	}
 
 	var reified []*ObjectInstance
+	deleteAfterTransfer := ch.Flags&CHAR_IS_PLAYER != 0 && target.Flags&CHAR_IS_PLAYER == 0
+	ids := obj.objectInstanceIDs()
+
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
 		err = ch.detachObjectTx(ctx, tx, obj)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	if deleteAfterTransfer {
+		err = deleteObjectInstancesTx(ctx, tx, ids)
 		if err != nil {
 			tx.Rollback()
 			return err
@@ -737,32 +748,59 @@ func (ch *Character) TransferObjectTo(target *Character, obj *ObjectInstance) er
 		return err
 	}
 
+	if deleteAfterTransfer {
+		obj.resetObjectInstanceIDs()
+	}
+
 	return nil
 }
 
 func (ch *Character) DetachAllObjects() int {
-	result, err := ch.Game.db.Exec(`
-	DELETE FROM
-		player_character_object
-	WHERE
-		player_character_id = ?`,
-		ch.Id)
+	if ch == nil || ch.Game == nil || ch.Game.db == nil {
+		return -1
+	}
+
+	ctx := context.Background()
+	tx, err := ch.Game.db.BeginTx(ctx, nil)
 	if err != nil {
 		return -1
 	}
 
-	rowsAffected, err := result.RowsAffected()
+	ids, err := playerObjectInstanceIDsTx(ctx, tx, ch.Id)
 	if err != nil {
+		tx.Rollback()
+		return -1
+	}
+	ids = compactObjectInstanceIDs(ids)
+
+	err = deleteObjectInstancesTx(ctx, tx, ids)
+	if err != nil {
+		tx.Rollback()
 		return -1
 	}
 
-	return int(rowsAffected)
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return -1
+	}
+
+	if ch.Inventory != nil {
+		for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
+			obj := iter.Value.(*ObjectInstance)
+			obj.resetObjectInstanceIDs()
+		}
+	}
+
+	return len(ids)
 }
 
 func (ch *Character) DetachObject(obj *ObjectInstance) error {
 	if ch == nil || ch.Game == nil || ch.Game.db == nil {
 		return fmt.Errorf("cannot detach object without a database")
 	}
+
+	ids := obj.objectInstanceIDs()
 
 	ctx := context.Background()
 	tx, err := ch.Game.db.BeginTx(ctx, nil)
@@ -776,11 +814,19 @@ func (ch *Character) DetachObject(obj *ObjectInstance) error {
 		return err
 	}
 
+	err = deleteObjectInstancesTx(ctx, tx, ids)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
+
+	obj.resetObjectInstanceIDs()
 
 	return nil
 }
@@ -861,6 +907,80 @@ func deleteObjectOwnersTx(ctx context.Context, tx *sql.Tx, ids []uint) error {
 			object_instance_id IN (%s)
 	`, placeholders), args...)
 	return err
+}
+
+func deleteObjectInstancesTx(ctx context.Context, tx *sql.Tx, ids []uint) error {
+	ids = compactObjectInstanceIDs(ids)
+	if len(ids) == 0 {
+		return nil
+	}
+
+	err := deleteObjectOwnersTx(ctx, tx, ids)
+	if err != nil {
+		return err
+	}
+
+	placeholders, args := sqlInClauseArgs(ids)
+
+	_, err = tx.ExecContext(ctx, fmt.Sprintf(`
+		DELETE FROM
+			object_instances
+		WHERE
+			id IN (%s)
+	`, placeholders), args...)
+	return err
+}
+
+func playerObjectInstanceIDsTx(ctx context.Context, tx *sql.Tx, playerCharacterID int) ([]uint, error) {
+	rows, err := tx.QueryContext(ctx, `
+		SELECT
+			object_instance_id
+		FROM
+			player_character_object
+		WHERE
+			player_character_id = ?
+	`, playerCharacterID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	ids := make([]uint, 0)
+	for rows.Next() {
+		var id uint
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+
+		ids = append(ids, id)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return ids, nil
+}
+
+func compactObjectInstanceIDs(ids []uint) []uint {
+	if len(ids) == 0 {
+		return nil
+	}
+
+	seen := make(map[uint]bool)
+	compacted := make([]uint, 0, len(ids))
+
+	for _, id := range ids {
+		if id == 0 || seen[id] {
+			continue
+		}
+
+		seen[id] = true
+		compacted = append(compacted, id)
+	}
+
+	return compacted
 }
 
 func sqlInClauseArgs(ids []uint) (string, []interface{}) {
