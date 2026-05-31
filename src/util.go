@@ -14,8 +14,15 @@ import (
 	"math"
 	"net/http"
 	"strings"
+	"time"
 	"unicode"
 )
+
+const simpleHTTPTimeout = 5 * time.Second
+
+var simpleHTTPClient = &http.Client{
+	Timeout: simpleHTTPTimeout,
+}
 
 type Flag struct {
 	Name string `json:"name"`
@@ -23,7 +30,7 @@ type Flag struct {
 }
 
 func SimpleGET(url string) (string, error) {
-	resp, err := http.Get(url)
+	resp, err := simpleHTTPClient.Get(url)
 	if err != nil {
 		return "", err
 	}
@@ -32,7 +39,7 @@ func SimpleGET(url string) (string, error) {
 }
 
 func SimplePOST(url string, data string) (string, error) {
-	resp, err := http.Post(url,
+	resp, err := simpleHTTPClient.Post(url,
 		"application/json",
 		bytes.NewBuffer([]byte(data)))
 	if err != nil {
