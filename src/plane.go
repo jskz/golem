@@ -759,13 +759,20 @@ func (game *Game) LoadDistricts() error {
 
 		var layer *MapGrid = district.Plane.Map.Layers[z]
 
+		collides := false
+
 		for iter := layer.Districts.Head; iter != nil; iter = iter.Next {
 			d := iter.Value.(*District)
 
 			if d.Rect.CollidesRect(district.Rect) {
 				log.Printf("District %d collides with an existing district, ignoring.\r\n", district.Id)
-				continue
+				collides = true
+				break
 			}
+		}
+
+		if collides {
+			continue
 		}
 
 		district.Layer = layer
