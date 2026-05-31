@@ -595,7 +595,7 @@ func do_goto(ch *Character, arguments string) {
 	}
 
 	if ch.Room != nil {
-		for iter := room.Characters.Head; iter != nil; iter = iter.Next {
+		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 			character := iter.Value.(*Character)
 			if character != ch {
 				character.Send(fmt.Sprintf("\r\n{W%s{W disappears in a puff of smoke.{x\r\n", ch.GetShortDescriptionUpper(character)))
