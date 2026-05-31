@@ -239,6 +239,23 @@ func (layer *MapGrid) FindDistrict(x int, y int) *District {
 	return nil
 }
 
+func (plane *Plane) districtLayer(z int) (*MapGrid, bool) {
+	if plane == nil || plane.Map == nil || z < 0 || z >= len(plane.Map.Layers) {
+		return nil, false
+	}
+
+	layer := plane.Map.Layers[z]
+	if layer == nil {
+		return nil, false
+	}
+
+	if layer.Districts == nil {
+		layer.Districts = NewLinkedList()
+	}
+
+	return layer, true
+}
+
 func (layer *MapGrid) RegisterObserver(rect *Rect, options goja.Object, onEnterCallback goja.Callable, onLeaveCallback goja.Callable) goja.Value {
 	obs := &PlaneObserver{Plane: layer.Atlas.Plane, Rect: rect, OnEnterCallback: onEnterCallback, OnLeaveCallback: onLeaveCallback}
 	layer.Observers = append(layer.Observers, obs)
@@ -764,7 +781,11 @@ func (game *Game) LoadDistricts() error {
 			continue
 		}
 
-		var layer *MapGrid = district.Plane.Map.Layers[z]
+		layer, ok := district.Plane.districtLayer(z)
+		if !ok {
+			log.Printf("Ignoring district with ID %d loaded for invalid map layer %d on plane with ID %d.\r\n", district.Id, z, planeId)
+			continue
+		}
 
 		collides := false
 
@@ -804,6 +825,10 @@ func (game *Game) FindDistrictByID(id int) *District {
 		}
 
 		for _, layer := range plane.Map.Layers {
+			if layer == nil || layer.Districts == nil {
+				continue
+			}
+
 			for districtIter := layer.Districts.Head; districtIter != nil; districtIter = districtIter.Next {
 				district := districtIter.Value.(*District)
 
