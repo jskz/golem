@@ -146,6 +146,10 @@ func (plane *Plane) terrainBlobIndex(x int, y int, z int) int {
 	return z*plane.Height*plane.Width + y*plane.Width + x
 }
 
+func (plane *Plane) atlasKey(x int, y int) int {
+	return y*plane.Width + x
+}
+
 func (plane *Plane) containsCoordinates(x int, y int, z int) bool {
 	return x >= 0 && x < plane.Width &&
 		y >= 0 && y < plane.Height &&
@@ -333,7 +337,7 @@ func (ch *Character) CreatePlaneMap() string {
 				continue
 			}
 
-			otherCharacters, ok := ch.Room.Plane.Map.Layers[ch.Room.Z].Atlas.Characters[cY*ch.Room.Plane.Height+cX]
+			otherCharacters, ok := ch.Room.Plane.Map.Layers[ch.Room.Z].Atlas.Characters[ch.Room.Plane.atlasKey(cX, cY)]
 			if ok {
 				if otherCharacters.Count > 0 {
 					buf.WriteString("{W@")
@@ -517,29 +521,31 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 
 	var ok bool = false
 
-	room.Characters, ok = plane.Map.Layers[z].Atlas.Characters[y*plane.Height+x]
+	atlasKey := plane.atlasKey(x, y)
+
+	room.Characters, ok = plane.Map.Layers[z].Atlas.Characters[atlasKey]
 	if !ok {
 		list := NewLinkedList()
 
-		plane.Map.Layers[z].Atlas.Characters[y*plane.Height+x] = list
+		plane.Map.Layers[z].Atlas.Characters[atlasKey] = list
 		room.Characters = list
 	}
 
 	ok = false
-	room.Objects, ok = plane.Map.Layers[z].Atlas.Objects[y*plane.Height+x]
+	room.Objects, ok = plane.Map.Layers[z].Atlas.Objects[atlasKey]
 	if !ok {
 		list := NewLinkedList()
 
-		plane.Map.Layers[z].Atlas.Objects[y*plane.Height+x] = list
+		plane.Map.Layers[z].Atlas.Objects[atlasKey] = list
 		room.Objects = list
 	}
 
 	ok = false
-	room.Exit, ok = plane.Map.Layers[z].Atlas.Exits[y*plane.Height+x]
+	room.Exit, ok = plane.Map.Layers[z].Atlas.Exits[atlasKey]
 	if !ok {
 		exits := make(map[uint]*Exit, DirectionMax)
 
-		plane.Map.Layers[z].Atlas.Exits[y*plane.Height+x] = exits
+		plane.Map.Layers[z].Atlas.Exits[atlasKey] = exits
 		room.Exit = exits
 	}
 
