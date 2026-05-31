@@ -2,12 +2,8 @@
     "port": 4000,
     "hashSalt": "place-a-sufficiently-random-string-here",
     "database": {
-        "driver": "mysql",
-        "host": "mysql",
-        "port": 3306,
-        "user": "username",
-        "password": "password",
-        "database": "database"
+        "driver": "sqlite",
+        "path": "etc/golem.sqlite3"
     },
     "profiling": {
         "enabled": true,

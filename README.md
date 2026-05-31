@@ -25,19 +25,6 @@ The MUD is exposed on the host's TCP port 4000 by default.
 
 Database settings live under `database` in `etc/config.json`.
 
-### MySQL
-
-```json
-"database": {
-  "driver": "mysql",
-  "host": "mysql",
-  "port": 3306,
-  "user": "username",
-  "password": "password",
-  "database": "database"
-}
-```
-
 ### SQLite
 
 ```json
@@ -51,7 +38,7 @@ Database settings live under `database` in `etc/config.json`.
 
 ```
 docker-compose down
-docker volume rm golem_db_data
+rm -f etc/golem.sqlite3
 ```
 
 ## Video

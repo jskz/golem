@@ -1,24 +1,7 @@
 services:
-  mysql:
-    image: mysql:8.0
-    command: mysqld --default-authentication-plugin=mysql_native_password
-    networks:
-      - overlay
-    volumes:
-      - db_data:/var/lib/mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: database
-      MYSQL_USER: username
-      MYSQL_PASSWORD: password
   game:
-    depends_on:
-      - mysql
     restart: on-failure
     image: golem:latest
-    networks:
-      - overlay
     ports:
       - "4000:4000"
       - "40000:40000"
@@ -28,10 +11,3 @@ services:
       - ./etc:/app/etc
       - ./migrations:/app/migrations
       - ./scripts:/app/scripts
-
-networks:
-  overlay:
-
-volumes:
-  db_data: {}
-  etc:
