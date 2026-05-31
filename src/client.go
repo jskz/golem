@@ -44,7 +44,11 @@ const (
 	TelnetIAC       = 255
 )
 
-const clientMaxLineLength = 512
+const (
+	clientMaxLineLength  = 512
+	clientSendBufferSize = 64
+	clientWriteTimeout   = 10 * time.Second
+)
 
 var errClientLineTooLong = errors.New("client line input was too long")
 
@@ -269,7 +273,6 @@ func readClientLine(reader *bufio.Reader) (string, error) {
 func (client *Client) writePump(game *Game) {
 	defer func() {
 		client.Close()
-		close(client.send)
 
 		client.unregister(game)
 	}()
@@ -284,13 +287,34 @@ func (client *Client) writePump(game *Game) {
 				return
 			}
 
-			_, err := client.conn.Write(outgoing)
-			if err != nil {
+			if err := client.writeToConn(outgoing); err != nil {
 				log.Printf("Error writing to socket: %v\r\n", err)
 				return
 			}
 		}
 	}
+}
+
+func (client *Client) writeToConn(outgoing []byte) error {
+	for len(outgoing) > 0 {
+		err := client.conn.SetWriteDeadline(time.Now().Add(clientWriteTimeout))
+		if err != nil {
+			return err
+		}
+
+		n, err := client.conn.Write(outgoing)
+		if err != nil {
+			return err
+		}
+
+		if n == 0 {
+			return io.ErrShortWrite
+		}
+
+		outgoing = outgoing[n:]
+	}
+
+	return nil
 }
 
 func (client *Client) Close() {
@@ -307,25 +331,25 @@ func (client *Client) unregister(game *Game) {
 }
 
 func (client *Client) Send(data []byte) (closed bool) {
-	defer func() {
-		if recover() != nil {
-			closed = true
-		}
-	}()
-
 	select {
 	case <-client.close:
 		return true
 	default:
 	}
 
+	outgoing := make([]byte, len(data))
+	copy(outgoing, data)
+
 	select {
 	case <-client.close:
 		return true
-	case client.send <- data:
+	case client.send <- outgoing:
+		return false
+	default:
+		log.Printf("Client send queue full, dropping connection.\r\n")
+		client.Close()
+		return true
 	}
-
-	return false
 }
 
 func (game *Game) checkReconnect(client *Client, name string) bool {
@@ -372,7 +396,7 @@ func (game *Game) handleConnection(conn net.Conn) {
 
 	client := &Client{sessionStartedAt: time.Now()}
 	client.conn = conn
-	client.send = make(chan []byte)
+	client.send = make(chan []byte, clientSendBufferSize)
 	client.close = make(chan struct{})
 	client.Character = nil
 	client.remainingRolls = 10
