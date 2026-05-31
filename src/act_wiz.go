@@ -99,13 +99,16 @@ func do_purge(ch *Character, arguments string) {
 		return
 	}
 
-	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+	for iter := ch.Room.Characters.Head; iter != nil; {
+		next := iter.Next
 		rch := iter.Value.(*Character)
 		if rch == ch || rch.Client != nil || rch.Flags&CHAR_IS_PLAYER != 0 {
+			iter = next
 			continue
 		}
 
-		ch.Room.Characters.Remove(rch)
+		ch.Game.removeCharacterFromWorld(rch)
+		iter = next
 	}
 
 	for {
@@ -113,7 +116,8 @@ func do_purge(ch *Character, arguments string) {
 			break
 		}
 
-		ch.Room.Objects.Remove(ch.Room.Objects.Head.Value)
+		obj := ch.Room.Objects.Head.Value.(*ObjectInstance)
+		ch.Game.removeObjectFromWorld(obj)
 	}
 
 	ch.Send("You have purged the contents of the room.\r\n")

@@ -79,6 +79,53 @@ func (game *Game) decayObject(obj *ObjectInstance) {
 	game.Objects.Remove(obj)
 }
 
+func (game *Game) removeCharacterFromWorld(ch *Character) {
+	if ch.Room != nil {
+		ch.Room.removeCharacter(ch)
+	}
+
+	for iter := game.Fights.Head; iter != nil; {
+		next := iter.Next
+		combat := iter.Value.(*Combat)
+
+		for _, participant := range combat.Participants {
+			if participant == ch {
+				game.DisposeCombat(combat)
+				break
+			}
+		}
+
+		iter = next
+	}
+
+	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+
+		if rch.Fighting == ch {
+			rch.Fighting = nil
+		}
+	}
+
+	ch.Fighting = nil
+	ch.Combat = nil
+	game.Characters.Remove(ch)
+}
+
+func (game *Game) removeObjectFromWorld(obj *ObjectInstance) {
+	if obj.Contents != nil {
+		for iter := obj.Contents.Head; iter != nil; {
+			next := iter.Next
+			containedObj := iter.Value.(*ObjectInstance)
+
+			game.removeObjectFromWorld(containedObj)
+			iter = next
+		}
+	}
+
+	obj.removeFromLocation()
+	game.Objects.Remove(obj)
+}
+
 func (game *Game) sendDecayMessage(obj *ObjectInstance, location objectLocation) {
 	if obj.Flags&ITEM_DECAY_SILENTLY != 0 {
 		return
