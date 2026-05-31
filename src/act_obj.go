@@ -720,7 +720,7 @@ func do_put(ch *Character, arguments string) {
 		return
 	}
 
-	if placingIn.Contents.Count+1 > placingIn.Value0 {
+	if placingIn.ensureContents().Count+1 > placingIn.Value0 {
 		ch.Send(fmt.Sprintf("No more items will fit inside %s.\r\n", placingIn.GetShortDescription(ch)))
 		return
 	}

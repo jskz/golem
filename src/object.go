@@ -157,6 +157,7 @@ func (game *Game) NewObjectInstance(objectIndex uint) *ObjectInstance {
 	objectInstance := &ObjectInstance{
 		Game:             game,
 		ParentId:         obj.Id,
+		Contents:         NewLinkedList(),
 		Description:      obj.Description,
 		ShortDescription: obj.ShortDescription,
 		LongDescription:  obj.LongDescription,
@@ -501,8 +502,16 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 	return nil
 }
 
+func (obj *ObjectInstance) ensureContents() *LinkedList {
+	if obj.Contents == nil {
+		obj.Contents = NewLinkedList()
+	}
+
+	return obj.Contents
+}
+
 func (container *ObjectInstance) AddObject(obj *ObjectInstance) {
-	container.Contents.Insert(obj)
+	container.ensureContents().Insert(obj)
 
 	obj.Inside = container
 	obj.CarriedBy = nil
