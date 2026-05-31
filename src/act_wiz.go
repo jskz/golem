@@ -217,7 +217,7 @@ func do_webhook(ch *Character, arguments string) {
 		}
 
 		thirdArgument, _ := OneArgument(arguments)
-		if secondArgument == "" {
+		if thirdArgument == "" {
 			ch.Send("Disconnect requires two ID arguments, webhook_id and script_id.\r\n")
 			break
 		}
@@ -263,7 +263,7 @@ func do_webhook(ch *Character, arguments string) {
 		}
 
 		thirdArgument, _ := OneArgument(arguments)
-		if secondArgument == "" {
+		if thirdArgument == "" {
 			ch.Send("Connect requires two ID arguments, webhook_id and script_id.\r\n")
 			break
 		}
