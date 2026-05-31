@@ -40,8 +40,8 @@ func (game *Game) NewMaze(width int, height int) *MazeGrid {
 		Height: height,
 	}
 
-	for i := 0; i < height; i++ {
-		maze.Grid[i] = make([]*MazeCell, height)
+	for x := 0; x < width; x++ {
+		maze.Grid[x] = make([]*MazeCell, height)
 	}
 
 	for y := 0; y < height; y++ {
