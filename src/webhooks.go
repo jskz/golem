@@ -103,6 +103,7 @@ func (game *Game) DeleteWebhook(webhook *Webhook) error {
 	}
 
 	delete(game.webhooks, webhook.Uuid)
+	delete(game.webhookScripts, webhook.Id)
 	return nil
 }
 
