@@ -722,11 +722,17 @@ func do_put(ch *Character, arguments string) {
 		return
 	}
 
-	ch.RemoveObject(placingObj)
 	if placingIn.CarriedBy != ch {
-		ch.DetachObject(placingObj)
+		if ch.Flags&CHAR_IS_PLAYER != 0 {
+			err := ch.DetachObject(placingObj)
+			if err != nil {
+				ch.Send("A strange force prevents you from releasing your grip.\r\n")
+				return
+			}
+		}
 	}
 
+	ch.RemoveObject(placingObj)
 	placingIn.AddObject(placingObj)
 
 	ch.Send(fmt.Sprintf("You put %s{x inside of %s{x.\r\n", placingObj.GetShortDescription(ch), placingIn.GetShortDescription(ch)))
@@ -1045,24 +1051,13 @@ func do_give(ch *Character, arguments string) {
 		return
 	}
 
-	if ch.Flags&CHAR_IS_PLAYER != 0 {
-		err := ch.DetachObject(found)
-		if err != nil {
-			ch.Send("A strange force prevents you from releasing your grip.\r\n")
-			return
-		}
-
-		ch.RemoveObject(found)
+	err := ch.TransferObjectTo(target, found)
+	if err != nil {
+		ch.Send("A strange force prevents you from releasing your grip.\r\n")
+		return
 	}
 
-	if target.Flags&CHAR_IS_PLAYER != 0 {
-		err := target.AttachObject(found)
-		if err != nil {
-			ch.Send("A strange force prevents you from releasing your grip.\r\n")
-			return
-		}
-	}
-
+	ch.RemoveObject(found)
 	target.AddObject(found)
 
 	ch.Send(fmt.Sprintf("You give %s{x to %s{x.\r\n", found.GetShortDescription(ch), target.GetShortDescription(ch)))
@@ -1102,9 +1097,13 @@ func do_drop(ch *Character, arguments string) {
 			obj := iter.Value.(*ObjectInstance)
 
 			// TODO: check that we have not exceeded the room object capacity, etc...
-			err := ch.DetachObject(obj)
-			if err != nil {
-				log.Printf("Warning: failed to detach object from PC on drop all: %v\r\n", err)
+			if ch.Flags&CHAR_IS_PLAYER != 0 {
+				err := ch.DetachObject(obj)
+				if err != nil {
+					log.Printf("Warning: failed to detach object from PC on drop all: %v\r\n", err)
+					ch.Send("A strange force prevents you from releasing your grip.\r\n")
+					break
+				}
 			}
 
 			ch.RemoveObject(obj)

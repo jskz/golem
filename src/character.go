@@ -648,31 +648,74 @@ func (ch *Character) Save() bool {
 }
 
 func (ch *Character) AttachObject(obj *ObjectInstance) error {
-	err := obj.reify()
+	if ch == nil || ch.Game == nil || ch.Game.db == nil {
+		return fmt.Errorf("cannot attach object without a database")
+	}
+
+	ctx := context.Background()
+	tx, err := ch.Game.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
 	}
 
-	var attachingValues strings.Builder
-	attachingValues.WriteString(fmt.Sprintf("(%d,%d),", ch.Id, obj.Id))
+	reified, err := ch.attachObjectTx(ctx, tx, obj)
+	if err != nil {
+		tx.Rollback()
+		resetReifiedObjectIDs(reified)
+		return err
+	}
 
-	if obj.Contents != nil {
-		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-			contained := iter.Value.(*ObjectInstance)
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		resetReifiedObjectIDs(reified)
+		return err
+	}
 
-			attachingValues.WriteString(fmt.Sprintf("(%d,%d),", ch.Id, contained.Id))
+	return nil
+}
+
+func (ch *Character) TransferObjectTo(target *Character, obj *ObjectInstance) error {
+	if target == nil {
+		return fmt.Errorf("cannot transfer object to nil character")
+	}
+
+	if (ch.Flags&CHAR_IS_PLAYER == 0) && (target.Flags&CHAR_IS_PLAYER == 0) {
+		return nil
+	}
+
+	if ch.Game == nil || ch.Game.db == nil {
+		return fmt.Errorf("cannot transfer object without a database")
+	}
+
+	ctx := context.Background()
+	tx, err := ch.Game.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+
+	var reified []*ObjectInstance
+	if ch.Flags&CHAR_IS_PLAYER != 0 {
+		err = ch.detachObjectTx(ctx, tx, obj)
+		if err != nil {
+			tx.Rollback()
+			return err
 		}
 	}
 
-	attachingValuesString := strings.TrimRight(attachingValues.String(), ",")
+	if target.Flags&CHAR_IS_PLAYER != 0 {
+		reified, err = target.attachObjectTx(ctx, tx, obj)
+		if err != nil {
+			tx.Rollback()
+			resetReifiedObjectIDs(reified)
+			return err
+		}
+	}
 
-	_, err = ch.Game.db.Exec(fmt.Sprintf(`
-	INSERT INTO
-		player_character_object(player_character_id, object_instance_id)
-	VALUES
-		%s
-	`, attachingValuesString))
+	err = tx.Commit()
 	if err != nil {
+		tx.Rollback()
+		resetReifiedObjectIDs(reified)
 		return err
 	}
 
@@ -699,39 +742,125 @@ func (ch *Character) DetachAllObjects() int {
 }
 
 func (ch *Character) DetachObject(obj *ObjectInstance) error {
-	var detachingIds strings.Builder
-	detachingIds.WriteString(fmt.Sprintf("%d,", obj.Id))
-
-	if obj.Contents != nil {
-		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-			contained := iter.Value.(*ObjectInstance)
-
-			detachingIds.WriteString(fmt.Sprintf("%d,", contained.Id))
-		}
+	if ch == nil || ch.Game == nil || ch.Game.db == nil {
+		return fmt.Errorf("cannot detach object without a database")
 	}
 
-	detachingIdsString := strings.TrimRight(detachingIds.String(), ",")
+	ctx := context.Background()
+	tx, err := ch.Game.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
 
-	result, err := ch.Game.db.Exec(
-		fmt.Sprintf(`
-			DELETE FROM
-				player_character_object
-			WHERE
-				player_character_id = ?
-			AND
-				object_instance_id IN (%s)`,
-			detachingIdsString),
-		ch.Id)
+	err = ch.detachObjectTx(ctx, tx, obj)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return nil
+}
+
+func (ch *Character) attachObjectTx(ctx context.Context, tx *sql.Tx, obj *ObjectInstance) ([]*ObjectInstance, error) {
+	reified, err := obj.reifyTx(ctx, tx)
+	if err != nil {
+		return reified, err
+	}
+
+	ids := obj.objectInstanceIDs()
+	if len(ids) == 0 {
+		return reified, nil
+	}
+
+	err = deleteObjectOwnersTx(ctx, tx, ids)
+	if err != nil {
+		return reified, err
+	}
+
+	var values strings.Builder
+	args := make([]interface{}, 0, len(ids)*2)
+
+	for _, id := range ids {
+		values.WriteString("(?,?),")
+		args = append(args, ch.Id, id)
+	}
+
+	_, err = tx.ExecContext(ctx, fmt.Sprintf(`
+		INSERT INTO
+			player_character_object(player_character_id, object_instance_id)
+		VALUES
+			%s
+	`, strings.TrimRight(values.String(), ",")), args...)
+	if err != nil {
+		return reified, err
+	}
+
+	return reified, nil
+}
+
+func (ch *Character) detachObjectTx(ctx context.Context, tx *sql.Tx, obj *ObjectInstance) error {
+	ids := obj.objectInstanceIDs()
+	if len(ids) == 0 {
+		return nil
+	}
+
+	placeholders, args := sqlInClauseArgs(ids)
+	args = append([]interface{}{ch.Id}, args...)
+
+	result, err := tx.ExecContext(ctx, fmt.Sprintf(`
+		DELETE FROM
+			player_character_object
+		WHERE
+			player_character_id = ?
+		AND
+			object_instance_id IN (%s)
+	`, placeholders), args...)
 	if err != nil {
 		return err
 	}
 
 	_, err = result.RowsAffected()
-	if err != nil {
-		return err
+	return err
+}
+
+func deleteObjectOwnersTx(ctx context.Context, tx *sql.Tx, ids []uint) error {
+	if len(ids) == 0 {
+		return nil
 	}
 
-	return nil
+	placeholders, args := sqlInClauseArgs(ids)
+
+	_, err := tx.ExecContext(ctx, fmt.Sprintf(`
+		DELETE FROM
+			player_character_object
+		WHERE
+			object_instance_id IN (%s)
+	`, placeholders), args...)
+	return err
+}
+
+func sqlInClauseArgs(ids []uint) (string, []interface{}) {
+	var placeholders strings.Builder
+	args := make([]interface{}, 0, len(ids))
+
+	for _, id := range ids {
+		placeholders.WriteString("?,")
+		args = append(args, id)
+	}
+
+	return strings.TrimRight(placeholders.String(), ","), args
+}
+
+func resetReifiedObjectIDs(objects []*ObjectInstance) {
+	for _, obj := range objects {
+		obj.Id = 0
+	}
 }
 
 func (game *Game) SavePlayerInventory(ch *Character) error {

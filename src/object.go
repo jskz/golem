@@ -8,6 +8,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -376,16 +377,96 @@ func (obj *ObjectInstance) Visible(viewer *Character) bool {
 }
 
 func (obj *ObjectInstance) reify() error {
-	obj.Finalize(nil)
+	err := obj.Finalize(nil)
+	if err != nil {
+		return err
+	}
 
 	if obj.Contents != nil && obj.Contents.Count > 0 {
 		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
 			containedObject := iter.Value.(*ObjectInstance)
-			containedObject.Finalize(obj)
+
+			err = containedObject.Finalize(obj)
+			if err != nil {
+				return err
+			}
 		}
 	}
 
 	return nil
+}
+
+func (obj *ObjectInstance) reifyTx(ctx context.Context, tx *sql.Tx) ([]*ObjectInstance, error) {
+	return obj.reifyInContainerTx(ctx, tx, nil)
+}
+
+func (obj *ObjectInstance) reifyInContainerTx(ctx context.Context, tx *sql.Tx, container *ObjectInstance) ([]*ObjectInstance, error) {
+	if obj == nil {
+		return nil, nil
+	}
+
+	reified := make([]*ObjectInstance, 0)
+
+	if obj.Id == 0 {
+		var insideObjectInstanceId *uint = nil
+		if container != nil {
+			insideObjectInstanceId = &container.Id
+		}
+
+		result, err := tx.ExecContext(ctx, `
+			INSERT INTO
+				object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4)
+			VALUES
+				(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3)
+		if err != nil {
+			log.Printf("Failed to finalize new object: %v.\r\n", err)
+			return reified, err
+		}
+
+		objectInstanceId, err := result.LastInsertId()
+		if err != nil {
+			log.Printf("Failed to retrieve insert id: %v.\r\n", err)
+			return reified, err
+		}
+
+		obj.Id = uint(objectInstanceId)
+		reified = append(reified, obj)
+	}
+
+	if obj.Contents != nil && obj.Contents.Count > 0 {
+		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
+			containedObject := iter.Value.(*ObjectInstance)
+
+			containedReified, err := containedObject.reifyInContainerTx(ctx, tx, obj)
+			reified = append(reified, containedReified...)
+			if err != nil {
+				return reified, err
+			}
+		}
+	}
+
+	return reified, nil
+}
+
+func (obj *ObjectInstance) objectInstanceIDs() []uint {
+	if obj == nil {
+		return nil
+	}
+
+	ids := make([]uint, 0)
+	if obj.Id > 0 {
+		ids = append(ids, obj.Id)
+	}
+
+	if obj.Contents != nil {
+		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
+			containedObject := iter.Value.(*ObjectInstance)
+			ids = append(ids, containedObject.objectInstanceIDs()...)
+		}
+	}
+
+	return ids
 }
 
 func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
