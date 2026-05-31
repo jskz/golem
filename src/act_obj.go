@@ -52,6 +52,26 @@ func init() {
 	WearLocations[WearLocationHeld] = "<held>                "
 }
 
+func objectListDescription(obj *ObjectInstance, viewer *Character, longDescriptions bool) string {
+	if longDescriptions {
+		return obj.LongDescription
+	}
+
+	var buf strings.Builder
+
+	if obj.Flags&ITEM_GLOW != 0 {
+		buf.WriteString("{G(Glowing){x ")
+	}
+
+	if obj.Flags&ITEM_HUM != 0 {
+		buf.WriteString("{M(Humming){x ")
+	}
+
+	buf.WriteString(obj.GetShortDescription(viewer))
+
+	return buf.String()
+}
+
 func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hideEquipped bool) {
 	var output strings.Builder
 	var inventory map[string]uint = make(map[string]uint)
@@ -67,21 +87,7 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 			continue
 		}
 
-		var description string = obj.LongDescription
-		if !longDescriptions {
-			var buf strings.Builder
-
-			if obj.Flags&ITEM_GLOW != 0 {
-				buf.WriteString("{G(Glowing){x ")
-			}
-
-			if obj.Flags&ITEM_HUM != 0 {
-				buf.WriteString("{M(Humming){x ")
-			}
-
-			buf.WriteString(obj.GetShortDescription(ch))
-			description = buf.String()
-		}
+		description := objectListDescription(obj, ch, longDescriptions)
 
 		_, ok := inventory[description]
 		if !ok {
@@ -98,10 +104,7 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 			continue
 		}
 
-		var description string = obj.LongDescription
-		if !longDescriptions {
-			description = obj.ShortDescription
-		}
+		description := objectListDescription(obj, ch, longDescriptions)
 
 		count, ok := inventory[description]
 		if !ok {
