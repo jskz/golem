@@ -631,6 +631,10 @@ func (game *Game) InitScripting() error {
 	directionsConstantsObj.Set("DirectionWest", DirectionWest)
 	directionsConstantsObj.Set("DirectionUp", DirectionUp)
 	directionsConstantsObj.Set("DirectionDown", DirectionDown)
+	directionsConstantsObj.Set("DirectionNortheast", DirectionNortheast)
+	directionsConstantsObj.Set("DirectionSoutheast", DirectionSoutheast)
+	directionsConstantsObj.Set("DirectionSouthwest", DirectionSouthwest)
+	directionsConstantsObj.Set("DirectionNorthwest", DirectionNorthwest)
 
 	wearLocationsConstantsObj := game.vm.NewObject()
 	wearLocationsConstantsObj.Set("WearLocationNone", game.vm.ToValue(WearLocationNone))

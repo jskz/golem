@@ -65,6 +65,56 @@ var ReverseDirection = map[uint]uint{
 	DirectionNorthwest: DirectionSoutheast,
 }
 
+var DirectionAliases = map[string]uint{
+	"n":         DirectionNorth,
+	"north":     DirectionNorth,
+	"e":         DirectionEast,
+	"east":      DirectionEast,
+	"s":         DirectionSouth,
+	"south":     DirectionSouth,
+	"w":         DirectionWest,
+	"west":      DirectionWest,
+	"u":         DirectionUp,
+	"up":        DirectionUp,
+	"d":         DirectionDown,
+	"down":      DirectionDown,
+	"ne":        DirectionNortheast,
+	"northeast": DirectionNortheast,
+	"se":        DirectionSoutheast,
+	"southeast": DirectionSoutheast,
+	"sw":        DirectionSouthwest,
+	"southwest": DirectionSouthwest,
+	"nw":        DirectionNorthwest,
+	"northwest": DirectionNorthwest,
+}
+
+var PlanarDirections = []uint{
+	DirectionNorth,
+	DirectionEast,
+	DirectionSouth,
+	DirectionWest,
+	DirectionNortheast,
+	DirectionSoutheast,
+	DirectionSouthwest,
+	DirectionNorthwest,
+}
+
+type DirectionDelta struct {
+	X int
+	Y int
+}
+
+var PlanarDirectionDeltas = map[uint]DirectionDelta{
+	DirectionNorth:     {X: 0, Y: -1},
+	DirectionEast:      {X: 1, Y: 0},
+	DirectionSouth:     {X: 0, Y: 1},
+	DirectionWest:      {X: -1, Y: 0},
+	DirectionNortheast: {X: 1, Y: -1},
+	DirectionSoutheast: {X: 1, Y: 1},
+	DirectionSouthwest: {X: -1, Y: 1},
+	DirectionNorthwest: {X: -1, Y: -1},
+}
+
 const (
 	EXIT_IS_DOOR = 1
 	EXIT_CLOSED  = 1 << 1
@@ -137,6 +187,25 @@ func (game *Game) NewExit(from *Room, direction uint, to *Room, flags int) *Exit
 
 func (room *Room) getExit(direction uint) *Exit {
 	return room.Exit[direction]
+}
+
+func DirectionFromString(input string) (uint, bool) {
+	direction, ok := DirectionAliases[strings.ToLower(strings.TrimSpace(input))]
+	return direction, ok
+}
+
+func DirectionIsOrdinal(direction uint) bool {
+	switch direction {
+	case DirectionNortheast, DirectionSoutheast, DirectionSouthwest, DirectionNorthwest:
+		return true
+	}
+
+	return false
+}
+
+func PlanarDirectionDeltaFor(direction uint) (DirectionDelta, bool) {
+	delta, ok := PlanarDirectionDeltas[direction]
+	return delta, ok
 }
 
 func FindExitFlag(flag string) *Flag {
@@ -258,18 +327,8 @@ func do_close(ch *Character, arguments string) {
 	args := strings.ToLower(arguments)
 	var exit *Exit = nil
 
-	if args == "n" || args == "north" {
-		exit = ch.Room.getExit(DirectionNorth)
-	} else if args == "e" || args == "east" {
-		exit = ch.Room.getExit(DirectionEast)
-	} else if args == "s" || args == "south" {
-		exit = ch.Room.getExit(DirectionSouth)
-	} else if args == "w" || args == "west" {
-		exit = ch.Room.getExit(DirectionWest)
-	} else if args == "u" || args == "up" {
-		exit = ch.Room.getExit(DirectionUp)
-	} else if args == "d" || args == "down" {
-		exit = ch.Room.getExit(DirectionDown)
+	if direction, ok := DirectionFromString(args); ok {
+		exit = ch.Room.getExit(direction)
 	} else {
 		obj := ch.FindObjectOnSelf(args)
 
@@ -349,18 +408,8 @@ func do_open(ch *Character, arguments string) {
 	args := strings.ToLower(arguments)
 	var exit *Exit = nil
 
-	if args == "n" || args == "north" {
-		exit = ch.Room.getExit(DirectionNorth)
-	} else if args == "e" || args == "east" {
-		exit = ch.Room.getExit(DirectionEast)
-	} else if args == "s" || args == "south" {
-		exit = ch.Room.getExit(DirectionSouth)
-	} else if args == "w" || args == "west" {
-		exit = ch.Room.getExit(DirectionWest)
-	} else if args == "u" || args == "up" {
-		exit = ch.Room.getExit(DirectionUp)
-	} else if args == "d" || args == "down" {
-		exit = ch.Room.getExit(DirectionDown)
+	if direction, ok := DirectionFromString(args); ok {
+		exit = ch.Room.getExit(direction)
 	} else {
 		obj := ch.FindObjectOnSelf(args)
 
@@ -487,6 +536,22 @@ func do_south(ch *Character, arguments string) {
 
 func do_west(ch *Character, arguments string) {
 	ch.move(DirectionWest, false)
+}
+
+func do_northeast(ch *Character, arguments string) {
+	ch.move(DirectionNortheast, false)
+}
+
+func do_southeast(ch *Character, arguments string) {
+	ch.move(DirectionSoutheast, false)
+}
+
+func do_southwest(ch *Character, arguments string) {
+	ch.move(DirectionSouthwest, false)
+}
+
+func do_northwest(ch *Character, arguments string) {
+	ch.move(DirectionNorthwest, false)
 }
 
 func do_up(ch *Character, arguments string) {

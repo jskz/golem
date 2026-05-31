@@ -507,6 +507,15 @@ func (plane *Plane) generate() error {
 	return nil
 }
 
+func terrainRestrictsOrdinalPlanarLinks(terrainType int) bool {
+	switch terrainType {
+	case TerrainTypeOverworldCityEntrance:
+		return true
+	}
+
+	return false
+}
+
 func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 	if !plane.containsCoordinates(x, y, z) {
 		return nil
@@ -571,30 +580,30 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 	room.Z = z
 
 	if src {
-		/* Try to materialize adjacent (no ordinals) rooms and link them */
-		for direction := uint(DirectionNorth); direction < DirectionUp; direction++ {
-			var translatedX int = x
-			var translatedY int = y
+		sourceTerrain := plane.Map.Layers[z].Terrain[y][x]
 
-			switch direction {
-			case DirectionNorth:
-				translatedX = x
-				translatedY = y - 1
-			case DirectionEast:
-				translatedX = x + 1
-				translatedY = y
-			case DirectionSouth:
-				translatedX = x
-				translatedY = y + 1
-			case DirectionWest:
-				translatedX = x - 1
-				translatedY = y
+		/* Try to materialize adjacent planar rooms and link them */
+		for _, direction := range PlanarDirections {
+			delta, ok := PlanarDirectionDeltaFor(direction)
+			if !ok {
+				continue
 			}
 
-			// If this terrain type is impassible, don't try to materialize it
-			if (translatedX >= 0 && translatedX < plane.Width && translatedY >= 0 && translatedY < plane.Height) &&
-				TerrainTable[plane.Map.Layers[z].Terrain[translatedY][translatedX]].Flags&TERRAIN_IMPASSABLE != 0 {
-				continue
+			translatedX := x + delta.X
+			translatedY := y + delta.Y
+
+			if plane.containsCoordinates(translatedX, translatedY, z) {
+				targetTerrain := plane.Map.Layers[z].Terrain[translatedY][translatedX]
+
+				// If this terrain type is impassible, don't try to materialize it
+				if TerrainTable[targetTerrain].Flags&TERRAIN_IMPASSABLE != 0 {
+					continue
+				}
+
+				if DirectionIsOrdinal(direction) &&
+					(terrainRestrictsOrdinalPlanarLinks(sourceTerrain) || terrainRestrictsOrdinalPlanarLinks(targetTerrain)) {
+					continue
+				}
 			}
 
 			adj := plane.MaterializeRoom(translatedX, translatedY, z, false)
@@ -602,7 +611,7 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 				continue
 			}
 
-			_, ok := room.Exit[uint(direction)]
+			_, ok = room.Exit[uint(direction)]
 			if ok {
 				continue
 			}

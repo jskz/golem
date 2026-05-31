@@ -53,6 +53,10 @@ func init() {
 	CommandTable["east"] = Command{Name: "east", CmdFunc: do_east}
 	CommandTable["south"] = Command{Name: "south", CmdFunc: do_south}
 	CommandTable["west"] = Command{Name: "west", CmdFunc: do_west}
+	CommandTable["northeast"] = Command{Name: "northeast", CmdFunc: do_northeast}
+	CommandTable["southeast"] = Command{Name: "southeast", CmdFunc: do_southeast}
+	CommandTable["southwest"] = Command{Name: "southwest", CmdFunc: do_southwest}
+	CommandTable["northwest"] = Command{Name: "northwest", CmdFunc: do_northwest}
 	CommandTable["up"] = Command{Name: "up", CmdFunc: do_up}
 	CommandTable["down"] = Command{Name: "down", CmdFunc: do_down}
 	CommandTable["follow"] = Command{Name: "follow", CmdFunc: do_follow}
@@ -113,6 +117,10 @@ func init() {
 	CommandTable["e"] = Command{Name: "east", CmdFunc: do_east, Hidden: true}
 	CommandTable["s"] = Command{Name: "south", CmdFunc: do_south, Hidden: true}
 	CommandTable["w"] = Command{Name: "west", CmdFunc: do_west, Hidden: true}
+	CommandTable["ne"] = Command{Name: "northeast", CmdFunc: do_northeast, Hidden: true}
+	CommandTable["se"] = Command{Name: "southeast", CmdFunc: do_southeast, Hidden: true}
+	CommandTable["sw"] = Command{Name: "southwest", CmdFunc: do_southwest, Hidden: true}
+	CommandTable["nw"] = Command{Name: "northwest", CmdFunc: do_northwest, Hidden: true}
 	CommandTable["u"] = Command{Name: "up", CmdFunc: do_up, Hidden: true}
 	CommandTable["d"] = Command{Name: "down", CmdFunc: do_down, Hidden: true}
 }

@@ -6,15 +6,29 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function do_xedit(ch, args) {
-    const VALID_DIRECTIONS = ['north', 'east', 'south', 'west', 'up', 'down'];
     const DIRECTION_TO_VALUE = {
+        'n': Golem.Directions.DirectionNorth,
         'north': Golem.Directions.DirectionNorth,
+        'e': Golem.Directions.DirectionEast,
         'east': Golem.Directions.DirectionEast,
+        's': Golem.Directions.DirectionSouth,
         'south': Golem.Directions.DirectionSouth,
+        'w': Golem.Directions.DirectionWest,
         'west': Golem.Directions.DirectionWest,
+        'u': Golem.Directions.DirectionUp,
         'up': Golem.Directions.DirectionUp,
-        'down': Golem.Directions.DirectionDown
+        'd': Golem.Directions.DirectionDown,
+        'down': Golem.Directions.DirectionDown,
+        'ne': Golem.Directions.DirectionNortheast,
+        'northeast': Golem.Directions.DirectionNortheast,
+        'se': Golem.Directions.DirectionSoutheast,
+        'southeast': Golem.Directions.DirectionSoutheast,
+        'sw': Golem.Directions.DirectionSouthwest,
+        'southwest': Golem.Directions.DirectionSouthwest,
+        'nw': Golem.Directions.DirectionNorthwest,
+        'northwest': Golem.Directions.DirectionNorthwest
     };
+    const VALID_DIRECTIONS = Object.keys(DIRECTION_TO_VALUE);
 
     function displayUsage() {
         ch.send(
