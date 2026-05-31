@@ -10,6 +10,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -42,6 +43,10 @@ const (
 	TelnetDONT      = 254
 	TelnetIAC       = 255
 )
+
+const clientMaxLineLength = 512
+
+var errClientLineTooLong = errors.New("client line input was too long")
 
 type TelnetCommand struct {
 	opCodes []byte
@@ -93,7 +98,7 @@ func (client *Client) readPump(game *Game) {
 		client.unregister(game)
 	}()
 
-	reader := bufio.NewReader(client.conn)
+	reader := newClientInputReader(client.conn)
 
 	for {
 		firstByte, err := reader.Peek(1)
@@ -164,18 +169,16 @@ func (client *Client) readPump(game *Game) {
 
 			reader.Discard(length)
 		} else {
-			line, err := reader.ReadString('\n')
-			if err != nil {
-				log.Printf("Failed to read string from reader: %v.\r\n", err)
-				break
-			}
-
-			if len(line) > 512 {
+			trimmed, err := readClientLine(reader)
+			if err == errClientLineTooLong {
 				log.Printf("Client line input was too long, dropping connection.\r\n")
 				return
 			}
 
-			trimmed := strings.TrimRight(line, "\r\n")
+			if err != nil {
+				log.Printf("Failed to read string from reader: %v.\r\n", err)
+				break
+			}
 
 			clientMessage := ClientTextMessage{
 				client:  client,
@@ -240,6 +243,27 @@ func (client *Client) readPump(game *Game) {
 			}
 		}
 	}
+}
+
+func newClientInputReader(input io.Reader) *bufio.Reader {
+	return bufio.NewReaderSize(input, clientMaxLineLength+1)
+}
+
+func readClientLine(reader *bufio.Reader) (string, error) {
+	line, err := reader.ReadSlice('\n')
+	if err == bufio.ErrBufferFull {
+		return "", errClientLineTooLong
+	}
+
+	if err != nil {
+		return "", err
+	}
+
+	if len(line) > clientMaxLineLength {
+		return "", errClientLineTooLong
+	}
+
+	return strings.TrimRight(string(line), "\r\n"), nil
 }
 
 func (client *Client) writePump(game *Game) {
