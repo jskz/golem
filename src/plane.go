@@ -592,11 +592,12 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 				Flags:     0,
 			}
 
-			adj.Exit[ReverseDirection[uint(direction)]] = &Exit{
+			reverseDirection := ReverseDirection[direction]
+			adj.Exit[reverseDirection] = &Exit{
 				Room:      adj,
 				Id:        0,
 				To:        room,
-				Direction: direction,
+				Direction: reverseDirection,
 				Flags:     0,
 			}
 		}
