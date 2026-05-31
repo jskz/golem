@@ -28,7 +28,25 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var IndexedArgumentRegexp *regexp.Regexp = regexp.MustCompile("^[0-9]+.(.*)$")
+var IndexedArgumentRegexp *regexp.Regexp = regexp.MustCompile(`^[0-9]+\.(.*)$`)
+
+func parseIndexedArgument(argument string) (int, string, bool) {
+	if !IndexedArgumentRegexp.MatchString(argument) {
+		return 1, argument, true
+	}
+
+	indexArgument, processed, found := strings.Cut(argument, ".")
+	if !found {
+		return 1, argument, false
+	}
+
+	desiredIndex, err := strconv.Atoi(indexArgument)
+	if err != nil {
+		return 1, argument, false
+	}
+
+	return desiredIndex, processed, true
+}
 
 type Job struct {
 	Id                         uint        `json:"id"`
@@ -1443,7 +1461,6 @@ func (ch *Character) RemoveObject(obj *ObjectInstance) {
 func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *ObjectInstance {
 	var desiredIndex int = 1
 	var i int = 1
-	var err error = nil
 
 	processed := strings.ToLower(argument)
 
@@ -1451,14 +1468,10 @@ func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *Obj
 		return nil
 	}
 
-	if IndexedArgumentRegexp.MatchString(processed) {
-		splitArguments := strings.Split(processed, ".")
-		desiredIndex, err = strconv.Atoi(splitArguments[0])
-		if err != nil {
-			return nil
-		}
-
-		processed = splitArguments[1]
+	var ok bool
+	desiredIndex, processed, ok = parseIndexedArgument(processed)
+	if !ok {
+		return nil
 	}
 
 	for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
@@ -1483,7 +1496,6 @@ func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *Obj
 func (ch *Character) FindObjectInRoom(argument string) *ObjectInstance {
 	var desiredIndex int = 1
 	var i int = 1
-	var err error = nil
 
 	processed := strings.ToLower(argument)
 
@@ -1491,14 +1503,10 @@ func (ch *Character) FindObjectInRoom(argument string) *ObjectInstance {
 		return nil
 	}
 
-	if IndexedArgumentRegexp.MatchString(processed) {
-		splitArguments := strings.Split(processed, ".")
-		desiredIndex, err = strconv.Atoi(splitArguments[0])
-		if err != nil {
-			return nil
-		}
-
-		processed = splitArguments[1]
+	var ok bool
+	desiredIndex, processed, ok = parseIndexedArgument(processed)
+	if !ok {
+		return nil
 	}
 
 	for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
@@ -1524,20 +1532,15 @@ func (ch *Character) FindObjectOnSelf(argument string) *ObjectInstance {
 	var desiredIndex int = 1
 	var i int = 1
 	var processed string = strings.ToLower(argument)
-	var err error = nil
 
 	if ch.Room == nil || len(processed) < 1 {
 		return nil
 	}
 
-	if IndexedArgumentRegexp.MatchString(processed) {
-		splitArguments := strings.Split(processed, ".")
-		desiredIndex, err = strconv.Atoi(splitArguments[0])
-		if err != nil {
-			return nil
-		}
-
-		processed = splitArguments[1]
+	var ok bool
+	desiredIndex, processed, ok = parseIndexedArgument(processed)
+	if !ok {
+		return nil
 	}
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
@@ -1571,7 +1574,6 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 	var desiredIndex int = 1
 	var i int = 1
 	var processed string = strings.ToLower(argument)
-	var err error = nil
 
 	if processed == "self" {
 		return ch
@@ -1581,14 +1583,10 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 		return nil
 	}
 
-	if IndexedArgumentRegexp.MatchString(processed) {
-		splitArguments := strings.Split(processed, ".")
-		desiredIndex, err = strconv.Atoi(splitArguments[0])
-		if err != nil {
-			return nil
-		}
-
-		processed = splitArguments[1]
+	var ok bool
+	desiredIndex, processed, ok = parseIndexedArgument(processed)
+	if !ok {
+		return nil
 	}
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
