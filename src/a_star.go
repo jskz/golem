@@ -23,13 +23,17 @@ type MazeAStarVisit struct {
 
 /* Taxi cab distance because only cardinal directions for now :-) */
 func (maze *MazeGrid) heuristic(node *MazeCell, target *MazeCell) int {
+	if node == nil || target == nil {
+		return 0
+	}
+
 	d := math.Abs(float64(node.Y-target.Y)) + math.Abs(float64(node.X-target.X))
 
 	return int(d)
 }
 
 func do_path(ch *Character, arguments string) {
-	if ch.Room == nil || !ch.Room.Virtual || ch.Room.Cell == nil {
+	if ch.Room == nil || !ch.Room.Virtual || ch.Room.Cell == nil || ch.Room.Cell.Grid == nil {
 		ch.Send("You cannot pathfind from here.\r\n")
 		return
 	}
@@ -52,20 +56,25 @@ func do_path(ch *Character, arguments string) {
 		return
 	}
 
-	if !ch.Room.Cell.Grid.isValidPosition(x, y) {
+	grid := ch.Room.Cell.Grid
+	if !grid.isValidPosition(x, y) {
 		ch.Send(fmt.Sprintf("Target (%d, %d) out of bounds.\r\n", x, y))
 		return
 	}
 
-	target := ch.Room.Cell.Grid.Grid[x][y]
+	target := grid.cellAt(x, y)
 	if target == nil || target.Wall {
-		ch.Send(fmt.Sprintf("Bad cell or obstacle at (%d, %d).\r\n", target.X, target.Y))
+		ch.Send(fmt.Sprintf("Bad cell or obstacle at (%d, %d).\r\n", x, y))
 		return
 	}
 
 	var output strings.Builder
 
-	pathNodes := ch.Room.Cell.Grid.findPathAStar(ch.Room.Cell, target)
+	pathNodes := grid.findPathAStar(ch.Room.Cell, target)
+	if len(pathNodes) == 0 && ch.Room.Cell != target {
+		ch.Send(fmt.Sprintf("No path from (%d, %d) to (%d, %d).\r\n", ch.Room.Cell.X, ch.Room.Cell.Y, target.X, target.Y))
+		return
+	}
 
 	output.WriteString(fmt.Sprintf("{YPath from (%d, %d) to (%d, %d) in %d moves.{x\r\n", ch.Room.Cell.X, ch.Room.Cell.Y, target.X, target.Y, int(math.Max(0, float64(len(pathNodes)-1)))))
 	for r := len(pathNodes) - 1; r >= 0; r-- {
@@ -76,27 +85,41 @@ func do_path(ch *Character, arguments string) {
 }
 
 func (maze *MazeGrid) findPathAStar(start *MazeCell, end *MazeCell) []*MazeAStarVisit {
-	visited := NewLinkedList()
+	visits := make([]*MazeAStarVisit, 0)
+	if maze == nil || start == nil || end == nil || start.Grid != maze || end.Grid != maze || start.Wall || end.Wall {
+		return visits
+	}
+
+	if start == end {
+		return visits
+	}
+
+	visited := make(map[*MazeCell]bool)
 	unvisited := make(map[*MazeCell]*MazeAStarVisit)
 
 	for y := 0; y < maze.Height; y++ {
 		for x := 0; x < maze.Width; x++ {
-			unvisited[maze.Grid[x][y]] = &MazeAStarVisit{gScore: 1000000, fScore: 1000000, previous: nil, cell: maze.Grid[x][y]}
+			cell := maze.cellAt(x, y)
+			if cell == nil || cell.Wall {
+				continue
+			}
+
+			unvisited[cell] = &MazeAStarVisit{gScore: 1000000, fScore: 1000000, previous: nil, cell: cell}
 		}
 	}
 
-	var hScore int = maze.heuristic(start, end)
-	unvisited[start] = &MazeAStarVisit{
-		gScore:   0,
-		fScore:   hScore,
-		previous: nil,
-		cell:     start,
-	}
-
-	visits := make([]*MazeAStarVisit, 0)
-	if start == end {
+	startVisit, ok := unvisited[start]
+	if !ok {
 		return visits
 	}
+
+	if _, ok := unvisited[end]; !ok {
+		return visits
+	}
+
+	startVisit.gScore = 0
+	startVisit.fScore = maze.heuristic(start, end)
+	startVisit.previous = nil
 
 	for {
 		if len(unvisited) == 0 {
@@ -111,42 +134,34 @@ func (maze *MazeGrid) findPathAStar(start *MazeCell, end *MazeCell) []*MazeAStar
 			}
 
 			if currentNode.cell == end {
-				visited.Insert(unvisited[currentNode.cell])
-
-				visits = append(visits, currentNode)
-				current := currentNode.previous
-				for {
-					if current == nil {
-						break
-					}
-
+				for current := currentNode; current != nil; current = current.previous {
 					visits = append(visits, current)
 					if current.cell == start {
 						return visits
 					}
-
-					current = current.previous
 				}
+
+				return make([]*MazeAStarVisit, 0)
 			} else {
 				neighbours := currentNode.cell.getAdjacentCells(false, 1, false)
 				for iter := neighbours.Head; iter != nil; iter = iter.Next {
 					neighbour := iter.Value.(*MazeCell)
 
-					if !visited.Contains(neighbour) {
-						var gScore int = unvisited[currentNode.cell].gScore + 1
+					if !visited[neighbour] {
+						var gScore int = currentNode.gScore + 1
 
-						_, ok := unvisited[neighbour]
+						neighbourVisit, ok := unvisited[neighbour]
 						if ok {
-							if gScore < unvisited[neighbour].gScore {
-								unvisited[neighbour].gScore = gScore + 1 /* movement cost */
-								unvisited[neighbour].fScore = gScore + maze.heuristic(currentNode.cell, end)
-								unvisited[neighbour].previous = currentNode
+							if gScore < neighbourVisit.gScore {
+								neighbourVisit.gScore = gScore
+								neighbourVisit.fScore = gScore + maze.heuristic(neighbour, end)
+								neighbourVisit.previous = currentNode
 							}
 						}
 					}
 				}
 
-				visited.Insert(unvisited[currentNode.cell])
+				visited[currentNode.cell] = true
 				delete(unvisited, currentNode.cell)
 			}
 		}

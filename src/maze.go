@@ -65,11 +65,27 @@ func (game *Game) NewMaze(width int, height int) *MazeGrid {
 }
 
 func (grid *MazeGrid) isValidPosition(x int, y int) bool {
-	return x >= 1 && x < grid.Width-1 && y >= 1 && y < grid.Height-1
+	return grid != nil && x >= 1 && x < grid.Width-1 && y >= 1 && y < grid.Height-1
+}
+
+func (grid *MazeGrid) cellAt(x int, y int) *MazeCell {
+	if !grid.isValidPosition(x, y) {
+		return nil
+	}
+
+	if x >= len(grid.Grid) || grid.Grid[x] == nil || y >= len(grid.Grid[x]) {
+		return nil
+	}
+
+	return grid.Grid[x][y]
 }
 
 func (cell *MazeCell) getAdjacentCells(wall bool, distance int, ordinals bool) *LinkedList {
 	list := NewLinkedList()
+
+	if cell == nil || cell.Grid == nil {
+		return list
+	}
 
 	top := DirectionMax
 	if !ordinals {
@@ -107,8 +123,9 @@ func (cell *MazeCell) getAdjacentCells(wall bool, distance int, ordinals bool) *
 			translatedY = cell.Y - distance
 		}
 
-		if cell.Grid.isValidPosition(translatedX, translatedY) && cell.Grid.Grid[translatedX][translatedY].Wall == wall {
-			list.Insert(cell.Grid.Grid[translatedX][translatedY])
+		adjacent := cell.Grid.cellAt(translatedX, translatedY)
+		if adjacent != nil && adjacent.Wall == wall {
+			list.Insert(adjacent)
 		}
 	}
 
