@@ -122,7 +122,11 @@ func (game *Game) nanny(client *Client, message string) {
 
 		character, room, err := game.FindPlayerByName(name)
 		if err != nil {
-			panic(err)
+			log.Printf("Unable to look up player %s: %v.\r\n", name, err)
+			client.Character = nil
+			client.ConnectionState = ConnectionStateName
+			output.WriteString("Something went wrong, please try again.\r\n\r\nBy what name do you wish to be known? ")
+			break
 		}
 
 		if character != nil {
