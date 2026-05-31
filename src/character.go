@@ -1282,7 +1282,7 @@ func (ch *Character) gainExperience(experience int) {
 
 			tnl := uint(ch.experienceRequiredForLevel(int(ch.Level + 1)))
 
-			if ch.Experience > tnl {
+			if ch.Experience >= tnl {
 				ch.Level = ch.Level + 1
 
 				/* Calculate stat gains, skill points, etc... */
