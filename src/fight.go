@@ -78,9 +78,20 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj.WearLocation = -1
 
 	obj.Contents = NewLinkedList()
-	obj.Contents.Head = ch.Inventory.Head
-	obj.Contents.Count = ch.Inventory.Count
-	ch.Inventory = NewLinkedList()
+	if ch.Inventory != nil {
+		carriedObjects := make([]*ObjectInstance, 0, ch.Inventory.Count)
+		for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
+			carriedObjects = append(carriedObjects, iter.Value.(*ObjectInstance))
+		}
+
+		for _, carriedObj := range carriedObjects {
+			ch.RemoveObject(carriedObj)
+		}
+
+		for i := len(carriedObjects) - 1; i >= 0; i-- {
+			obj.AddObject(carriedObjects[i])
+		}
+	}
 
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
 		ch.DetachAllObjects()
@@ -89,7 +100,7 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	// Create a gold object corresponding to how much gold they had on their person
 	gobj := game.CreateGold(ch.Gold)
 	if gobj != nil {
-		obj.Contents.Insert(gobj)
+		obj.AddObject(gobj)
 
 		game.Objects.Insert(gobj)
 	}
