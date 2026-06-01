@@ -91,9 +91,7 @@ func (script *Script) GetExports() (*goja.Object, error) {
 
 func (game *Game) LoadScriptsFromDatabase() error {
 	game.Scripts = make(map[uint]*Script)
-	game.objectScripts = make(map[uint]*Script)
-	game.webhookScripts = make(map[int]*Script)
-	game.districtScripts = make(map[int]*Script)
+	game.clearScriptBindings()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -319,6 +317,78 @@ func (game *Game) LoadScriptsFromDatabase() error {
 	return rows.Err()
 }
 
+func (game *Game) clearScriptBindings() {
+	game.objectScripts = make(map[uint]*Script)
+	game.webhookScripts = make(map[int]*Script)
+	game.districtScripts = make(map[int]*Script)
+
+	for _, room := range game.world {
+		room.script = nil
+	}
+
+	if game.Planes == nil {
+		return
+	}
+
+	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
+		plane := iter.Value.(*Plane)
+		plane.Scripts = nil
+	}
+}
+
+func (game *Game) detachScriptBindings(script *Script) {
+	if script == nil {
+		return
+	}
+
+	for objectId, boundScript := range game.objectScripts {
+		if sameScriptBinding(boundScript, script) {
+			delete(game.objectScripts, objectId)
+		}
+	}
+
+	for webhookId, boundScript := range game.webhookScripts {
+		if sameScriptBinding(boundScript, script) {
+			delete(game.webhookScripts, webhookId)
+		}
+	}
+
+	for districtId, boundScript := range game.districtScripts {
+		if sameScriptBinding(boundScript, script) {
+			delete(game.districtScripts, districtId)
+		}
+	}
+
+	for _, room := range game.world {
+		if sameScriptBinding(room.script, script) {
+			room.script = nil
+		}
+	}
+
+	if game.Planes == nil {
+		return
+	}
+
+	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
+		plane := iter.Value.(*Plane)
+		if sameScriptBinding(plane.Scripts, script) {
+			plane.Scripts = nil
+		}
+	}
+}
+
+func sameScriptBinding(boundScript *Script, script *Script) bool {
+	if boundScript == nil || script == nil {
+		return false
+	}
+
+	if boundScript == script {
+		return true
+	}
+
+	return script.Id != 0 && boundScript.Id == script.Id
+}
+
 func (game *Game) setTimeout(cb goja.Callable, delay int64) goja.Value {
 	defer func() {
 		recover()
@@ -348,6 +418,7 @@ func (game *Game) DeleteScript(script *Script) error {
 		return err
 	}
 
+	game.detachScriptBindings(script)
 	delete(game.Scripts, script.Id)
 	return nil
 }
