@@ -1,4 +1,5 @@
 DROP INDEX IF EXISTS `index_pc_username`;
+DROP INDEX IF EXISTS `index_pc_username_unique`;
 DROP INDEX IF EXISTS `index_race_name`;
 DROP INDEX IF EXISTS `index_job_name`;
 

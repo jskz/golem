@@ -377,6 +377,6 @@ INSERT INTO
 VALUES
     (5, 1, 1, 'object', 11, 1, 1, 1);
 
-CREATE INDEX index_pc_username ON player_characters(username);
+CREATE UNIQUE INDEX index_pc_username_unique ON player_characters(username) WHERE deleted_at IS NULL;
 CREATE INDEX index_race_name ON races(name);
 CREATE INDEX index_job_name ON jobs(name);
