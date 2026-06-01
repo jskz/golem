@@ -98,7 +98,7 @@ func init() {
 
 	/* shop.go */
 	CommandTable["buy"] = Command{Name: "buy", CmdFunc: do_buy}
-	CommandTable["shop"] = Command{Name: "list", CmdFunc: do_shop}
+	CommandTable["shop"] = Command{Name: "shop", CmdFunc: do_shop}
 
 	/* scripting.go */
 	CommandTable["reload"] = Command{Name: "reload", CmdFunc: do_reload, MinimumLevel: LevelAdmin}
