@@ -377,6 +377,17 @@ func (script *Script) Save() bool {
 }
 
 func (game *Game) CreateScript(name string, initialBody string) (*Script, error) {
+	script := &Script{Name: name, Script: initialBody, Game: game}
+
+	var err error
+	script.Exports, err = script.GetExports()
+	if err != nil {
+		return nil, err
+	}
+	if script.Exports == nil {
+		return nil, fmt.Errorf("failed to initialize exports for script %s", script.Name)
+	}
+
 	res, err := game.db.Exec(`
 	INSERT INTO
 		scripts(name, script)
@@ -392,9 +403,11 @@ func (game *Game) CreateScript(name string, initialBody string) (*Script, error)
 		return nil, err
 	}
 
-	insertId := uint(insertId64)
-	script := &Script{Id: insertId, Name: name, Script: initialBody, Game: game}
-	game.Scripts[insertId] = script
+	script.Id = uint(insertId64)
+	if game.Scripts == nil {
+		game.Scripts = make(map[uint]*Script)
+	}
+	game.Scripts[script.Id] = script
 	return script, nil
 }
 
@@ -411,6 +424,10 @@ func (game *Game) scriptTimersUpdate() {
 }
 
 func (script *Script) tryEvaluate(methodName string, this goja.Value, arguments ...goja.Value) (goja.Value, error) {
+	if script.Exports == nil {
+		return nil, fmt.Errorf("script %s exports are not initialized", script.Name)
+	}
+
 	v := script.Exports.Get(methodName)
 	fn, ok := goja.AssertFunction(v)
 	if !ok {
