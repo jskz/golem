@@ -36,12 +36,22 @@ const (
 	TelnetENVIRONMENTVARIABLES = 36
 	TelnetNEWENVIRONMENT       = 39
 
-	TelnetERASELINE = 248
-	TelnetWILL      = 251
-	TelnetWONT      = 252
-	TelnetDO        = 253
-	TelnetDONT      = 254
-	TelnetIAC       = 255
+	TelnetENDSUBNEGOTIATION = 240
+	TelnetNOP               = 241
+	TelnetDATAMARK          = 242
+	TelnetBREAK             = 243
+	TelnetINTERRUPTPROCESS  = 244
+	TelnetABORTOUTPUT       = 245
+	TelnetAREYOUTHERE       = 246
+	TelnetERASECHARACTER    = 247
+	TelnetERASELINE         = 248
+	TelnetGOAHEAD           = 249
+	TelnetSUBNEGOTIATION    = 250
+	TelnetWILL              = 251
+	TelnetWONT              = 252
+	TelnetDO                = 253
+	TelnetDONT              = 254
+	TelnetIAC               = 255
 )
 
 const (
@@ -51,10 +61,6 @@ const (
 )
 
 var errClientLineTooLong = errors.New("client line input was too long")
-
-type TelnetCommand struct {
-	opCodes []byte
-}
 
 /* App-level connection state */
 const (
@@ -115,63 +121,15 @@ func (client *Client) readPump(game *Game) {
 			return
 		}
 
-		var commands []*TelnetCommand = []*TelnetCommand{}
-
 		clientRequests := make([]byte, 0) /* IAC DO operation */
 		clientWill := make([]byte, 0)     /* IAC WILL operation */
 
 		if firstByte[0] == TelnetIAC {
-			var nextByte []byte
-			var length int = 3
-
-			nextByte, err = reader.Peek(2)
-			if nil != err {
-				log.Printf("Unable to peek next byte after IAC: %v.\r\n", err)
+			clientWill, clientRequests, err = handleTelnetCommand(reader)
+			if err != nil {
+				log.Printf("Unable to handle IAC command: %v.\r\n", err)
 				return
 			}
-
-			switch nextByte[1] {
-			case TelnetDONT:
-				length = 3
-				requestOption, err := reader.Peek(3)
-				if err != nil {
-					log.Printf("Unable to peek next 2 bytes for IAC DONT: %v.\r\n", err)
-					break
-				}
-
-				log.Printf("Client sent DONT %d.\r\n", requestOption[2])
-			case TelnetWILL:
-				length = 3
-
-				willOption, err := reader.Peek(3)
-				if err != nil {
-					log.Printf("Unable to peek next 2 bytes for IAC WILL: %v.\r\n", err)
-					break
-				}
-
-				clientWill = append(clientWill, willOption[2])
-			case TelnetDO:
-				length = 3
-
-				requestOption, err := reader.Peek(3)
-				if err != nil {
-					log.Printf("Unable to peek next 2 bytes for IAC DO: %v.\r\n", err)
-					break
-				}
-
-				clientRequests = append(clientRequests, requestOption[2])
-
-			/*
-			 * To fix: I believe we are now only grabbing the first IAC command each time now - it still seems
-			 * to passively work out, but should instead recursively peek ahead here for all commands at once.
-			 */
-			case TelnetIAC:
-				break
-			default:
-				log.Printf("Unknown IAC code: %d.\r\n", nextByte[1])
-			}
-
-			reader.Discard(length)
 		} else {
 			trimmed, err := readClientLine(reader)
 			if err == errClientLineTooLong {
@@ -198,21 +156,6 @@ func (client *Client) readPump(game *Game) {
 			}
 
 			game.clientMessage <- clientMessage
-		}
-
-		for _, command := range commands {
-			if len(command.opCodes) < 3 {
-				/* We can't make safe assumptions about this IAC command; skip. */
-				continue
-			}
-
-			intent := command.opCodes[1]
-			switch intent {
-			case TelnetWILL:
-				clientWill = append(clientWill, command.opCodes[2])
-			case TelnetDO:
-				clientRequests = append(clientRequests, command.opCodes[2])
-			}
 		}
 
 		/*
@@ -245,6 +188,104 @@ func (client *Client) readPump(game *Game) {
 			if client.Send(responseBytes) {
 				break
 			}
+		}
+	}
+}
+
+func handleTelnetCommand(reader *bufio.Reader) ([]byte, []byte, error) {
+	clientWill := make([]byte, 0)
+	clientRequests := make([]byte, 0)
+
+	nextByte, err := reader.Peek(2)
+	if err != nil {
+		return clientWill, clientRequests, fmt.Errorf("peek next byte after IAC: %w", err)
+	}
+
+	switch nextByte[1] {
+	case TelnetDONT:
+		option, err := readTelnetNegotiation(reader)
+		if err != nil {
+			return clientWill, clientRequests, fmt.Errorf("read IAC DONT option: %w", err)
+		}
+
+		log.Printf("Client sent DONT %d.\r\n", option)
+	case TelnetWONT:
+		option, err := readTelnetNegotiation(reader)
+		if err != nil {
+			return clientWill, clientRequests, fmt.Errorf("read IAC WONT option: %w", err)
+		}
+
+		log.Printf("Client sent WONT %d.\r\n", option)
+	case TelnetWILL:
+		option, err := readTelnetNegotiation(reader)
+		if err != nil {
+			return clientWill, clientRequests, fmt.Errorf("read IAC WILL option: %w", err)
+		}
+
+		clientWill = append(clientWill, option)
+	case TelnetDO:
+		option, err := readTelnetNegotiation(reader)
+		if err != nil {
+			return clientWill, clientRequests, fmt.Errorf("read IAC DO option: %w", err)
+		}
+
+		clientRequests = append(clientRequests, option)
+	case TelnetSUBNEGOTIATION:
+		err = discardTelnetSubnegotiation(reader)
+	case TelnetENDSUBNEGOTIATION,
+		TelnetNOP,
+		TelnetDATAMARK,
+		TelnetBREAK,
+		TelnetINTERRUPTPROCESS,
+		TelnetABORTOUTPUT,
+		TelnetAREYOUTHERE,
+		TelnetERASECHARACTER,
+		TelnetERASELINE,
+		TelnetGOAHEAD,
+		TelnetIAC:
+		_, err = reader.Discard(2)
+	default:
+		log.Printf("Unknown IAC code: %d.\r\n", nextByte[1])
+		_, err = reader.Discard(2)
+	}
+
+	return clientWill, clientRequests, err
+}
+
+func readTelnetNegotiation(reader *bufio.Reader) (byte, error) {
+	opCodes, err := reader.Peek(3)
+	if err != nil {
+		return 0, err
+	}
+
+	option := opCodes[2]
+	_, err = reader.Discard(3)
+
+	return option, err
+}
+
+func discardTelnetSubnegotiation(reader *bufio.Reader) error {
+	if _, err := reader.Discard(2); err != nil {
+		return err
+	}
+
+	for {
+		b, err := reader.ReadByte()
+		if err != nil {
+			return err
+		}
+
+		if b != TelnetIAC {
+			continue
+		}
+
+		command, err := reader.ReadByte()
+		if err != nil {
+			return err
+		}
+
+		if command == TelnetENDSUBNEGOTIATION {
+			return nil
 		}
 	}
 }
