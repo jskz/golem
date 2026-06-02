@@ -91,7 +91,7 @@ function do_zedit(ch, args) {
                             return;
                         }
 
-                        if (!Golem.game.validZoneRange(low, high)) {
+                        if (!Golem.game.validZoneRangeExcept(low, high, zone.id)) {
                             ch.send("Please provide a valid low-high ID range which does not overlap an existing zone.\r\n");
                             return;
                         }
