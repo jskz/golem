@@ -20,6 +20,20 @@ type Combat struct {
 	Participants []*Character `json:"participants"`
 }
 
+func (combat *Combat) hasParticipant(ch *Character) bool {
+	if combat == nil || ch == nil {
+		return false
+	}
+
+	for _, participant := range combat.Participants {
+		if participant != nil && participant.IsEqual(ch) {
+			return true
+		}
+	}
+
+	return false
+}
+
 const (
 	DamageTypeBash   = 0
 	DamageTypeSlash  = 1
@@ -117,6 +131,67 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	return obj
 }
 
+func (game *Game) participatedInKill(ch *Character, target *Character) bool {
+	if ch == nil || target == nil || ch.IsEqual(target) {
+		return false
+	}
+
+	if ch.Fighting != nil && ch.Fighting.IsEqual(target) {
+		return true
+	}
+
+	for iter := game.Fights.Head; iter != nil; iter = iter.Next {
+		combat := iter.Value.(*Combat)
+		if combat.hasParticipant(ch) && combat.hasParticipant(target) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (game *Game) experienceRecipientsForKill(ch *Character, target *Character, room *Room) []*Character {
+	if ch == nil || target == nil || room == nil || ch.Room != room {
+		return nil
+	}
+
+	if ch.Group == nil {
+		return []*Character{ch}
+	}
+
+	recipients := make([]*Character, 0, ch.Group.Count)
+	seen := map[*Character]bool{ch: true}
+	recipients = append(recipients, ch)
+
+	for iter := ch.Group.Head; iter != nil; iter = iter.Next {
+		gch := iter.Value.(*Character)
+		if gch == nil || seen[gch] {
+			continue
+		}
+
+		seen[gch] = true
+
+		if gch.Room != room || !game.participatedInKill(gch, target) {
+			continue
+		}
+
+		recipients = append(recipients, gch)
+	}
+
+	return recipients
+}
+
+func awardExperienceToRecipients(experience int, recipients []*Character) {
+	if len(recipients) == 0 {
+		return
+	}
+
+	groupExperience := experience / len(recipients)
+	for _, gch := range recipients {
+		gch.gainExperience(groupExperience)
+	}
+}
+
 func (game *Game) Damage(ch *Character, target *Character, display bool, amount int, damageType int) bool {
 	if target == nil {
 		return false
@@ -168,6 +243,10 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 	if target.Health <= 0 {
 		if target.Room != nil {
 			room := target.Room
+			var experienceRecipients []*Character
+			if target.Flags&CHAR_IS_PLAYER == 0 {
+				experienceRecipients = game.experienceRecipientsForKill(ch, target, room)
+			}
 
 			corpse := game.createCorpse(target)
 
@@ -214,19 +293,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 				do_look(target, "")
 			} else {
 				exp := int(target.Experience)
-				if ch != nil {
-					if ch.Group != nil {
-						groupExperience := exp / ch.Group.Count
-
-						for iter := ch.Group.Head; iter != nil; iter = iter.Next {
-							gch := iter.Value.(*Character)
-
-							gch.gainExperience(groupExperience)
-						}
-					} else {
-						ch.gainExperience(int(exp))
-					}
-				}
+				awardExperienceToRecipients(exp, experienceRecipients)
 
 				game.Characters.Remove(target)
 				target = nil
