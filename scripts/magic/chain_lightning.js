@@ -64,7 +64,7 @@ function spell_chain_lightning(ch, args) {
 
     const target = ch.fighting || ch.findCharacterInRoom(args);
     if (!target || !ch.room || !target.room || target.isEqual(ch) || !target.room.isEqual(ch.room)) {
-        ch.send("Your target couldn't be found.\r\n");
+        ch.send("Your target isn't here.\r\n");
         return;
     }
     

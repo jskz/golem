@@ -8,7 +8,12 @@
 function spell_haste(ch, args) {
     const target = args.length > 1 ? ch.findCharacterInRoom(args) : ch;
 
-    if(target.affected & Golem.AffectedTypes.AFFECT_HASTE) {
+    if (!target || !ch.room || !target.room || !target.room.isEqual(ch.room)) {
+        ch.send("Your target isn't here.\r\n");
+        return;
+    }
+
+    if (target.affected & Golem.AffectedTypes.AFFECT_HASTE) {
         ch.send("{WYou failed.{x\r\n");
         return;
     }
