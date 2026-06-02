@@ -6,12 +6,7 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function spell_magical_might(ch, args) {
-    if(ch.affected & Golem.AffectedTypes.AFFECT_MAGICAL_MIGHT) {
-        ch.send("{WYou failed.{x\r\n");
-        return;
-    }
-
-    ch.addEffect(Golem.game.createEffect(
+    const effect = Golem.game.createEffect(
         'magical might',
         Golem.EffectTypes.EffectTypeStat,
         0,
@@ -21,7 +16,14 @@ function spell_magical_might(ch, args) {
         3,
         function() {
             ch.send("{DThe magical energy pulsing through your muscles subsides.{x\r\n");
-        }));
+        });
+
+    if(ch.hasEffect(effect)) {
+        ch.send("{WYou failed.{x\r\n");
+        return;
+    }
+
+    ch.addEffect(effect);
 
     ch.send('{MYour muscles harden as a magical energy surges through you.{x\r\n');
 

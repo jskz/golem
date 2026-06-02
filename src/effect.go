@@ -95,6 +95,37 @@ func (game *Game) CreateEffect(name string, effectType int, bits int, duration i
 	}
 }
 
+func (fx *Effect) Matches(other *Effect) bool {
+	if fx == nil || other == nil {
+		return false
+	}
+
+	return fx.Name == other.Name &&
+		fx.EffectType == other.EffectType &&
+		fx.Bits == other.Bits &&
+		fx.Location == other.Location &&
+		fx.Modifier == other.Modifier
+}
+
+func (ch *Character) HasEffect(fx *Effect) bool {
+	if fx == nil || ch.Effects == nil {
+		return false
+	}
+
+	for effect := ch.Effects.Head; effect != nil; effect = effect.Next {
+		existing, ok := effect.Value.(*Effect)
+		if !ok {
+			continue
+		}
+
+		if existing.Matches(fx) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (ch *Character) AddEffect(fx *Effect) {
 	switch fx.EffectType {
 	case EffectTypeAffected:
