@@ -21,10 +21,11 @@ func (game *Game) characterUpdate() {
 			ch.onCastingUpdate()
 		}
 
-		for effectIter := ch.Effects.Head; effectIter != nil; effectIter = effectIter.Next {
+		for effectIter := ch.Effects.Head; effectIter != nil; {
+			next := effectIter.Next
 			fx := effectIter.Value.(*Effect)
 
-			if int(time.Since(fx.CreatedAt).Seconds()) >= fx.Duration {
+			if fx.Duration != EffectDurationPermanent && int(time.Since(fx.CreatedAt).Seconds()) >= fx.Duration {
 				if fx.OnComplete != nil {
 					_, err := (*fx.OnComplete)(game.vm.ToValue(ch))
 					if err != nil {
@@ -34,6 +35,8 @@ func (game *Game) characterUpdate() {
 
 				ch.RemoveEffect(fx)
 			}
+
+			effectIter = next
 		}
 	}
 }

@@ -18,13 +18,14 @@ import (
  * as a function of a spell or other game mechanic, or else an application of some attributes
  * to the player by equipment in a location.
  *
- * The Game.objectUpdate method is responsibly for expiring effects which do not have -1
- * duration.
+ * The Game.characterUpdate method is responsible for expiring effects which do not have
+ * EffectDurationPermanent duration.
  */
 const (
-	EffectTypeAffected = 0
-	EffectTypeStat     = 1
-	EffectTypeImmunity = 2
+	EffectDurationPermanent = -1
+	EffectTypeAffected      = 0
+	EffectTypeStat          = 1
+	EffectTypeImmunity      = 2
 )
 
 type Effect struct {
@@ -54,7 +55,7 @@ type Effect struct {
  * A level 25 +2 intelligence buffing enchantment for an armor with id 50 when worn:
  *
  * EffectType = "EffectTypeStat"
- * Duration = -1
+ * Duration = EffectDurationPermanent
  * Level = 25
  * Modifier = 2
  * Location = WearLocationHead
