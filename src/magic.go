@@ -58,7 +58,11 @@ func (ch *Character) onCastingUpdate() {
 		if ch.Casting.Casting.Handler != nil {
 			fn := *ch.Casting.Casting.Handler
 
-			fn(ch.Game.vm.ToValue(ch.Casting), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(ch.Casting.Arguments))
+			_, err := fn(ch.Game.vm.ToValue(ch.Casting), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(ch.Casting.Arguments))
+			if err != nil {
+				logScriptHandlerError(fmt.Sprintf("spell %q", ch.Casting.Casting.Name), err)
+				ch.Send("{RThe magic twists strangely and fades away.{x\r\n")
+			}
 		}
 
 		ch.Casting = nil

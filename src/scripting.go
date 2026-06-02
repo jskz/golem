@@ -38,6 +38,14 @@ type Script struct {
 	Exports *goja.Object `json:"exports"`
 }
 
+func logScriptHandlerError(context string, err error) {
+	if err == nil {
+		return
+	}
+
+	log.Printf("Script handler %s failed: %v\r\n", context, err)
+}
+
 func (game *Game) DefaultSourceLoader(filename string) ([]byte, error) {
 	for _, script := range game.Scripts {
 		if strings.Compare(strings.ToLower(filename), strings.ToLower(script.Name)) == 0 {
@@ -487,7 +495,11 @@ func (game *Game) scriptTimersUpdate() {
 		effect := iter.Value.(*ScriptTimer)
 
 		if time.Since(effect.createdAt).Milliseconds() > effect.delay {
-			effect.callback(game.vm.ToValue(effect))
+			_, err := effect.callback(game.vm.ToValue(effect))
+			if err != nil {
+				logScriptHandlerError("setTimeout callback", err)
+			}
+
 			game.ScriptTimers.Remove(effect)
 			break
 		}
@@ -524,6 +536,7 @@ func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, t
 
 			result, err := eventHandler.callback(this, arguments...)
 			if err != nil {
+				logScriptHandlerError(fmt.Sprintf("event %q", name), err)
 				errors[i] = err
 				values[i] = nil
 				i++

@@ -144,7 +144,13 @@ func (ch *Character) Interpret(input string) bool {
 	}
 
 	if ch.Client != nil && ch.Client.ConnectionHandler != nil {
-		(*ch.Client.ConnectionHandler)(ch.Game.vm.ToValue(ch.Client), ch.Game.vm.ToValue(input))
+		_, err := (*ch.Client.ConnectionHandler)(ch.Game.vm.ToValue(ch.Client), ch.Game.vm.ToValue(input))
+		if err != nil {
+			logScriptHandlerError("connection input handler", err)
+			ch.Client.ConnectionHandler = nil
+			ch.Send("{RAn unseen force breaks your concentration, returning you to your senses.{x\r\n")
+		}
+
 		return true
 	}
 
@@ -173,7 +179,11 @@ func (ch *Character) Interpret(input string) bool {
 				return false
 			}
 
-			(*ch.Game.skills[prof.SkillId].Handler)(ch.Game.vm.ToValue(prof), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(rest))
+			_, err := (*ch.Game.skills[prof.SkillId].Handler)(ch.Game.vm.ToValue(prof), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(rest))
+			if err != nil {
+				logScriptHandlerError(fmt.Sprintf("skill %q", ch.Game.skills[prof.SkillId].Name), err)
+				ch.Send("{RAn unseen force prevents that action.{x\r\n")
+			}
 		} else {
 			/* We'll still want a prompt on no input */
 			ch.Send("\r\n")
@@ -183,7 +193,12 @@ func (ch *Character) Interpret(input string) bool {
 	}
 	/* Call the command func with the remaining command words joined. */
 	if val.Scripted {
-		val.Callback(ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(rest))
+		_, err := val.Callback(ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(rest))
+		if err != nil {
+			logScriptHandlerError(fmt.Sprintf("command %q", val.Name), err)
+			ch.Send("{RAn unseen force prevents that action.{x\r\n")
+		}
+
 		return true
 	}
 
