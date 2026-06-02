@@ -383,8 +383,7 @@ func (ch *Character) LoadPlayerSkills() error {
 		}
 
 		if proficiency.Job == nil {
-			log.Printf("Failed to attach PC proficiency because its job ID did not exist.\r\n")
-			return nil
+			return fmt.Errorf("failed to attach PC proficiency %d for player %d: job ID %d did not exist", proficiency.Id, ch.Id, jobId)
 		}
 
 		ch.Skills[proficiency.SkillId] = proficiency
