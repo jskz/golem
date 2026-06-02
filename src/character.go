@@ -538,7 +538,7 @@ func (ch *Character) RollStats() {
 
 	for index, base := range statBase {
 		max := statMax[index]
-		val := rand.Intn(max-base) + base
+		val := rand.Intn(max-base+1) + base
 
 		ch.Stats[index] = val
 	}
