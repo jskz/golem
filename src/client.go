@@ -15,6 +15,7 @@ import (
 	"io"
 	"log"
 	"net"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -430,10 +431,27 @@ func (client *Client) Delay(ms int) {
 	client.delayMutex.Unlock()
 }
 
+func recoverConnectionSetupPanic(conn net.Conn) {
+	if recovered := recover(); recovered != nil {
+		log.Printf("Connection setup panicked for %s: %v\r\n%s", remoteAddress(conn), recovered, debug.Stack())
+	}
+}
+
+func remoteAddress(conn net.Conn) string {
+	if conn == nil {
+		return "unknown remote address"
+	}
+
+	addr := conn.RemoteAddr()
+	if addr == nil {
+		return "unknown remote address"
+	}
+
+	return addr.String()
+}
+
 func (game *Game) handleConnection(conn net.Conn) {
-	defer func() {
-		recover()
-	}()
+	defer recoverConnectionSetupPanic(conn)
 
 	client := &Client{sessionStartedAt: time.Now()}
 	client.conn = conn
