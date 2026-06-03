@@ -1100,14 +1100,22 @@ func do_drop(ch *Character, arguments string) {
 	secondArgument, _ := OneArgument(arguments)
 
 	if firstArgument == "all" {
-		if ch.Inventory.Count == 0 {
-			ch.Send("You aren't carrying anything.\r\n")
-			return
-		}
+		objects := make([]*ObjectInstance, 0)
 
 		for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
 			obj := iter.Value.(*ObjectInstance)
 
+			if obj.WearLocation == -1 {
+				objects = append(objects, obj)
+			}
+		}
+
+		if len(objects) == 0 {
+			ch.Send("You aren't carrying anything.\r\n")
+			return
+		}
+
+		for _, obj := range objects {
 			// TODO: check that we have not exceeded the room object capacity, etc...
 			if ch.Flags&CHAR_IS_PLAYER != 0 {
 				err := ch.DetachObject(obj)
