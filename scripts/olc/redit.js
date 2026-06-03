@@ -69,13 +69,14 @@ function do_redit(ch, args) {
 
         // try to save room to database
         case 'save':
-            const err = ch.room.save();
-            if (!err) {
-                ch.send("Ok.\r\n");
+            try {
+                ch.room.save();
+            } catch(err) {
+                ch.send("Something went wrong trying to save this room.\r\n");
                 return;
             }
 
-            ch.send("Something went wrong trying to save this room: " + v + "\r\n");
+            ch.send("Ok.\r\n");
             return;
 
         default:

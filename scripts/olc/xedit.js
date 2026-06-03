@@ -228,6 +228,11 @@ function do_xedit(ch, args) {
                 }
 
                 const dir = DIRECTION_TO_VALUE[direction];
+                if(!ch.room.exit[dir]) {
+                    ch.send("There is no exit in that direction here.\r\n");
+                    return;
+                }
+
                 const exitFlag = Golem.util.findExitFlag(flagName);
 
                 if(!exitFlag) {
