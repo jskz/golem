@@ -136,10 +136,26 @@ func (ch *Character) AddEffect(fx *Effect) {
 }
 
 func (ch *Character) RemoveEffect(fx *Effect) {
-	switch fx.EffectType {
-	case EffectTypeAffected:
-		ch.Affected &= ^fx.Bits
+	if fx == nil || ch.Effects == nil || !ch.Effects.Remove(fx) {
+		return
 	}
 
-	ch.Effects.Remove(fx)
+	if fx.EffectType == EffectTypeAffected {
+		ch.refreshAffected()
+	}
+}
+
+func (ch *Character) refreshAffected() {
+	ch.Affected = 0
+
+	if ch.Effects == nil {
+		return
+	}
+
+	for effect := ch.Effects.Head; effect != nil; effect = effect.Next {
+		fx := effect.Value.(*Effect)
+		if fx.EffectType == EffectTypeAffected {
+			ch.Affected |= fx.Bits
+		}
+	}
 }

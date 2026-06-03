@@ -285,6 +285,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 				limbo.AddCharacter(target)
 
 				target.Effects = NewLinkedList()
+				target.refreshAffected()
 				target.Health = target.MaxHealth / 8
 				target.Mana = 1
 				target.Stamina = 1
