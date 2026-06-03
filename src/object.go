@@ -154,6 +154,11 @@ func (game *Game) NewObjectInstance(objectIndex uint) *ObjectInstance {
 		return nil
 	}
 
+	if obj == nil {
+		log.Printf("Failed to create object instance from id %d: object index does not exist\r\n", objectIndex)
+		return nil
+	}
+
 	objectInstance := &ObjectInstance{
 		Game:             game,
 		ParentId:         obj.Id,
