@@ -17,7 +17,7 @@ import (
 )
 
 func (ch *Character) getHealthFeedback(viewer *Character) string {
-	healthPercentage := ch.Health * 100 / ch.MaxHealth
+	healthPercentage := resourcePercentage(ch.Health, ch.MaxHealth)
 
 	if healthPercentage >= 100 {
 		return fmt.Sprintf("{G%s{G is in perfect health.{x", ch.GetShortDescriptionUpper(viewer))
@@ -233,9 +233,9 @@ func do_affect(ch *Character, arguments string) {
 func do_score(ch *Character, arguments string) {
 	var buf strings.Builder
 
-	healthPercentage := ch.Health * 100 / ch.MaxHealth
-	manaPercentage := ch.Mana * 100 / ch.MaxMana
-	staminaPercentage := ch.Stamina * 100 / ch.MaxStamina
+	healthPercentage := resourcePercentage(ch.Health, ch.MaxHealth)
+	manaPercentage := resourcePercentage(ch.Mana, ch.MaxMana)
+	staminaPercentage := resourcePercentage(ch.Stamina, ch.MaxStamina)
 
 	currentHealthColour := SeverityColourFromPercentage(healthPercentage)
 	currentManaColour := SeverityColourFromPercentage(manaPercentage)

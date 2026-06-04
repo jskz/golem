@@ -146,3 +146,15 @@ func AngleToDirection(angle int) int {
 
 	return DirectionNorth
 }
+
+func resourcePercentage(current int, maximum int) int {
+	if maximum <= 0 || current <= 0 {
+		return 0
+	}
+
+	if current >= maximum {
+		return 100
+	}
+
+	return int(float64(current) * 100 / float64(maximum))
+}

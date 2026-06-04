@@ -38,9 +38,9 @@ func (client *Client) displayPrompt() {
 		return
 	}
 
-	healthPercentage := client.Character.Health * 100 / client.Character.MaxHealth
-	manaPercentage := client.Character.Mana * 100 / client.Character.MaxMana
-	staminaPercentage := client.Character.Stamina * 100 / client.Character.MaxStamina
+	healthPercentage := resourcePercentage(client.Character.Health, client.Character.MaxHealth)
+	manaPercentage := resourcePercentage(client.Character.Mana, client.Character.MaxMana)
+	staminaPercentage := resourcePercentage(client.Character.Stamina, client.Character.MaxStamina)
 
 	currentHealthColour := SeverityColourFromPercentage(healthPercentage)
 	currentManaColour := SeverityColourFromPercentage(manaPercentage)

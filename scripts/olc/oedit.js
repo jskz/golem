@@ -13,6 +13,7 @@ function do_oedit(ch, args) {
 {Goedit <obj> save             - {gSave object instance properties globally
 {Goedit <obj> description      - {gString editor for object's description
 {Goedit <obj> flag <flag name> - {gToggle object flag by name
+{Goedit <obj> ttl <minutes>    - {gSet object decay lifetime in minutes
 
 {WThe following values may be used in a general way with the syntax:
 {Goedit <target> <attribute> <value>
@@ -20,7 +21,7 @@ function do_oedit(ch, args) {
 
 {GThe following attributes are available:{g
   name short_description long_description item_type
-  value0 value1 value2 value3
+  ttl value0 value1 value2 value3
 {x`);
     }
 
@@ -70,23 +71,27 @@ function do_oedit(ch, args) {
                     ch.send("An object flag argument to toggle is required.\r\nExample: oedit amulet flag glow\n");
                     return;
                 }
-    
+
                 const flag = Golem.util.findObjectFlag(xxs);
                 if(!flag) {
                     ch.send("No such object flag exists.\r\n");
                     return;
                 }
-    
+
                 if(!(target.flags & flag.flag)) {
                     target.flags |= flag.flag;
+                    if (flag.flag === Golem.ObjectFlags.ITEM_DECAYS) {
+                        target.startDecay();
+                    }
+
                     ch.send("Ok.  Enabled object flag " + flag.name + " on " + target.getShortDescription(ch) + ".\r\n");
                     return;
                 }
-    
+
                 target.flags &= ~(flag.flag);
                 ch.send("Ok.  Disabled object flag " + flag.name + " on " + target.getShortDescription(ch) + ".\r\n");
                 return;
-        
+
             case 'name':
                 target.name = xxs;
                 ch.send("Ok.\r\n");
@@ -101,7 +106,18 @@ function do_oedit(ch, args) {
                 target.longDescription = xxs;
                 ch.send("Ok.\r\n");
                 break;
-                
+
+            case 'ttl':
+                const ttl = parseInt(xxs);
+                if (isNaN(ttl) || ttl < 0) {
+                    ch.send("Object TTL must be a non-negative number of minutes.\r\n");
+                    return;
+                }
+
+                target.ttl = ttl;
+                ch.send("Ok.\r\n");
+                break;
+
             case 'value0':
                 target.value0 = parseInt(xxs);
                 ch.send("Ok.\r\n");

@@ -6,6 +6,16 @@
  *     James Skarzinskas <james@jskarzin.org>
  */
 function do_medit(ch, args) {
+    function parsePositiveResourceMax(resourceName, value) {
+        const maximum = parseInt(value, 10);
+        if (isNaN(maximum) || maximum <= 0) {
+            ch.send('Maximum ' + resourceName + ' must be a positive number.\r\n');
+            return null;
+        }
+
+        return maximum;
+    }
+
     function displayUsage() {
         ch.send(
             `{WMobile editor usage:
@@ -142,7 +152,12 @@ function do_medit(ch, args) {
             break;
 
         case 'max_health':
-            target.maxHealth = parseInt(xxs);
+            const maxHealth = parsePositiveResourceMax('health', xxs);
+            if (maxHealth === null) {
+                return;
+            }
+
+            target.maxHealth = maxHealth;
             ch.send("Ok.\r\n");
             break;
 
@@ -152,7 +167,12 @@ function do_medit(ch, args) {
             break;
 
         case 'max_mana':
-            target.maxMana = parseInt(xxs);
+            const maxMana = parsePositiveResourceMax('mana', xxs);
+            if (maxMana === null) {
+                return;
+            }
+
+            target.maxMana = maxMana;
             ch.send("Ok.\r\n");
             break;
                 
@@ -162,7 +182,12 @@ function do_medit(ch, args) {
             break;
 
         case 'max_stamina':
-            target.maxStamina = parseInt(xxs);
+            const maxStamina = parsePositiveResourceMax('stamina', xxs);
+            if (maxStamina === null) {
+                return;
+            }
+
+            target.maxStamina = maxStamina;
             ch.send("Ok.\r\n");
             break;
 
