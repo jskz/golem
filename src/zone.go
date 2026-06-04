@@ -151,25 +151,7 @@ func (game *Game) ResetRoom(room *Room) {
 			}
 
 			if objIndex != nil {
-				obj := &ObjectInstance{
-					Game:             game,
-					ParentId:         objIndex.Id,
-					Contents:         NewLinkedList(),
-					Inside:           nil,
-					CarriedBy:        nil,
-					Flags:            objIndex.Flags,
-					Name:             objIndex.Name,
-					ShortDescription: objIndex.ShortDescription,
-					LongDescription:  objIndex.LongDescription,
-					Description:      objIndex.Description,
-					ItemType:         objIndex.ItemType,
-					Value0:           objIndex.Value0,
-					Value1:           objIndex.Value1,
-					Value2:           objIndex.Value2,
-					Value3:           objIndex.Value3,
-					CreatedAt:        time.Now(),
-					WearLocation:     -1,
-				}
+				obj := game.objectInstanceFromIndex(objIndex)
 
 				room.AddObject(obj)
 				game.Objects.Insert(obj)

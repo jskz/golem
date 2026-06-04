@@ -131,10 +131,13 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	output.WriteString(fmt.Sprintf("{C%s{x\r\n", obj.Description))
 
 	if obj.Flags&ITEM_DECAYS != 0 {
+		now := time.Now()
 		var silentString string = " "
 		var minuteSuffix string = "s"
-		var minutesSince int = int(time.Since(obj.CreatedAt).Minutes())
 		var ttlSuffix string = "s"
+
+		obj.ensureDecayState(now)
+		var minutesSince int = int(now.Sub(obj.CreatedAt).Minutes())
 
 		if obj.Flags&ITEM_DECAY_SILENTLY != 0 {
 			silentString = " silently "
@@ -144,7 +147,7 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 			minuteSuffix = ""
 		}
 
-		objExpiry := int(math.Max(time.Until(obj.CreatedAt.Add(time.Duration(obj.Ttl)*time.Minute)).Minutes(), 0))
+		objExpiry := int(math.Max(obj.CreatedAt.Add(time.Duration(obj.Ttl)*time.Minute).Sub(now).Minutes(), 0))
 		if objExpiry == 1 {
 			ttlSuffix = ""
 		}

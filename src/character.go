@@ -1033,6 +1033,8 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 			continue
 		}
 
+		obj.ensureDecayState(time.Now())
+
 		if obj.Inside != nil {
 			_, err = tx.ExecContext(ctx, `
 				UPDATE
@@ -1048,10 +1050,12 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 					value_2 = ?,
 					value_3 = ?,
 					value_4 = ?,
+					ttl = ?,
+					created_at = ?,
 					inside_object_instance_id = ?
 				WHERE
 					id = ?
-			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Inside.Id, obj.Id)
+			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.CreatedAt, obj.Inside.Id, obj.Id)
 		} else {
 			_, err = tx.ExecContext(ctx, `
 				UPDATE
@@ -1067,10 +1071,12 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 					value_2 = ?,
 					value_3 = ?,
 					value_4 = ?,
+					ttl = ?,
+					created_at = ?,
 					inside_object_instance_id = NULL
 				WHERE
 					id = ?
-			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Id)
+			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.CreatedAt, obj.Id)
 		}
 
 		if err != nil {
@@ -1103,7 +1109,9 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			object_instances.value_1,
 			object_instances.value_2,
 			object_instances.value_3,
-			object_instances.value_4
+			object_instances.value_4,
+			object_instances.ttl,
+			CAST(strftime('%s', object_instances.created_at) AS INTEGER)
 		FROM
 			object_instances
 		INNER JOIN
@@ -1127,15 +1135,17 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			Contents:     NewLinkedList(),
 			Inside:       nil,
 			CarriedBy:    nil,
-			CreatedAt:    time.Now(),
 			WearLocation: -1,
 		}
 
-		err = rows.Scan(&obj.Id, &obj.ParentId, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.WearLocation, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3)
+		var createdAt sql.NullInt64
+		err = rows.Scan(&obj.Id, &obj.ParentId, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.WearLocation, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3, &obj.Ttl, &createdAt)
 		if err != nil {
 			return err
 		}
 
+		obj.CreatedAt = objectCreatedAtFromUnix(createdAt)
+		obj.Ttl = normalizeObjectTtl(obj.Flags, obj.Ttl)
 		ch.AddObject(obj)
 	}
 
@@ -1159,7 +1169,9 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 				object_instances.value_1,
 				object_instances.value_2,
 				object_instances.value_3,
-				object_instances.value_4
+				object_instances.value_4,
+				object_instances.ttl,
+				CAST(strftime('%s', object_instances.created_at) AS INTEGER)
 			FROM
 				object_instances
 			WHERE
@@ -1177,15 +1189,17 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 				Contents:     NewLinkedList(),
 				Inside:       nil,
 				CarriedBy:    nil,
-				CreatedAt:    time.Now(),
 				WearLocation: -1,
 			}
 
-			err = rows.Scan(&containedObj.Id, &containedObj.ParentId, &containedObj.Name, &containedObj.ShortDescription, &containedObj.LongDescription, &containedObj.Description, &containedObj.Flags, &containedObj.ItemType, &containedObj.Value0, &containedObj.Value1, &containedObj.Value2, &containedObj.Value3)
+			var createdAt sql.NullInt64
+			err = rows.Scan(&containedObj.Id, &containedObj.ParentId, &containedObj.Name, &containedObj.ShortDescription, &containedObj.LongDescription, &containedObj.Description, &containedObj.Flags, &containedObj.ItemType, &containedObj.Value0, &containedObj.Value1, &containedObj.Value2, &containedObj.Value3, &containedObj.Ttl, &createdAt)
 			if err != nil {
 				return err
 			}
 
+			containedObj.CreatedAt = objectCreatedAtFromUnix(createdAt)
+			containedObj.Ttl = normalizeObjectTtl(containedObj.Flags, containedObj.Ttl)
 			obj.AddObject(containedObj)
 		}
 

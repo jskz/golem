@@ -31,6 +31,7 @@ type Object struct {
 	Value1 int
 	Value2 int
 	Value3 int
+	Ttl    int
 }
 
 type ObjectInstance struct {
@@ -106,6 +107,7 @@ const (
 
 const ObjectGoldSingle = 2
 const ObjectGoldCoins = 3
+const DefaultObjectDecayTtl = 20
 
 type ObjectFlag struct {
 	Name string `json:"name"`
@@ -147,15 +149,64 @@ func FindObjectFlag(flag string) *ObjectFlag {
 	return nil
 }
 
-func (game *Game) NewObjectInstance(objectIndex uint) *ObjectInstance {
-	obj, err := game.LoadObjectIndex(objectIndex)
-	if err != nil {
-		log.Printf("Failed to create object instance from id %d: %v\r\n", objectIndex, err)
-		return nil
+func normalizeObjectTtl(flags int, ttl int) int {
+	if ttl < 0 {
+		ttl = 0
 	}
 
+	if flags&ITEM_DECAYS != 0 && ttl == 0 {
+		return DefaultObjectDecayTtl
+	}
+
+	return ttl
+}
+
+func objectCreatedAtFromUnix(createdAt sql.NullInt64) time.Time {
+	if createdAt.Valid && createdAt.Int64 > 0 {
+		return time.Unix(createdAt.Int64, 0)
+	}
+
+	return time.Now()
+}
+
+func (obj *ObjectInstance) ensureDecayState(now time.Time) {
 	if obj == nil {
-		log.Printf("Failed to create object instance from id %d: object index does not exist\r\n", objectIndex)
+		return
+	}
+
+	ttlUnset := obj.Ttl <= 0
+	if obj.CreatedAt.IsZero() || (obj.Flags&ITEM_DECAYS != 0 && ttlUnset) {
+		obj.CreatedAt = now
+	}
+
+	obj.Ttl = normalizeObjectTtl(obj.Flags, obj.Ttl)
+}
+
+func (obj *ObjectInstance) StartDecay() {
+	if obj == nil {
+		return
+	}
+
+	obj.CreatedAt = time.Now()
+	obj.Ttl = normalizeObjectTtl(obj.Flags, obj.Ttl)
+}
+
+func (obj *ObjectInstance) shouldDecay(now time.Time) bool {
+	if obj == nil || obj.Flags&ITEM_DECAYS == 0 {
+		return false
+	}
+
+	obj.ensureDecayState(now)
+
+	if obj.Ttl <= 0 {
+		return false
+	}
+
+	return int(now.Sub(obj.CreatedAt).Minutes()) >= obj.Ttl
+}
+
+func (game *Game) objectInstanceFromIndex(obj *Object) *ObjectInstance {
+	if obj == nil {
 		return nil
 	}
 
@@ -175,9 +226,25 @@ func (game *Game) NewObjectInstance(objectIndex uint) *ObjectInstance {
 		Value1:           obj.Value1,
 		Value2:           obj.Value2,
 		Value3:           obj.Value3,
+		Ttl:              normalizeObjectTtl(obj.Flags, obj.Ttl),
 	}
 
 	return objectInstance
+}
+
+func (game *Game) NewObjectInstance(objectIndex uint) *ObjectInstance {
+	obj, err := game.LoadObjectIndex(objectIndex)
+	if err != nil {
+		log.Printf("Failed to create object instance from id %d: %v\r\n", objectIndex, err)
+		return nil
+	}
+
+	if obj == nil {
+		log.Printf("Failed to create object instance from id %d: object index does not exist\r\n", objectIndex)
+		return nil
+	}
+
+	return game.objectInstanceFromIndex(obj)
 }
 
 func (game *Game) CreateGold(amount int) *ObjectInstance {
@@ -271,7 +338,8 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 			value_1,
 			value_2,
 			value_3,
-			value_4
+			value_4,
+			ttl
 		FROM
 			objects
 		WHERE
@@ -291,7 +359,7 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 
 	for rows.Next() {
 		obj := &Object{}
-		err := rows.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3)
+		err := rows.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3, &obj.Ttl)
 
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -324,7 +392,8 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 			value_1,
 			value_2,
 			value_3,
-			value_4
+			value_4,
+			ttl
 		FROM
 			objects
 		WHERE
@@ -334,7 +403,7 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	`, index)
 
 	obj := &Object{}
-	err := row.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3)
+	err := row.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3, &obj.Ttl)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -414,6 +483,8 @@ func (obj *ObjectInstance) reifyInContainerTx(ctx context.Context, tx *sql.Tx, c
 	reified := make([]*ObjectInstance, 0)
 
 	if obj.Id == 0 {
+		obj.ensureDecayState(time.Now())
+
 		var insideObjectInstanceId *uint = nil
 		if container != nil {
 			insideObjectInstanceId = &container.Id
@@ -421,10 +492,10 @@ func (obj *ObjectInstance) reifyInContainerTx(ctx context.Context, tx *sql.Tx, c
 
 		result, err := tx.ExecContext(ctx, `
 			INSERT INTO
-				object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4)
+				object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4, ttl, created_at)
 			VALUES
-				(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3)
+				(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.CreatedAt)
 		if err != nil {
 			log.Printf("Failed to finalize new object: %v.\r\n", err)
 			return reified, err
@@ -570,6 +641,8 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 		return nil
 	}
 
+	obj.ensureDecayState(time.Now())
+
 	var insideObjectInstanceId *uint = nil
 
 	if container != nil {
@@ -578,10 +651,10 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 
 	result, err := obj.Game.db.Exec(`
 		INSERT INTO
-			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4)
+			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4, ttl, created_at)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.CreatedAt)
 	if err != nil {
 		log.Printf("Failed to finalize new object: %v.\r\n", err)
 		return err

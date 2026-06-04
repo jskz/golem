@@ -42,12 +42,14 @@ func (game *Game) characterUpdate() {
 }
 
 func (game *Game) objectUpdate() {
+	now := time.Now()
+
 	for iter := game.Objects.Head; iter != nil; {
 		next := iter.Next
 		obj := iter.Value.(*ObjectInstance)
 
 		/* Remove the obj after its ttl time in minutes, if the ITEM_DECAYS flag is set */
-		if obj.Flags&ITEM_DECAYS != 0 && int(time.Since(obj.CreatedAt).Minutes()) >= obj.Ttl {
+		if obj.shouldDecay(now) {
 			game.decayObject(obj)
 		}
 

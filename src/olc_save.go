@@ -10,6 +10,7 @@ package main
 import (
 	"errors"
 	"log"
+	"time"
 )
 
 func (room *Room) Save() error {
@@ -61,6 +62,8 @@ func (obj *ObjectInstance) Sync() error {
 		return errors.New("trying to sync an object instance with no parent ID")
 	}
 
+	obj.ensureDecayState(time.Now())
+
 	_, err := obj.Game.db.Exec(`
 		UPDATE
 			objects
@@ -74,10 +77,11 @@ func (obj *ObjectInstance) Sync() error {
 			value_1 = ?,
 			value_2 = ?,
 			value_3 = ?,
-			value_4 = ?
+			value_4 = ?,
+			ttl = ?
 		WHERE
 			id = ?
-	`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.ParentId)
+	`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.ParentId)
 	if err != nil {
 		return err
 	}

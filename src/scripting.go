@@ -839,6 +839,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("StatTypes", statTypes)
 	obj.Set("CharacterFlags", charFlagsConstantsObj)
 	obj.Set("ObjectFlags", objectFlagsConstantsObj)
+	obj.Set("DefaultObjectDecayTtl", DefaultObjectDecayTtl)
 	obj.Set("Combat", combatObj)
 	obj.Set("Directions", directionsConstantsObj)
 	obj.Set("WearLocations", wearLocationsConstantsObj)

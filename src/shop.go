@@ -12,7 +12,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"time"
 )
 
 type ShopListing struct {
@@ -221,25 +220,7 @@ func do_buy(ch *Character, arguments string) {
 
 			objIndex := listing.Object
 
-			obj := &ObjectInstance{
-				Game:             ch.Game,
-				ParentId:         objIndex.Id,
-				Contents:         NewLinkedList(),
-				Inside:           nil,
-				CarriedBy:        nil,
-				Name:             objIndex.Name,
-				ShortDescription: objIndex.ShortDescription,
-				LongDescription:  objIndex.LongDescription,
-				Description:      objIndex.Description,
-				ItemType:         objIndex.ItemType,
-				Flags:            objIndex.Flags,
-				Value0:           objIndex.Value0,
-				Value1:           objIndex.Value1,
-				Value2:           objIndex.Value2,
-				Value3:           objIndex.Value3,
-				CreatedAt:        time.Now(),
-				WearLocation:     -1,
-			}
+			obj := ch.Game.objectInstanceFromIndex(objIndex)
 
 			err := ch.AttachObject(obj)
 			if err != nil {
