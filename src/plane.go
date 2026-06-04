@@ -9,6 +9,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -167,7 +168,12 @@ func (plane *Plane) newMapGrid() *MapGrid {
 	return grid
 }
 
-func (plane *Plane) terrainMapFromBlob(blob []byte) *Map {
+func (plane *Plane) terrainMapFromBlob(blob []byte) (*Map, error) {
+	expectedBlobSize := plane.terrainBlobSize()
+	if len(blob) != expectedBlobSize {
+		return nil, fmt.Errorf("plane %d terrain blob was %d bytes, expected %d", plane.Id, len(blob), expectedBlobSize)
+	}
+
 	planeMap := &Map{
 		Layers: make([]*MapGrid, 0, plane.Depth),
 	}
@@ -177,14 +183,19 @@ func (plane *Plane) terrainMapFromBlob(blob []byte) *Map {
 
 		for y := 0; y < plane.Height; y++ {
 			for x := 0; x < plane.Width; x++ {
-				grid.Terrain[y][x] = int(blob[plane.terrainBlobIndex(x, y, z)])
+				terrainType := int(blob[plane.terrainBlobIndex(x, y, z)])
+				if terrain, ok := TerrainTable[terrainType]; !ok || terrain == nil {
+					return nil, fmt.Errorf("plane %d terrain blob contains unknown terrain type %d at (%d, %d, %d)", plane.Id, terrainType, x, y, z)
+				}
+
+				grid.Terrain[y][x] = terrainType
 			}
 		}
 
 		planeMap.Layers = append(planeMap.Layers, grid)
 	}
 
-	return planeMap
+	return planeMap, nil
 }
 
 func (plane *Plane) initializeTerrainBlob(defaultTerrain int) ([]byte, int) {
@@ -422,7 +433,10 @@ func (plane *Plane) generate() error {
 				}
 			}
 
-			planeMap := plane.terrainMapFromBlob(blob)
+			planeMap, err := plane.terrainMapFromBlob(blob)
+			if err != nil {
+				return err
+			}
 
 			log.Printf("Plane %d (%d,%d) initialized from %d byte blob.\r\n", plane.Id, plane.Width, plane.Height, blobSize)
 
