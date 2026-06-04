@@ -15,6 +15,7 @@ import (
 	"log"
 	"net/http"
 	"runtime/debug"
+	"time"
 )
 
 type Webhook struct {
@@ -47,6 +48,8 @@ const (
 	WebhookKeyLength     = 36
 	webhookListenAddress = ":9000"
 )
+
+var webhookMessageSendTimeout = 5 * time.Second
 
 var (
 	errWorldMapOverworldNotFound    = errors.New("failed to find overworld plane")
@@ -319,5 +322,22 @@ func (game *Game) handleWebhook(w http.ResponseWriter, req *http.Request) {
 	}
 
 	log.Print("Got a webhook request with a valid-length key.\r\n")
-	game.webhookMessage <- keyParam
+
+	if game.webhookMessage == nil {
+		http.Error(w, "webhook service is unavailable", http.StatusServiceUnavailable)
+		return
+	}
+
+	timer := time.NewTimer(webhookMessageSendTimeout)
+	defer timer.Stop()
+
+	select {
+	case game.webhookMessage <- keyParam:
+	case <-req.Context().Done():
+		return
+	case <-timer.C:
+		log.Print("Timed out waiting to enqueue webhook message.\r\n")
+		http.Error(w, "webhook service is unavailable", http.StatusServiceUnavailable)
+		return
+	}
 }
