@@ -459,7 +459,7 @@ func do_flee(ch *Character, arguments string) {
 	var exits []*Exit = make([]*Exit, 0)
 
 	for _, exit := range ch.Room.Exit {
-		if exit.To != nil && exit.Flags&EXIT_CLOSED == 0 {
+		if exit.To != nil && exit.Flags&EXIT_CLOSED == 0 && exit.Visible(ch) {
 			exits = append(exits, exit)
 		}
 	}

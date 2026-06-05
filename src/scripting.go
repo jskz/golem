@@ -724,6 +724,7 @@ func (game *Game) InitScripting() error {
 	exitFlagsConstantsObj.Set("EXIT_IS_DOOR", EXIT_IS_DOOR)
 	exitFlagsConstantsObj.Set("EXIT_CLOSED", EXIT_CLOSED)
 	exitFlagsConstantsObj.Set("EXIT_LOCKED", EXIT_LOCKED)
+	exitFlagsConstantsObj.Set("EXIT_HIDDEN", EXIT_HIDDEN)
 
 	directionsConstantsObj := game.vm.NewObject()
 	directionsConstantsObj.Set("DirectionNorth", DirectionNorth)

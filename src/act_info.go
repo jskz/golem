@@ -383,9 +383,9 @@ const (
 	compassCellAlignRight
 )
 
-func roomCompassSymbol(room *Room, direction uint) (string, int) {
+func roomCompassSymbol(room *Room, direction uint, viewer *Character) (string, int) {
 	exit := room.Exit[direction]
-	if exit == nil {
+	if !exit.Visible(viewer) {
 		return "{D-", 1
 	}
 
@@ -401,8 +401,8 @@ func roomCompassSymbol(room *Room, direction uint) (string, int) {
 	return fmt.Sprintf("{Y%s", symbol), len(symbol)
 }
 
-func roomCompassCell(room *Room, direction uint, width int, align compassCellAlignment) string {
-	symbol, visibleWidth := roomCompassSymbol(room, direction)
+func roomCompassCell(room *Room, direction uint, width int, align compassCellAlignment, viewer *Character) string {
+	symbol, visibleWidth := roomCompassSymbol(room, direction, viewer)
 	if visibleWidth >= width {
 		return symbol
 	}
@@ -466,16 +466,16 @@ func do_look(ch *Character, arguments string) {
 	}
 
 	lookCompassOutput := map[uint]string{
-		DirectionNorth:     roomCompassCell(ch.Room, DirectionNorth, 1, compassCellAlignLeft),
-		DirectionEast:      roomCompassCell(ch.Room, DirectionEast, 1, compassCellAlignLeft),
-		DirectionSouth:     roomCompassCell(ch.Room, DirectionSouth, 1, compassCellAlignLeft),
-		DirectionWest:      roomCompassCell(ch.Room, DirectionWest, 1, compassCellAlignLeft),
-		DirectionUp:        roomCompassCell(ch.Room, DirectionUp, 1, compassCellAlignLeft),
-		DirectionDown:      roomCompassCell(ch.Room, DirectionDown, 1, compassCellAlignLeft),
-		DirectionNortheast: roomCompassCell(ch.Room, DirectionNortheast, 2, compassCellAlignRight),
-		DirectionSoutheast: roomCompassCell(ch.Room, DirectionSoutheast, 2, compassCellAlignRight),
-		DirectionSouthwest: roomCompassCell(ch.Room, DirectionSouthwest, 2, compassCellAlignLeft),
-		DirectionNorthwest: roomCompassCell(ch.Room, DirectionNorthwest, 2, compassCellAlignLeft),
+		DirectionNorth:     roomCompassCell(ch.Room, DirectionNorth, 1, compassCellAlignLeft, ch),
+		DirectionEast:      roomCompassCell(ch.Room, DirectionEast, 1, compassCellAlignLeft, ch),
+		DirectionSouth:     roomCompassCell(ch.Room, DirectionSouth, 1, compassCellAlignLeft, ch),
+		DirectionWest:      roomCompassCell(ch.Room, DirectionWest, 1, compassCellAlignLeft, ch),
+		DirectionUp:        roomCompassCell(ch.Room, DirectionUp, 1, compassCellAlignLeft, ch),
+		DirectionDown:      roomCompassCell(ch.Room, DirectionDown, 1, compassCellAlignLeft, ch),
+		DirectionNortheast: roomCompassCell(ch.Room, DirectionNortheast, 2, compassCellAlignRight, ch),
+		DirectionSoutheast: roomCompassCell(ch.Room, DirectionSoutheast, 2, compassCellAlignRight, ch),
+		DirectionSouthwest: roomCompassCell(ch.Room, DirectionSouthwest, 2, compassCellAlignLeft, ch),
+		DirectionNorthwest: roomCompassCell(ch.Room, DirectionNorthwest, 2, compassCellAlignLeft, ch),
 	}
 
 	var roomName string = ch.Room.Name
@@ -514,9 +514,9 @@ func do_look(ch *Character, arguments string) {
 		var exitsString strings.Builder
 
 		for direction := uint(0); direction < DirectionMax; direction++ {
-			_, ok := ch.Room.Exit[direction]
-			if ok {
-				if ch.Room.Exit[direction].Flags&EXIT_CLOSED != 0 {
+			exit, ok := ch.Room.Exit[direction]
+			if ok && exit.Visible(ch) {
+				if exit.Flags&EXIT_CLOSED != 0 {
 					exitsString.WriteString("#")
 				}
 
@@ -524,7 +524,9 @@ func do_look(ch *Character, arguments string) {
 			}
 		}
 
-		buf.WriteString(fmt.Sprintf("\r\n{W[Exits: %s]{x\r\n", strings.TrimRight(exitsString.String(), " ")))
+		if exitsString.Len() > 0 {
+			buf.WriteString(fmt.Sprintf("\r\n{W[Exits: %s]{x\r\n", strings.TrimRight(exitsString.String(), " ")))
+		}
 	}
 
 	ch.Send(buf.String())

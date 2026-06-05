@@ -189,6 +189,18 @@ func (room *Room) getExit(direction uint) *Exit {
 	return room.Exit[direction]
 }
 
+func (exit *Exit) Visible(viewer *Character) bool {
+	if exit == nil {
+		return false
+	}
+
+	if exit.Flags&EXIT_HIDDEN == 0 {
+		return true
+	}
+
+	return viewer != nil && viewer.Level > LevelHero
+}
+
 func DirectionFromString(input string) (uint, bool) {
 	direction, ok := DirectionAliases[strings.ToLower(strings.TrimSpace(input))]
 	return direction, ok
@@ -237,7 +249,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	}
 
 	exit := ch.Room.getExit(direction)
-	if exit == nil || exit.To == nil {
+	if exit == nil || exit.To == nil || !exit.Visible(ch) {
 		ch.Send("{RAlas, you cannot go that way.{x\r\n")
 		return false
 	}
@@ -329,6 +341,9 @@ func do_close(ch *Character, arguments string) {
 
 	if direction, ok := DirectionFromString(args); ok {
 		exit = ch.Room.getExit(direction)
+		if !exit.Visible(ch) {
+			exit = nil
+		}
 	} else {
 		obj := ch.FindObjectOnSelf(args)
 
@@ -410,6 +425,9 @@ func do_open(ch *Character, arguments string) {
 
 	if direction, ok := DirectionFromString(args); ok {
 		exit = ch.Room.getExit(direction)
+		if !exit.Visible(ch) {
+			exit = nil
+		}
 	} else {
 		obj := ch.FindObjectOnSelf(args)
 
