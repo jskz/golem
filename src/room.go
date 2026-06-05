@@ -122,63 +122,98 @@ func (room *Room) Visible(viewer *Character) bool {
 	return true
 }
 
+func (room *Room) planarLayer() (*MapGrid, bool) {
+	if room == nil || room.Flags&ROOM_PLANAR == 0 || room.Plane == nil || room.Plane.Map == nil {
+		return nil, false
+	}
+
+	if room.Z < 0 || room.Z >= len(room.Plane.Map.Layers) {
+		return nil, false
+	}
+
+	layer := room.Plane.Map.Layers[room.Z]
+	if layer == nil {
+		return nil, false
+	}
+
+	return layer, true
+}
+
+func (room *Room) samePlanarLayer(other *Room) bool {
+	if room == nil || other == nil {
+		return false
+	}
+
+	return room.Flags&ROOM_PLANAR != 0 &&
+		other.Flags&ROOM_PLANAR != 0 &&
+		room.Plane != nil &&
+		room.Plane == other.Plane &&
+		room.Z == other.Z
+}
+
+func (room *Room) notifyPlaneEnter(ch *Character, previousRoom *Room) {
+	layer, ok := room.planarLayer()
+	if !ok {
+		return
+	}
+
+	for _, obs := range layer.Observers {
+		if obs.Rect == nil || obs.OnEnterCallback == nil {
+			continue
+		}
+
+		if !obs.Rect.Contains(float64(room.X), float64(room.Y)) {
+			continue
+		}
+
+		if room.samePlanarLayer(previousRoom) && obs.Rect.Contains(float64(previousRoom.X), float64(previousRoom.Y)) {
+			continue
+		}
+
+		obs.OnEnterCallback(room.Game.vm.ToValue(ch))
+	}
+}
+
+func (room *Room) notifyPlaneLeave(ch *Character, destination *Room) {
+	layer, ok := room.planarLayer()
+	if !ok {
+		return
+	}
+
+	for _, obs := range layer.Observers {
+		if obs.Rect == nil || obs.OnLeaveCallback == nil {
+			continue
+		}
+
+		if !obs.Rect.Contains(float64(room.X), float64(room.Y)) {
+			continue
+		}
+
+		if room.samePlanarLayer(destination) && obs.Rect.Contains(float64(destination.X), float64(destination.Y)) {
+			continue
+		}
+
+		obs.OnLeaveCallback(room.Game.vm.ToValue(ch))
+	}
+}
+
 func (room *Room) AddCharacter(ch *Character) {
+	previousRoom := ch.moveOrigin
+	if previousRoom == nil && len(ch.Trail) > 0 {
+		previousRoom = ch.Trail[0]
+	}
+	ch.moveOrigin = nil
+
 	room.Characters.Insert(ch)
 	ch.Room = room
 
-	if room.Flags&ROOM_PLANAR != 0 && room.Plane != nil {
+	if layer, ok := room.planarLayer(); ok {
 		ch.PlaneIndex = &Point{X: float64(room.X), Y: float64(room.Y), Value: ch}
-		room.Plane.Map.Layers[room.Z].Atlas.CharacterTree.Insert(ch.PlaneIndex)
-
-		for _, obs := range room.Plane.Map.Layers[room.Z].Observers {
-			// If this obs does not contain the room, skip
-			if !obs.Rect.Contains(float64(room.X), float64(room.Y)) {
-				continue
-			}
-
-			var entering bool = true
-			var previousRoom *Room = nil
-
-			if len(ch.Trail) > 1 {
-				previousRoom = ch.Trail[0]
-			}
-
-			if previousRoom != nil {
-				if previousRoom.Flags&ROOM_PLANAR == 0 || previousRoom.Plane != room.Plane {
-					entering = true
-				} else if obs.Rect.Contains(float64(previousRoom.X), float64(previousRoom.Y)) && obs.Rect.Contains(float64(room.X), float64(room.Y)) {
-					entering = false
-				}
-			}
-
-			if entering {
-				obs.OnEnterCallback(room.Game.vm.ToValue(ch))
-			}
+		if layer.Atlas != nil && layer.Atlas.CharacterTree != nil {
+			layer.Atlas.CharacterTree.Insert(ch.PlaneIndex)
 		}
 
-		var previousRoom *Room = nil
-
-		if len(ch.Trail) > 1 {
-			previousRoom = ch.Trail[0]
-		}
-
-		if previousRoom != nil {
-			if previousRoom.Flags&ROOM_PLANAR != 0 {
-				for _, obs := range previousRoom.Plane.Map.Layers[previousRoom.Z].Observers {
-					var leaving bool = false
-
-					if previousRoom.Flags&ROOM_PLANAR == 0 || previousRoom.Plane != room.Plane {
-						leaving = true
-					} else if obs.Rect.Contains(float64(previousRoom.X), float64(previousRoom.Y)) && !obs.Rect.Contains(float64(room.X), float64(room.Y)) {
-						leaving = true
-					}
-
-					if leaving {
-						obs.OnLeaveCallback(room.Game.vm.ToValue(ch))
-					}
-				}
-			}
-		}
+		room.notifyPlaneEnter(ch, previousRoom)
 	}
 
 	trail := make([]*Room, 0)
@@ -192,12 +227,32 @@ func (room *Room) AddCharacter(ch *Character) {
 	ch.Trail = trail
 }
 
+func (room *Room) moveCharacter(ch *Character, destination *Room) {
+	if destination == nil {
+		room.removeCharacter(ch)
+		return
+	}
+
+	room.removeCharacterForMove(ch, destination)
+	destination.AddCharacter(ch)
+}
+
 func (room *Room) removeCharacter(ch *Character) {
+	room.removeCharacterForMove(ch, nil)
+	ch.moveOrigin = nil
+}
+
+func (room *Room) removeCharacterForMove(ch *Character, destination *Room) {
 	room.Characters.Remove(ch)
+	ch.moveOrigin = room
 
 	// If the origin room was planar, remove this character from its atlas' character lookup quadtree
-	if room.Flags&ROOM_PLANAR != 0 && room.Plane != nil {
-		room.Plane.Map.Layers[room.Z].Atlas.CharacterTree.Remove(ch.PlaneIndex)
+	if layer, ok := room.planarLayer(); ok {
+		if ch.PlaneIndex != nil && layer.Atlas != nil && layer.Atlas.CharacterTree != nil {
+			layer.Atlas.CharacterTree.Remove(ch.PlaneIndex)
+		}
+		ch.PlaneIndex = nil
+		room.notifyPlaneLeave(ch, destination)
 	}
 
 	ch.Room = nil

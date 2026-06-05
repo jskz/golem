@@ -177,9 +177,10 @@ type Character struct {
 	outputLines  int
 	inputCursor  int
 
-	PlaneIndex *Point          `json:"planeIndex"`
-	Trail      []*Room         `json:"trail"`
-	Room       *Room           `json:"room"`
+	PlaneIndex *Point  `json:"planeIndex"`
+	Trail      []*Room `json:"trail"`
+	Room       *Room   `json:"room"`
+	moveOrigin *Room
 	Combat     *Combat         `json:"combat"`
 	Fighting   *Character      `json:"fighting"`
 	Casting    *CastingContext `json:"casting"`
@@ -1813,6 +1814,7 @@ func NewCharacter() *Character {
 	character.Room = nil
 	character.Trail = make([]*Room, 0)
 	character.PlaneIndex = nil
+	character.moveOrigin = nil
 	character.Wiznet = false
 	character.Practices = 0
 	character.Position = PositionDead

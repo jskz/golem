@@ -482,6 +482,16 @@ func do_flee(ch *Character, arguments string) {
 
 	var choice int = rand.Intn(len(exits))
 	var chosenEscape *Exit = exits[choice]
+	destination := chosenEscape.To
+
+	if destination.Plane != nil && destination.Flags&ROOM_PLANAR != 0 {
+		destination = destination.Plane.MaterializeRoom(destination.X, destination.Y, destination.Z, true)
+		if destination == nil {
+			ch.Send("{RYou panic and attempt to flee, but can't get away!{x\r\n")
+			return
+		}
+		chosenEscape.To = destination
+	}
 
 	ch.Send(fmt.Sprintf("{RYou panic and flee %s!{x\r\n", ExitName[chosenEscape.Direction]))
 
@@ -504,13 +514,7 @@ func do_flee(ch *Character, arguments string) {
 	ch.Fighting = nil
 	ch.Combat = nil
 
-	ch.Room.removeCharacter(ch)
-
-	if chosenEscape.To.Plane != nil && chosenEscape.To.Flags&ROOM_PLANAR != 0 {
-		chosenEscape.To = chosenEscape.To.Plane.MaterializeRoom(chosenEscape.To.X, chosenEscape.To.Y, chosenEscape.To.Z, true)
-	}
-
-	chosenEscape.To.AddCharacter(ch)
+	ch.Room.moveCharacter(ch, destination)
 
 	/* Announce player's arrival to all other players in the new room */
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {

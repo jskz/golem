@@ -546,8 +546,7 @@ func do_goto(ch *Character, arguments string) {
 		}
 
 		if ch.Room != nil {
-			ch.Room.removeCharacter(ch)
-			destination.AddCharacter(ch)
+			ch.Room.moveCharacter(ch, destination)
 
 			for iter := destination.Characters.Head; iter != nil; iter = iter.Next {
 				character := iter.Value.(*Character)
@@ -602,10 +601,10 @@ func do_goto(ch *Character, arguments string) {
 			}
 		}
 
-		ch.Room.removeCharacter(ch)
+		ch.Room.moveCharacter(ch, room)
+	} else {
+		room.AddCharacter(ch)
 	}
-
-	room.AddCharacter(ch)
 
 	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)

@@ -268,7 +268,20 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	// Is the exit closed, etc.
 	from := ch.Room
-	from.removeCharacter(ch)
+	destination := exit.To
+
+	// If destination room is planar, then try to fully materialize on the room that the player is about to move into
+	if destination.Flags&ROOM_PLANAR != 0 {
+		destination = destination.Plane.MaterializeRoom(destination.X, destination.Y, destination.Z, true)
+		if destination == nil {
+			ch.Stamina += MovementCost
+			ch.Send("{RAlas, you cannot go that way.{x\r\n")
+			return false
+		}
+		exit.To = destination
+	}
+
+	from.moveCharacter(ch, destination)
 	for iter := from.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 		character.Send(fmt.Sprintf("{W%s{W leaves %s.{x\r\n", ch.GetShortDescriptionUpper(character), ExitName[direction]))
@@ -278,13 +291,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		from.script.tryEvaluate("onRoomLeave", ch.Game.vm.ToValue(from), ch.Game.vm.ToValue(ch))
 	}
 
-	// If destination room is planar, then try to fully materialize on the room that the player is about to move into
-	if exit.To.Flags&ROOM_PLANAR != 0 {
-		exit.To = exit.To.Plane.MaterializeRoom(exit.To.X, exit.To.Y, exit.To.Z, true)
-	}
-
-	exit.To.AddCharacter(ch)
-	for iter := exit.To.Characters.Head; iter != nil; iter = iter.Next {
+	for iter := destination.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 		if character != ch {
 			character.Send(fmt.Sprintf("{W%s{W arrives from %s.{x\r\n", ch.GetShortDescriptionUpper(character), ExitName[ReverseDirection[direction]]))
@@ -293,7 +300,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	do_look(ch, "")
 
-	if exit.To == from {
+	if destination == from {
 		return true
 	}
 
@@ -306,12 +313,12 @@ func (ch *Character) move(direction uint, follow bool) bool {
 		}
 	}
 
-	if exit.To.script != nil {
-		exit.To.script.tryEvaluate("onRoomEnter", ch.Game.vm.ToValue(exit.To), ch.Game.vm.ToValue(ch))
+	if destination.script != nil {
+		destination.script.tryEvaluate("onRoomEnter", ch.Game.vm.ToValue(destination), ch.Game.vm.ToValue(ch))
 	}
 
 	/* Aggro check... */
-	for iter := exit.To.Characters.Head; iter != nil; iter = iter.Next {
+	for iter := destination.Characters.Head; iter != nil; iter = iter.Next {
 		character := iter.Value.(*Character)
 
 		if character != ch {
