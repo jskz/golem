@@ -27,7 +27,8 @@ func (game *Game) characterUpdate() {
 
 			if fx.Duration != EffectDurationPermanent && int(time.Since(fx.CreatedAt).Seconds()) >= fx.Duration {
 				if fx.OnComplete != nil {
-					_, err := (*fx.OnComplete)(game.vm.ToValue(ch))
+					affected := game.vm.ToValue(ch)
+					_, err := (*fx.OnComplete)(affected, affected)
 					if err != nil {
 						log.Println(err)
 					}

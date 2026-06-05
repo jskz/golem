@@ -46,15 +46,23 @@ function do_stun(ch, args) {
         ch.level,
         0,
         0,
-        function() {
-            victim.send("{YYour senses recover and you are no longer stunned.{x\r\n");
+        function(affected) {
+            if (!affected) {
+                return;
+            }
 
-            for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+            affected.send("{YYour senses recover and you are no longer stunned.{x\r\n");
+
+            if (!affected.room) {
+                return;
+            }
+
+            for (let iter = affected.room.characters.head; iter !== null; iter = iter.next) {
                 const rch = iter.value;
 
-                if (!rch.isEqual(victim)) {
+                if (!rch.isEqual(affected)) {
                     rch.send(
-                        '{Y' + victim.getShortDescriptionUpper(rch) +
+                        '{Y' + affected.getShortDescriptionUpper(rch) +
                             '{Y returns to their senses.{x\r\n'
                     );
                 }

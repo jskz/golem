@@ -26,16 +26,24 @@ function spell_sanctuary(ch, args) {
         ch.level,
         0,
         0,
-        function() {
-            target.send("{WYour holy protection has worn off.{x\r\n");
+        function(affected) {
+            if (!affected) {
+                return;
+            }
 
-            for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+            affected.send("{WYour holy protection has worn off.{x\r\n");
+
+            if (!affected.room) {
+                return;
+            }
+
+            for (let iter = affected.room.characters.head; iter !== null; iter = iter.next) {
                 const rch = iter.value;
 
-                if (!rch.isEqual(target)) {
+                if (!rch.isEqual(affected)) {
                     rch.send(
                         '{WThe protective aura surrounding ' +
-                            target.getShortDescription(rch) +
+                            affected.getShortDescription(rch) +
                             ' fades and va{wnishes.{x\r\n'
                     );
                 }

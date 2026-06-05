@@ -26,16 +26,24 @@ function spell_haste(ch, args) {
         ch.level,
         0,
         0,
-        function() {
-            target.send("{DYou slow down and begin to move normally again.{x\r\n");
+        function(affected) {
+            if (!affected) {
+                return;
+            }
 
-            for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+            affected.send("{DYou slow down and begin to move normally again.{x\r\n");
+
+            if (!affected.room) {
+                return;
+            }
+
+            for (let iter = affected.room.characters.head; iter !== null; iter = iter.next) {
                 const rch = iter.value;
 
-                if (!rch.isEqual(target)) {
+                if (!rch.isEqual(affected)) {
                     rch.send(
                         '{D' +
-                            target.getShortDescriptionUpper(rch) +
+                            affected.getShortDescriptionUpper(rch) +
                             ' slows down and begins to move normally again.{x\r\n'
                     );
                 }

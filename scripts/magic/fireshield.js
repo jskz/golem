@@ -26,16 +26,24 @@ function spell_fireshield(ch, args) {
         ch.level,
         0,
         0,
-        function() {
-            target.send("{RYour reactive fireshield vanishes.{x\r\n");
+        function(affected) {
+            if (!affected) {
+                return;
+            }
 
-            for (let iter = ch.room.characters.head; iter !== null; iter = iter.next) {
+            affected.send("{RYour reactive fireshield vanishes.{x\r\n");
+
+            if (!affected.room) {
+                return;
+            }
+
+            for (let iter = affected.room.characters.head; iter !== null; iter = iter.next) {
                 const rch = iter.value;
 
-                if (!rch.isEqual(target)) {
+                if (!rch.isEqual(affected)) {
                     rch.send(
                         '{RThe reactive fireshield surrounding ' +
-                            target.getShortDescription(rch) +
+                            affected.getShortDescription(rch) +
                             ' {Rsputters and dies.{x\r\n'
                     );
                 }
