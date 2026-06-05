@@ -1182,13 +1182,13 @@ func do_drop(ch *Character, arguments string) {
 		if found != nil {
 			amount += found.Value0
 
-			ch.Room.Objects.Remove(found)
+			ch.Room.removeObject(found)
 			ch.Game.Objects.Remove(found)
 
 			gold = ch.Game.CreateGold(amount)
 		}
 
-		ch.Room.Objects.Insert(gold)
+		ch.Room.AddObject(gold)
 		ch.Game.Objects.Insert(gold)
 
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
