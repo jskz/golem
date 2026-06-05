@@ -34,6 +34,121 @@ func (combat *Combat) hasParticipant(ch *Character) bool {
 	return false
 }
 
+func (combat *Combat) addParticipant(ch *Character) {
+	if combat == nil || ch == nil {
+		return
+	}
+
+	if !combat.hasParticipant(ch) {
+		combat.Participants = append(combat.Participants, ch)
+	}
+
+	ch.Combat = combat
+}
+
+func (combat *Combat) removeParticipant(ch *Character) bool {
+	if combat == nil || ch == nil {
+		return false
+	}
+
+	participants := make([]*Character, 0, len(combat.Participants))
+	removed := false
+
+	for _, participant := range combat.Participants {
+		if participant != nil && participant.IsEqual(ch) {
+			removed = true
+			continue
+		}
+
+		participants = append(participants, participant)
+	}
+
+	if removed {
+		combat.Participants = participants
+		if ch.Combat == combat {
+			ch.Combat = nil
+		}
+	}
+
+	return removed
+}
+
+func (game *Game) combatForCharacter(ch *Character) *Combat {
+	if game == nil || game.Fights == nil || ch == nil {
+		return nil
+	}
+
+	if ch.Combat != nil && game.Fights.Contains(ch.Combat) {
+		return ch.Combat
+	}
+
+	for iter := game.Fights.Head; iter != nil; iter = iter.Next {
+		combat := iter.Value.(*Combat)
+		if combat.hasParticipant(ch) {
+			return combat
+		}
+	}
+
+	return nil
+}
+
+// AddCombatParticipant keeps Combat.Participants and Character.Combat in sync.
+func (game *Game) AddCombatParticipant(combat *Combat, ch *Character) {
+	if combat == nil || ch == nil {
+		return
+	}
+
+	if game != nil && game.Fights != nil {
+		for iter := game.Fights.Head; iter != nil; iter = iter.Next {
+			existing := iter.Value.(*Combat)
+			if existing == combat {
+				continue
+			}
+
+			existing.removeParticipant(ch)
+		}
+	}
+
+	combat.addParticipant(ch)
+}
+
+func (game *Game) reconcileCombatParticipants(combat *Combat) {
+	if combat == nil {
+		return
+	}
+
+	participants := append([]*Character(nil), combat.Participants...)
+	for _, participant := range participants {
+		if participant == nil {
+			continue
+		}
+
+		if participant.Combat != nil && participant.Combat != combat {
+			combat.removeParticipant(participant)
+			continue
+		}
+
+		game.AddCombatParticipant(combat, participant)
+	}
+}
+
+func (game *Game) combatForAttack(ch *Character, target *Character) *Combat {
+	combat := game.combatForCharacter(target)
+	if combat == nil {
+		combat = &Combat{
+			StartedAt: time.Now(),
+			Room:      ch.Room,
+		}
+		ch.Game.Fights.Insert(combat)
+	}
+
+	game.reconcileCombatParticipants(combat)
+	game.AddCombatParticipant(combat, ch)
+	game.AddCombatParticipant(combat, target)
+
+	return combat
+}
+
 const (
 	DamageTypeBash   = 0
 	DamageTypeSlash  = 1
@@ -311,6 +426,14 @@ func (game *Game) combatUpdate() {
 
 func (game *Game) DisposeCombat(combat *Combat) {
 	for _, vch := range combat.Participants {
+		if vch == nil {
+			continue
+		}
+
+		if vch.Combat != nil && vch.Combat != combat {
+			continue
+		}
+
 		vch.Combat = nil
 		vch.Fighting = nil
 	}
@@ -429,17 +552,12 @@ func do_kill(ch *Character, arguments string) {
 		return
 	}
 
-	combat := &Combat{}
-	combat.StartedAt = time.Now()
-	combat.Room = ch.Room
-	combat.Participants = []*Character{ch, target}
-	ch.Game.Fights.Insert(combat)
+	ch.Game.combatForAttack(ch, target)
 
 	ch.Fighting = target
 
 	if target.Fighting == nil {
 		target.Fighting = ch
-		target.Combat = combat
 	}
 
 	ch.Send(fmt.Sprintf("\r\n{GYou begin attacking %s{G!{x\r\n", target.GetShortDescription(ch)))

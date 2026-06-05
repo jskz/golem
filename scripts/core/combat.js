@@ -155,19 +155,23 @@ function onCombatUpdate() {
                             const gch = iter.value;
 
                             if(!gch.fighting && vch.room && gch.room && vch.room.isEqual(gch.room)) {
+                                const combat = victim.combat || vch.combat;
+                                if(!combat) {
+                                    continue;
+                                }
+
                                 gch.send('{WYou start attacking ' + vch.getShortDescription(gch) + '{W in defense of ' + victim.getShortDescription(gch) + "{W!{x\r\n");
                                 gch.fighting = vch;
-                                gch.combat = victim.combat;
-
-                                if(gch.combat && gch.combat.participants) {
-                                    gch.combat.participants.push(gch);
-                                }
+                                this.addCombatParticipant(combat, victim);
+                                this.addCombatParticipant(combat, gch);
                             }
                         }
                     } else {
                         if(!victim.fighting || !victim.combat) {
                             victim.fighting = vch;
-                            victim.combat = vch.combat;
+                            if(vch.combat) {
+                                this.addCombatParticipant(vch.combat, victim);
+                            }
                         }
                     }
 
