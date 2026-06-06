@@ -402,12 +402,18 @@ func (game *Game) FixExits() error {
 
 		exit.To, err = game.LoadRoomIndex(uint(record.toRoomId))
 		if err != nil {
-			continue
+			return fmt.Errorf("failed to load destination room %d for exit %d: %w", record.toRoomId, exit.Id, err)
+		}
+		if exit.To == nil {
+			return fmt.Errorf("exit %d references missing or deleted destination room %d", exit.Id, record.toRoomId)
 		}
 
 		exit.Room, err = game.LoadRoomIndex(uint(record.roomId))
 		if err != nil {
-			continue
+			return fmt.Errorf("failed to load source room %d for exit %d: %w", record.roomId, exit.Id, err)
+		}
+		if exit.Room == nil {
+			return fmt.Errorf("exit %d references missing or deleted source room %d", exit.Id, record.roomId)
 		}
 
 		exit.Room.Exit[exit.Direction] = exit

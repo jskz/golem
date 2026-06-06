@@ -434,6 +434,12 @@ func (game *Game) LoadResets() error {
 
 	defer rows.Close()
 
+	resetEnumToUintType := map[string]uint{
+		"mobile": ResetTypeMobile,
+		"room":   ResetTypeRoom,
+		"object": ResetTypeObject,
+	}
+
 	for rows.Next() {
 		reset := &Reset{}
 
@@ -447,37 +453,31 @@ func (game *Game) LoadResets() error {
 			continue
 		}
 
-		for iter := game.Zones.Head; iter != nil; iter = iter.Next {
-			zone := iter.Value.(*Zone)
-
-			if zone.Id == zoneId {
-				room, err := game.LoadRoomIndex(roomId)
-				if err != nil {
-					return err
-				}
-
-				//`type` ENUM('mobile', 'room', 'object')
-				var resetEnumToUintType = map[string]uint{
-					"mobile": ResetTypeMobile,
-					"room":   ResetTypeRoom,
-					"object": ResetTypeObject,
-				}
-
-				var ok bool
-
-				reset.ResetType, ok = resetEnumToUintType[resetType]
-				if !ok {
-					break
-				}
-
-				reset.Zone = zone
-				reset.Room = room
-
-				room.Resets.Insert(reset)
-
-				resetCount++
-			}
+		zone := game.FindZoneByID(zoneId)
+		if zone == nil {
+			return fmt.Errorf("reset %d references missing or deleted zone %d", reset.Id, zoneId)
 		}
+
+		room, err := game.LoadRoomIndex(roomId)
+		if err != nil {
+			return fmt.Errorf("failed to load room %d for reset %d: %w", roomId, reset.Id, err)
+		}
+		if room == nil {
+			return fmt.Errorf("reset %d references missing or deleted room %d", reset.Id, roomId)
+		}
+
+		var ok bool
+		reset.ResetType, ok = resetEnumToUintType[resetType]
+		if !ok {
+			continue
+		}
+
+		reset.Zone = zone
+		reset.Room = room
+
+		room.Resets.Insert(reset)
+
+		resetCount++
 	}
 
 	if err := rows.Err(); err != nil {
