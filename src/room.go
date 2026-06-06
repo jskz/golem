@@ -74,6 +74,7 @@ func (room *Room) AddObject(obj *ObjectInstance) {
 	obj.Inside = nil
 	obj.CarriedBy = nil
 	obj.InRoom = room
+	obj.WearLocation = -1
 }
 
 func (room *Room) removeObject(obj *ObjectInstance) {

@@ -684,6 +684,7 @@ func (container *ObjectInstance) AddObject(obj *ObjectInstance) {
 	obj.Inside = container
 	obj.CarriedBy = nil
 	obj.InRoom = nil
+	obj.WearLocation = -1
 }
 
 func (container *ObjectInstance) removeObject(obj *ObjectInstance) {

@@ -1147,7 +1147,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 
 		obj.CreatedAt = objectCreatedAtFromUnix(createdAt)
 		obj.Ttl = normalizeObjectTtl(obj.Flags, obj.Ttl)
-		ch.AddObject(obj)
+		ch.addObject(obj, true)
 	}
 
 	if err := rows.Err(); err != nil {
@@ -1578,11 +1578,18 @@ func (ch *Character) getLongDescription(viewer *Character) string {
 }
 
 func (ch *Character) AddObject(obj *ObjectInstance) {
+	ch.addObject(obj, false)
+}
+
+func (ch *Character) addObject(obj *ObjectInstance, preserveWearLocation bool) {
 	ch.Inventory.Insert(obj)
 
 	obj.CarriedBy = ch
 	obj.InRoom = nil
 	obj.Inside = nil
+	if !preserveWearLocation {
+		obj.WearLocation = -1
+	}
 }
 
 func (ch *Character) RemoveObject(obj *ObjectInstance) {
