@@ -78,10 +78,11 @@ func (obj *ObjectInstance) Sync() error {
 			value_2 = ?,
 			value_3 = ?,
 			value_4 = ?,
+			weight = ?,
 			ttl = ?
 		WHERE
 			id = ?
-	`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.ParentId)
+	`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.GetWeight(), obj.Ttl, obj.ParentId)
 	if err != nil {
 		return err
 	}

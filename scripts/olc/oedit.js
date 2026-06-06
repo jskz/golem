@@ -21,7 +21,7 @@ function do_oedit(ch, args) {
 
 {GThe following attributes are available:{g
   name short_description long_description item_type
-  ttl value0 value1 value2 value3
+  ttl weight value0 value1 value2 value3
 {x`);
     }
 
@@ -115,6 +115,17 @@ function do_oedit(ch, args) {
                 }
 
                 target.ttl = ttl;
+                ch.send("Ok.\r\n");
+                break;
+
+            case 'weight':
+                const weight = parseFloat(xxs);
+                if (isNaN(weight) || weight < 0) {
+                    ch.send("Object weight must be a non-negative number.\r\n");
+                    return;
+                }
+
+                target.weight = weight;
                 ch.send("Ok.\r\n");
                 break;
 

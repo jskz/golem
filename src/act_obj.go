@@ -129,6 +129,7 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 
 	output.WriteString(fmt.Sprintf("{cObject {C'%s'{c is type {C%s{c with flags {C%s{c.\r\n", obj.Name, obj.ItemType, obj.GetFlagsString()))
 	output.WriteString(fmt.Sprintf("{C%s{x\r\n", obj.Description))
+	output.WriteString(fmt.Sprintf("{Y* {C%s{c weighs {C%.1f{c lbs.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.GetWeight()))
 
 	if obj.Flags&ITEM_DECAYS != 0 {
 		now := time.Now()
@@ -255,8 +256,6 @@ func do_equipment(ch *Character, arguments string) {
 }
 
 func do_inventory(ch *Character, arguments string) {
-	var weightTotal float64 = 0.0
-
 	ch.Send("\r\n{YYour current inventory:{x\r\n")
 	ch.listObjects(ch.Inventory, false, true)
 
@@ -272,7 +271,7 @@ func do_inventory(ch *Character, arguments string) {
 	ch.Send(fmt.Sprintf("{xTotal: %d/%d items, %0.1f/%.1f lbs.\r\n",
 		ch.Inventory.Count,
 		ch.getMaxItemsInventory(),
-		weightTotal,
+		ch.getCarryWeight(),
 		ch.getMaxCarryWeight()))
 }
 
@@ -725,6 +724,11 @@ func do_put(ch *Character, arguments string) {
 
 	if placingIn.ensureContents().Count+1 > placingIn.Value0 {
 		ch.Send(fmt.Sprintf("No more items will fit inside %s.\r\n", placingIn.GetShortDescription(ch)))
+		return
+	}
+
+	if placingIn.GetContentsWeight()+placingObj.GetTotalWeight() > float64(placingIn.Value1) {
+		ch.Send(fmt.Sprintf("%s{x can't hold that much weight.\r\n", placingIn.GetShortDescriptionUpper(ch)))
 		return
 	}
 

@@ -31,6 +31,7 @@ type Object struct {
 	Value1 int
 	Value2 int
 	Value3 int
+	Weight float64
 	Ttl    int
 }
 
@@ -53,10 +54,11 @@ type ObjectInstance struct {
 
 	WearLocation int `json:"wearLocation"`
 
-	Value0 int `json:"value0"`
-	Value1 int `json:"value1"`
-	Value2 int `json:"value2"`
-	Value3 int `json:"value3"`
+	Value0 int     `json:"value0"`
+	Value1 int     `json:"value1"`
+	Value2 int     `json:"value2"`
+	Value3 int     `json:"value3"`
+	Weight float64 `json:"weight"`
 
 	CreatedAt time.Time `json:"createdAt"`
 	Ttl       int       `json:"ttl"`
@@ -226,6 +228,7 @@ func (game *Game) objectInstanceFromIndex(obj *Object) *ObjectInstance {
 		Value1:           obj.Value1,
 		Value2:           obj.Value2,
 		Value3:           obj.Value3,
+		Weight:           normalizeObjectWeight(obj.Weight),
 		Ttl:              normalizeObjectTtl(obj.Flags, obj.Ttl),
 	}
 
@@ -269,6 +272,7 @@ func (game *Game) CreateGold(amount int) *ObjectInstance {
 			Flags:            ITEM_TAKE,
 			WearLocation:     0,
 			Value0:           amount,
+			Weight:           normalizeObjectWeight(obj.Weight),
 		}
 
 		return objectInstance
@@ -292,6 +296,7 @@ func (game *Game) CreateGold(amount int) *ObjectInstance {
 		Flags:            ITEM_TAKE,
 		WearLocation:     0,
 		Value0:           amount,
+		Weight:           normalizeObjectWeight(obj.Weight),
 	}
 
 	return objectInstance
@@ -339,6 +344,7 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 			value_2,
 			value_3,
 			value_4,
+			weight,
 			ttl
 		FROM
 			objects
@@ -359,7 +365,7 @@ func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {
 
 	for rows.Next() {
 		obj := &Object{}
-		err := rows.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3, &obj.Ttl)
+		err := rows.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3, &obj.Weight, &obj.Ttl)
 
 		if err != nil {
 			if err == sql.ErrNoRows {
@@ -393,6 +399,7 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 			value_2,
 			value_3,
 			value_4,
+			weight,
 			ttl
 		FROM
 			objects
@@ -403,7 +410,7 @@ func (game *Game) LoadObjectIndex(index uint) (*Object, error) {
 	`, index)
 
 	obj := &Object{}
-	err := row.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3, &obj.Ttl)
+	err := row.Scan(&obj.Id, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3, &obj.Weight, &obj.Ttl)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
@@ -451,6 +458,44 @@ func (obj *ObjectInstance) Visible(viewer *Character) bool {
 	return true
 }
 
+func normalizeObjectWeight(weight float64) float64 {
+	if weight < 0 {
+		return 0
+	}
+
+	return weight
+}
+
+func (obj *ObjectInstance) GetWeight() float64 {
+	if obj == nil {
+		return 0
+	}
+
+	return normalizeObjectWeight(obj.Weight)
+}
+
+func (obj *ObjectInstance) GetContentsWeight() float64 {
+	if obj == nil || obj.Contents == nil {
+		return 0
+	}
+
+	var total float64
+	for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
+		containedObject := iter.Value.(*ObjectInstance)
+		total += containedObject.GetTotalWeight()
+	}
+
+	return total
+}
+
+func (obj *ObjectInstance) GetTotalWeight() float64 {
+	if obj == nil {
+		return 0
+	}
+
+	return obj.GetWeight() + obj.GetContentsWeight()
+}
+
 func (obj *ObjectInstance) reifyTx(ctx context.Context, tx *sql.Tx) ([]*ObjectInstance, error) {
 	return obj.reifyInContainerTx(ctx, tx, nil)
 }
@@ -472,10 +517,10 @@ func (obj *ObjectInstance) reifyInContainerTx(ctx context.Context, tx *sql.Tx, c
 
 		result, err := tx.ExecContext(ctx, `
 			INSERT INTO
-				object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4, ttl, created_at)
+				object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4, weight, ttl, created_at)
 			VALUES
-				(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-		`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.CreatedAt)
+				(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.GetWeight(), obj.Ttl, obj.CreatedAt)
 		if err != nil {
 			log.Printf("Failed to finalize new object: %v.\r\n", err)
 			return reified, err
@@ -631,10 +676,10 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 
 	result, err := obj.Game.db.Exec(`
 		INSERT INTO
-			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4, ttl, created_at)
+			object_instances(parent_id, inside_object_instance_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4, weight, ttl, created_at)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.CreatedAt)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, obj.ParentId, insideObjectInstanceId, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.Flags, obj.ItemType, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.GetWeight(), obj.Ttl, obj.CreatedAt)
 	if err != nil {
 		log.Printf("Failed to finalize new object: %v.\r\n", err)
 		return err

@@ -1059,12 +1059,13 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 					value_2 = ?,
 					value_3 = ?,
 					value_4 = ?,
+					weight = ?,
 					ttl = ?,
 					created_at = ?,
 					inside_object_instance_id = ?
 				WHERE
 					id = ?
-			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.CreatedAt, obj.Inside.Id, obj.Id)
+			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.GetWeight(), obj.Ttl, obj.CreatedAt, obj.Inside.Id, obj.Id)
 		} else {
 			_, err = tx.ExecContext(ctx, `
 				UPDATE
@@ -1080,12 +1081,13 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 					value_2 = ?,
 					value_3 = ?,
 					value_4 = ?,
+					weight = ?,
 					ttl = ?,
 					created_at = ?,
 					inside_object_instance_id = NULL
 				WHERE
 					id = ?
-			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.Ttl, obj.CreatedAt, obj.Id)
+			`, obj.Name, obj.ShortDescription, obj.LongDescription, obj.Description, obj.WearLocation, obj.Flags, obj.Value0, obj.Value1, obj.Value2, obj.Value3, obj.GetWeight(), obj.Ttl, obj.CreatedAt, obj.Id)
 		}
 
 		if err != nil {
@@ -1119,6 +1121,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			object_instances.value_2,
 			object_instances.value_3,
 			object_instances.value_4,
+			object_instances.weight,
 			object_instances.ttl,
 			CAST(strftime('%s', object_instances.created_at) AS INTEGER)
 		FROM
@@ -1148,7 +1151,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 		}
 
 		var createdAt sql.NullInt64
-		err = rows.Scan(&obj.Id, &obj.ParentId, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.WearLocation, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3, &obj.Ttl, &createdAt)
+		err = rows.Scan(&obj.Id, &obj.ParentId, &obj.Name, &obj.ShortDescription, &obj.LongDescription, &obj.Description, &obj.Flags, &obj.ItemType, &obj.WearLocation, &obj.Value0, &obj.Value1, &obj.Value2, &obj.Value3, &obj.Weight, &obj.Ttl, &createdAt)
 		if err != nil {
 			return err
 		}
@@ -1179,6 +1182,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 				object_instances.value_2,
 				object_instances.value_3,
 				object_instances.value_4,
+				object_instances.weight,
 				object_instances.ttl,
 				CAST(strftime('%s', object_instances.created_at) AS INTEGER)
 			FROM
@@ -1202,7 +1206,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 			}
 
 			var createdAt sql.NullInt64
-			err = rows.Scan(&containedObj.Id, &containedObj.ParentId, &containedObj.Name, &containedObj.ShortDescription, &containedObj.LongDescription, &containedObj.Description, &containedObj.Flags, &containedObj.ItemType, &containedObj.Value0, &containedObj.Value1, &containedObj.Value2, &containedObj.Value3, &containedObj.Ttl, &createdAt)
+			err = rows.Scan(&containedObj.Id, &containedObj.ParentId, &containedObj.Name, &containedObj.ShortDescription, &containedObj.LongDescription, &containedObj.Description, &containedObj.Flags, &containedObj.ItemType, &containedObj.Value0, &containedObj.Value1, &containedObj.Value2, &containedObj.Value3, &containedObj.Weight, &containedObj.Ttl, &createdAt)
 			if err != nil {
 				return err
 			}
@@ -1539,6 +1543,20 @@ func (ch *Character) getMaxItemsInventory() int {
 
 func (ch *Character) getMaxCarryWeight() float64 {
 	return 200.0
+}
+
+func (ch *Character) getCarryWeight() float64 {
+	if ch == nil || ch.Inventory == nil {
+		return 0
+	}
+
+	var total float64
+	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+		total += obj.GetTotalWeight()
+	}
+
+	return total
 }
 
 func (ch *Character) GetShortDescription(viewer *Character) string {
