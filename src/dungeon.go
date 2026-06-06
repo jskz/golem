@@ -30,6 +30,11 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 		return nil
 	}
 
+	if !validMazeDimensions(dungeonWidth, dungeonHeight) {
+		log.Printf("Cannot generate dungeon with invalid dimensions %dx%d; minimum dimensions are %dx%d.\r\n", dungeonWidth, dungeonHeight, minMazeDimension, minMazeDimension)
+		return nil
+	}
+
 	var previousFloorExit *Room = nil
 	log.Printf("Generating a %d floor dungeon of dimensions %dx%d\r\n", floorCount, dungeonWidth, dungeonHeight)
 
@@ -104,6 +109,10 @@ func (game *Game) GenerateDungeon(floorCount int, dungeonWidth int, dungeonHeigh
 
 		log.Printf("Finished generating floor %d, start at (%d, %d) end at (%d, %d): %d difficulty.\r\n", i+1, floor.EntryX, floor.EntryY, floor.EndX, floor.EndY, fScore)
 		dungeon.Floors = append(dungeon.Floors, floor)
+	}
+
+	if len(dungeon.Floors) < 1 {
+		return nil
 	}
 
 	dungeon.Entrance = dungeon.Floors[0].Grid[dungeon.Floors[0].EntryX][dungeon.Floors[0].EntryY].Room

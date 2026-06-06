@@ -32,6 +32,12 @@ type MazeGrid struct {
 	EndY   int           `json:"endY"`
 }
 
+const minMazeDimension = 4
+
+func validMazeDimensions(width int, height int) bool {
+	return width >= minMazeDimension && height >= minMazeDimension
+}
+
 func (game *Game) NewMaze(width int, height int) *MazeGrid {
 	maze := &MazeGrid{
 		Game:   game,
@@ -146,6 +152,10 @@ func (cell *MazeCell) setAdjacentCellsTerrainType(wall bool, distance int, terra
 
 /* Dig a maze using Prim's algorithm */
 func (maze *MazeGrid) generatePrimMaze() {
+	if maze == nil || !validMazeDimensions(maze.Width, maze.Height) {
+		return
+	}
+
 	maze.EntryX = rand.Intn(maze.Width-3) + 2
 	maze.EntryY = rand.Intn(maze.Height-3) + 2
 
