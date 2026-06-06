@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -569,25 +570,35 @@ func (game *Game) LoadScriptsFromDirectory(directory string) error {
 	}
 
 	for _, script := range scripts {
-		path := fmt.Sprintf("%s/%s", directory, script.Name())
+		name := script.Name()
+		if strings.HasPrefix(name, ".") {
+			continue
+		}
+
+		path := filepath.Join(directory, name)
 
 		if script.IsDir() {
 			err := game.LoadScriptsFromDirectory(path)
 			if err != nil {
 				return err
 			}
-		} else {
-			log.Printf("Loading script: %s\r\n", path)
-			bytes, err := os.ReadFile(path)
-			if err != nil {
-				return err
-			}
+			continue
+		}
 
-			_, err = game.vm.RunString(string(bytes))
-			if err != nil {
-				log.Println(err)
-				return err
-			}
+		if filepath.Ext(name) != ".js" {
+			continue
+		}
+
+		log.Printf("Loading script: %s\r\n", path)
+		bytes, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		_, err = game.vm.RunString(string(bytes))
+		if err != nil {
+			log.Println(err)
+			return err
 		}
 	}
 
