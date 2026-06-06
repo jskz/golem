@@ -196,13 +196,13 @@ func (qt *QuadTree) Remove(p *Point) bool {
 	}
 
 	// Try to remove from this tree's quadrants
-	if qt.Northwest.Remove(p) == true {
+	if qt.Northwest.Remove(p) {
 		return true
-	} else if qt.Northeast.Remove(p) == true {
+	} else if qt.Northeast.Remove(p) {
 		return true
-	} else if qt.Southwest.Remove(p) == true {
+	} else if qt.Southwest.Remove(p) {
 		return true
-	} else if qt.Southeast.Remove(p) == true {
+	} else if qt.Southeast.Remove(p) {
 		return true
 	}
 

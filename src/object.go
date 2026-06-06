@@ -451,26 +451,6 @@ func (obj *ObjectInstance) Visible(viewer *Character) bool {
 	return true
 }
 
-func (obj *ObjectInstance) reify() error {
-	err := obj.Finalize(nil)
-	if err != nil {
-		return err
-	}
-
-	if obj.Contents != nil && obj.Contents.Count > 0 {
-		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-			containedObject := iter.Value.(*ObjectInstance)
-
-			err = containedObject.Finalize(obj)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
 func (obj *ObjectInstance) reifyTx(ctx context.Context, tx *sql.Tx) ([]*ObjectInstance, error) {
 	return obj.reifyInContainerTx(ctx, tx, nil)
 }

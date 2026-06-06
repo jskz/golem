@@ -11,12 +11,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	_ "net/http/pprof"
 )
@@ -26,8 +24,6 @@ func main() {
 }
 
 func run() int {
-	rand.Seed(time.Now().UnixNano())
-
 	/* Game instance will encapsulate both the world and player session management */
 	game, err := NewGame()
 	if err != nil {

@@ -16,6 +16,8 @@ import (
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 const JoinedGameFlavourText = "{WYou have entered the world of Golem.{x"
@@ -110,7 +112,7 @@ func (game *Game) nanny(client *Client, message string) {
 		output.WriteString("[ Press return to continue ]")
 
 	case ConnectionStateName:
-		name := strings.Title(strings.ToLower(message))
+		name := cases.Title(language.Und).String(strings.ToLower(message))
 		if !game.IsValidPCName(name) {
 			output.WriteString("Invalid name, please try another.\r\n\r\nBy what name do you wish to be known? ")
 			break
@@ -153,7 +155,7 @@ func (game *Game) nanny(client *Client, message string) {
 
 		client.Character.Practices = 100
 
-		for index, _ := range client.Character.Stats {
+		for index := range client.Character.Stats {
 			client.Character.Stats[index] = 10
 		}
 

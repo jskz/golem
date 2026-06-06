@@ -522,7 +522,7 @@ func (ch *Character) RollStats() {
 	var statBase []int = make([]int, STAT_MAX)
 	var statMax []int = make([]int, STAT_MAX)
 
-	for index, _ := range statBase {
+	for index := range statBase {
 		statBase[index] = 10
 		statMax[index] = 20
 
