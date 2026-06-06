@@ -237,6 +237,11 @@ func do_buy(ch *Character, arguments string) {
 				objects = append(objects, ch.Game.objectInstanceFromIndex(objIndex))
 			}
 
+			if !ch.canCarryObjects(objects) {
+				ch.Send("You can't carry that much weight.\r\n")
+				return
+			}
+
 			err := ch.AttachObjects(objects)
 			if err != nil {
 				ch.Send("{RA mysterious force prevents you from buying that.{x\r\n")

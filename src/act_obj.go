@@ -810,6 +810,11 @@ func do_take(ch *Character, arguments string) {
 					break
 				}
 
+				if !ch.canPickUpObject(takingObj) {
+					ch.Send("You can't carry that much weight.\r\n")
+					break
+				}
+
 				if takingObj.ItemType != ItemTypeCurrency && takingFrom.CarriedBy != ch {
 					err := ch.AttachObject(takingObj)
 					if err != nil {
@@ -852,6 +857,11 @@ func do_take(ch *Character, arguments string) {
 
 			if ch.Inventory.Count+1 > ch.getMaxItemsInventory() {
 				ch.Send("You can't carry any more.\r\n")
+				return
+			}
+
+			if !ch.canPickUpObject(takingObj) {
+				ch.Send("You can't carry that much weight.\r\n")
 				return
 			}
 
@@ -898,7 +908,11 @@ func do_take(ch *Character, arguments string) {
 				break
 			}
 
-			/* TODO: Check if object can be taken, weight limits, etc */
+			if !ch.canPickUpObject(found) {
+				ch.Send("You can't carry that much weight.\r\n")
+				break
+			}
+
 			if ch.Flags&CHAR_IS_PLAYER != 0 {
 				if found.ItemType != ItemTypeCurrency {
 					err := ch.AttachObject(found)
@@ -955,7 +969,11 @@ func do_take(ch *Character, arguments string) {
 		return
 	}
 
-	/* TODO: Check if object can be taken, weight limits, etc */
+	if !ch.canPickUpObject(found) {
+		ch.Send("You can't carry that much weight.\r\n")
+		return
+	}
+
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
 		if found.ItemType != ItemTypeCurrency {
 			err := ch.AttachObject(found)
@@ -1067,6 +1085,16 @@ func do_give(ch *Character, arguments string) {
 
 	if target == ch {
 		ch.Send("You cannot give to yourself!\r\n")
+		return
+	}
+
+	if target.Inventory.Count+1 > target.getMaxItemsInventory() {
+		ch.Send(fmt.Sprintf("%s{x can't carry any more.\r\n", target.GetShortDescriptionUpper(ch)))
+		return
+	}
+
+	if !target.canCarryObject(found) {
+		ch.Send(fmt.Sprintf("%s{x can't carry that much weight.\r\n", target.GetShortDescriptionUpper(ch)))
 		return
 	}
 

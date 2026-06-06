@@ -675,6 +675,10 @@ func (ch *Character) AttachObjects(objects []*ObjectInstance) error {
 		return fmt.Errorf("cannot attach object without a database")
 	}
 
+	if !ch.canCarryObjects(objects) {
+		return fmt.Errorf("character cannot carry that much weight")
+	}
+
 	ctx := context.Background()
 	tx, err := ch.Game.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -705,6 +709,10 @@ func (ch *Character) AttachObjects(objects []*ObjectInstance) error {
 func (ch *Character) TransferObjectTo(target *Character, obj *ObjectInstance) error {
 	if target == nil {
 		return fmt.Errorf("cannot transfer object to nil character")
+	}
+
+	if !target.canCarryObject(obj) {
+		return fmt.Errorf("target cannot carry that much weight")
 	}
 
 	if (ch.Flags&CHAR_IS_PLAYER == 0) && (target.Flags&CHAR_IS_PLAYER == 0) {
@@ -1557,6 +1565,70 @@ func (ch *Character) getCarryWeight() float64 {
 	}
 
 	return total
+}
+
+func (ch *Character) canCarryAdditionalWeight(weight float64) bool {
+	if ch == nil {
+		return false
+	}
+
+	if ch.Wizard {
+		return true
+	}
+
+	weight = normalizeObjectWeight(weight)
+	return ch.getCarryWeight()+weight <= ch.getMaxCarryWeight()
+}
+
+func (ch *Character) canCarryObject(obj *ObjectInstance) bool {
+	if obj == nil || obj.ItemType == ItemTypeCurrency {
+		return true
+	}
+
+	return ch.canCarryAdditionalWeight(obj.GetTotalWeight())
+}
+
+func (ch *Character) canCarryObjects(objects []*ObjectInstance) bool {
+	if ch == nil {
+		return false
+	}
+
+	if ch.Wizard {
+		return true
+	}
+
+	var total float64
+	for _, obj := range objects {
+		if obj == nil || obj.ItemType == ItemTypeCurrency {
+			continue
+		}
+
+		total += obj.GetTotalWeight()
+	}
+
+	return ch.canCarryAdditionalWeight(total)
+}
+
+func (ch *Character) canPickUpObject(obj *ObjectInstance) bool {
+	if obj == nil || obj.isCarriedBy(ch) {
+		return true
+	}
+
+	return ch.canCarryObject(obj)
+}
+
+func (obj *ObjectInstance) isCarriedBy(ch *Character) bool {
+	if ch == nil {
+		return false
+	}
+
+	for current := obj; current != nil; current = current.Inside {
+		if current.CarriedBy == ch {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (ch *Character) GetShortDescription(viewer *Character) string {
