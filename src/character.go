@@ -667,6 +667,10 @@ func (ch *Character) Save() bool {
 }
 
 func (ch *Character) AttachObject(obj *ObjectInstance) error {
+	return ch.AttachObjects([]*ObjectInstance{obj})
+}
+
+func (ch *Character) AttachObjects(objects []*ObjectInstance) error {
 	if ch == nil || ch.Game == nil || ch.Game.db == nil {
 		return fmt.Errorf("cannot attach object without a database")
 	}
@@ -677,11 +681,15 @@ func (ch *Character) AttachObject(obj *ObjectInstance) error {
 		return err
 	}
 
-	reified, err := ch.attachObjectTx(ctx, tx, obj)
-	if err != nil {
-		tx.Rollback()
-		resetReifiedObjectIDs(reified)
-		return err
+	reified := make([]*ObjectInstance, 0, len(objects))
+	for _, obj := range objects {
+		objectReified, err := ch.attachObjectTx(ctx, tx, obj)
+		reified = append(reified, objectReified...)
+		if err != nil {
+			tx.Rollback()
+			resetReifiedObjectIDs(reified)
+			return err
+		}
 	}
 
 	err = tx.Commit()

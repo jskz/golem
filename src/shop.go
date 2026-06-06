@@ -186,16 +186,26 @@ func do_buy(ch *Character, arguments string) {
 		return
 	}
 
-	secondArgument, _ := OneArgument(arguments)
-	if secondArgument == "" {
+	firstArgument, arguments := OneArgument(arguments)
+	if firstArgument == "" {
 		ch.Send("Buy requires a numeric argument.\r\n")
 		return
 	}
 
-	id, err := strconv.Atoi(secondArgument)
+	id, err := strconv.Atoi(firstArgument)
 	if err != nil {
 		ch.Send("Bad argument, please provider an integer.\r\n")
 		return
+	}
+
+	quantity := 1
+	quantityArgument, _ := OneArgument(arguments)
+	if quantityArgument != "" {
+		quantity, err = strconv.Atoi(quantityArgument)
+		if err != nil || quantity < 1 {
+			ch.Send("Buy quantity requires a positive integer.\r\n")
+			return
+		}
 	}
 
 	var count int = 1
@@ -208,39 +218,55 @@ func do_buy(ch *Character, arguments string) {
 		}
 
 		if count == id {
-			if listing.Price > ch.Gold {
+			if listing.Price > 0 && quantity > ch.Gold/listing.Price {
 				ch.Send("You can't afford that.\r\n")
 				return
 			}
 
-			if ch.Inventory.Count+1 > ch.getMaxItemsInventory() {
+			if quantity > ch.getMaxItemsInventory()-ch.Inventory.Count {
 				ch.Send("You can't carry any more.\r\n")
 				return
 			}
 
+			totalPrice := listing.Price * quantity
+
 			objIndex := listing.Object
+			objects := make([]*ObjectInstance, 0, quantity)
 
-			obj := ch.Game.objectInstanceFromIndex(objIndex)
+			for i := 0; i < quantity; i++ {
+				objects = append(objects, ch.Game.objectInstanceFromIndex(objIndex))
+			}
 
-			err := ch.AttachObject(obj)
+			err := ch.AttachObjects(objects)
 			if err != nil {
 				ch.Send("{RA mysterious force prevents you from buying that.{x\r\n")
 				return
 			}
 
-			ch.Send(fmt.Sprintf("You buy %s for %d gold coins.\r\n", obj.GetShortDescription(ch), listing.Price))
+			for _, obj := range objects {
+				ch.AddObject(obj)
+				ch.Game.Objects.Insert(obj)
+			}
+
+			if quantity == 1 {
+				ch.Send(fmt.Sprintf("You buy %s for %d gold coins.\r\n", objects[0].GetShortDescription(ch), totalPrice))
+			} else {
+				ch.Send(fmt.Sprintf("You buy %d of %s for %d gold coins.\r\n", quantity, objects[0].GetShortDescription(ch), totalPrice))
+			}
 
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
 				rch := iter.Value.(*Character)
 
 				if !rch.IsEqual(ch) {
-					rch.Send(fmt.Sprintf("%s buys %s.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
+					if quantity == 1 {
+						rch.Send(fmt.Sprintf("%s buys %s.\r\n", ch.GetShortDescriptionUpper(rch), objects[0].GetShortDescription(rch)))
+					} else {
+						rch.Send(fmt.Sprintf("%s buys %d of %s.\r\n", ch.GetShortDescriptionUpper(rch), quantity, objects[0].GetShortDescription(rch)))
+					}
 				}
 			}
 
-			ch.AddObject(obj)
-			ch.Game.Objects.Insert(obj)
-			ch.Gold -= listing.Price
+			ch.Gold -= totalPrice
 			return
 		}
 
