@@ -277,7 +277,16 @@ INSERT INTO rooms(id, zone_id, name, description, flags) VALUES (8, 1, 'Trading 
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (1, 1, 'ball protoplasm', 'a ball of protoplasm', 'A ball of protoplasm has been left here.', 'This is some generic object entity without definition, left strewn about by an absent-minded developer!', 0, 'protoplasm', 0, 0, 0, 0);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (2, 1, 'gold coin', 'a gold coin', 'A gold coin lies on the ground here.', 'A single gold coin.', 0, 'currency', 0, 0, 0, 0);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (3, 1, 'gold coins pile', '%d gold coins', 'There is a pile of gold coins here.', 'A pile of %d gold coins.', 0, 'currency', 0, 0, 0, 0);
-INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (4, 1, 'sign post signpost', 'a signpost', 'A signpost hangs in the aether beside a foreboding trapdoor.', '{YWelcome to Golem!{x\r\n\r\n{CThis pre-alpha MUD is in active development.\r\n\r\nBeneath this safe zone welcome lobby is a test dungeon with multiple floors\r\nwhose mazes are regenerated each reboot.\r\n\r\nFind updates and information on development at https://github.com/jskz/golem\r\n\r\n{WProblems? {wFeel free to {Wcontact{w the developer at {Wjames@jskarzin.org{w.{x', 0, 'sign', 0, 0, 0, 0);
+INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (4, 1, 'sign post signpost', 'a signpost', 'A signpost hangs in the aether beside a foreboding trapdoor.', '{YWelcome to Golem!{x
+
+{CThis pre-alpha MUD is in active development.
+
+Beneath this safe zone welcome lobby is a test dungeon with multiple floors
+whose mazes are regenerated each reboot.
+
+Find updates and information on development at https://github.com/jskz/golem
+
+{WProblems? {wFeel free to {Wcontact{w the developer at {Wjames@jskarzin.org{w.{x', 0, 'sign', 0, 0, 0, 0);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (5, 1, 'minor healing potion', 'a potion of minor healing', 'A hazy cyan potion lays here.', '{CTh{cis fo{Cgg{Wy c{wyan l{Wi{Cq{cu{Cid is a life-giving elixir, but the taste is not so great.{x', 1, 'potion', 0, 0, 0, 0);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (6, 1, 'swashbuckler cutlass sword', 'a swashbuckler''s cutlass', 'A sword with a large, basket-guarded hilt was left here.', 'The preferred sword of the pirate, with a pronounced basket guard at the hilt.', 7, 'weapon', 3, 6, 5, 1);
 INSERT INTO objects(id, zone_id, name, short_description, long_description, description, flags, item_type, value_1, value_2, value_3, value_4) VALUES (7, 1, 'wizard wizardry pointed hat cone', 'a pointed hat', 'An unassuming cone encircled by a wide brim suggests wizardry afoot.', 'An i-conic cap perfectly fit for the magical mindspace.', 69, 'armor', 3, 3, 3, 10);
