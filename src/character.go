@@ -1357,6 +1357,28 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 	return ch, room, nil
 }
 
+func (game *Game) addPlayerCharacterToWorld(ch *Character) {
+	game.Characters.Insert(ch)
+
+	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
+		obj := iter.Value.(*ObjectInstance)
+
+		game.Objects.Insert(obj)
+
+		if obj.Contents != nil {
+			for innerIter := obj.Contents.Head; innerIter != nil; innerIter = innerIter.Next {
+				containedObj := innerIter.Value.(*ObjectInstance)
+
+				game.Objects.Insert(containedObj)
+			}
+		}
+	}
+
+	if ch.Room != nil {
+		ch.Room.AddCharacter(ch)
+	}
+}
+
 func (ch *Character) clearOutputBuffer() {
 	ch.output = make([]byte, 32768)
 	ch.outputHead = 0

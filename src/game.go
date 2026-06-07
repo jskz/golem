@@ -11,6 +11,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -32,8 +33,9 @@ const (
 type Game struct {
 	startedAt time.Time
 
-	db *sql.DB
-	vm *goja.Runtime
+	db       *sql.DB
+	vm       *goja.Runtime
+	listener net.Listener
 
 	Objects      *LinkedList `json:"objects"`
 	Characters   *LinkedList `json:"characters"`

@@ -90,6 +90,7 @@ type Client struct {
 	close             chan struct{}
 	closeOnce         sync.Once
 	unregisterOnce    sync.Once
+	writeMutex        sync.Mutex
 	remainingRolls    int
 	delayMutex        sync.Mutex
 	delayUntil        time.Time
@@ -101,6 +102,19 @@ type Client struct {
 type ClientTextMessage struct {
 	client  *Client
 	message string
+}
+
+func newClient(conn net.Conn) *Client {
+	return &Client{
+		sessionStartedAt: time.Now(),
+		conn:             conn,
+		send:             make(chan []byte, clientSendBufferSize),
+		close:            make(chan struct{}),
+		remainingRolls:   10,
+		ConnectionState:  ConnectionStateNone,
+		delayUntil:       time.Now(),
+		ansiEnabled:      true,
+	}
 }
 
 func (client *Client) readPump(game *Game) {
@@ -338,6 +352,9 @@ func (client *Client) writePump(game *Game) {
 }
 
 func (client *Client) writeToConn(outgoing []byte) error {
+	client.writeMutex.Lock()
+	defer client.writeMutex.Unlock()
+
 	for len(outgoing) > 0 {
 		err := client.conn.SetWriteDeadline(time.Now().Add(clientWriteTimeout))
 		if err != nil {
@@ -391,6 +408,23 @@ func (client *Client) Send(data []byte) (closed bool) {
 		log.Printf("Client send queue full, dropping connection.\r\n")
 		client.Close()
 		return true
+	}
+}
+
+func (client *Client) drainSendQueue() error {
+	for {
+		select {
+		case outgoing, ok := <-client.send:
+			if !ok {
+				return nil
+			}
+
+			if err := client.writeToConn(outgoing); err != nil {
+				return err
+			}
+		default:
+			return nil
+		}
 	}
 }
 
@@ -453,16 +487,7 @@ func remoteAddress(conn net.Conn) string {
 func (game *Game) handleConnection(conn net.Conn) {
 	defer recoverConnectionSetupPanic(conn)
 
-	client := &Client{sessionStartedAt: time.Now()}
-	client.conn = conn
-	client.send = make(chan []byte, clientSendBufferSize)
-	client.close = make(chan struct{})
-	client.Character = nil
-	client.remainingRolls = 10
-	client.ConnectionState = ConnectionStateNone
-	client.delayUntil = time.Now()
-	client.delayMutex = sync.Mutex{}
-	client.ansiEnabled = true
+	client := newClient(conn)
 
 	/* Spawn goroutines to handle client I/O */
 	go client.writePump(game)

@@ -153,6 +153,13 @@ func do_shutdown(ch *Character, arguments string) {
 	}
 }
 
+func do_copyover(ch *Character, arguments string) {
+	err := ch.Game.copyover(ch)
+	if err != nil {
+		ch.Send(fmt.Sprintf("{RCopyover failed: %s{x\r\n", err.Error()))
+	}
+}
+
 func do_wiznet(ch *Character, arguments string) {
 	if ch.Wiznet {
 		ch.Wiznet = false

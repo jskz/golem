@@ -9,7 +9,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -24,6 +23,12 @@ func main() {
 }
 
 func run() int {
+	copyoverState, err := copyoverStateFromEnvironment()
+	if err != nil {
+		log.Printf("Unable to read copyover state: %v.\r\n", err)
+		return 1
+	}
+
 	/* Game instance will encapsulate both the world and player session management */
 	game, err := NewGame()
 	if err != nil {
@@ -31,11 +36,12 @@ func run() int {
 		return 1
 	}
 
-	app, err := net.Listen("tcp", fmt.Sprintf(":%d", Config.Port))
+	app, err := openListener(copyoverState)
 	if err != nil {
 		log.Println(err)
 		return 1
 	}
+	game.listener = app
 	defer app.Close()
 
 	shutdown := make(chan os.Signal, 1)
@@ -50,6 +56,14 @@ func run() int {
 
 	/* Spawn the webhook-handling goroutine */
 	go game.handleWebhooks()
+
+	if copyoverState != nil {
+		err = game.recoverCopyover(copyoverState)
+		if err != nil {
+			log.Printf("Unable to recover copyover clients: %v.\r\n", err)
+			return 1
+		}
+	}
 
 	/* Start the game loop */
 	go game.Run()

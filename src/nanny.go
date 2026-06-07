@@ -395,25 +395,9 @@ func (game *Game) nanny(client *Client, message string) {
 	case ConnectionStateMessageOfTheDay:
 		client.ConnectionState = ConnectionStatePlaying
 
-		game.Characters.Insert(client.Character)
-
-		for iter := client.Character.Inventory.Head; iter != nil; iter = iter.Next {
-			obj := iter.Value.(*ObjectInstance)
-
-			game.Objects.Insert(obj)
-
-			if obj.Contents != nil {
-				for innerIter := obj.Contents.Head; innerIter != nil; innerIter = innerIter.Next {
-					containedObj := innerIter.Value.(*ObjectInstance)
-
-					game.Objects.Insert(containedObj)
-				}
-			}
-		}
+		game.addPlayerCharacterToWorld(client.Character)
 
 		if client.Character.Room != nil {
-			client.Character.Room.AddCharacter(client.Character)
-
 			out := fmt.Sprintf("{W%s has entered the game.{x\r\n", client.Character.Name)
 
 			game.broadcast(out, func(character *Character) bool {
