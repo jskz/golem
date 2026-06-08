@@ -71,6 +71,7 @@ const (
 	ItemTypePotion         = "potion"
 	ItemTypeFood           = "food"
 	ItemTypeDrinkContainer = "drink_container"
+	ItemTypeFountain       = "fountain"
 	ItemTypeArmor          = "armor"
 	ItemTypeWeapon         = "weapon"
 	ItemTypeLight          = "light"

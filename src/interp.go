@@ -73,6 +73,9 @@ func init() {
 	CommandTable["drop"] = Command{Name: "drop", CmdFunc: do_drop}
 	CommandTable["put"] = Command{Name: "put", CmdFunc: do_put}
 	CommandTable["use"] = Command{Name: "use", CmdFunc: do_use}
+	CommandTable["drink"] = Command{Name: "drink", CmdFunc: do_drink}
+	CommandTable["eat"] = Command{Name: "eat", CmdFunc: do_eat}
+	CommandTable["fill"] = Command{Name: "fill", CmdFunc: do_fill}
 
 	/* act_wiz.go */
 	CommandTable["copyover"] = Command{Name: "copyover", CmdFunc: do_copyover, MinimumLevel: LevelAdmin}

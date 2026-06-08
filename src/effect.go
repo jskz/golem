@@ -66,6 +66,7 @@ var AffectedFlagTable []Flag = []Flag{
 	{Name: "haste", Flag: AFFECT_HASTE},
 	{Name: "detect_magic", Flag: AFFECT_DETECT_MAGIC},
 	{Name: "fireshield", Flag: AFFECT_FIRESHIELD},
+	{Name: "poison", Flag: AFFECT_POISON},
 	{Name: "paralysis", Flag: AFFECT_PARALYSIS},
 	{Name: "blindness", Flag: AFFECT_BLINDNESS},
 }

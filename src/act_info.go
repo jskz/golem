@@ -277,6 +277,15 @@ func do_score(ch *Character, arguments string) {
 			ch.MaxStamina),
 		modifiedLuck))
 	buf.WriteString("{D└──────────────────────────────────────────┴────────────────────┘{x\r\n")
+	if ch.hasMortalNeeds() && ch.Conditions[ConditionDrunk] > ConditionDrunkThreshold {
+		buf.WriteString("{Y* {RYou are drunk.{x\r\n")
+	}
+	if ch.hasMortalNeeds() && ch.Conditions[ConditionThirst] == 0 {
+		buf.WriteString("{Y* {cYou are thirsty.{x\r\n")
+	}
+	if ch.hasMortalNeeds() && ch.Conditions[ConditionHunger] == 0 {
+		buf.WriteString("{Y* {yYou are hungry.{x\r\n")
+	}
 
 	output := buf.String()
 	ch.Send(output)

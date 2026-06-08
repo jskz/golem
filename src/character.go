@@ -151,6 +151,21 @@ const (
 	PositionStanding = 8
 )
 
+const (
+	ConditionDrunk = iota
+	ConditionFull
+	ConditionThirst
+	ConditionHunger
+	ConditionCount
+)
+
+const (
+	ConditionMaximum            = 48
+	ConditionDrunkThreshold     = 10
+	ConditionFullEatThreshold   = 40
+	ConditionFullDrinkThreshold = 45
+)
+
 var StatNameTable map[int]string = map[int]string{
 	STAT_STRENGTH:     "strength",
 	STAT_DEXTERITY:    "dexterity",
@@ -219,6 +234,8 @@ type Character struct {
 	MaxMana    int `json:"maxMana"`
 	Stamina    int `json:"stamina"`
 	MaxStamina int `json:"maxStamina"`
+
+	Conditions [ConditionCount]int `json:"conditions"`
 
 	Position int
 
@@ -370,6 +387,8 @@ func (ch *Character) onUpdate() {
 	if ch.Stamina < ch.MaxStamina {
 		ch.Stamina = int(math.Min(float64(ch.MaxStamina), float64(ch.Stamina+40)))
 	}
+
+	ch.updateConditions()
 }
 
 func (ch *Character) Finalize() error {
@@ -380,10 +399,10 @@ func (ch *Character) Finalize() error {
 
 	result, err := ch.Game.db.Exec(`
 		INSERT INTO
-			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
+			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, condition_drunk, condition_full, condition_thirst, condition_hunger, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK])
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Conditions[ConditionDrunk], ch.Conditions[ConditionFull], ch.Conditions[ConditionThirst], ch.Conditions[ConditionHunger], ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK])
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -573,6 +592,57 @@ func FindStatByName(statName string) int {
 	return STAT_NONE
 }
 
+func (ch *Character) hasMortalNeeds() bool {
+	return ch != nil && ch.Flags&CHAR_IS_PLAYER != 0 && ch.Level <= LevelHero
+}
+
+func clampCondition(value int) int {
+	if value < 0 {
+		return 0
+	}
+
+	if value > ConditionMaximum {
+		return ConditionMaximum
+	}
+
+	return value
+}
+
+func (ch *Character) gainCondition(condition int, value int) {
+	if value == 0 || !ch.hasMortalNeeds() || condition < 0 || condition >= ConditionCount {
+		return
+	}
+
+	previous := ch.Conditions[condition]
+	ch.Conditions[condition] = clampCondition(previous + value)
+
+	if ch.Conditions[condition] != 0 {
+		return
+	}
+
+	switch condition {
+	case ConditionHunger:
+		ch.Send("You are hungry.\r\n")
+	case ConditionThirst:
+		ch.Send("You are thirsty.\r\n")
+	case ConditionDrunk:
+		if previous != 0 {
+			ch.Send("You are sober.\r\n")
+		}
+	}
+}
+
+func (ch *Character) updateConditions() {
+	if !ch.hasMortalNeeds() {
+		return
+	}
+
+	ch.gainCondition(ConditionDrunk, -1)
+	ch.gainCondition(ConditionFull, -2)
+	ch.gainCondition(ConditionThirst, -1)
+	ch.gainCondition(ConditionHunger, -1)
+}
+
 func (ch *Character) Save() bool {
 	if ch.Client == nil || ch.Game == nil {
 		/* If somehow an NPC were to try to save, do not allow it. */
@@ -602,6 +672,10 @@ func (ch *Character) Save() bool {
 			max_mana = ?,
 			stamina = ?,
 			max_stamina = ?,
+			condition_drunk = ?,
+			condition_full = ?,
+			condition_thirst = ?,
+			condition_hunger = ?,
 			stat_str = ?,
 			stat_dex = ?,
 			stat_int = ?,
@@ -631,6 +705,10 @@ func (ch *Character) Save() bool {
 		ch.MaxMana,
 		ch.Stamina,
 		ch.MaxStamina,
+		ch.Conditions[ConditionDrunk],
+		ch.Conditions[ConditionFull],
+		ch.Conditions[ConditionThirst],
+		ch.Conditions[ConditionHunger],
 		ch.Stats[STAT_STRENGTH],
 		ch.Stats[STAT_DEXTERITY],
 		ch.Stats[STAT_INTELLIGENCE],
@@ -1269,6 +1347,10 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 			max_mana,
 			stamina,
 			max_stamina,
+			condition_drunk,
+			condition_full,
+			condition_thirst,
+			condition_hunger,
 			stat_str,
 			stat_dex,
 			stat_int,
@@ -1312,6 +1394,10 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 		&ch.MaxMana,
 		&ch.Stamina,
 		&ch.MaxStamina,
+		&ch.Conditions[ConditionDrunk],
+		&ch.Conditions[ConditionFull],
+		&ch.Conditions[ConditionThirst],
+		&ch.Conditions[ConditionHunger],
 		&ch.Stats[STAT_STRENGTH],
 		&ch.Stats[STAT_DEXTERITY],
 		&ch.Stats[STAT_INTELLIGENCE],
@@ -1958,6 +2044,10 @@ func NewCharacter() *Character {
 	character.Inventory = NewLinkedList()
 	character.Effects = NewLinkedList()
 	character.Skills = make(map[uint]*Proficiency)
+	character.Conditions[ConditionDrunk] = 0
+	character.Conditions[ConditionFull] = ConditionMaximum
+	character.Conditions[ConditionThirst] = ConditionMaximum
+	character.Conditions[ConditionHunger] = ConditionMaximum
 
 	character.Defense = 0
 

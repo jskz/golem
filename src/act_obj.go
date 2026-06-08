@@ -124,6 +124,63 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 	ch.Send(output.String())
 }
 
+func sendToRoomExcept(ch *Character, message func(rch *Character) string) {
+	if ch == nil || ch.Room == nil || ch.Room.Characters == nil {
+		return
+	}
+
+	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+		if rch.IsEqual(ch) {
+			continue
+		}
+
+		rch.Send(message(rch))
+	}
+}
+
+func (ch *Character) consumeCarriedObject(obj *ObjectInstance) bool {
+	if obj == nil {
+		return false
+	}
+
+	if ch.Flags&CHAR_IS_PLAYER != 0 && obj.Id > 0 {
+		if err := ch.DetachObject(obj); err != nil {
+			log.Printf("Failed to detach consumed object from PC: %v\r\n", err)
+			return false
+		}
+	}
+
+	ch.RemoveObject(obj)
+	if ch.Game != nil && ch.Game.Objects != nil {
+		ch.Game.Objects.Remove(obj)
+	}
+
+	return true
+}
+
+func (ch *Character) applyPoisonedConsumable(level int, duration int) {
+	sendToRoomExcept(ch, func(rch *Character) string {
+		return fmt.Sprintf("%s{x chokes and gags.\r\n", ch.GetShortDescriptionUpper(rch))
+	})
+	ch.Send("You choke and gag.\r\n")
+
+	if level < 1 {
+		level = 1
+	}
+
+	if duration < 1 {
+		duration = 1
+	}
+
+	if ch.Game == nil {
+		ch.Affected |= AFFECT_POISON
+		return
+	}
+
+	ch.AddEffect(ch.Game.CreateEffect("poison", EffectTypeAffected, AFFECT_POISON, duration, level, 0, 0, nil))
+}
+
 func (ch *Character) examineObject(obj *ObjectInstance) {
 	var output strings.Builder
 
@@ -171,6 +228,28 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 		output.WriteString(fmt.Sprintf("{Y* {C%s{c provides {C%d{c defense against exotic damage.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value3))
 	case ItemTypeContainer:
 		output.WriteString(fmt.Sprintf("{C%s{c can hold up to {C%d{c items and {C%d{c lbs.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value0, obj.Value1))
+	case ItemTypeFood:
+		output.WriteString(fmt.Sprintf("{C%s{c looks edible.{x\r\n", obj.GetShortDescriptionUpper(ch)))
+	case ItemTypeDrinkContainer:
+		if obj.Value1 <= 0 {
+			output.WriteString(fmt.Sprintf("{C%s{c is empty.{x\r\n", obj.GetShortDescriptionUpper(ch)))
+			break
+		}
+
+		liquid := LiquidTable[normalizeLiquid(obj.Value2)]
+		fill := "more than half-"
+		if obj.Value0 > 0 {
+			if obj.Value1 < obj.Value0/4 {
+				fill = "less than half-"
+			} else if obj.Value1 < 3*obj.Value0/4 {
+				fill = "about half-"
+			}
+		}
+
+		output.WriteString(fmt.Sprintf("{C%s{c is %sfilled with a %s liquid.{x\r\n", obj.GetShortDescriptionUpper(ch), fill, liquid.Colour))
+	case ItemTypeFountain:
+		liquid := LiquidTable[normalizeLiquid(obj.Value2)]
+		output.WriteString(fmt.Sprintf("{C%s{c flows with %s.{x\r\n", obj.GetShortDescriptionUpper(ch), liquid.Name))
 	default:
 		break
 	}
@@ -664,6 +743,219 @@ func do_use(ch *Character, arguments string) {
 	if err != nil {
 		ch.Send("You can't use that.\r\n")
 		return
+	}
+}
+
+func do_fill(ch *Character, arguments string) {
+	arg, _ := OneArgument(arguments)
+	if arg == "" {
+		ch.Send("Fill what?\r\n")
+		return
+	}
+
+	if ch.Room == nil || ch.Room.Objects == nil {
+		return
+	}
+
+	obj := ch.FindObjectOnSelf(arg)
+	if obj == nil {
+		ch.Send("You do not have that item.\r\n")
+		return
+	}
+
+	var fountain *ObjectInstance
+	for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
+		roomObj := iter.Value.(*ObjectInstance)
+		if roomObj.ItemType == ItemTypeFountain {
+			fountain = roomObj
+			break
+		}
+	}
+
+	if fountain == nil {
+		ch.Send("There is no fountain here!\r\n")
+		return
+	}
+
+	if obj.ItemType != ItemTypeDrinkContainer {
+		ch.Send("You can't fill that.\r\n")
+		return
+	}
+
+	liquidIndex := normalizeLiquid(fountain.Value2)
+	if obj.Value1 != 0 && normalizeLiquid(obj.Value2) != liquidIndex {
+		ch.Send("There is already another liquid in it.\r\n")
+		return
+	}
+
+	if obj.Value0 <= 0 || obj.Value1 >= obj.Value0 {
+		ch.Send("Your container is full.\r\n")
+		return
+	}
+
+	liquid := LiquidTable[liquidIndex]
+	obj.Value2 = liquidIndex
+	obj.Value1 = obj.Value0
+
+	ch.Send(fmt.Sprintf("You fill %s{x with %s from %s{x.\r\n", obj.GetShortDescription(ch), liquid.Name, fountain.GetShortDescription(ch)))
+	sendToRoomExcept(ch, func(rch *Character) string {
+		return fmt.Sprintf("%s{x fills %s{x with %s from %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch), liquid.Name, fountain.GetShortDescription(rch))
+	})
+}
+
+func do_drink(ch *Character, arguments string) {
+	arg, _ := OneArgument(arguments)
+	if ch.Room == nil {
+		return
+	}
+
+	var obj *ObjectInstance
+	if arg == "" {
+		if ch.Room.Objects != nil {
+			for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
+				roomObj := iter.Value.(*ObjectInstance)
+				if roomObj.ItemType == ItemTypeFountain {
+					obj = roomObj
+					break
+				}
+			}
+		}
+
+		if obj == nil {
+			ch.Send("Drink what?\r\n")
+			return
+		}
+	} else {
+		obj = ch.FindObjectOnSelf(arg)
+		if obj == nil && ch.Room.Objects != nil {
+			obj = ch.FindObjectInRoom(arg)
+		}
+
+		if obj == nil {
+			ch.Send("You can't find it.\r\n")
+			return
+		}
+	}
+
+	if ch.hasMortalNeeds() && ch.Conditions[ConditionDrunk] > ConditionDrunkThreshold {
+		ch.Send("You fail to reach your mouth.  *Hic*\r\n")
+		return
+	}
+
+	var amount int
+	var liquidIndex int
+
+	switch obj.ItemType {
+	default:
+		ch.Send("You can't drink from that.\r\n")
+		return
+	case ItemTypeFountain:
+		liquidIndex = normalizeLiquid(obj.Value2)
+		obj.Value2 = liquidIndex
+		amount = LiquidTable[liquidIndex].Sip * 3
+	case ItemTypeDrinkContainer:
+		if obj.Value1 <= 0 {
+			ch.Send("It is already empty.\r\n")
+			return
+		}
+
+		liquidIndex = normalizeLiquid(obj.Value2)
+		obj.Value2 = liquidIndex
+		amount = LiquidTable[liquidIndex].Sip
+		if obj.Value1 < amount {
+			amount = obj.Value1
+		}
+	}
+
+	if ch.hasMortalNeeds() && ch.Conditions[ConditionFull] > ConditionFullDrinkThreshold {
+		ch.Send("You're too full to drink more.\r\n")
+		return
+	}
+
+	liquid := LiquidTable[liquidIndex]
+	ch.Send(fmt.Sprintf("You drink %s from %s{x.\r\n", liquid.Name, obj.GetShortDescription(ch)))
+	sendToRoomExcept(ch, func(rch *Character) string {
+		return fmt.Sprintf("%s{x drinks %s from %s{x.\r\n", ch.GetShortDescriptionUpper(rch), liquid.Name, obj.GetShortDescription(rch))
+	})
+
+	ch.gainCondition(ConditionDrunk, amount*liquid.Drunk/36)
+	ch.gainCondition(ConditionFull, amount*liquid.Full/4)
+	ch.gainCondition(ConditionThirst, amount*liquid.Thirst/10)
+	ch.gainCondition(ConditionHunger, amount*liquid.Hunger/2)
+
+	if ch.hasMortalNeeds() && ch.Conditions[ConditionDrunk] > ConditionDrunkThreshold {
+		ch.Send("You feel drunk.\r\n")
+	}
+	if ch.hasMortalNeeds() && ch.Conditions[ConditionFull] > ConditionFullEatThreshold {
+		ch.Send("You are full.\r\n")
+	}
+	if ch.hasMortalNeeds() && ch.Conditions[ConditionThirst] > ConditionFullEatThreshold {
+		ch.Send("Your thirst is quenched.\r\n")
+	}
+
+	if obj.Value3 != 0 {
+		ch.applyPoisonedConsumable(amount, 3*amount)
+	}
+
+	if obj.ItemType == ItemTypeDrinkContainer && obj.Value0 > 0 {
+		obj.Value1 -= amount
+		if obj.Value1 < 0 {
+			obj.Value1 = 0
+		}
+	}
+}
+
+func do_eat(ch *Character, arguments string) {
+	arg, _ := OneArgument(arguments)
+	if arg == "" {
+		ch.Send("Eat what?\r\n")
+		return
+	}
+
+	if ch.Room == nil {
+		return
+	}
+
+	obj := ch.FindObjectOnSelf(arg)
+	if obj == nil {
+		ch.Send("You do not have that item.\r\n")
+		return
+	}
+
+	if obj.ItemType != ItemTypeFood {
+		ch.Send("That's not edible.\r\n")
+		return
+	}
+
+	if ch.hasMortalNeeds() && ch.Conditions[ConditionFull] > ConditionFullEatThreshold {
+		ch.Send("You are too full to eat more.\r\n")
+		return
+	}
+
+	if !ch.consumeCarriedObject(obj) {
+		ch.Send("A strange force prevents you from eating that.\r\n")
+		return
+	}
+
+	ch.Send(fmt.Sprintf("You eat %s{x.\r\n", obj.GetShortDescription(ch)))
+	sendToRoomExcept(ch, func(rch *Character) string {
+		return fmt.Sprintf("%s{x eats %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch))
+	})
+
+	if ch.hasMortalNeeds() {
+		previousHunger := ch.Conditions[ConditionHunger]
+		ch.gainCondition(ConditionFull, obj.Value0)
+		ch.gainCondition(ConditionHunger, obj.Value1)
+
+		if previousHunger == 0 && ch.Conditions[ConditionHunger] > 0 {
+			ch.Send("You are no longer hungry.\r\n")
+		} else if ch.Conditions[ConditionFull] > ConditionFullEatThreshold {
+			ch.Send("You are full.\r\n")
+		}
+	}
+
+	if obj.Value3 != 0 {
+		ch.applyPoisonedConsumable(obj.Value0, 2*obj.Value0)
 	}
 }
 
