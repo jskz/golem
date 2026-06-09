@@ -15,12 +15,13 @@ import (
 )
 
 type Command struct {
-	Name         string
-	MinimumLevel uint
-	CmdFunc      func(ch *Character, arguments string)
-	Scripted     bool
-	Callback     goja.Callable
-	Hidden       bool
+	Name            string
+	MinimumLevel    uint
+	MinimumPosition int
+	CmdFunc         func(ch *Character, arguments string)
+	Scripted        bool
+	Callback        goja.Callable
+	Hidden          bool
 }
 
 var CommandTable map[string]Command
@@ -132,6 +133,55 @@ func init() {
 	CommandTable["nw"] = Command{Name: "northwest", CmdFunc: do_northwest, Hidden: true}
 	CommandTable["u"] = Command{Name: "up", CmdFunc: do_up, Hidden: true}
 	CommandTable["d"] = Command{Name: "down", CmdFunc: do_down, Hidden: true}
+
+	setCommandMinimumPosition(PositionResting,
+		"say", "look", "scan",
+		"eat", "drink", "shop",
+		"l",
+	)
+
+	setCommandMinimumPosition(PositionStanding,
+		"north", "east", "south", "west", "northeast", "southeast", "southwest", "northwest", "up", "down",
+		"follow", "open", "close",
+		"wear", "remove", "give", "take", "drop", "put", "use", "fill",
+		"flee", "kill", "cast",
+		"buy", "practice",
+		"n", "e", "s", "w", "ne", "se", "sw", "nw", "u", "d",
+		"k", "get",
+	)
+}
+
+func setCommandMinimumPosition(position int, names ...string) {
+	for _, name := range names {
+		command, ok := CommandTable[name]
+		if !ok {
+			continue
+		}
+
+		command.MinimumPosition = position
+		CommandTable[name] = command
+	}
+}
+
+func (ch *Character) canActFromPosition(position int) bool {
+	if position == 0 || ch.Position >= position {
+		return true
+	}
+
+	switch ch.Position {
+	case PositionSleeping:
+		if position >= PositionStanding {
+			ch.Send("You need to wake and stand up first.\r\n")
+		} else {
+			ch.Send("You can't do that while sleeping.\r\n")
+		}
+	case PositionResting, PositionSitting:
+		ch.Send("You need to stand up first.\r\n")
+	default:
+		ch.Send("You can't do that right now.\r\n")
+	}
+
+	return false
 }
 
 func (ch *Character) Interpret(input string) bool {
@@ -183,7 +233,11 @@ func (ch *Character) Interpret(input string) bool {
 				return false
 			}
 
-			if ch.Game.skills[prof.SkillId].Intent == SkillIntentOffensive && ch.Room.Flags&ROOM_SAFE != 0 {
+			if ch.Game.skills[prof.SkillId].Intent == SkillIntentOffensive && !ch.canActFromPosition(PositionStanding) {
+				return false
+			}
+
+			if ch.Game.skills[prof.SkillId].Intent == SkillIntentOffensive && ch.Room != nil && ch.Room.Flags&ROOM_SAFE != 0 {
 				ch.Send("You can't do that here.\r\n")
 				return false
 			}
@@ -200,6 +254,11 @@ func (ch *Character) Interpret(input string) bool {
 
 		return true
 	}
+
+	if !ch.canActFromPosition(val.MinimumPosition) {
+		return false
+	}
+
 	/* Call the command func with the remaining command words joined. */
 	if val.Scripted {
 		_, err := val.Callback(ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(ch), ch.Game.vm.ToValue(rest))

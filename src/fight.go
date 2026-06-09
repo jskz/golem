@@ -98,6 +98,8 @@ func (game *Game) AddCombatParticipant(combat *Combat, ch *Character) {
 		return
 	}
 
+	ch.standForCombat()
+
 	if game != nil && game.Fights != nil {
 		for iter := game.Fights.Head; iter != nil; iter = iter.Next {
 			existing := iter.Value.(*Combat)
@@ -110,6 +112,30 @@ func (game *Game) AddCombatParticipant(combat *Combat, ch *Character) {
 	}
 
 	combat.addParticipant(ch)
+}
+
+func (ch *Character) standForCombat() {
+	if ch == nil {
+		return
+	}
+
+	switch ch.Position {
+	case PositionSleeping:
+		ch.Send("You wake and scramble to your feet as combat begins!\r\n")
+		sendToRoomExcept(ch, func(rch *Character) string {
+			return fmt.Sprintf("%s{x wakes and scrambles to their feet as combat begins!\r\n", ch.GetShortDescriptionUpper(rch))
+		})
+	case PositionResting, PositionSitting:
+		ch.Send("You scramble to your feet as combat begins!\r\n")
+		sendToRoomExcept(ch, func(rch *Character) string {
+			return fmt.Sprintf("%s{x scrambles to their feet as combat begins!\r\n", ch.GetShortDescriptionUpper(rch))
+		})
+	default:
+		return
+	}
+
+	ch.Position = PositionStanding
+	ch.Furniture = nil
 }
 
 func (game *Game) reconcileCombatParticipants(combat *Combat) {
