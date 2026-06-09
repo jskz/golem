@@ -62,6 +62,10 @@ func init() {
 	CommandTable["follow"] = Command{Name: "follow", CmdFunc: do_follow}
 	CommandTable["open"] = Command{Name: "open", CmdFunc: do_open}
 	CommandTable["close"] = Command{Name: "close", CmdFunc: do_close}
+	CommandTable["rest"] = Command{Name: "rest", CmdFunc: do_rest}
+	CommandTable["sit"] = Command{Name: "sit", CmdFunc: do_sit}
+	CommandTable["sleep"] = Command{Name: "sleep", CmdFunc: do_sleep}
+	CommandTable["stand"] = Command{Name: "stand", CmdFunc: do_stand}
 
 	/* act_obj.go */
 	CommandTable["equipment"] = Command{Name: "equipment", CmdFunc: do_equipment}
@@ -117,6 +121,7 @@ func init() {
 	CommandTable["k"] = Command{Name: "kill", CmdFunc: do_kill, Hidden: true}
 	CommandTable["l"] = Command{Name: "look", CmdFunc: do_look, Hidden: true}
 	CommandTable["get"] = Command{Name: "take", CmdFunc: do_take, Hidden: true}
+	CommandTable["wake"] = Command{Name: "stand", CmdFunc: do_stand, Hidden: true}
 	CommandTable["n"] = Command{Name: "north", CmdFunc: do_north, Hidden: true}
 	CommandTable["e"] = Command{Name: "east", CmdFunc: do_east, Hidden: true}
 	CommandTable["s"] = Command{Name: "south", CmdFunc: do_south, Hidden: true}

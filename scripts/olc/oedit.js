@@ -13,6 +13,7 @@ function do_oedit(ch, args) {
 {Goedit <obj> save             - {gSave object instance properties globally
 {Goedit <obj> description      - {gString editor for object's description
 {Goedit <obj> flag <flag name> - {gToggle object flag by name
+{Goedit <obj> furniture <flag> - {gToggle furniture flag by name
 {Goedit <obj> ttl <minutes>    - {gSet object decay lifetime in minutes
 
 {WThe following values may be used in a general way with the syntax:
@@ -90,6 +91,28 @@ function do_oedit(ch, args) {
 
                 target.flags &= ~(flag.flag);
                 ch.send("Ok.  Disabled object flag " + flag.name + " on " + target.getShortDescription(ch) + ".\r\n");
+                return;
+
+            case 'furniture':
+                if (!xxs.length) {
+                    ch.send("A furniture flag argument to toggle is required.\r\nExample: oedit bench furniture sit_on\n");
+                    return;
+                }
+
+                const furnitureFlag = Golem.util.findFurnitureFlag(xxs);
+                if (!furnitureFlag) {
+                    ch.send("No such furniture flag exists.\r\n");
+                    return;
+                }
+
+                if (!(target.value2 & furnitureFlag.flag)) {
+                    target.value2 |= furnitureFlag.flag;
+                    ch.send("Ok.  Enabled furniture flag " + furnitureFlag.name + " on " + target.getShortDescription(ch) + ".\r\n");
+                    return;
+                }
+
+                target.value2 &= ~(furnitureFlag.flag);
+                ch.send("Ok.  Disabled furniture flag " + furnitureFlag.name + " on " + target.getShortDescription(ch) + ".\r\n");
                 return;
 
             case 'name':

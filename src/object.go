@@ -84,6 +84,21 @@ const (
 )
 
 const (
+	FURNITURE_STAND_AT = 1
+	FURNITURE_STAND_ON = 1 << 1
+	FURNITURE_STAND_IN = 1 << 2
+	FURNITURE_SIT_AT   = 1 << 3
+	FURNITURE_SIT_ON   = 1 << 4
+	FURNITURE_SIT_IN   = 1 << 5
+	FURNITURE_REST_AT  = 1 << 6
+	FURNITURE_REST_ON  = 1 << 7
+	FURNITURE_REST_IN  = 1 << 8
+	FURNITURE_SLEEP_AT = 1 << 9
+	FURNITURE_SLEEP_ON = 1 << 10
+	FURNITURE_SLEEP_IN = 1 << 11
+)
+
+const (
 	ITEM_TAKE           = 1
 	ITEM_WEAPON         = 1 << 1
 	ITEM_WEARABLE       = 1 << 2
@@ -142,8 +157,33 @@ var ObjectFlagTable []ObjectFlag = []ObjectFlag{
 	{Name: "persistent", Flag: ITEM_PERSISTENT},
 }
 
+var FurnitureFlagTable []Flag = []Flag{
+	{Name: "stand_at", Flag: FURNITURE_STAND_AT},
+	{Name: "stand_on", Flag: FURNITURE_STAND_ON},
+	{Name: "stand_in", Flag: FURNITURE_STAND_IN},
+	{Name: "sit_at", Flag: FURNITURE_SIT_AT},
+	{Name: "sit_on", Flag: FURNITURE_SIT_ON},
+	{Name: "sit_in", Flag: FURNITURE_SIT_IN},
+	{Name: "rest_at", Flag: FURNITURE_REST_AT},
+	{Name: "rest_on", Flag: FURNITURE_REST_ON},
+	{Name: "rest_in", Flag: FURNITURE_REST_IN},
+	{Name: "sleep_at", Flag: FURNITURE_SLEEP_AT},
+	{Name: "sleep_on", Flag: FURNITURE_SLEEP_ON},
+	{Name: "sleep_in", Flag: FURNITURE_SLEEP_IN},
+}
+
 func FindObjectFlag(flag string) *ObjectFlag {
 	for _, f := range ObjectFlagTable {
+		if strings.EqualFold(f.Name, flag) {
+			return &f
+		}
+	}
+
+	return nil
+}
+
+func FindFurnitureFlag(flag string) *Flag {
+	for _, f := range FurnitureFlagTable {
 		if strings.EqualFold(f.Name, flag) {
 			return &f
 		}
@@ -317,6 +357,80 @@ func (obj *ObjectInstance) GetFlagsString() string {
 	}
 
 	return strings.TrimRight(buf.String(), " ")
+}
+
+func (obj *ObjectInstance) GetFurnitureFlagsString() string {
+	var buf strings.Builder
+
+	if obj == nil || obj.Value2 == 0 {
+		return "none"
+	}
+
+	for _, flag := range FurnitureFlagTable {
+		if obj.Value2&flag.Flag != 0 {
+			buf.WriteString(fmt.Sprintf("%s ", flag.Name))
+		}
+	}
+
+	if buf.Len() == 0 {
+		return "none"
+	}
+
+	return strings.TrimRight(buf.String(), " ")
+}
+
+func furnitureFlagsForPosition(position int) (int, int, int) {
+	switch position {
+	case PositionStanding:
+		return FURNITURE_STAND_AT, FURNITURE_STAND_ON, FURNITURE_STAND_IN
+	case PositionSitting:
+		return FURNITURE_SIT_AT, FURNITURE_SIT_ON, FURNITURE_SIT_IN
+	case PositionResting:
+		return FURNITURE_REST_AT, FURNITURE_REST_ON, FURNITURE_REST_IN
+	case PositionSleeping:
+		return FURNITURE_SLEEP_AT, FURNITURE_SLEEP_ON, FURNITURE_SLEEP_IN
+	default:
+		return 0, 0, 0
+	}
+}
+
+func (obj *ObjectInstance) FurnitureRelation(position int) (string, bool) {
+	if obj == nil || obj.ItemType != ItemTypeFurniture {
+		return "", false
+	}
+
+	at, on, in := furnitureFlagsForPosition(position)
+	switch {
+	case at != 0 && obj.Value2&at != 0:
+		return "at", true
+	case on != 0 && obj.Value2&on != 0:
+		return "on", true
+	case in != 0 && obj.Value2&in != 0:
+		return "in", true
+	default:
+		return "", false
+	}
+}
+
+func (obj *ObjectInstance) SupportsFurniturePosition(position int) bool {
+	_, ok := obj.FurnitureRelation(position)
+	return ok
+}
+
+func (obj *ObjectInstance) CountFurnitureUsers() int {
+	if obj == nil || obj.InRoom == nil || obj.InRoom.Characters == nil {
+		return 0
+	}
+
+	count := 0
+	for iter := obj.InRoom.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+		if rch.Furniture == obj {
+			count++
+		}
+	}
+
+	return count
 }
 
 func (game *Game) LoadObjectsByIndices(indices []uint) ([]*Object, error) {

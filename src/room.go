@@ -78,11 +78,25 @@ func (room *Room) AddObject(obj *ObjectInstance) {
 }
 
 func (room *Room) removeObject(obj *ObjectInstance) {
+	room.clearFurnitureUsers(obj)
 	room.Objects.Remove(obj)
 
 	obj.InRoom = nil
 	obj.CarriedBy = nil
 	obj.Inside = nil
+}
+
+func (room *Room) clearFurnitureUsers(obj *ObjectInstance) {
+	if room == nil || room.Characters == nil || obj == nil {
+		return
+	}
+
+	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
+		rch := iter.Value.(*Character)
+		if rch.Furniture == obj {
+			rch.Furniture = nil
+		}
+	}
 }
 
 func FindRoomFlag(flag string) *Flag {
@@ -246,6 +260,7 @@ func (room *Room) removeCharacter(ch *Character) {
 func (room *Room) removeCharacterForMove(ch *Character, destination *Room) {
 	room.Characters.Remove(ch)
 	ch.moveOrigin = room
+	ch.Furniture = nil
 
 	// If the origin room was planar, remove this character from its atlas' character lookup quadtree
 	if layer, ok := room.planarLayer(); ok {

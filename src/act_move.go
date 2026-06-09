@@ -220,6 +220,268 @@ func PlanarDirectionDeltaFor(direction uint) (DirectionDelta, bool) {
 	return delta, ok
 }
 
+func furnitureArgumentName(arguments string) string {
+	first, rest := OneArgument(arguments)
+	switch first {
+	case "at", "on", "in":
+		return rest
+	default:
+		return strings.TrimSpace(arguments)
+	}
+}
+
+func (ch *Character) resolveFurnitureForPosition(arguments string, position int, cantMessage string) (*ObjectInstance, bool) {
+	args := furnitureArgumentName(arguments)
+	var obj *ObjectInstance
+
+	if args != "" {
+		obj = ch.FindObjectInRoom(args)
+		if obj == nil {
+			ch.Send("You don't see that here.\r\n")
+			return nil, false
+		}
+	} else {
+		obj = ch.Furniture
+	}
+
+	if obj == nil {
+		return nil, true
+	}
+
+	if obj.ItemType != ItemTypeFurniture || !obj.SupportsFurniturePosition(position) {
+		ch.Send(cantMessage)
+		return nil, false
+	}
+
+	if ch.Furniture != obj {
+		if obj.Value0 <= 0 || obj.CountFurnitureUsers() >= obj.Value0 {
+			ch.Send(fmt.Sprintf("There's no more room on %s{x.\r\n", obj.GetShortDescription(ch)))
+			return nil, false
+		}
+
+		if obj.Value1 > 0 && ch.getCarryWeight() > float64(obj.Value1) {
+			ch.Send(fmt.Sprintf("%s{x can't support that much weight.\r\n", obj.GetShortDescriptionUpper(ch)))
+			return nil, false
+		}
+	}
+
+	ch.Furniture = obj
+	return obj, true
+}
+
+func sendFurniturePositionMessage(ch *Character, obj *ObjectInstance, position int, toCharFormat string, toRoomFormat string) {
+	relation, _ := obj.FurnitureRelation(position)
+
+	ch.Send(fmt.Sprintf(toCharFormat, relation, obj.GetShortDescription(ch)))
+	sendToRoomExcept(ch, func(rch *Character) string {
+		return fmt.Sprintf(toRoomFormat, ch.GetShortDescriptionUpper(rch), relation, obj.GetShortDescription(rch))
+	})
+}
+
+func do_stand(ch *Character, arguments string) {
+	if ch.Room == nil {
+		return
+	}
+
+	if ch.isFighting() {
+		ch.Send("You are already fighting!\r\n")
+		return
+	}
+
+	var obj *ObjectInstance
+	if strings.TrimSpace(arguments) != "" {
+		var ok bool
+		obj, ok = ch.resolveFurnitureForPosition(arguments, PositionStanding, "You can't seem to find a place to stand.\r\n")
+		if !ok {
+			return
+		}
+	}
+
+	switch ch.Position {
+	case PositionSleeping:
+		if obj == nil {
+			ch.Send("You wake and stand up.\r\n")
+			sendToRoomExcept(ch, func(rch *Character) string {
+				return fmt.Sprintf("%s{x wakes and stands up.\r\n", ch.GetShortDescriptionUpper(rch))
+			})
+			ch.Furniture = nil
+		} else {
+			sendFurniturePositionMessage(ch, obj, PositionStanding, "You wake and stand %s %s{x.\r\n", "%s{x wakes and stands %s %s{x.\r\n")
+		}
+
+		ch.Position = PositionStanding
+		do_look(ch, "")
+	case PositionResting, PositionSitting:
+		if obj == nil {
+			ch.Send("You stand up.\r\n")
+			sendToRoomExcept(ch, func(rch *Character) string {
+				return fmt.Sprintf("%s{x stands up.\r\n", ch.GetShortDescriptionUpper(rch))
+			})
+			ch.Furniture = nil
+		} else {
+			sendFurniturePositionMessage(ch, obj, PositionStanding, "You stand %s %s{x.\r\n", "%s{x stands %s %s{x.\r\n")
+		}
+
+		ch.Position = PositionStanding
+	case PositionStanding:
+		if obj == nil {
+			ch.Send("You are already standing.\r\n")
+			return
+		}
+
+		sendFurniturePositionMessage(ch, obj, PositionStanding, "You stand %s %s{x.\r\n", "%s{x stands %s %s{x.\r\n")
+	default:
+		if obj == nil {
+			ch.Send("You stand up.\r\n")
+			ch.Furniture = nil
+		} else {
+			sendFurniturePositionMessage(ch, obj, PositionStanding, "You stand %s %s{x.\r\n", "%s{x stands %s %s{x.\r\n")
+		}
+
+		ch.Position = PositionStanding
+	}
+}
+
+func do_sit(ch *Character, arguments string) {
+	if ch.Room == nil {
+		return
+	}
+
+	if ch.isFighting() {
+		ch.Send("Maybe you should finish this fight first?\r\n")
+		return
+	}
+
+	obj, ok := ch.resolveFurnitureForPosition(arguments, PositionSitting, "You can't sit on that.\r\n")
+	if !ok {
+		return
+	}
+
+	switch ch.Position {
+	case PositionSleeping:
+		if obj == nil {
+			ch.Send("You wake and sit up.\r\n")
+			sendToRoomExcept(ch, func(rch *Character) string {
+				return fmt.Sprintf("%s{x wakes and sits up.\r\n", ch.GetShortDescriptionUpper(rch))
+			})
+		} else {
+			sendFurniturePositionMessage(ch, obj, PositionSitting, "You wake and sit %s %s{x.\r\n", "%s{x wakes and sits %s %s{x.\r\n")
+		}
+
+		ch.Position = PositionSitting
+	case PositionResting:
+		if obj == nil {
+			ch.Send("You stop resting.\r\n")
+		} else {
+			sendFurniturePositionMessage(ch, obj, PositionSitting, "You sit %s %s{x.\r\n", "%s{x sits %s %s{x.\r\n")
+		}
+
+		ch.Position = PositionSitting
+	case PositionSitting:
+		ch.Send("You are already sitting down.\r\n")
+	case PositionStanding:
+		if obj == nil {
+			ch.Send("You sit down.\r\n")
+			sendToRoomExcept(ch, func(rch *Character) string {
+				return fmt.Sprintf("%s{x sits down on the ground.\r\n", ch.GetShortDescriptionUpper(rch))
+			})
+		} else {
+			sendFurniturePositionMessage(ch, obj, PositionSitting, "You sit %s %s{x.\r\n", "%s{x sits %s %s{x.\r\n")
+		}
+
+		ch.Position = PositionSitting
+	default:
+		ch.Send("You sit down.\r\n")
+		ch.Position = PositionSitting
+	}
+}
+
+func do_rest(ch *Character, arguments string) {
+	if ch.Room == nil {
+		return
+	}
+
+	if ch.isFighting() {
+		ch.Send("You are already fighting!\r\n")
+		return
+	}
+
+	obj, ok := ch.resolveFurnitureForPosition(arguments, PositionResting, "You can't rest on that.\r\n")
+	if !ok {
+		return
+	}
+
+	switch ch.Position {
+	case PositionSleeping:
+		if obj == nil {
+			ch.Send("You wake up and start resting.\r\n")
+			sendToRoomExcept(ch, func(rch *Character) string {
+				return fmt.Sprintf("%s{x wakes up and starts resting.\r\n", ch.GetShortDescriptionUpper(rch))
+			})
+		} else {
+			sendFurniturePositionMessage(ch, obj, PositionResting, "You wake up and rest %s %s{x.\r\n", "%s{x wakes up and rests %s %s{x.\r\n")
+		}
+
+		ch.Position = PositionResting
+	case PositionResting:
+		ch.Send("You are already resting.\r\n")
+	case PositionSitting:
+		if obj == nil {
+			ch.Send("You rest.\r\n")
+			sendToRoomExcept(ch, func(rch *Character) string {
+				return fmt.Sprintf("%s{x rests.\r\n", ch.GetShortDescriptionUpper(rch))
+			})
+		} else {
+			sendFurniturePositionMessage(ch, obj, PositionResting, "You rest %s %s{x.\r\n", "%s{x rests %s %s{x.\r\n")
+		}
+
+		ch.Position = PositionResting
+	default:
+		if obj == nil {
+			ch.Send("You rest.\r\n")
+			sendToRoomExcept(ch, func(rch *Character) string {
+				return fmt.Sprintf("%s{x sits down and rests.\r\n", ch.GetShortDescriptionUpper(rch))
+			})
+		} else {
+			sendFurniturePositionMessage(ch, obj, PositionResting, "You rest %s %s{x.\r\n", "%s{x rests %s %s{x.\r\n")
+		}
+
+		ch.Position = PositionResting
+	}
+}
+
+func do_sleep(ch *Character, arguments string) {
+	if ch.Room == nil {
+		return
+	}
+
+	if ch.isFighting() {
+		ch.Send("You are already fighting!\r\n")
+		return
+	}
+
+	if ch.Position == PositionSleeping {
+		ch.Send("You are already sleeping.\r\n")
+		return
+	}
+
+	obj, ok := ch.resolveFurnitureForPosition(arguments, PositionSleeping, "You can't sleep on that!\r\n")
+	if !ok {
+		return
+	}
+
+	if obj == nil {
+		ch.Send("You go to sleep.\r\n")
+		sendToRoomExcept(ch, func(rch *Character) string {
+			return fmt.Sprintf("%s{x goes to sleep.\r\n", ch.GetShortDescriptionUpper(rch))
+		})
+	} else {
+		sendFurniturePositionMessage(ch, obj, PositionSleeping, "You go to sleep %s %s{x.\r\n", "%s{x goes to sleep %s %s{x.\r\n")
+	}
+
+	ch.Position = PositionSleeping
+}
+
 func FindExitFlag(flag string) *Flag {
 	for _, f := range ExitFlagTable {
 		if strings.EqualFold(f.Name, flag) {
@@ -240,6 +502,12 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	if ch.Casting != nil {
 		ch.Send("{RYou are focused on casting a magical spell and cannot move!{x\r\n")
+		return false
+	}
+
+	switch ch.Position {
+	case PositionSleeping, PositionResting, PositionSitting:
+		ch.Send("You need to stand up first.\r\n")
 		return false
 	}
 

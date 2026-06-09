@@ -250,6 +250,14 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 	case ItemTypeFountain:
 		liquid := LiquidTable[normalizeLiquid(obj.Value2)]
 		output.WriteString(fmt.Sprintf("{C%s{c flows with %s.{x\r\n", obj.GetShortDescriptionUpper(ch), liquid.Name))
+	case ItemTypeFurniture:
+		output.WriteString(fmt.Sprintf("{C%s{c can hold {C%d{c people with furniture flags {C%s{c.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value0, obj.GetFurnitureFlagsString()))
+		if obj.Value1 > 0 {
+			output.WriteString(fmt.Sprintf("{C%s{c can support up to {C%d{c lbs. of carried weight.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value1))
+		}
+		if obj.Value3 > 0 {
+			output.WriteString(fmt.Sprintf("{C%s{c provides {C%d%%{c recovery.{x\r\n", obj.GetShortDescriptionUpper(ch), obj.Value3))
+		}
 	default:
 		break
 	}

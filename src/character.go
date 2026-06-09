@@ -199,6 +199,7 @@ type Character struct {
 	Combat     *Combat         `json:"combat"`
 	Fighting   *Character      `json:"fighting"`
 	Casting    *CastingContext `json:"casting"`
+	Furniture  *ObjectInstance `json:"furniture"`
 
 	Following *Character  `json:"following"`
 	Leader    *Character  `json:"leader"`
@@ -374,18 +375,23 @@ func (ch *Character) onUpdate() {
 	 * Regenerate some health and mana every tick if not in a room with ROOM_EVIL_AURA set.
 	 * Always regenerate some stamina.
 	 */
+	recoveryBonus := 100
+	if ch.Furniture != nil && ch.Furniture.ItemType == ItemTypeFurniture && ch.Furniture.Value3 > 0 {
+		recoveryBonus = ch.Furniture.Value3
+	}
+
 	if ch.Room == nil || ch.Room.Flags&ROOM_EVIL_AURA == 0 {
 		if ch.Health < ch.MaxHealth {
-			ch.Health = int(math.Min(float64(ch.MaxHealth), float64(ch.Health+3)))
+			ch.Health = int(math.Min(float64(ch.MaxHealth), float64(ch.Health+(3*recoveryBonus/100))))
 		}
 
 		if ch.Mana < ch.MaxMana {
-			ch.Mana = int(math.Min(float64(ch.MaxMana), float64(ch.Mana+7)))
+			ch.Mana = int(math.Min(float64(ch.MaxMana), float64(ch.Mana+(7*recoveryBonus/100))))
 		}
 	}
 
 	if ch.Stamina < ch.MaxStamina {
-		ch.Stamina = int(math.Min(float64(ch.MaxStamina), float64(ch.Stamina+40)))
+		ch.Stamina = int(math.Min(float64(ch.MaxStamina), float64(ch.Stamina+(40*recoveryBonus/100))))
 	}
 
 	ch.updateConditions()
@@ -1776,11 +1782,55 @@ func (ch *Character) getLongDescription(viewer *Character) string {
 		return fmt.Sprintf("%s is here, fighting %s.", ch.GetShortDescriptionUpper(viewer), ch.Fighting.GetShortDescription(viewer))
 	}
 
+	if ch.Position != PositionStanding || ch.Furniture != nil {
+		return ch.getPositionLongDescription(viewer)
+	}
+
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
 		return fmt.Sprintf("%s is here.", ch.Name)
 	}
 
 	return ch.LongDescription
+}
+
+func (ch *Character) getPositionLongDescription(viewer *Character) string {
+	subject := ch.GetShortDescriptionUpper(viewer)
+
+	if ch.Furniture != nil {
+		switch ch.Position {
+		case PositionSleeping:
+			if relation, ok := ch.Furniture.FurnitureRelation(PositionSleeping); ok {
+				return fmt.Sprintf("%s is sleeping %s %s.", subject, relation, ch.Furniture.GetShortDescription(viewer))
+			}
+		case PositionResting:
+			if relation, ok := ch.Furniture.FurnitureRelation(PositionResting); ok {
+				return fmt.Sprintf("%s is resting %s %s.", subject, relation, ch.Furniture.GetShortDescription(viewer))
+			}
+		case PositionSitting:
+			if relation, ok := ch.Furniture.FurnitureRelation(PositionSitting); ok {
+				return fmt.Sprintf("%s is sitting %s %s.", subject, relation, ch.Furniture.GetShortDescription(viewer))
+			}
+		case PositionStanding:
+			if relation, ok := ch.Furniture.FurnitureRelation(PositionStanding); ok {
+				return fmt.Sprintf("%s is standing %s %s.", subject, relation, ch.Furniture.GetShortDescription(viewer))
+			}
+		}
+	}
+
+	switch ch.Position {
+	case PositionSleeping:
+		return fmt.Sprintf("%s is sleeping here.", subject)
+	case PositionResting:
+		return fmt.Sprintf("%s is resting here.", subject)
+	case PositionSitting:
+		return fmt.Sprintf("%s is sitting here.", subject)
+	default:
+		if ch.Flags&CHAR_IS_PLAYER != 0 {
+			return fmt.Sprintf("%s is here.", ch.Name)
+		}
+
+		return ch.LongDescription
+	}
 }
 
 func (ch *Character) AddObject(obj *ObjectInstance) {
@@ -2023,6 +2073,7 @@ func NewCharacter() *Character {
 	character.Gold = 0
 	character.Fighting = nil
 	character.Combat = nil
+	character.Furniture = nil
 	character.Race = nil
 	character.Room = nil
 	character.Trail = make([]*Room, 0)
@@ -2030,7 +2081,7 @@ func NewCharacter() *Character {
 	character.moveOrigin = nil
 	character.Wiznet = false
 	character.Practices = 0
-	character.Position = PositionDead
+	character.Position = PositionStanding
 	character.output = make([]byte, 65536)
 	character.outputCursor = 0
 	character.inputCursor = DefaultMaxLines
