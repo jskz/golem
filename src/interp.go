@@ -39,6 +39,9 @@ func init() {
 	CommandTable["say"] = Command{Name: "say", CmdFunc: do_say}
 	CommandTable["save"] = Command{Name: "save", CmdFunc: do_save}
 
+	/* act_social.go */
+	CommandTable["socials"] = Command{Name: "socials", CmdFunc: do_socials}
+
 	/* act_info.go */
 	CommandTable["affect"] = Command{Name: "affect", CmdFunc: do_affect}
 	CommandTable["help"] = Command{Name: "help", CmdFunc: do_help}
@@ -226,6 +229,10 @@ func (ch *Character) Interpret(input string) bool {
 	if !ok || (ok && ch.Level < val.MinimumLevel) {
 		/* Send a no such command if there was any command text */
 		if len(command) > 0 {
+			if !ok && ch.Game != nil && ch.trySocial(command, rest) {
+				return true
+			}
+
 			/* As a fallback, see if this command matches any proficiency which has a registered handler. */
 			prof := ch.FindProficiencyByName(command)
 			if prof == nil || prof.Proficiency <= 0 || ch.Game.skills[prof.SkillId].Handler == nil {

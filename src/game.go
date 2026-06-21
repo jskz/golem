@@ -49,6 +49,7 @@ type Game struct {
 	world       map[uint]*Room
 	shops       map[uint]*Shop
 	mobileShops map[uint]*Shop
+	socials     map[string]*Social
 
 	eventHandlers   map[string]*LinkedList
 	Scripts         map[uint]*Script `json:"scripts"`
@@ -129,6 +130,11 @@ func NewGame() (*Game, error) {
 	}
 
 	err = game.LoadJobSkills()
+	if err != nil {
+		return nil, err
+	}
+
+	err = game.LoadSocials()
 	if err != nil {
 		return nil, err
 	}
