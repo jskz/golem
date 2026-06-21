@@ -56,7 +56,7 @@ This will be a working document to track major feature development goals for eac
 
 ## 0.8 The (Problematic) Human Element Development Milestones
 
-- [ ] Socials: flavour text commands for socializing in-room like grin, nod, laugh
+- [x] Socials: flavour text commands for socializing in-room like grin, nod, laugh
 - [ ] Enforcement: bans on username and host (IP? allow covering prefix with single ban?)
 
 ## 0.9 Tying It All Together Milestones
@@ -66,5 +66,4 @@ This will be a working document to track major feature development goals for eac
 
 ## 1.0 Release Milestones
 
-- [ ] Harden existing telnet implementation and begin fuzzing; we'll rewrite the telnet implementation as a post-1.0 goal
 - [ ] TBD; errata, polish, suggestions uncovered en route
