@@ -49,13 +49,13 @@ func parseIndexedArgument(argument string) (int, string, bool) {
 }
 
 type Job struct {
-	Id                         uint                     `json:"id"`
-	Name                       string                   `json:"name"`
-	DisplayName                string                   `json:"display_name"`
-	Playable                   bool                     `json:"playable"`
-	ExperienceRequiredModifier float64                  `json:"experience_required_modifier"`
-	Skills                     *LinkedList[interface{}] `json:"skills"`
-	PrimaryAttribute           int                      `json:"primaryAttribute"`
+	Id                         uint                   `json:"id"`
+	Name                       string                 `json:"name"`
+	DisplayName                string                 `json:"display_name"`
+	Playable                   bool                   `json:"playable"`
+	ExperienceRequiredModifier float64                `json:"experience_required_modifier"`
+	Skills                     *LinkedList[*JobSkill] `json:"skills"`
+	PrimaryAttribute           int                    `json:"primaryAttribute"`
 }
 
 type Race struct {

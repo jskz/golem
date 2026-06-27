@@ -110,7 +110,7 @@ func (ch *Character) FindProficiencyByName(name string) *Proficiency {
 
 func (ch *Character) syncJobSkills() error {
 	for iter := ch.Job.Skills.Head; iter != nil; iter = iter.Next {
-		jobSkill := iter.Value.(*JobSkill)
+		jobSkill := iter.Value
 
 		if uint(jobSkill.Level) > ch.Level {
 			continue
@@ -375,7 +375,7 @@ func (ch *Character) LoadPlayerSkills() error {
 		}
 
 		for iter := Jobs.Head; iter != nil; iter = iter.Next {
-			job := iter.Value.(*Job)
+			job := iter.Value
 
 			if job.Id == jobId {
 				proficiency.Job = job

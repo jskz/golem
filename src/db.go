@@ -14,8 +14,8 @@ import (
 )
 
 var TerrainTable map[int]*Terrain
-var Jobs *LinkedList[interface{}]
-var Races *LinkedList[interface{}]
+var Jobs *LinkedList[*Job]
+var Races *LinkedList[*Race]
 
 func (game *Game) LoadTerrain() error {
 	log.Printf("Loading terrain types.\r\n")
@@ -63,7 +63,7 @@ func (game *Game) LoadTerrain() error {
 func (game *Game) LoadRaceTable() error {
 	log.Printf("Loading races.\r\n")
 
-	Races = NewAnyLinkedList()
+	Races = NewLinkedList[*Race]()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -108,7 +108,7 @@ func (game *Game) LoadRaceTable() error {
 func (game *Game) LoadJobTable() error {
 	log.Printf("Loading jobs.\r\n")
 
-	Jobs = NewAnyLinkedList()
+	Jobs = NewLinkedList[*Job]()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -139,7 +139,7 @@ func (game *Game) LoadJobTable() error {
 			continue
 		}
 
-		job.Skills = NewAnyLinkedList()
+		job.Skills = NewLinkedList[*JobSkill]()
 		job.PrimaryAttribute = FindStatByName(primaryAttribute)
 		Jobs.Insert(job)
 	}
@@ -214,7 +214,7 @@ func (game *Game) LoadJobSkills() error {
 /* Utility lookup methods */
 func FindJobByName(name string) *Job {
 	for iter := Jobs.Head; iter != nil; iter = iter.Next {
-		job := iter.Value.(*Job)
+		job := iter.Value
 
 		if strings.Compare(name, job.Name) == 0 {
 			return job
@@ -226,7 +226,7 @@ func FindJobByName(name string) *Job {
 
 func FindRaceByName(name string) *Race {
 	for iter := Races.Head; iter != nil; iter = iter.Next {
-		race := iter.Value.(*Race)
+		race := iter.Value
 
 		if strings.Compare(name, race.Name) == 0 {
 			return race
@@ -238,7 +238,7 @@ func FindRaceByName(name string) *Race {
 
 func FindJobByID(id uint) *Job {
 	for iter := Jobs.Head; iter != nil; iter = iter.Next {
-		job := iter.Value.(*Job)
+		job := iter.Value
 
 		if job.Id == id {
 			return job
@@ -250,7 +250,7 @@ func FindJobByID(id uint) *Job {
 
 func FindRaceByID(id uint) *Race {
 	for iter := Races.Head; iter != nil; iter = iter.Next {
-		race := iter.Value.(*Race)
+		race := iter.Value
 
 		if race.Id == id {
 			return race
