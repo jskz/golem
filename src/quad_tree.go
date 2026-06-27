@@ -18,10 +18,10 @@ type QuadTree struct {
 	Southwest *QuadTree `json:"sw"`
 	Southeast *QuadTree `json:"se"`
 
-	Boundary *Rect                    `json:"boundary"`
-	Nodes    *LinkedList[interface{}] `json:"data"`
-	Capacity int                      `json:"capacity"`
-	Parent   *QuadTree                `json:"parent"`
+	Boundary *Rect               `json:"boundary"`
+	Nodes    *LinkedList[*Point] `json:"data"`
+	Capacity int                 `json:"capacity"`
+	Parent   *QuadTree           `json:"parent"`
 }
 
 const QuadTreeNodeMaxElements = 4
@@ -67,7 +67,7 @@ func (qt *QuadTree) Subdivide() bool {
 
 	// Repartition the nodes at this level to the appropriate child quad
 	for iter := qt.Nodes.Head; iter != nil; iter = iter.Next {
-		point := iter.Value.(*Point)
+		point := iter.Value
 
 		if qt.Northwest.Boundary.ContainsPoint(point) {
 			qt.Northwest.Nodes.Insert(point)
@@ -160,7 +160,7 @@ func (qt *QuadTree) Collapse() bool {
 		qt.Southwest = nil
 		qt.Southeast = nil
 
-		qt.Nodes = NewAnyLinkedList()
+		qt.Nodes = NewLinkedList[*Point]()
 
 		for _, p := range results {
 			qt.Nodes.Insert(p)
@@ -219,7 +219,7 @@ func (qt *QuadTree) QueryRect(r *Rect) []*Point {
 	}
 
 	for iter := qt.Nodes.Head; iter != nil; iter = iter.Next {
-		p := iter.Value.(*Point)
+		p := iter.Value
 
 		if r.ContainsPoint(p) {
 			results = append(results, p)
@@ -244,7 +244,7 @@ func (qt *QuadTree) QueryRect(r *Rect) []*Point {
 func NewQuadTree(width float64, height float64) *QuadTree {
 	qt := &QuadTree{
 		Capacity: QuadTreeNodeMaxElements,
-		Nodes:    NewAnyLinkedList(),
+		Nodes:    NewLinkedList[*Point](),
 		Boundary: &Rect{X: 0, Y: 0, W: width, H: height},
 		Parent:   nil,
 	}
