@@ -7,7 +7,10 @@
  */
 package main
 
-import "math/rand"
+import (
+	"iter"
+	"math/rand"
+)
 
 type LinkedListNode[T comparable] struct {
 	Next  *LinkedListNode[T] `json:"next"`
@@ -29,6 +32,16 @@ func NewLinkedList[T comparable]() *LinkedList[T] {
 
 func NewAnyLinkedList() *LinkedList[interface{}] {
 	return NewLinkedList[interface{}]()
+}
+
+func (list *LinkedList[T]) All() iter.Seq[T] {
+	return func(yield func(T) bool) {
+		for iter := list.Head; iter != nil; iter = iter.Next {
+			if !yield(iter.Value) {
+				return
+			}
+		}
+	}
 }
 
 func (list *LinkedList[T]) Remove(value T) bool {
