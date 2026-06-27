@@ -109,9 +109,7 @@ func (ch *Character) FindProficiencyByName(name string) *Proficiency {
 }
 
 func (ch *Character) syncJobSkills() error {
-	for iter := ch.Job.Skills.Head; iter != nil; iter = iter.Next {
-		jobSkill := iter.Value
-
+	for jobSkill := range ch.Job.Skills.All() {
 		if uint(jobSkill.Level) > ch.Level {
 			continue
 		}
@@ -196,9 +194,7 @@ func do_practice(ch *Character, arguments string) {
 			return
 		}
 
-		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value
-
+		for rch := range ch.Room.Characters.All() {
 			if rch.Flags&CHAR_PRACTICE != 0 {
 				trainerFound = true
 			}
@@ -374,9 +370,7 @@ func (ch *Character) LoadPlayerSkills() error {
 			return err
 		}
 
-		for iter := Jobs.Head; iter != nil; iter = iter.Next {
-			job := iter.Value
-
+		for job := range Jobs.All() {
 			if job.Id == jobId {
 				proficiency.Job = job
 			}

@@ -371,8 +371,7 @@ func (game *Game) recoverCopyoverClient(savedClient copyoverClientState) error {
 	go client.readPump(game)
 
 	if ch.Room != nil {
-		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value
+		for rch := range ch.Room.Characters.All() {
 			if rch != ch {
 				rch.Send(fmt.Sprintf("\r\n{W%s materializes.{x\r\n", ch.GetShortDescriptionUpper(rch)))
 			}

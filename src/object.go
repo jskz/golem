@@ -423,8 +423,7 @@ func (obj *ObjectInstance) CountFurnitureUsers() int {
 	}
 
 	count := 0
-	for iter := obj.InRoom.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value
+	for rch := range obj.InRoom.Characters.All() {
 		if rch.Furniture == obj {
 			count++
 		}
@@ -595,8 +594,7 @@ func (obj *ObjectInstance) GetContentsWeight() float64 {
 	}
 
 	var total float64
-	for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-		containedObject := iter.Value
+	for containedObject := range obj.Contents.All() {
 		total += containedObject.GetTotalWeight()
 	}
 
@@ -652,9 +650,7 @@ func (obj *ObjectInstance) reifyInContainerTx(ctx context.Context, tx *sql.Tx, c
 	}
 
 	if obj.Contents != nil && obj.Contents.Count > 0 {
-		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-			containedObject := iter.Value
-
+		for containedObject := range obj.Contents.All() {
 			containedReified, err := containedObject.reifyInContainerTx(ctx, tx, obj)
 			reified = append(reified, containedReified...)
 			if err != nil {
@@ -677,8 +673,7 @@ func (obj *ObjectInstance) objectInstanceIDs() []uint {
 	}
 
 	if obj.Contents != nil {
-		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-			containedObject := iter.Value
+		for containedObject := range obj.Contents.All() {
 			ids = append(ids, containedObject.objectInstanceIDs()...)
 		}
 	}
@@ -694,8 +689,7 @@ func (obj *ObjectInstance) resetObjectInstanceIDs() {
 	obj.Id = 0
 
 	if obj.Contents != nil {
-		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-			containedObject := iter.Value
+		for containedObject := range obj.Contents.All() {
 			containedObject.resetObjectInstanceIDs()
 		}
 	}
@@ -842,9 +836,7 @@ func (ch *Character) showObjectList(objects *LinkedList[*ObjectInstance]) {
 		return
 	}
 
-	for iter := objects.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value
-
+	for obj := range objects.All() {
 		output.WriteString(fmt.Sprintf("  %s\r\n", obj.GetShortDescriptionUpper(ch)))
 	}
 

@@ -213,9 +213,7 @@ func (game *Game) LoadJobSkills() error {
 
 /* Utility lookup methods */
 func FindJobByName(name string) *Job {
-	for iter := Jobs.Head; iter != nil; iter = iter.Next {
-		job := iter.Value
-
+	for job := range Jobs.All() {
 		if strings.Compare(name, job.Name) == 0 {
 			return job
 		}
@@ -225,9 +223,7 @@ func FindJobByName(name string) *Job {
 }
 
 func FindRaceByName(name string) *Race {
-	for iter := Races.Head; iter != nil; iter = iter.Next {
-		race := iter.Value
-
+	for race := range Races.All() {
 		if strings.Compare(name, race.Name) == 0 {
 			return race
 		}
@@ -237,9 +233,7 @@ func FindRaceByName(name string) *Race {
 }
 
 func FindJobByID(id uint) *Job {
-	for iter := Jobs.Head; iter != nil; iter = iter.Next {
-		job := iter.Value
-
+	for job := range Jobs.All() {
 		if job.Id == id {
 			return job
 		}
@@ -249,9 +243,7 @@ func FindJobByID(id uint) *Job {
 }
 
 func FindRaceByID(id uint) *Race {
-	for iter := Races.Head; iter != nil; iter = iter.Next {
-		race := iter.Value
-
+	for race := range Races.All() {
 		if race.Id == id {
 			return race
 		}

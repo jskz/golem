@@ -29,9 +29,7 @@ func (ch *Character) onCastingUpdate() {
 	if ch.Casting.Proficiency < fizzleChance {
 		ch.Send("\r\n{WYou lose your concentration and your magic spell fizzles out.{x\r\n")
 		if ch.Room != nil {
-			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value
-
+			for rch := range ch.Room.Characters.All() {
 				if !rch.IsEqual(ch) {
 					rch.Send(fmt.Sprintf("\r\n{W%s{W seems to lose their concentration.{W{x\r\n", ch.GetShortDescriptionUpper(rch)))
 				}
@@ -46,9 +44,7 @@ func (ch *Character) onCastingUpdate() {
 		ch.Send("\r\n{WYou finish casting the magic spell.{x\r\n")
 
 		if ch.Room != nil {
-			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value
-
+			for rch := range ch.Room.Characters.All() {
 				if !rch.IsEqual(ch) {
 					rch.Send(fmt.Sprintf("\r\n{W%s{W finishes casting their magic spell.{W{x\r\n", ch.GetShortDescriptionUpper(rch)))
 				}
@@ -130,8 +126,7 @@ func do_cast(ch *Character, arguments string) {
 	}
 
 	ch.Send("{WYou start uttering the words of the spell...{x\r\n")
-	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		character := iter.Value
+	for character := range ch.Room.Characters.All() {
 		if character != ch {
 			character.Send(fmt.Sprintf("\r\n{W%s{W begins casting a spell...{x\r\n", ch.GetShortDescriptionUpper(character)))
 		}

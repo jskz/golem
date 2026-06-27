@@ -124,16 +124,12 @@ func (game *Game) CreateZone() *Zone {
 }
 
 func (game *Game) ResetRoom(room *Room) {
-	for iter := room.Resets.Head; iter != nil; iter = iter.Next {
-		reset := iter.Value
-
+	for reset := range room.Resets.All() {
 		switch reset.ResetType {
 		case ResetTypeObject:
 			count := 0
 
-			for iter := room.Objects.Head; iter != nil; iter = iter.Next {
-				obj := iter.Value
-
+			for obj := range room.Objects.All() {
 				if obj.ParentId == uint(reset.Value0) {
 					count++
 				}
@@ -160,9 +156,7 @@ func (game *Game) ResetRoom(room *Room) {
 		case ResetTypeMobile:
 			count := 0
 
-			for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value
-
+			for rch := range room.Characters.All() {
 				if rch.Flags&CHAR_IS_PLAYER == 0 && rch.Id == reset.Value0 {
 					count++
 				}
@@ -188,9 +182,7 @@ func (game *Game) ResetRoom(room *Room) {
 		}
 	}
 
-	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-		character := iter.Value
-
+	for character := range room.Characters.All() {
 		if room.Zone.ResetMessage != "" && character.Flags&CHAR_IS_PLAYER != 0 {
 			character.Send(fmt.Sprintf("\r\n{x%s{x\r\n", room.Zone.ResetMessage))
 		}
@@ -206,9 +198,7 @@ func (game *Game) ValidZoneRangeExcept(low uint, high uint, ignoredZoneId int) b
 		return false
 	}
 
-	for zoneIter := game.Zones.Head; zoneIter != nil; zoneIter = zoneIter.Next {
-		zone := zoneIter.Value
-
+	for zone := range game.Zones.All() {
 		if zone.Id == ignoredZoneId {
 			continue
 		}
@@ -489,9 +479,7 @@ func (game *Game) LoadResets() error {
 }
 
 func (game *Game) FindZoneByID(id int) *Zone {
-	for zoneIter := game.Zones.Head; zoneIter != nil; zoneIter = zoneIter.Next {
-		zone := zoneIter.Value
-
+	for zone := range game.Zones.All() {
 		if zone.Id == id {
 			return zone
 		}

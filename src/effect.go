@@ -113,9 +113,7 @@ func (ch *Character) HasEffect(fx *Effect) bool {
 		return false
 	}
 
-	for effect := ch.Effects.Head; effect != nil; effect = effect.Next {
-		existing := effect.Value
-
+	for existing := range ch.Effects.All() {
 		if existing.Matches(fx) {
 			return true
 		}
@@ -150,8 +148,7 @@ func (ch *Character) refreshAffected() {
 		return
 	}
 
-	for effect := ch.Effects.Head; effect != nil; effect = effect.Next {
-		fx := effect.Value
+	for fx := range ch.Effects.All() {
 		if fx.EffectType == EffectTypeAffected {
 			ch.Affected |= fx.Bits
 		}

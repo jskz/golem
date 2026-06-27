@@ -339,8 +339,7 @@ func (game *Game) clearScriptBindings() {
 		return
 	}
 
-	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
-		plane := iter.Value
+	for plane := range game.Planes.All() {
 		plane.Scripts = nil
 	}
 }
@@ -378,8 +377,7 @@ func (game *Game) detachScriptBindings(script *Script) {
 		return
 	}
 
-	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
-		plane := iter.Value
+	for plane := range game.Planes.All() {
 		if sameScriptBinding(plane.Scripts, script) {
 			plane.Scripts = nil
 		}
@@ -532,9 +530,7 @@ func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, t
 		errors := make([]error, game.eventHandlers[name].Count)
 		i := 0
 
-		for iter := game.eventHandlers[name].Head; iter != nil; iter = iter.Next {
-			eventHandler := iter.Value
-
+		for eventHandler := range game.eventHandlers[name].All() {
 			result, err := eventHandler.callback(this, arguments...)
 			if err != nil {
 				logScriptHandlerError(fmt.Sprintf("event %q", name), err)

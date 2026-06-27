@@ -91,8 +91,7 @@ func (room *Room) clearFurnitureUsers(obj *ObjectInstance) {
 		return
 	}
 
-	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value
+	for rch := range room.Characters.All() {
 		if rch.Furniture == obj {
 			rch.Furniture = nil
 		}
@@ -114,9 +113,7 @@ func (room *Room) ActiveLightSourcePresent() bool {
 		return true
 	}
 
-	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value
-
+	for rch := range room.Characters.All() {
 		if rch.HasEquippedLightSource() {
 			return true
 		}
@@ -281,9 +278,7 @@ func (room *Room) listObjectsToCharacter(ch *Character) {
 func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 	var output strings.Builder
 
-	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value
-
+	for rch := range room.Characters.All() {
 		if rch != ch {
 			output.WriteString(fmt.Sprintf("{G%s{x\r\n", rch.getLongDescription(ch)))
 		}
@@ -336,9 +331,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 		return nil, err
 	}
 
-	for iter := game.Zones.Head; iter != nil; iter = iter.Next {
-		zone := iter.Value
-
+	for zone := range game.Zones.All() {
 		if zone.Id == zoneId {
 			room.Zone = zone
 		}
@@ -445,10 +438,8 @@ func (room *Room) Broadcast(message string, filter goja.Callable) {
 	var recipients []*Character = make([]*Character, 0)
 
 	/* Collect characters in room for which filter(rch) == true */
-	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
+	for rch := range room.Characters.All() {
 		var result bool = false
-
-		rch := iter.Value
 
 		if filter != nil {
 			val, err := filter(room.Game.vm.ToValue(rch))

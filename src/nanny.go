@@ -213,9 +213,7 @@ func (game *Game) nanny(client *Client, message string) {
 		/* Counter value for periodically line-breaking */
 		index := 0
 
-		for iter := Races.Head; iter != nil; iter = iter.Next {
-			race := iter.Value
-
+		for race := range Races.All() {
 			if !race.Playable {
 				continue
 			}
@@ -250,9 +248,7 @@ func (game *Game) nanny(client *Client, message string) {
 			/* Counter value for periodically line-breaking */
 			index := 0
 
-			for iter := Races.Head; iter != nil; iter = iter.Next {
-				race := iter.Value
-
+			for race := range Races.All() {
 				if !race.Playable {
 					continue
 				}
@@ -276,9 +272,7 @@ func (game *Game) nanny(client *Client, message string) {
 		/* Counter value for periodically line-breaking */
 		index := 0
 
-		for iter := Jobs.Head; iter != nil; iter = iter.Next {
-			job := iter.Value
-
+		for job := range Jobs.All() {
 			if !job.Playable {
 				continue
 			}
@@ -313,9 +307,7 @@ func (game *Game) nanny(client *Client, message string) {
 			/* Counter value for periodically line-breaking */
 			index := 0
 
-			for iter := Jobs.Head; iter != nil; iter = iter.Next {
-				job := iter.Value
-
+			for job := range Jobs.All() {
 				if !job.Playable {
 					continue
 				}

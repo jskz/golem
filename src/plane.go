@@ -240,9 +240,7 @@ func (obs *PlaneObserver) Dispose() {
 }
 
 func (layer *MapGrid) FindDistrict(x int, y int) *District {
-	for iter := layer.Districts.Head; iter != nil; iter = iter.Next {
-		d := iter.Value
-
+	for d := range layer.Districts.All() {
 		if d.Rect.Contains(float64(x), float64(y)) {
 			return d
 		}
@@ -678,9 +676,7 @@ func (plane *Plane) GetTerrainRect(x int, y int, z int, w int, h int) [][]int {
 }
 
 func (game *Game) FindPlaneByName(name string) *Plane {
-	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
-		plane := iter.Value
-
+	for plane := range game.Planes.All() {
 		if plane.Name == name {
 			return plane
 		}
@@ -690,9 +686,7 @@ func (game *Game) FindPlaneByName(name string) *Plane {
 }
 
 func (game *Game) FindPlaneByID(id int) *Plane {
-	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
-		plane := iter.Value
-
+	for plane := range game.Planes.All() {
 		if plane.Id == id {
 			return plane
 		}
@@ -737,9 +731,7 @@ func (game *Game) LoadPlanes() error {
 			return err
 		}
 
-		for iter := game.Zones.Head; iter != nil; iter = iter.Next {
-			zone := iter.Value
-
+		for zone := range game.Zones.All() {
 			if zone.Id == zoneId {
 				plane.Zone = zone
 			}
@@ -813,9 +805,7 @@ func (game *Game) LoadDistricts() error {
 
 		collides := false
 
-		for iter := layer.Districts.Head; iter != nil; iter = iter.Next {
-			d := iter.Value
-
+		for d := range layer.Districts.All() {
 			if d.Rect.CollidesRect(district.Rect) {
 				log.Printf("District %d collides with an existing district, ignoring.\r\n", district.Id)
 				collides = true
@@ -841,9 +831,7 @@ func (game *Game) LoadDistricts() error {
 }
 
 func (game *Game) FindDistrictByID(id int) *District {
-	for planeIter := game.Planes.Head; planeIter != nil; planeIter = planeIter.Next {
-		plane := planeIter.Value
-
+	for plane := range game.Planes.All() {
 		if plane.Map == nil || len(plane.Map.Layers) == 0 {
 			continue
 		}
@@ -853,9 +841,7 @@ func (game *Game) FindDistrictByID(id int) *District {
 				continue
 			}
 
-			for districtIter := layer.Districts.Head; districtIter != nil; districtIter = districtIter.Next {
-				district := districtIter.Value
-
+			for district := range layer.Districts.All() {
 				if district.Id == id {
 					return district
 				}

@@ -14,9 +14,7 @@ import (
 )
 
 func (game *Game) characterUpdate() {
-	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
-		ch := iter.Value
-
+	for ch := range game.Characters.All() {
 		if ch.Casting != nil {
 			ch.onCastingUpdate()
 		}
@@ -127,9 +125,7 @@ func (game *Game) removeCharacterFromWorld(ch *Character) {
 		iter = next
 	}
 
-	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value
-
+	for rch := range game.Characters.All() {
 		if rch.Fighting == ch {
 			rch.Fighting = nil
 		}
@@ -165,9 +161,7 @@ func (game *Game) sendDecayMessage(obj *ObjectInstance, location objectLocation)
 	}
 
 	if location.room != nil {
-		for innerIter := location.room.Characters.Head; innerIter != nil; innerIter = innerIter.Next {
-			rch := innerIter.Value
-
+		for rch := range location.room.Characters.All() {
 			rch.Send(fmt.Sprintf("{D%s{D crumbles into dust.{x\r\n", obj.GetShortDescriptionUpper(rch)))
 		}
 
@@ -250,9 +244,7 @@ func (game *Game) moveDecayedContainerContent(obj *ObjectInstance, location obje
 func (game *Game) moveDecayedContainerContentToRoom(obj *ObjectInstance, room *Room) {
 	var found *ObjectInstance = nil
 
-	for iter := room.Objects.Head; iter != nil; iter = iter.Next {
-		roomObj := iter.Value
-
+	for roomObj := range room.Objects.All() {
 		if roomObj.ItemType == ItemTypeCurrency {
 			found = roomObj
 			break
@@ -297,17 +289,13 @@ func (obj *ObjectInstance) removeFromLocation() {
 }
 
 func (game *Game) Update() {
-	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
-		ch := iter.Value
-
+	for ch := range game.Characters.All() {
 		ch.onUpdate()
 	}
 }
 
 func (game *Game) ZoneUpdate() {
-	for iter := game.Zones.Head; iter != nil; iter = iter.Next {
-		zone := iter.Value
-
+	for zone := range game.Zones.All() {
 		if time.Since(zone.LastReset).Minutes() > float64(zone.ResetFrequency) {
 			game.ResetZone(zone)
 		}

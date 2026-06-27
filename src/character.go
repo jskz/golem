@@ -575,9 +575,7 @@ func (ch *Character) GetStat(stat int) (int, int) {
 	var base int = ch.Stats[stat]
 	var modifiedSum int = 0
 
-	for iter := ch.Effects.Head; iter != nil; iter = iter.Next {
-		fx := iter.Value
-
+	for fx := range ch.Effects.All() {
 		if fx.EffectType != EffectTypeStat || fx.Location != stat {
 			continue
 		}
@@ -887,8 +885,7 @@ func (ch *Character) DetachAllObjects() int {
 	}
 
 	if ch.Inventory != nil {
-		for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-			obj := iter.Value
+		for obj := range ch.Inventory.All() {
 			obj.resetObjectInstanceIDs()
 		}
 	}
@@ -1107,14 +1104,10 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 	var updating []*ObjectInstance = make([]*ObjectInstance, 0)
 
 	/* Iterate over all objects in this player's inventory */
-	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value
-
+	for obj := range ch.Inventory.All() {
 		/* If this is a container, ensure that all contained object instances are also updated */
 		if obj.Contents != nil && obj.Contents.Count > 0 {
-			for containerIter := obj.Contents.Head; containerIter != nil; containerIter = containerIter.Next {
-				containedObj := containerIter.Value
-
+			for containedObj := range obj.Contents.All() {
 				updating = append(updating, containedObj)
 			}
 		}
@@ -1257,9 +1250,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 		return err
 	}
 
-	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value
-
+	for obj := range ch.Inventory.All() {
 		rows, err := game.db.Query(`
 			SELECT
 				object_instances.id,
@@ -1452,15 +1443,11 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 func (game *Game) addPlayerCharacterToWorld(ch *Character) {
 	game.Characters.Insert(ch)
 
-	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value
-
+	for obj := range ch.Inventory.All() {
 		game.Objects.Insert(obj)
 
 		if obj.Contents != nil {
-			for innerIter := obj.Contents.Head; innerIter != nil; innerIter = innerIter.Next {
-				containedObj := innerIter.Value
-
+			for containedObj := range obj.Contents.All() {
 				game.Objects.Insert(containedObj)
 			}
 		}
@@ -1673,8 +1660,7 @@ func (ch *Character) getCarryWeight() float64 {
 	}
 
 	var total float64
-	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value
+	for obj := range ch.Inventory.All() {
 		total += obj.GetTotalWeight()
 	}
 
@@ -1872,14 +1858,12 @@ func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *Obj
 		return nil
 	}
 
-	for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value
-
-		nameParts := strings.Split(obj.Name, " ")
+	for containedObj := range obj.Contents.All() {
+		nameParts := strings.Split(containedObj.Name, " ")
 		for _, part := range nameParts {
 			if strings.EqualFold(part, processed) {
 				if i == desiredIndex {
-					return obj
+					return containedObj
 				} else {
 					i++
 					continue
@@ -1907,9 +1891,7 @@ func (ch *Character) FindObjectInRoom(argument string) *ObjectInstance {
 		return nil
 	}
 
-	for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value
-
+	for obj := range ch.Room.Objects.All() {
 		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
 			if strings.EqualFold(part, processed) {
@@ -1941,9 +1923,7 @@ func (ch *Character) FindObjectOnSelf(argument string) *ObjectInstance {
 		return nil
 	}
 
-	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value
-
+	for obj := range ch.Inventory.All() {
 		if obj.WearLocation != -1 {
 			continue
 		}
@@ -1987,9 +1967,7 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 		return nil
 	}
 
-	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value
-
+	for rch := range ch.Room.Characters.All() {
 		nameParts := strings.Split(rch.Name, " ")
 		for _, part := range nameParts {
 			if strings.EqualFold(part, processed) {
@@ -2009,10 +1987,8 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 func (game *Game) Broadcast(message string, filter goja.Callable) {
 	var recipients []*Character = make([]*Character, 0)
 
-	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
+	for ch := range game.Characters.All() {
 		var result bool = false
-
-		ch := iter.Value
 
 		if filter != nil {
 			val, err := filter(game.vm.ToValue(ch))
@@ -2042,10 +2018,8 @@ func WiznetBroadcastFilter(ch *Character) bool {
 func (game *Game) broadcast(message string, filterFn func(*Character) bool) {
 	var recipients []*Character = make([]*Character, 0)
 
-	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
+	for ch := range game.Characters.All() {
 		var result bool = false
-
-		ch := iter.Value
 
 		if filterFn != nil {
 			result = filterFn(ch)

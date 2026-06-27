@@ -54,9 +54,7 @@ func do_say(ch *Character, arguments string) {
 	output := buf.String()
 
 	if ch.Room != nil {
-		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value
-
+		for rch := range ch.Room.Characters.All() {
 			if rch != ch {
 				rch.Send(output)
 			}
@@ -117,13 +115,9 @@ func do_quit(ch *Character, arguments string) {
 	})
 
 	ch.Game.Characters.Remove(ch)
-	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value
-
+	for obj := range ch.Inventory.All() {
 		if obj.Contents != nil {
-			for innerIter := obj.Contents.Head; innerIter != nil; innerIter = innerIter.Next {
-				containedObj := innerIter.Value
-
+			for containedObj := range obj.Contents.All() {
 				ch.Game.Objects.Remove(containedObj)
 			}
 		}
@@ -146,8 +140,7 @@ func do_quit(ch *Character, arguments string) {
 func (ch *Character) DisbandGroup() {
 	ch.Send("{WYou disband your group.{x\r\n")
 
-	for iter := ch.Group.Head; iter != nil; iter = iter.Next {
-		gch := iter.Value
+	for gch := range ch.Group.All() {
 		gch.Group = nil
 		gch.Leader = nil
 
@@ -190,9 +183,7 @@ func do_group(ch *Character, arguments string) {
 
 		output.WriteString(fmt.Sprintf("{W%s{W's group:{x\r\n", ch.Leader.GetShortDescriptionUpper(ch)))
 
-		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
-			gch := iter.Value
-
+		for gch := range ch.Group.All() {
 			output.WriteString(fmt.Sprintf("[%2d %-8s] %-14s %5d/%5dhp %5d/%5dm %5d/%5dst\r\n",
 				gch.Level,
 				gch.Job.DisplayName,
@@ -229,9 +220,7 @@ func do_group(ch *Character, arguments string) {
 
 		ch.Send(fmt.Sprintf("{WYou leave %s{W's group.{x\r\n", ch.Leader.GetShortDescription(ch)))
 
-		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
-			gch := iter.Value
-
+		for gch := range ch.Group.All() {
 			if gch != ch {
 				gch.Send(fmt.Sprintf("{W%s{W leaves the group.{x\r\n", ch.GetShortDescriptionUpper(gch)))
 			}

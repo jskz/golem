@@ -218,9 +218,7 @@ func (qt *QuadTree) QueryRect(r *Rect) []*Point {
 		return results
 	}
 
-	for iter := qt.Nodes.Head; iter != nil; iter = iter.Next {
-		p := iter.Value
-
+	for p := range qt.Nodes.All() {
 		if r.ContainsPoint(p) {
 			results = append(results, p)
 		}

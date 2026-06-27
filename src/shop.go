@@ -132,9 +132,7 @@ func (game *Game) LoadShops() error {
 	}
 
 	for _, shop := range game.shops {
-		for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
-			listing := iter.Value
-
+		for listing := range shop.Listings.All() {
 			obj, ok := objectFromId[shopListingIds[listing.Id]]
 			if !ok {
 				log.Printf("Failed to hydrate object for shop, omitting.\r\n")
@@ -157,9 +155,7 @@ func (ch *Character) FindShopInRoom() *Shop {
 		return nil
 	}
 
-	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value
-
+	for rch := range ch.Room.Characters.All() {
 		if rch.Flags&CHAR_SHOPKEEPER != 0 {
 			shop, ok := ch.Game.mobileShops[uint(rch.Id)]
 			if !ok {
@@ -210,9 +206,7 @@ func do_buy(ch *Character, arguments string) {
 
 	var count int = 1
 
-	for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
-		listing := iter.Value
-
+	for listing := range shop.Listings.All() {
 		if listing.Object == nil {
 			continue
 		}
@@ -259,9 +253,7 @@ func do_buy(ch *Character, arguments string) {
 				ch.Send(fmt.Sprintf("You buy %d of %s for %d gold coins.\r\n", quantity, objects[0].GetShortDescription(ch), totalPrice))
 			}
 
-			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value
-
+			for rch := range ch.Room.Characters.All() {
 				if !rch.IsEqual(ch) {
 					if quantity == 1 {
 						rch.Send(fmt.Sprintf("%s buys %s.\r\n", ch.GetShortDescriptionUpper(rch), objects[0].GetShortDescription(rch)))
@@ -296,9 +288,7 @@ func do_shop(ch *Character, arguments string) {
 		return
 	}
 
-	for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
-		listing := iter.Value
-
+	for listing := range shop.Listings.All() {
 		if listing.Object == nil {
 			continue
 		}

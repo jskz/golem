@@ -209,9 +209,7 @@ func do_affect(ch *Character, arguments string) {
 
 	buf.WriteString("{MYou are affected by the following enchantments:{x\r\n")
 
-	for effect := ch.Effects.Head; effect != nil; effect = effect.Next {
-		fx := effect.Value
-
+	for fx := range ch.Effects.All() {
 		switch fx.EffectType {
 		case EffectTypeStat:
 			buf.WriteString(fmt.Sprintf("{Y* {MLevel {Y%d '%s' {Mspell affecting {Y%s{M by {Y%d {Mpoints for another {Y%d{M seconds.{x\r\n",
@@ -460,9 +458,7 @@ func do_look(ch *Character, arguments string) {
 				ch.Send(fmt.Sprintf("{GYou look at %s{G.{x\r\n", foundCh.GetShortDescription(ch)))
 				foundCh.Send(fmt.Sprintf("{G%s{G looks at you.{x\r\n", ch.GetShortDescriptionUpper(foundCh)))
 
-				for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-					rch := iter.Value
-
+				for rch := range ch.Room.Characters.All() {
 					if rch != ch && rch != foundCh {
 						rch.Send(fmt.Sprintf("{G%s{G looks at %s{G.{x\r\n", ch.GetShortDescriptionUpper(rch), foundCh.GetShortDescription(rch)))
 					}

@@ -144,9 +144,7 @@ func (maze *MazeGrid) findPathAStar(start *MazeCell, end *MazeCell) []*MazeAStar
 				return make([]*MazeAStarVisit, 0)
 			} else {
 				neighbours := currentNode.cell.getAdjacentCells(false, 1, false)
-				for iter := neighbours.Head; iter != nil; iter = iter.Next {
-					neighbour := iter.Value
-
+				for neighbour := range neighbours.All() {
 					if !visited[neighbour] {
 						var gScore int = currentNode.gScore + 1
 

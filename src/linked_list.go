@@ -92,9 +92,7 @@ func (list *LinkedList[T]) GetRandomNode() *LinkedListNode[T] {
 
 /* Utility method to concatenate one linked list to another */
 func (list *LinkedList[T]) Concat(other *LinkedList[T]) *LinkedList[T] {
-	for iter := other.Head; iter != nil; iter = iter.Next {
-		v := iter.Value
-
+	for v := range other.All() {
 		list.Insert(v)
 	}
 
@@ -102,9 +100,7 @@ func (list *LinkedList[T]) Concat(other *LinkedList[T]) *LinkedList[T] {
 }
 
 func (list *LinkedList[T]) Contains(value T) bool {
-	for iter := list.Head; iter != nil; iter = iter.Next {
-		v := iter.Value
-
+	for v := range list.All() {
 		if v == value {
 			return true
 		}
@@ -116,8 +112,8 @@ func (list *LinkedList[T]) Contains(value T) bool {
 func (list *LinkedList[T]) Values() []T {
 	var values []T = make([]T, 0)
 
-	for iter := list.Head; iter != nil; iter = iter.Next {
-		values = append(values, iter.Value)
+	for value := range list.All() {
+		values = append(values, value)
 	}
 
 	return values

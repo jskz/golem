@@ -141,9 +141,7 @@ func (cell *MazeCell) getAdjacentCells(wall bool, distance int, ordinals bool) *
 func (cell *MazeCell) setAdjacentCellsTerrainType(wall bool, distance int, terrain int) {
 	cells := cell.getAdjacentCells(wall, distance, true)
 
-	for iter := cells.Head; iter != nil; iter = iter.Next {
-		cell := iter.Value
-
+	for cell := range cells.All() {
 		if cell.Wall == wall {
 			cell.Terrain = terrain
 		}
