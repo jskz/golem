@@ -44,7 +44,7 @@ func TestQuadTreeInsert(t *testing.T) {
 		t.Errorf("Root quadtree boundary contained %d points, expected %d.", len(results), len(examplePoints))
 	}
 
-	matches := make([]interface{}, 0)
+	matches := make([]*Point, 0)
 	for _, p := range examplePoints {
 		for _, match := range results {
 			if match == p {

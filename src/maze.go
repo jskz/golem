@@ -86,8 +86,8 @@ func (grid *MazeGrid) cellAt(x int, y int) *MazeCell {
 	return grid.Grid[x][y]
 }
 
-func (cell *MazeCell) getAdjacentCells(wall bool, distance int, ordinals bool) *LinkedList {
-	list := NewLinkedList()
+func (cell *MazeCell) getAdjacentCells(wall bool, distance int, ordinals bool) *LinkedList[*MazeCell] {
+	list := NewLinkedList[*MazeCell]()
 
 	if cell == nil || cell.Grid == nil {
 		return list
@@ -142,7 +142,7 @@ func (cell *MazeCell) setAdjacentCellsTerrainType(wall bool, distance int, terra
 	cells := cell.getAdjacentCells(wall, distance, true)
 
 	for iter := cells.Head; iter != nil; iter = iter.Next {
-		cell := iter.Value.(*MazeCell)
+		cell := iter.Value
 
 		if cell.Wall == wall {
 			cell.Terrain = terrain
@@ -171,11 +171,11 @@ func (maze *MazeGrid) generatePrimMaze() {
 			break
 		}
 
-		f := frontiers.GetRandomNode().Value.(*MazeCell)
+		f := frontiers.GetRandomNode().Value
 		neighbours := f.getAdjacentCells(false, 2, false)
 
 		if neighbours.Count > 0 {
-			neighbour := neighbours.GetRandomNode().Value.(*MazeCell)
+			neighbour := neighbours.GetRandomNode().Value
 
 			passageX := (neighbour.X + f.X) / 2
 			passageY := (neighbour.Y + f.Y) / 2
@@ -217,8 +217,8 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 	room.Name = "In the Underground"
 	room.Description = "You are deep within the dark dungeons of development."
 	room.Exit = make(map[uint]*Exit)
-	room.Characters = NewLinkedList()
-	room.Objects = NewLinkedList()
+	room.Characters = NewLinkedList[*Character]()
+	room.Objects = NewLinkedList[*ObjectInstance]()
 
 	maze.Grid[x][y].Room = room
 	return room

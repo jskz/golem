@@ -37,12 +37,12 @@ type Game struct {
 	vm       *goja.Runtime
 	listener net.Listener
 
-	Objects      *LinkedList `json:"objects"`
-	Characters   *LinkedList `json:"characters"`
-	Fights       *LinkedList `json:"fights"`
-	Planes       *LinkedList `json:"planes"`
-	Zones        *LinkedList `json:"zones"`
-	ScriptTimers *LinkedList `json:"scriptTimers"`
+	Objects      *LinkedList[*ObjectInstance] `json:"objects"`
+	Characters   *LinkedList[*Character]      `json:"characters"`
+	Fights       *LinkedList[*Combat]         `json:"fights"`
+	Planes       *LinkedList[*Plane]          `json:"planes"`
+	Zones        *LinkedList[*Zone]           `json:"zones"`
+	ScriptTimers *LinkedList[*ScriptTimer]    `json:"scriptTimers"`
 
 	clients     map[*Client]bool
 	skills      map[uint]*Skill
@@ -51,7 +51,7 @@ type Game struct {
 	mobileShops map[uint]*Shop
 	socials     map[string]*Social
 
-	eventHandlers   map[string]*LinkedList
+	eventHandlers   map[string]*LinkedList[*EventHandler]
 	Scripts         map[uint]*Script `json:"scripts"`
 	objectScripts   map[uint]*Script
 	districtScripts map[int]*Script
@@ -91,11 +91,11 @@ func NewGame() (*Game, error) {
 	game.clientMessage = make(chan ClientTextMessage)
 	game.planeGenerationCompleted = make(chan int)
 
-	game.Characters = NewLinkedList()
-	game.Fights = NewLinkedList()
-	game.Objects = NewLinkedList()
-	game.ScriptTimers = NewLinkedList()
-	game.Planes = NewLinkedList()
+	game.Characters = NewLinkedList[*Character]()
+	game.Fights = NewLinkedList[*Combat]()
+	game.Objects = NewLinkedList[*ObjectInstance]()
+	game.ScriptTimers = NewLinkedList[*ScriptTimer]()
+	game.Planes = NewLinkedList[*Plane]()
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
 	game.db, err = openDatabase()
@@ -168,7 +168,7 @@ func NewGame() (*Game, error) {
 
 	/* Try to initialize each plane now that potential scripts have been attached */
 	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
-		plane := iter.Value.(*Plane)
+		plane := iter.Value
 
 		log.Printf("Generating %s...\r\n", plane.Name)
 

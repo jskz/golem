@@ -72,7 +72,7 @@ func objectListDescription(obj *ObjectInstance, viewer *Character, longDescripti
 	return buf.String()
 }
 
-func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hideEquipped bool) {
+func (ch *Character) listObjects(objects *LinkedList[*ObjectInstance], longDescriptions bool, hideEquipped bool) {
 	var output strings.Builder
 	var inventory map[string]uint = make(map[string]uint)
 
@@ -81,7 +81,7 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 	}
 
 	for iter := objects.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		if hideEquipped && obj.WearLocation != -1 {
 			continue
@@ -98,7 +98,7 @@ func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hid
 	}
 
 	for iter := objects.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		if hideEquipped && obj.WearLocation != -1 {
 			continue
@@ -130,7 +130,7 @@ func sendToRoomExcept(ch *Character, message func(rch *Character) string) {
 	}
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 		if rch.IsEqual(ch) {
 			continue
 		}
@@ -286,7 +286,7 @@ func (ch *Character) examineObject(obj *ObjectInstance) {
 
 func (ch *Character) GetEquipment(wearLocation int) *ObjectInstance {
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		if obj.WearLocation == wearLocation {
 			return obj
@@ -371,7 +371,7 @@ func do_wear(ch *Character, arguments string) {
 	firstArgument, _ := OneArgument(arguments)
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		if obj.WearLocation == -1 {
 			if strings.Contains(obj.Name, firstArgument) {
@@ -391,7 +391,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You hold %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x holds %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -416,7 +416,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wield %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wields %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -441,7 +441,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -466,7 +466,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -491,7 +491,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -516,7 +516,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -541,7 +541,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -566,7 +566,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -591,7 +591,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -616,7 +616,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -641,7 +641,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -666,7 +666,7 @@ func do_wear(ch *Character, arguments string) {
 						ch.Send(fmt.Sprintf("You wear %s{x.\r\n", obj.GetShortDescription(ch)))
 
 						for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-							rch := roomOthersIter.Value.(*Character)
+							rch := roomOthersIter.Value
 
 							if !rch.IsEqual(ch) {
 								rch.Send(fmt.Sprintf("%s{x wears %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -692,7 +692,7 @@ func do_remove(ch *Character, arguments string) {
 	firstArgument, _ := OneArgument(arguments)
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		if obj.WearLocation != -1 {
 			if strings.Contains(obj.Name, firstArgument) {
@@ -701,7 +701,7 @@ func do_remove(ch *Character, arguments string) {
 					ch.Send(fmt.Sprintf("You remove %s{x.\r\n", obj.GetShortDescription(ch)))
 
 					for roomOthersIter := ch.Room.Characters.Head; roomOthersIter != nil; roomOthersIter = roomOthersIter.Next {
-						rch := roomOthersIter.Value.(*Character)
+						rch := roomOthersIter.Value
 
 						if !rch.IsEqual(ch) {
 							rch.Send(fmt.Sprintf("%s{x removes %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -773,7 +773,7 @@ func do_fill(ch *Character, arguments string) {
 
 	var fountain *ObjectInstance
 	for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
-		roomObj := iter.Value.(*ObjectInstance)
+		roomObj := iter.Value
 		if roomObj.ItemType == ItemTypeFountain {
 			fountain = roomObj
 			break
@@ -821,7 +821,7 @@ func do_drink(ch *Character, arguments string) {
 	if arg == "" {
 		if ch.Room.Objects != nil {
 			for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
-				roomObj := iter.Value.(*ObjectInstance)
+				roomObj := iter.Value
 				if roomObj.ItemType == ItemTypeFountain {
 					obj = roomObj
 					break
@@ -1048,7 +1048,7 @@ func do_put(ch *Character, arguments string) {
 	ch.Send(fmt.Sprintf("You put %s{x inside of %s{x.\r\n", placingObj.GetShortDescription(ch), placingIn.GetShortDescription(ch)))
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch != ch {
 			rch.Send(fmt.Sprintf("%s{x puts %s{x inside of %s{x.\r\n", ch.GetShortDescriptionUpper(rch), placingObj.GetShortDescription(rch), placingIn.GetShortDescription(rch)))
@@ -1099,7 +1099,7 @@ func do_take(ch *Character, arguments string) {
 			}
 
 			for iter := takingFrom.Contents.Head; iter != nil; iter = iter.Next {
-				takingObj := iter.Value.(*ObjectInstance)
+				takingObj := iter.Value
 
 				if takingObj.Flags&ITEM_TAKE == 0 {
 					continue
@@ -1134,7 +1134,7 @@ func do_take(ch *Character, arguments string) {
 
 				ch.Send(fmt.Sprintf("You take %s{x from %s{x.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
 				for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-					rch := iter.Value.(*Character)
+					rch := iter.Value
 
 					if rch != ch {
 						rch.Send(fmt.Sprintf("%s{x takes %s{x from %s{x.\r\n", ch.GetShortDescriptionUpper(rch), takingObj.GetShortDescription(rch), takingFrom.GetShortDescription(rch)))
@@ -1184,7 +1184,7 @@ func do_take(ch *Character, arguments string) {
 
 			ch.Send(fmt.Sprintf("You take %s{x from %s{x.\r\n", takingObj.GetShortDescription(ch), takingFrom.GetShortDescription(ch)))
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value.(*Character)
+				rch := iter.Value
 
 				if rch != ch {
 					rch.Send(fmt.Sprintf("%s{x takes %s{x from %s{x.\r\n", ch.GetShortDescriptionUpper(rch), takingObj.GetShortDescription(rch), takingFrom.GetShortDescription(rch)))
@@ -1197,7 +1197,7 @@ func do_take(ch *Character, arguments string) {
 
 	if firstArgument == "all" {
 		for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
-			found := iter.Value.(*ObjectInstance)
+			found := iter.Value
 
 			if found.Flags&ITEM_TAKE == 0 {
 				continue
@@ -1241,7 +1241,7 @@ func do_take(ch *Character, arguments string) {
 
 			if ch.Room != nil {
 				for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-					rch := iter.Value.(*Character)
+					rch := iter.Value
 
 					if rch != ch {
 						rch.Send(outString)
@@ -1302,7 +1302,7 @@ func do_take(ch *Character, arguments string) {
 
 	if ch.Room != nil {
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value.(*Character)
+			rch := iter.Value
 
 			if rch != ch {
 				rch.Send(outString)
@@ -1360,7 +1360,7 @@ func do_give(ch *Character, arguments string) {
 
 		if ch.Room != nil {
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value.(*Character)
+				rch := iter.Value
 
 				if rch != ch && rch != target {
 					rch.Send(fmt.Sprintf("\r\n%s{x gives %s{x to %s{x.\r\n", ch.GetShortDescriptionUpper(rch), goldRepresentation.GetShortDescription(rch), target.GetShortDescription(rch)))
@@ -1412,7 +1412,7 @@ func do_give(ch *Character, arguments string) {
 
 	if ch.Room != nil {
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value.(*Character)
+			rch := iter.Value
 
 			if rch != ch && rch != target {
 				rch.Send(fmt.Sprintf("\r\n%s{x gives %s{x to %s{x.\r\n", ch.GetShortDescriptionUpper(rch), found.GetShortDescription(rch), target.GetShortDescription(rch)))
@@ -1438,7 +1438,7 @@ func do_drop(ch *Character, arguments string) {
 		objects := make([]*ObjectInstance, 0)
 
 		for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-			obj := iter.Value.(*ObjectInstance)
+			obj := iter.Value
 
 			if obj.WearLocation == -1 {
 				objects = append(objects, obj)
@@ -1467,7 +1467,7 @@ func do_drop(ch *Character, arguments string) {
 			ch.Send(fmt.Sprintf("You drop %s{x.\r\n", obj.GetShortDescription(ch)))
 
 			for roomIter := ch.Room.Characters.Head; roomIter != nil; roomIter = roomIter.Next {
-				rch := roomIter.Value.(*Character)
+				rch := roomIter.Value
 
 				if !rch.IsEqual(ch) {
 					rch.Send(fmt.Sprintf("%s{x drops %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -1500,7 +1500,7 @@ func do_drop(ch *Character, arguments string) {
 		var found *ObjectInstance = nil
 
 		for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
-			obj := iter.Value.(*ObjectInstance)
+			obj := iter.Value
 
 			if obj.ItemType == ItemTypeCurrency {
 				found = obj
@@ -1524,7 +1524,7 @@ func do_drop(ch *Character, arguments string) {
 		ch.Game.Objects.Insert(gold)
 
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value.(*Character)
+			rch := iter.Value
 
 			if !rch.IsEqual(ch) {
 				rch.Send(fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.GetShortDescriptionUpper(rch), gold.GetShortDescription(rch)))
@@ -1558,7 +1558,7 @@ func do_drop(ch *Character, arguments string) {
 	outString := fmt.Sprintf("\r\n%s drops %s{x.\r\n", ch.Name, found.ShortDescription)
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch != ch {
 			rch.Send(outString)

@@ -372,7 +372,7 @@ func (game *Game) recoverCopyoverClient(savedClient copyoverClientState) error {
 
 	if ch.Room != nil {
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value.(*Character)
+			rch := iter.Value
 			if rch != ch {
 				rch.Send(fmt.Sprintf("\r\n{W%s materializes.{x\r\n", ch.GetShortDescriptionUpper(rch)))
 			}

@@ -430,7 +430,7 @@ func (client *Client) drainSendQueue() error {
 
 func (game *Game) checkReconnect(client *Client, name string) bool {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
-		ch := iter.Value.(*Character)
+		ch := iter.Value
 
 		if ch.Flags&CHAR_IS_PLAYER != 0 && ch.Name == name {
 			client.Character = nil
@@ -444,7 +444,7 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 
 			if ch.Room != nil {
 				for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-					character := iter.Value.(*Character)
+					character := iter.Value
 
 					if character != ch {
 						character.Send(fmt.Sprintf("\r\n{M%s has reconnected.{x\r\n", ch.GetShortDescriptionUpper(character)))

@@ -36,11 +36,11 @@ type Object struct {
 }
 
 type ObjectInstance struct {
-	Game      *Game           `json:"game"`
-	Contents  *LinkedList     `json:"contents"`
-	Inside    *ObjectInstance `json:"inside"`
-	InRoom    *Room           `json:"inRoom"`
-	CarriedBy *Character      `json:"carriedBy"`
+	Game      *Game                        `json:"game"`
+	Contents  *LinkedList[*ObjectInstance] `json:"contents"`
+	Inside    *ObjectInstance              `json:"inside"`
+	InRoom    *Room                        `json:"inRoom"`
+	CarriedBy *Character                   `json:"carriedBy"`
 
 	Id       uint   `json:"id"`
 	ParentId uint   `json:"parentId"`
@@ -256,7 +256,7 @@ func (game *Game) objectInstanceFromIndex(obj *Object) *ObjectInstance {
 	objectInstance := &ObjectInstance{
 		Game:             game,
 		ParentId:         obj.Id,
-		Contents:         NewLinkedList(),
+		Contents:         NewLinkedList[*ObjectInstance](),
 		Description:      obj.Description,
 		ShortDescription: obj.ShortDescription,
 		LongDescription:  obj.LongDescription,
@@ -424,7 +424,7 @@ func (obj *ObjectInstance) CountFurnitureUsers() int {
 
 	count := 0
 	for iter := obj.InRoom.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 		if rch.Furniture == obj {
 			count++
 		}
@@ -596,7 +596,7 @@ func (obj *ObjectInstance) GetContentsWeight() float64 {
 
 	var total float64
 	for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-		containedObject := iter.Value.(*ObjectInstance)
+		containedObject := iter.Value
 		total += containedObject.GetTotalWeight()
 	}
 
@@ -653,7 +653,7 @@ func (obj *ObjectInstance) reifyInContainerTx(ctx context.Context, tx *sql.Tx, c
 
 	if obj.Contents != nil && obj.Contents.Count > 0 {
 		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-			containedObject := iter.Value.(*ObjectInstance)
+			containedObject := iter.Value
 
 			containedReified, err := containedObject.reifyInContainerTx(ctx, tx, obj)
 			reified = append(reified, containedReified...)
@@ -678,7 +678,7 @@ func (obj *ObjectInstance) objectInstanceIDs() []uint {
 
 	if obj.Contents != nil {
 		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-			containedObject := iter.Value.(*ObjectInstance)
+			containedObject := iter.Value
 			ids = append(ids, containedObject.objectInstanceIDs()...)
 		}
 	}
@@ -695,7 +695,7 @@ func (obj *ObjectInstance) resetObjectInstanceIDs() {
 
 	if obj.Contents != nil {
 		for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-			containedObject := iter.Value.(*ObjectInstance)
+			containedObject := iter.Value
 			containedObject.resetObjectInstanceIDs()
 		}
 	}
@@ -810,9 +810,9 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 	return nil
 }
 
-func (obj *ObjectInstance) ensureContents() *LinkedList {
+func (obj *ObjectInstance) ensureContents() *LinkedList[*ObjectInstance] {
 	if obj.Contents == nil {
-		obj.Contents = NewLinkedList()
+		obj.Contents = NewLinkedList[*ObjectInstance]()
 	}
 
 	return obj.Contents
@@ -835,7 +835,7 @@ func (container *ObjectInstance) removeObject(obj *ObjectInstance) {
 	obj.InRoom = nil
 }
 
-func (ch *Character) showObjectList(objects *LinkedList) {
+func (ch *Character) showObjectList(objects *LinkedList[*ObjectInstance]) {
 	var output strings.Builder
 
 	if objects == nil || objects.Count < 1 {
@@ -843,7 +843,7 @@ func (ch *Character) showObjectList(objects *LinkedList) {
 	}
 
 	for iter := objects.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		output.WriteString(fmt.Sprintf("  %s\r\n", obj.GetShortDescriptionUpper(ch)))
 	}

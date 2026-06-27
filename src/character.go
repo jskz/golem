@@ -49,13 +49,13 @@ func parseIndexedArgument(argument string) (int, string, bool) {
 }
 
 type Job struct {
-	Id                         uint        `json:"id"`
-	Name                       string      `json:"name"`
-	DisplayName                string      `json:"display_name"`
-	Playable                   bool        `json:"playable"`
-	ExperienceRequiredModifier float64     `json:"experience_required_modifier"`
-	Skills                     *LinkedList `json:"skills"`
-	PrimaryAttribute           int         `json:"primaryAttribute"`
+	Id                         uint                   `json:"id"`
+	Name                       string                 `json:"name"`
+	DisplayName                string                 `json:"display_name"`
+	Playable                   bool                   `json:"playable"`
+	ExperienceRequiredModifier float64                `json:"experience_required_modifier"`
+	Skills                     *LinkedList[*JobSkill] `json:"skills"`
+	PrimaryAttribute           int                    `json:"primaryAttribute"`
 }
 
 type Race struct {
@@ -184,7 +184,7 @@ type Character struct {
 	Game   *Game   `json:"game"`
 	Client *Client `json:"client"`
 
-	Inventory *LinkedList `json:"inventory"`
+	Inventory *LinkedList[*ObjectInstance] `json:"inventory"`
 
 	output       []byte
 	outputCursor int
@@ -201,9 +201,9 @@ type Character struct {
 	Casting    *CastingContext `json:"casting"`
 	Furniture  *ObjectInstance `json:"furniture"`
 
-	Following *Character  `json:"following"`
-	Leader    *Character  `json:"leader"`
-	Group     *LinkedList `json:"group"`
+	Following *Character              `json:"following"`
+	Leader    *Character              `json:"leader"`
+	Group     *LinkedList[*Character] `json:"group"`
 
 	Id int `json:"id"`
 
@@ -222,7 +222,7 @@ type Character struct {
 	Practices  int  `json:"practices"`
 
 	Affected int                   `json:"affected"`
-	Effects  *LinkedList           `json:"effects"`
+	Effects  *LinkedList[*Effect]  `json:"effects"`
 	Skills   map[uint]*Proficiency `json:"skills"`
 
 	Gold  int               `json:"gold"`
@@ -576,7 +576,7 @@ func (ch *Character) GetStat(stat int) (int, int) {
 	var modifiedSum int = 0
 
 	for iter := ch.Effects.Head; iter != nil; iter = iter.Next {
-		fx := iter.Value.(*Effect)
+		fx := iter.Value
 
 		if fx.EffectType != EffectTypeStat || fx.Location != stat {
 			continue
@@ -888,7 +888,7 @@ func (ch *Character) DetachAllObjects() int {
 
 	if ch.Inventory != nil {
 		for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-			obj := iter.Value.(*ObjectInstance)
+			obj := iter.Value
 			obj.resetObjectInstanceIDs()
 		}
 	}
@@ -1108,12 +1108,12 @@ func (game *Game) SavePlayerInventory(ch *Character) error {
 
 	/* Iterate over all objects in this player's inventory */
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		/* If this is a container, ensure that all contained object instances are also updated */
 		if obj.Contents != nil && obj.Contents.Count > 0 {
 			for containerIter := obj.Contents.Head; containerIter != nil; containerIter = containerIter.Next {
-				containedObj := containerIter.Value.(*ObjectInstance)
+				containedObj := containerIter.Value
 
 				updating = append(updating, containedObj)
 			}
@@ -1236,7 +1236,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 	for rows.Next() {
 		obj := &ObjectInstance{
 			Game:         game,
-			Contents:     NewLinkedList(),
+			Contents:     NewLinkedList[*ObjectInstance](),
 			Inside:       nil,
 			CarriedBy:    nil,
 			WearLocation: -1,
@@ -1258,7 +1258,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 	}
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		rows, err := game.db.Query(`
 			SELECT
@@ -1291,7 +1291,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 		for rows.Next() {
 			containedObj := &ObjectInstance{
 				Game:         game,
-				Contents:     NewLinkedList(),
+				Contents:     NewLinkedList[*ObjectInstance](),
 				Inside:       nil,
 				CarriedBy:    nil,
 				WearLocation: -1,
@@ -1453,13 +1453,13 @@ func (game *Game) addPlayerCharacterToWorld(ch *Character) {
 	game.Characters.Insert(ch)
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		game.Objects.Insert(obj)
 
 		if obj.Contents != nil {
 			for innerIter := obj.Contents.Head; innerIter != nil; innerIter = innerIter.Next {
-				containedObj := innerIter.Value.(*ObjectInstance)
+				containedObj := innerIter.Value
 
 				game.Objects.Insert(containedObj)
 			}
@@ -1674,7 +1674,7 @@ func (ch *Character) getCarryWeight() float64 {
 
 	var total float64
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 		total += obj.GetTotalWeight()
 	}
 
@@ -1873,7 +1873,7 @@ func (obj *ObjectInstance) findObjectInSelf(ch *Character, argument string) *Obj
 	}
 
 	for iter := obj.Contents.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
@@ -1908,7 +1908,7 @@ func (ch *Character) FindObjectInRoom(argument string) *ObjectInstance {
 	}
 
 	for iter := ch.Room.Objects.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		nameParts := strings.Split(obj.Name, " ")
 		for _, part := range nameParts {
@@ -1942,7 +1942,7 @@ func (ch *Character) FindObjectOnSelf(argument string) *ObjectInstance {
 	}
 
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		if obj.WearLocation != -1 {
 			continue
@@ -1988,7 +1988,7 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 	}
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		nameParts := strings.Split(rch.Name, " ")
 		for _, part := range nameParts {
@@ -2012,7 +2012,7 @@ func (game *Game) Broadcast(message string, filter goja.Callable) {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		var result bool = false
 
-		ch := iter.Value.(*Character)
+		ch := iter.Value
 
 		if filter != nil {
 			val, err := filter(game.vm.ToValue(ch))
@@ -2045,7 +2045,7 @@ func (game *Game) broadcast(message string, filterFn func(*Character) bool) {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		var result bool = false
 
-		ch := iter.Value.(*Character)
+		ch := iter.Value
 
 		if filterFn != nil {
 			result = filterFn(ch)
@@ -2092,8 +2092,8 @@ func NewCharacter() *Character {
 	character.Client = nil
 	character.Level = 0
 	character.Experience = 0
-	character.Inventory = NewLinkedList()
-	character.Effects = NewLinkedList()
+	character.Inventory = NewLinkedList[*ObjectInstance]()
+	character.Effects = NewLinkedList[*Effect]()
 	character.Skills = make(map[uint]*Proficiency)
 	character.Conditions[ConditionDrunk] = 0
 	character.Conditions[ConditionFull] = ConditionMaximum

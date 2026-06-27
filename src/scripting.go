@@ -340,7 +340,7 @@ func (game *Game) clearScriptBindings() {
 	}
 
 	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
-		plane := iter.Value.(*Plane)
+		plane := iter.Value
 		plane.Scripts = nil
 	}
 }
@@ -379,7 +379,7 @@ func (game *Game) detachScriptBindings(script *Script) {
 	}
 
 	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
-		plane := iter.Value.(*Plane)
+		plane := iter.Value
 		if sameScriptBinding(plane.Scripts, script) {
 			plane.Scripts = nil
 		}
@@ -493,7 +493,7 @@ func (game *Game) CreateScript(name string, initialBody string) (*Script, error)
 
 func (game *Game) scriptTimersUpdate() {
 	for iter := game.ScriptTimers.Head; iter != nil; iter = iter.Next {
-		effect := iter.Value.(*ScriptTimer)
+		effect := iter.Value
 
 		if time.Since(effect.createdAt).Milliseconds() > effect.delay {
 			_, err := effect.callback(game.vm.ToValue(effect))
@@ -533,7 +533,7 @@ func (game *Game) InvokeNamedEventHandlersWithContextAndArguments(name string, t
 		i := 0
 
 		for iter := game.eventHandlers[name].Head; iter != nil; iter = iter.Next {
-			eventHandler := iter.Value.(*EventHandler)
+			eventHandler := iter.Value
 
 			result, err := eventHandler.callback(this, arguments...)
 			if err != nil {
@@ -624,7 +624,7 @@ func do_reload(ch *Character, arguments string) {
 
 func (game *Game) InitScripting() error {
 	game.vm = goja.New()
-	game.eventHandlers = make(map[string]*LinkedList)
+	game.eventHandlers = make(map[string]*LinkedList[*EventHandler])
 
 	game.vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
 
@@ -633,7 +633,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("game", game.vm.ToValue(game))
 
 	obj.Set("clearAllEventHandlers", game.vm.ToValue(func() goja.Value {
-		game.eventHandlers = make(map[string]*LinkedList)
+		game.eventHandlers = make(map[string]*LinkedList[*EventHandler])
 
 		return game.vm.ToValue(true)
 	}))
@@ -659,7 +659,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("registerEventHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		eventName := name.String()
 		if game.eventHandlers[eventName] == nil {
-			game.eventHandlers[eventName] = NewLinkedList()
+			game.eventHandlers[eventName] = NewLinkedList[*EventHandler]()
 		}
 
 		handler := &EventHandler{name: eventName, callback: fn}
@@ -834,7 +834,7 @@ func (game *Game) InitScripting() error {
 	terrainTypes.Set("TerrainTypeSnowcappedMountains", game.vm.ToValue(TerrainTypeSnowcappedMountains))
 
 	utilObj := game.vm.NewObject()
-	utilObj.Set("createLinkedList", game.vm.ToValue(NewLinkedList))
+	utilObj.Set("createLinkedList", game.vm.ToValue(NewAnyLinkedList))
 	utilObj.Set("createQuadTree", game.vm.ToValue(NewQuadTree))
 	utilObj.Set("newRect2D", game.vm.ToValue(NewRect))
 	utilObj.Set("newPoint2D", game.vm.ToValue(NewPoint))

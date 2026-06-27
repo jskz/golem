@@ -210,7 +210,7 @@ func do_affect(ch *Character, arguments string) {
 	buf.WriteString("{MYou are affected by the following enchantments:{x\r\n")
 
 	for effect := ch.Effects.Head; effect != nil; effect = effect.Next {
-		fx := effect.Value.(*Effect)
+		fx := effect.Value
 
 		switch fx.EffectType {
 		case EffectTypeStat:
@@ -461,7 +461,7 @@ func do_look(ch *Character, arguments string) {
 				foundCh.Send(fmt.Sprintf("{G%s{G looks at you.{x\r\n", ch.GetShortDescriptionUpper(foundCh)))
 
 				for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-					rch := iter.Value.(*Character)
+					rch := iter.Value
 
 					if rch != ch && rch != foundCh {
 						rch.Send(fmt.Sprintf("{G%s{G looks at %s{G.{x\r\n", ch.GetShortDescriptionUpper(rch), foundCh.GetShortDescription(rch)))

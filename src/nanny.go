@@ -214,7 +214,7 @@ func (game *Game) nanny(client *Client, message string) {
 		index := 0
 
 		for iter := Races.Head; iter != nil; iter = iter.Next {
-			race := iter.Value.(*Race)
+			race := iter.Value
 
 			if !race.Playable {
 				continue
@@ -251,7 +251,7 @@ func (game *Game) nanny(client *Client, message string) {
 			index := 0
 
 			for iter := Races.Head; iter != nil; iter = iter.Next {
-				race := iter.Value.(*Race)
+				race := iter.Value
 
 				if !race.Playable {
 					continue
@@ -277,7 +277,7 @@ func (game *Game) nanny(client *Client, message string) {
 		index := 0
 
 		for iter := Jobs.Head; iter != nil; iter = iter.Next {
-			job := iter.Value.(*Job)
+			job := iter.Value
 
 			if !job.Playable {
 				continue
@@ -314,7 +314,7 @@ func (game *Game) nanny(client *Client, message string) {
 			index := 0
 
 			for iter := Jobs.Head; iter != nil; iter = iter.Next {
-				job := iter.Value.(*Job)
+				job := iter.Value
 
 				if !job.Playable {
 					continue

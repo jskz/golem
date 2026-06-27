@@ -22,10 +22,10 @@ type ShopListing struct {
 }
 
 type Shop struct {
-	Game     *Game       `json:"game"`
-	Id       int         `json:"id"`
-	MobileId uint        `json:"mobileId"`
-	Listings *LinkedList `json:"listings"`
+	Game     *Game                     `json:"game"`
+	Id       int                       `json:"id"`
+	MobileId uint                      `json:"mobileId"`
+	Listings *LinkedList[*ShopListing] `json:"listings"`
 }
 
 func (game *Game) LoadShops() error {
@@ -49,7 +49,7 @@ func (game *Game) LoadShops() error {
 	defer rows.Close()
 
 	for rows.Next() {
-		shop := &Shop{Game: game, Listings: NewLinkedList()}
+		shop := &Shop{Game: game, Listings: NewLinkedList[*ShopListing]()}
 		err := rows.Scan(&shop.Id, &shop.MobileId)
 		if err != nil {
 			log.Printf("Unable to scan shop: %v.\r\n", err)
@@ -133,7 +133,7 @@ func (game *Game) LoadShops() error {
 
 	for _, shop := range game.shops {
 		for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
-			listing := iter.Value.(*ShopListing)
+			listing := iter.Value
 
 			obj, ok := objectFromId[shopListingIds[listing.Id]]
 			if !ok {
@@ -158,7 +158,7 @@ func (ch *Character) FindShopInRoom() *Shop {
 	}
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch.Flags&CHAR_SHOPKEEPER != 0 {
 			shop, ok := ch.Game.mobileShops[uint(rch.Id)]
@@ -211,7 +211,7 @@ func do_buy(ch *Character, arguments string) {
 	var count int = 1
 
 	for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
-		listing := iter.Value.(*ShopListing)
+		listing := iter.Value
 
 		if listing.Object == nil {
 			continue
@@ -260,7 +260,7 @@ func do_buy(ch *Character, arguments string) {
 			}
 
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value.(*Character)
+				rch := iter.Value
 
 				if !rch.IsEqual(ch) {
 					if quantity == 1 {
@@ -297,7 +297,7 @@ func do_shop(ch *Character, arguments string) {
 	}
 
 	for iter := shop.Listings.Head; iter != nil; iter = iter.Next {
-		listing := iter.Value.(*ShopListing)
+		listing := iter.Value
 
 		if listing.Object == nil {
 			continue
