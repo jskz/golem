@@ -150,6 +150,14 @@ function onCombatUpdate() {
                         damageType
                     );
 
+                    if (
+                        !victim.room ||
+                        !vch.room ||
+                        !vch.room.isEqual(victim.room)
+                    ) {
+                        break;
+                    }
+
                     if(victim.group) {
                         for(let iter = victim.group.head; iter != null; iter = iter.next) {
                             const gch = iter.value;
