@@ -125,14 +125,14 @@ func (game *Game) CreateZone() *Zone {
 
 func (game *Game) ResetRoom(room *Room) {
 	for iter := room.Resets.Head; iter != nil; iter = iter.Next {
-		reset := iter.Value.(*Reset)
+		reset := iter.Value
 
 		switch reset.ResetType {
 		case ResetTypeObject:
 			count := 0
 
 			for iter := room.Objects.Head; iter != nil; iter = iter.Next {
-				obj := iter.Value.(*ObjectInstance)
+				obj := iter.Value
 
 				if obj.ParentId == uint(reset.Value0) {
 					count++
@@ -161,7 +161,7 @@ func (game *Game) ResetRoom(room *Room) {
 			count := 0
 
 			for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value.(*Character)
+				rch := iter.Value
 
 				if rch.Flags&CHAR_IS_PLAYER == 0 && rch.Id == reset.Value0 {
 					count++
@@ -189,7 +189,7 @@ func (game *Game) ResetRoom(room *Room) {
 	}
 
 	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-		character := iter.Value.(*Character)
+		character := iter.Value
 
 		if room.Zone.ResetMessage != "" && character.Flags&CHAR_IS_PLAYER != 0 {
 			character.Send(fmt.Sprintf("\r\n{x%s{x\r\n", room.Zone.ResetMessage))
@@ -293,9 +293,9 @@ func (zone *Zone) CreateRoom() (*Room, error) {
 	room.Flags = 0
 	room.Description = "This room-in-development needs a description!"
 	room.Exit = make(map[uint]*Exit)
-	room.Characters = NewAnyLinkedList()
-	room.Objects = NewAnyLinkedList()
-	room.Resets = NewAnyLinkedList()
+	room.Characters = NewLinkedList[*Character]()
+	room.Objects = NewLinkedList[*ObjectInstance]()
+	room.Resets = NewLinkedList[*Reset]()
 
 	_, err = tx.Exec(`
 		INSERT INTO

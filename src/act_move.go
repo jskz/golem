@@ -551,7 +551,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	from.moveCharacter(ch, destination)
 	for iter := from.Characters.Head; iter != nil; iter = iter.Next {
-		character := iter.Value.(*Character)
+		character := iter.Value
 		character.Send(fmt.Sprintf("{W%s{W leaves %s.{x\r\n", ch.GetShortDescriptionUpper(character), ExitName[direction]))
 	}
 
@@ -560,7 +560,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	}
 
 	for iter := destination.Characters.Head; iter != nil; iter = iter.Next {
-		character := iter.Value.(*Character)
+		character := iter.Value
 		if character != ch {
 			character.Send(fmt.Sprintf("{W%s{W arrives from %s.{x\r\n", ch.GetShortDescriptionUpper(character), ExitName[ReverseDirection[direction]]))
 		}
@@ -573,7 +573,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 	}
 
 	for iter := from.Characters.Head; iter != nil; iter = iter.Next {
-		character := iter.Value.(*Character)
+		character := iter.Value
 
 		if character.Following == ch {
 			character.Send(fmt.Sprintf("{WYou follow %s{W.{x\r\n", ch.GetShortDescription(character)))
@@ -587,7 +587,7 @@ func (ch *Character) move(direction uint, follow bool) bool {
 
 	/* Aggro check... */
 	for iter := destination.Characters.Head; iter != nil; iter = iter.Next {
-		character := iter.Value.(*Character)
+		character := iter.Value
 
 		if character != ch {
 			/* If the entering player is a PC, this is a hostile NPC, and that hostile NPC is not currently preoccupied with another combat, then let's rum	ble. */
@@ -639,7 +639,7 @@ func do_close(ch *Character, arguments string) {
 			ch.Send(fmt.Sprintf("You close %s{x.\r\n", obj.GetShortDescription(ch)))
 
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value.(*Character)
+				rch := iter.Value
 
 				if !rch.IsEqual(ch) {
 					rch.Send(fmt.Sprintf("{W%s{W closes %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -671,7 +671,7 @@ func do_close(ch *Character, arguments string) {
 	ch.Send("You close the door.\r\n")
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch != ch {
 			rch.Send(fmt.Sprintf("{W%s{W closes the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.Direction]))
@@ -679,7 +679,7 @@ func do_close(ch *Character, arguments string) {
 	}
 
 	for iter := exit.To.Characters.Head; iter != nil; iter = iter.Next {
-		character := iter.Value.(*Character)
+		character := iter.Value
 		character.Send(fmt.Sprintf("{WThe %s door closes.{x\r\n", ExitName[ReverseDirection[exit.Direction]]))
 	}
 }
@@ -728,7 +728,7 @@ func do_open(ch *Character, arguments string) {
 			ch.Send(fmt.Sprintf("You open %s{x.\r\n", obj.GetShortDescription(ch)))
 
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value.(*Character)
+				rch := iter.Value
 
 				if !rch.IsEqual(ch) {
 					rch.Send(fmt.Sprintf("{W%s{W opens %s{x.\r\n", ch.GetShortDescriptionUpper(rch), obj.GetShortDescription(rch)))
@@ -763,7 +763,7 @@ func do_open(ch *Character, arguments string) {
 	ch.Send("You open the door.\r\n")
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if !rch.IsEqual(ch) {
 			rch.Send(fmt.Sprintf("{W%s{W opens the door %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[exit.Direction]))
@@ -771,7 +771,7 @@ func do_open(ch *Character, arguments string) {
 	}
 
 	for iter := exit.To.Characters.Head; iter != nil; iter = iter.Next {
-		character := iter.Value.(*Character)
+		character := iter.Value
 		character.Send(fmt.Sprintf("{WThe %s door opens.{x\r\n", ExitName[ReverseDirection[exit.Direction]]))
 	}
 }

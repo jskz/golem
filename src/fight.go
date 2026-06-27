@@ -233,11 +233,11 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj.Ttl = 20
 	obj.WearLocation = -1
 
-	obj.Contents = NewAnyLinkedList()
+	obj.Contents = NewLinkedList[*ObjectInstance]()
 	if ch.Inventory != nil {
 		carriedObjects := make([]*ObjectInstance, 0, ch.Inventory.Count)
 		for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-			carriedObjects = append(carriedObjects, iter.Value.(*ObjectInstance))
+			carriedObjects = append(carriedObjects, iter.Value)
 		}
 
 		if ch.Flags&CHAR_IS_PLAYER != 0 {
@@ -305,7 +305,7 @@ func (game *Game) experienceRecipientsForKill(ch *Character, target *Character, 
 	recipients = append(recipients, ch)
 
 	for iter := ch.Group.Head; iter != nil; iter = iter.Next {
-		gch := iter.Value.(*Character)
+		gch := iter.Value
 		if gch == nil || seen[gch] {
 			continue
 		}
@@ -356,7 +356,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 	if display && ch != nil {
 		if ch.Room != nil && target.Room != nil && target.Room == ch.Room {
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				character := iter.Value.(*Character)
+				character := iter.Value
 				if character != ch && character != target {
 					character.Send(fmt.Sprintf("{G%s{G %s %s{G for %d damage.{x\r\n",
 						ch.GetShortDescriptionUpper(character),
@@ -405,7 +405,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 			target.Combat = nil
 
 			for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-				character := iter.Value.(*Character)
+				character := iter.Value
 				character.Send(fmt.Sprintf("{R%s{R has been slain!{x\r\n", target.GetShortDescriptionUpper(character)))
 
 				if character.Fighting != nil && character.Fighting.IsEqual(target) {
@@ -425,7 +425,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 
 				limbo.AddCharacter(target)
 
-				target.Effects = NewAnyLinkedList()
+				target.Effects = NewLinkedList[*Effect]()
 				target.refreshAffected()
 				target.Health = target.MaxHealth / 8
 				target.Mana = 1
@@ -495,7 +495,7 @@ func do_flee(ch *Character, arguments string) {
 
 		/* Announce player's failed flee attempt to others in the room */
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value.(*Character)
+			rch := iter.Value
 
 			if rch != ch {
 				output := fmt.Sprintf("\r\n{R%s{R panics and attempts to flee, but can't get away!{x\r\n", ch.GetShortDescriptionUpper(rch))
@@ -523,7 +523,7 @@ func do_flee(ch *Character, arguments string) {
 
 	/* Announce player's departure to all other players in the current room */
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch != ch {
 			/* If they were fighting this player, then this is a good time to stop their participation in the fight and let it dispose */
@@ -544,7 +544,7 @@ func do_flee(ch *Character, arguments string) {
 
 	/* Announce player's arrival to all other players in the new room */
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch != ch {
 			output := fmt.Sprintf("\r\n{W%s{W arrives from %s.{x\r\n", ch.GetShortDescriptionUpper(rch), ExitName[ReverseDirection[chosenEscape.Direction]])
@@ -595,7 +595,7 @@ func do_kill(ch *Character, arguments string) {
 
 	if ch.Room != nil && target.Room != nil && target.Room == ch.Room {
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			character := iter.Value.(*Character)
+			character := iter.Value
 			if character != ch && character != target {
 				character.Send(fmt.Sprintf("{G%s{G begins attacking %s{G!{x\r\n",
 					ch.GetShortDescriptionUpper(character),

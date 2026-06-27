@@ -55,7 +55,7 @@ func do_say(ch *Character, arguments string) {
 
 	if ch.Room != nil {
 		for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-			rch := iter.Value.(*Character)
+			rch := iter.Value
 
 			if rch != ch {
 				rch.Send(output)
@@ -118,11 +118,11 @@ func do_quit(ch *Character, arguments string) {
 
 	ch.Game.Characters.Remove(ch)
 	for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		if obj.Contents != nil {
 			for innerIter := obj.Contents.Head; innerIter != nil; innerIter = innerIter.Next {
-				containedObj := innerIter.Value.(*ObjectInstance)
+				containedObj := innerIter.Value
 
 				ch.Game.Objects.Remove(containedObj)
 			}
@@ -147,7 +147,7 @@ func (ch *Character) DisbandGroup() {
 	ch.Send("{WYou disband your group.{x\r\n")
 
 	for iter := ch.Group.Head; iter != nil; iter = iter.Next {
-		gch := iter.Value.(*Character)
+		gch := iter.Value
 		gch.Group = nil
 		gch.Leader = nil
 
@@ -161,7 +161,7 @@ func (ch *Character) leaveGroup() {
 	ch.leaveGroupFrom(nil)
 }
 
-func (ch *Character) leaveGroupFrom(group *LinkedList[interface{}]) {
+func (ch *Character) leaveGroupFrom(group *LinkedList[*Character]) {
 	if group != nil {
 		group.Remove(ch)
 	}
@@ -191,7 +191,7 @@ func do_group(ch *Character, arguments string) {
 		output.WriteString(fmt.Sprintf("{W%s{W's group:{x\r\n", ch.Leader.GetShortDescriptionUpper(ch)))
 
 		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
-			gch := iter.Value.(*Character)
+			gch := iter.Value
 
 			output.WriteString(fmt.Sprintf("[%2d %-8s] %-14s %5d/%5dhp %5d/%5dm %5d/%5dst\r\n",
 				gch.Level,
@@ -230,7 +230,7 @@ func do_group(ch *Character, arguments string) {
 		ch.Send(fmt.Sprintf("{WYou leave %s{W's group.{x\r\n", ch.Leader.GetShortDescription(ch)))
 
 		for iter := ch.Group.Head; iter != nil; iter = iter.Next {
-			gch := iter.Value.(*Character)
+			gch := iter.Value
 
 			if gch != ch {
 				gch.Send(fmt.Sprintf("{W%s{W leaves the group.{x\r\n", ch.GetShortDescriptionUpper(gch)))
@@ -247,7 +247,7 @@ func do_group(ch *Character, arguments string) {
 	}
 
 	if ch.Group == nil {
-		ch.Group = NewAnyLinkedList()
+		ch.Group = NewLinkedList[*Character]()
 		ch.Group.Insert(ch)
 		ch.Leader = ch
 	}

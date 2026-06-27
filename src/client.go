@@ -444,7 +444,7 @@ func (game *Game) checkReconnect(client *Client, name string) bool {
 
 			if ch.Room != nil {
 				for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-					character := iter.Value.(*Character)
+					character := iter.Value
 
 					if character != ch {
 						character.Send(fmt.Sprintf("\r\n{M%s has reconnected.{x\r\n", ch.GetShortDescriptionUpper(character)))

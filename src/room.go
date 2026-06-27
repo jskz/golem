@@ -61,9 +61,9 @@ type Room struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 
-	Objects    *LinkedList[interface{}] `json:"objects"`
-	Resets     *LinkedList[interface{}] `json:"resets"`
-	Characters *LinkedList[interface{}] `json:"characters"`
+	Objects    *LinkedList[*ObjectInstance] `json:"objects"`
+	Resets     *LinkedList[*Reset]          `json:"resets"`
+	Characters *LinkedList[*Character]      `json:"characters"`
 
 	Exit map[uint]*Exit `json:"exit"`
 }
@@ -92,7 +92,7 @@ func (room *Room) clearFurnitureUsers(obj *ObjectInstance) {
 	}
 
 	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 		if rch.Furniture == obj {
 			rch.Furniture = nil
 		}
@@ -115,7 +115,7 @@ func (room *Room) ActiveLightSourcePresent() bool {
 	}
 
 	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch.HasEquippedLightSource() {
 			return true
@@ -282,7 +282,7 @@ func (room *Room) listOtherRoomCharactersToCharacter(ch *Character) {
 	var output strings.Builder
 
 	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch != ch {
 			output.WriteString(fmt.Sprintf("{G%s{x\r\n", rch.getLongDescription(ch)))
@@ -322,9 +322,9 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	var zoneId int
 
 	room = &Room{Game: game}
-	room.Resets = NewAnyLinkedList()
-	room.Objects = NewAnyLinkedList()
-	room.Characters = NewAnyLinkedList()
+	room.Resets = NewLinkedList[*Reset]()
+	room.Objects = NewLinkedList[*ObjectInstance]()
+	room.Characters = NewLinkedList[*Character]()
 	room.Exit = make(map[uint]*Exit)
 	err := row.Scan(&room.Id, &zoneId, &room.Name, &room.Description, &room.Flags)
 
@@ -448,7 +448,7 @@ func (room *Room) Broadcast(message string, filter goja.Callable) {
 	for iter := room.Characters.Head; iter != nil; iter = iter.Next {
 		var result bool = false
 
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if filter != nil {
 			val, err := filter(room.Game.vm.ToValue(rch))

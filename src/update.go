@@ -23,7 +23,7 @@ func (game *Game) characterUpdate() {
 
 		for effectIter := ch.Effects.Head; effectIter != nil; {
 			next := effectIter.Next
-			fx := effectIter.Value.(*Effect)
+			fx := effectIter.Value
 
 			if fx.Duration != EffectDurationPermanent && int(time.Since(fx.CreatedAt).Seconds()) >= fx.Duration {
 				if fx.OnComplete != nil {
@@ -144,7 +144,7 @@ func (game *Game) removeObjectFromWorld(obj *ObjectInstance) {
 	if obj.Contents != nil {
 		for iter := obj.Contents.Head; iter != nil; {
 			next := iter.Next
-			containedObj := iter.Value.(*ObjectInstance)
+			containedObj := iter.Value
 
 			game.removeObjectFromWorld(containedObj)
 			iter = next
@@ -166,7 +166,7 @@ func (game *Game) sendDecayMessage(obj *ObjectInstance, location objectLocation)
 
 	if location.room != nil {
 		for innerIter := location.room.Characters.Head; innerIter != nil; innerIter = innerIter.Next {
-			rch := innerIter.Value.(*Character)
+			rch := innerIter.Value
 
 			rch.Send(fmt.Sprintf("{D%s{D crumbles into dust.{x\r\n", obj.GetShortDescriptionUpper(rch)))
 		}
@@ -184,7 +184,7 @@ func (game *Game) moveDecayedContainerContents(container *ObjectInstance, locati
 
 	for contentIter := container.Contents.Head; contentIter != nil; {
 		next := contentIter.Next
-		contentObj := contentIter.Value.(*ObjectInstance)
+		contentObj := contentIter.Value
 
 		container.removeObject(contentObj)
 		game.moveDecayedContainerContent(contentObj, location)
@@ -238,7 +238,7 @@ func (game *Game) moveDecayedContainerContent(obj *ObjectInstance, location obje
 		game.moveDecayedContainerContentToCarrier(obj, location.carrier)
 	case location.container != nil:
 		if location.container.Contents == nil {
-			location.container.Contents = NewAnyLinkedList()
+			location.container.Contents = NewLinkedList[*ObjectInstance]()
 		}
 
 		location.container.AddObject(obj)
@@ -251,7 +251,7 @@ func (game *Game) moveDecayedContainerContentToRoom(obj *ObjectInstance, room *R
 	var found *ObjectInstance = nil
 
 	for iter := room.Objects.Head; iter != nil; iter = iter.Next {
-		roomObj := iter.Value.(*ObjectInstance)
+		roomObj := iter.Value
 
 		if roomObj.ItemType == ItemTypeCurrency {
 			found = roomObj

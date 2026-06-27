@@ -158,7 +158,7 @@ func (ch *Character) FindShopInRoom() *Shop {
 	}
 
 	for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch.Flags&CHAR_SHOPKEEPER != 0 {
 			shop, ok := ch.Game.mobileShops[uint(rch.Id)]
@@ -260,7 +260,7 @@ func do_buy(ch *Character, arguments string) {
 			}
 
 			for iter := ch.Room.Characters.Head; iter != nil; iter = iter.Next {
-				rch := iter.Value.(*Character)
+				rch := iter.Value
 
 				if !rch.IsEqual(ch) {
 					if quantity == 1 {

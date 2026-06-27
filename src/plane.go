@@ -77,10 +77,10 @@ type Atlas struct {
 	Plane *Plane `json:"plane"`
 
 	// TODO: portals, scripts
-	Characters map[int]*LinkedList[interface{}] `json:"characters"`
-	Objects    map[int]*LinkedList[interface{}] `json:"objects"`
-	Rooms      map[int]*LinkedList[interface{}] `json:"rooms"`
-	Exits      map[int]map[uint]*Exit           `json:"exits"`
+	Characters map[int]*LinkedList[*Character]      `json:"characters"`
+	Objects    map[int]*LinkedList[*ObjectInstance] `json:"objects"`
+	Rooms      map[int]*LinkedList[interface{}]     `json:"rooms"`
+	Exits      map[int]map[uint]*Exit               `json:"exits"`
 
 	CharacterTree *QuadTree `json:"characterTree"`
 	ObjectTree    *QuadTree `json:"objectTree"`
@@ -130,8 +130,8 @@ func (plane *Plane) SupportsPersistentCoordinates() bool {
 func (plane *Plane) NewAtlas() *Atlas {
 	return &Atlas{
 		Plane:      plane,
-		Characters: make(map[int]*LinkedList[interface{}]),
-		Objects:    make(map[int]*LinkedList[interface{}]),
+		Characters: make(map[int]*LinkedList[*Character]),
+		Objects:    make(map[int]*LinkedList[*ObjectInstance]),
 		Exits:      make(map[int]map[uint]*Exit),
 
 		CharacterTree: NewQuadTree(float64(plane.Width), float64(plane.Height)),
@@ -565,7 +565,7 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 
 	room.Characters, ok = plane.Map.Layers[z].Atlas.Characters[atlasKey]
 	if !ok {
-		list := NewAnyLinkedList()
+		list := NewLinkedList[*Character]()
 
 		plane.Map.Layers[z].Atlas.Characters[atlasKey] = list
 		room.Characters = list
@@ -574,7 +574,7 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 	ok = false
 	room.Objects, ok = plane.Map.Layers[z].Atlas.Objects[atlasKey]
 	if !ok {
-		list := NewAnyLinkedList()
+		list := NewLinkedList[*ObjectInstance]()
 
 		plane.Map.Layers[z].Atlas.Objects[atlasKey] = list
 		room.Objects = list
