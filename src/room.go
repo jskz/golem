@@ -337,7 +337,7 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	}
 
 	for iter := game.Zones.Head; iter != nil; iter = iter.Next {
-		zone := iter.Value.(*Zone)
+		zone := iter.Value
 
 		if zone.Id == zoneId {
 			room.Zone = zone

@@ -2012,7 +2012,7 @@ func (game *Game) Broadcast(message string, filter goja.Callable) {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		var result bool = false
 
-		ch := iter.Value.(*Character)
+		ch := iter.Value
 
 		if filter != nil {
 			val, err := filter(game.vm.ToValue(ch))
@@ -2045,7 +2045,7 @@ func (game *Game) broadcast(message string, filterFn func(*Character) bool) {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
 		var result bool = false
 
-		ch := iter.Value.(*Character)
+		ch := iter.Value
 
 		if filterFn != nil {
 			result = filterFn(ch)

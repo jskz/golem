@@ -42,7 +42,7 @@ func do_zones(ch *Character, arguments string) {
 		"Min. Since"))
 
 	for iter := ch.Game.Zones.Head; iter != nil; iter = iter.Next {
-		zone := iter.Value.(*Zone)
+		zone := iter.Value
 
 		minutesSinceZoneReset := int(time.Since(zone.LastReset).Minutes())
 
@@ -78,7 +78,7 @@ func do_mlist(ch *Character, arguments string) {
 	output.WriteString(fmt.Sprintf("Displaying all %d character instances in the world:\r\n", ch.Game.Characters.Count))
 
 	for iter := ch.Game.Characters.Head; iter != nil; iter = iter.Next {
-		wch := iter.Value.(*Character)
+		wch := iter.Value
 
 		if wch.Flags&CHAR_IS_PLAYER != 0 {
 			if wch.Client != nil {
@@ -518,7 +518,7 @@ func do_goto(ch *Character, arguments string) {
 
 		var found *Plane = nil
 		for iter := ch.Game.Planes.Head; iter != nil; iter = iter.Next {
-			plane := iter.Value.(*Plane)
+			plane := iter.Value
 
 			if plane.Id == id {
 				found = plane
@@ -570,7 +570,7 @@ func do_goto(ch *Character, arguments string) {
 	var room *Room = nil
 
 	for iter := ch.Game.Characters.Head; iter != nil; iter = iter.Next {
-		gch := iter.Value.(*Character)
+		gch := iter.Value
 
 		nameParts := strings.Split(gch.Name, " ")
 		for _, part := range nameParts {

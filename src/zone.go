@@ -207,7 +207,7 @@ func (game *Game) ValidZoneRangeExcept(low uint, high uint, ignoredZoneId int) b
 	}
 
 	for zoneIter := game.Zones.Head; zoneIter != nil; zoneIter = zoneIter.Next {
-		zone := zoneIter.Value.(*Zone)
+		zone := zoneIter.Value
 
 		if zone.Id == ignoredZoneId {
 			continue
@@ -366,7 +366,7 @@ func (zone *Zone) FindAvailableRoomID() (int, error) {
 func (game *Game) LoadZones() error {
 	log.Printf("Loading zones.\r\n")
 
-	game.Zones = NewAnyLinkedList()
+	game.Zones = NewLinkedList[*Zone]()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -490,7 +490,7 @@ func (game *Game) LoadResets() error {
 
 func (game *Game) FindZoneByID(id int) *Zone {
 	for zoneIter := game.Zones.Head; zoneIter != nil; zoneIter = zoneIter.Next {
-		zone := zoneIter.Value.(*Zone)
+		zone := zoneIter.Value
 
 		if zone.Id == id {
 			return zone

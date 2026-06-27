@@ -83,7 +83,7 @@ func (game *Game) combatForCharacter(ch *Character) *Combat {
 	}
 
 	for iter := game.Fights.Head; iter != nil; iter = iter.Next {
-		combat := iter.Value.(*Combat)
+		combat := iter.Value
 		if combat.hasParticipant(ch) {
 			return combat
 		}
@@ -102,7 +102,7 @@ func (game *Game) AddCombatParticipant(combat *Combat, ch *Character) {
 
 	if game != nil && game.Fights != nil {
 		for iter := game.Fights.Head; iter != nil; iter = iter.Next {
-			existing := iter.Value.(*Combat)
+			existing := iter.Value
 			if existing == combat {
 				continue
 			}
@@ -282,7 +282,7 @@ func (game *Game) participatedInKill(ch *Character, target *Character) bool {
 	}
 
 	for iter := game.Fights.Head; iter != nil; iter = iter.Next {
-		combat := iter.Value.(*Combat)
+		combat := iter.Value
 		if combat.hasParticipant(ch) && combat.hasParticipant(target) {
 			return true
 		}

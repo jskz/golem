@@ -678,7 +678,7 @@ func (plane *Plane) GetTerrainRect(x int, y int, z int, w int, h int) [][]int {
 
 func (game *Game) FindPlaneByName(name string) *Plane {
 	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
-		plane := iter.Value.(*Plane)
+		plane := iter.Value
 
 		if plane.Name == name {
 			return plane
@@ -690,7 +690,7 @@ func (game *Game) FindPlaneByName(name string) *Plane {
 
 func (game *Game) FindPlaneByID(id int) *Plane {
 	for iter := game.Planes.Head; iter != nil; iter = iter.Next {
-		plane := iter.Value.(*Plane)
+		plane := iter.Value
 
 		if plane.Id == id {
 			return plane
@@ -737,7 +737,7 @@ func (game *Game) LoadPlanes() error {
 		}
 
 		for iter := game.Zones.Head; iter != nil; iter = iter.Next {
-			zone := iter.Value.(*Zone)
+			zone := iter.Value
 
 			if zone.Id == zoneId {
 				plane.Zone = zone
@@ -841,7 +841,7 @@ func (game *Game) LoadDistricts() error {
 
 func (game *Game) FindDistrictByID(id int) *District {
 	for planeIter := game.Planes.Head; planeIter != nil; planeIter = planeIter.Next {
-		plane := planeIter.Value.(*Plane)
+		plane := planeIter.Value
 
 		if plane.Map == nil || len(plane.Map.Layers) == 0 {
 			continue

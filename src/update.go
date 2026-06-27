@@ -15,7 +15,7 @@ import (
 
 func (game *Game) characterUpdate() {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
-		ch := iter.Value.(*Character)
+		ch := iter.Value
 
 		if ch.Casting != nil {
 			ch.onCastingUpdate()
@@ -47,7 +47,7 @@ func (game *Game) objectUpdate() {
 
 	for iter := game.Objects.Head; iter != nil; {
 		next := iter.Next
-		obj := iter.Value.(*ObjectInstance)
+		obj := iter.Value
 
 		/* Remove the obj after its ttl time in minutes, if the ITEM_DECAYS flag is set */
 		if obj.shouldDecay(now) {
@@ -115,7 +115,7 @@ func (game *Game) removeCharacterFromWorld(ch *Character) {
 
 	for iter := game.Fights.Head; iter != nil; {
 		next := iter.Next
-		combat := iter.Value.(*Combat)
+		combat := iter.Value
 
 		for _, participant := range combat.Participants {
 			if participant == ch {
@@ -128,7 +128,7 @@ func (game *Game) removeCharacterFromWorld(ch *Character) {
 	}
 
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
-		rch := iter.Value.(*Character)
+		rch := iter.Value
 
 		if rch.Fighting == ch {
 			rch.Fighting = nil
@@ -298,7 +298,7 @@ func (obj *ObjectInstance) removeFromLocation() {
 
 func (game *Game) Update() {
 	for iter := game.Characters.Head; iter != nil; iter = iter.Next {
-		ch := iter.Value.(*Character)
+		ch := iter.Value
 
 		ch.onUpdate()
 	}
@@ -306,7 +306,7 @@ func (game *Game) Update() {
 
 func (game *Game) ZoneUpdate() {
 	for iter := game.Zones.Head; iter != nil; iter = iter.Next {
-		zone := iter.Value.(*Zone)
+		zone := iter.Value
 
 		if time.Since(zone.LastReset).Minutes() > float64(zone.ResetFrequency) {
 			game.ResetZone(zone)
