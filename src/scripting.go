@@ -624,7 +624,7 @@ func do_reload(ch *Character, arguments string) {
 
 func (game *Game) InitScripting() error {
 	game.vm = goja.New()
-	game.eventHandlers = make(map[string]*LinkedList)
+	game.eventHandlers = make(map[string]*LinkedList[interface{}])
 
 	game.vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
 
@@ -633,7 +633,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("game", game.vm.ToValue(game))
 
 	obj.Set("clearAllEventHandlers", game.vm.ToValue(func() goja.Value {
-		game.eventHandlers = make(map[string]*LinkedList)
+		game.eventHandlers = make(map[string]*LinkedList[interface{}])
 
 		return game.vm.ToValue(true)
 	}))
@@ -659,7 +659,7 @@ func (game *Game) InitScripting() error {
 	obj.Set("registerEventHandler", game.vm.ToValue(func(name goja.Value, fn goja.Callable) goja.Value {
 		eventName := name.String()
 		if game.eventHandlers[eventName] == nil {
-			game.eventHandlers[eventName] = NewLinkedList()
+			game.eventHandlers[eventName] = NewAnyLinkedList()
 		}
 
 		handler := &EventHandler{name: eventName, callback: fn}
@@ -834,7 +834,7 @@ func (game *Game) InitScripting() error {
 	terrainTypes.Set("TerrainTypeSnowcappedMountains", game.vm.ToValue(TerrainTypeSnowcappedMountains))
 
 	utilObj := game.vm.NewObject()
-	utilObj.Set("createLinkedList", game.vm.ToValue(NewLinkedList))
+	utilObj.Set("createLinkedList", game.vm.ToValue(NewAnyLinkedList))
 	utilObj.Set("createQuadTree", game.vm.ToValue(NewQuadTree))
 	utilObj.Set("newRect2D", game.vm.ToValue(NewRect))
 	utilObj.Set("newPoint2D", game.vm.ToValue(NewPoint))

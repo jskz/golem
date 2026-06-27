@@ -293,9 +293,9 @@ func (zone *Zone) CreateRoom() (*Room, error) {
 	room.Flags = 0
 	room.Description = "This room-in-development needs a description!"
 	room.Exit = make(map[uint]*Exit)
-	room.Characters = NewLinkedList()
-	room.Objects = NewLinkedList()
-	room.Resets = NewLinkedList()
+	room.Characters = NewAnyLinkedList()
+	room.Objects = NewAnyLinkedList()
+	room.Resets = NewAnyLinkedList()
 
 	_, err = tx.Exec(`
 		INSERT INTO
@@ -366,7 +366,7 @@ func (zone *Zone) FindAvailableRoomID() (int, error) {
 func (game *Game) LoadZones() error {
 	log.Printf("Loading zones.\r\n")
 
-	game.Zones = NewLinkedList()
+	game.Zones = NewAnyLinkedList()
 
 	rows, err := game.db.Query(`
 		SELECT

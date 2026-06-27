@@ -61,9 +61,9 @@ type Room struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 
-	Objects    *LinkedList `json:"objects"`
-	Resets     *LinkedList `json:"resets"`
-	Characters *LinkedList `json:"characters"`
+	Objects    *LinkedList[interface{}] `json:"objects"`
+	Resets     *LinkedList[interface{}] `json:"resets"`
+	Characters *LinkedList[interface{}] `json:"characters"`
 
 	Exit map[uint]*Exit `json:"exit"`
 }
@@ -322,9 +322,9 @@ func (game *Game) LoadRoomIndex(index uint) (*Room, error) {
 	var zoneId int
 
 	room = &Room{Game: game}
-	room.Resets = NewLinkedList()
-	room.Objects = NewLinkedList()
-	room.Characters = NewLinkedList()
+	room.Resets = NewAnyLinkedList()
+	room.Objects = NewAnyLinkedList()
+	room.Characters = NewAnyLinkedList()
 	room.Exit = make(map[uint]*Exit)
 	err := row.Scan(&room.Id, &zoneId, &room.Name, &room.Description, &room.Flags)
 

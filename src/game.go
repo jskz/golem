@@ -37,12 +37,12 @@ type Game struct {
 	vm       *goja.Runtime
 	listener net.Listener
 
-	Objects      *LinkedList `json:"objects"`
-	Characters   *LinkedList `json:"characters"`
-	Fights       *LinkedList `json:"fights"`
-	Planes       *LinkedList `json:"planes"`
-	Zones        *LinkedList `json:"zones"`
-	ScriptTimers *LinkedList `json:"scriptTimers"`
+	Objects      *LinkedList[interface{}] `json:"objects"`
+	Characters   *LinkedList[interface{}] `json:"characters"`
+	Fights       *LinkedList[interface{}] `json:"fights"`
+	Planes       *LinkedList[interface{}] `json:"planes"`
+	Zones        *LinkedList[interface{}] `json:"zones"`
+	ScriptTimers *LinkedList[interface{}] `json:"scriptTimers"`
 
 	clients     map[*Client]bool
 	skills      map[uint]*Skill
@@ -51,7 +51,7 @@ type Game struct {
 	mobileShops map[uint]*Shop
 	socials     map[string]*Social
 
-	eventHandlers   map[string]*LinkedList
+	eventHandlers   map[string]*LinkedList[interface{}]
 	Scripts         map[uint]*Script `json:"scripts"`
 	objectScripts   map[uint]*Script
 	districtScripts map[int]*Script
@@ -91,11 +91,11 @@ func NewGame() (*Game, error) {
 	game.clientMessage = make(chan ClientTextMessage)
 	game.planeGenerationCompleted = make(chan int)
 
-	game.Characters = NewLinkedList()
-	game.Fights = NewLinkedList()
-	game.Objects = NewLinkedList()
-	game.ScriptTimers = NewLinkedList()
-	game.Planes = NewLinkedList()
+	game.Characters = NewAnyLinkedList()
+	game.Fights = NewAnyLinkedList()
+	game.Objects = NewAnyLinkedList()
+	game.ScriptTimers = NewAnyLinkedList()
+	game.Planes = NewAnyLinkedList()
 
 	/* Initialize services we'll inject elsewhere through the game instance. */
 	game.db, err = openDatabase()

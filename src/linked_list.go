@@ -9,26 +9,30 @@ package main
 
 import "math/rand"
 
-type LinkedListNode struct {
-	Next  *LinkedListNode `json:"next"`
-	Value interface{}     `json:"value"`
+type LinkedListNode[T comparable] struct {
+	Next  *LinkedListNode[T] `json:"next"`
+	Value T                  `json:"value"`
 }
 
-type LinkedList struct {
-	Head  *LinkedListNode `json:"head"`
-	Count int             `json:"count"`
+type LinkedList[T comparable] struct {
+	Head  *LinkedListNode[T] `json:"head"`
+	Count int                `json:"count"`
 }
 
-func NewLinkedList() *LinkedList {
-	list := &LinkedList{}
+func NewLinkedList[T comparable]() *LinkedList[T] {
+	list := &LinkedList[T]{}
 	list.Head = nil
 	list.Count = 0
 
 	return list
 }
 
-func (list *LinkedList) Remove(value interface{}) bool {
-	var iter *LinkedListNode = list.Head
+func NewAnyLinkedList() *LinkedList[interface{}] {
+	return NewLinkedList[interface{}]()
+}
+
+func (list *LinkedList[T]) Remove(value T) bool {
+	var iter *LinkedListNode[T] = list.Head
 
 	if list.Count == 0 || list.Head == nil {
 		return false
@@ -53,12 +57,12 @@ func (list *LinkedList) Remove(value interface{}) bool {
 	return false
 }
 
-func (list *LinkedList) Insert(value interface{}) {
-	list.Head = &LinkedListNode{Next: list.Head, Value: value}
+func (list *LinkedList[T]) Insert(value T) {
+	list.Head = &LinkedListNode[T]{Next: list.Head, Value: value}
 	list.Count++
 }
 
-func (list *LinkedList) GetRandomNode() *LinkedListNode {
+func (list *LinkedList[T]) GetRandomNode() *LinkedListNode[T] {
 	choice := rand.Intn(list.Count)
 
 	i := 0
@@ -74,7 +78,7 @@ func (list *LinkedList) GetRandomNode() *LinkedListNode {
 }
 
 /* Utility method to concatenate one linked list to another */
-func (list *LinkedList) Concat(other *LinkedList) *LinkedList {
+func (list *LinkedList[T]) Concat(other *LinkedList[T]) *LinkedList[T] {
 	for iter := other.Head; iter != nil; iter = iter.Next {
 		v := iter.Value
 
@@ -84,7 +88,7 @@ func (list *LinkedList) Concat(other *LinkedList) *LinkedList {
 	return list
 }
 
-func (list *LinkedList) Contains(value interface{}) bool {
+func (list *LinkedList[T]) Contains(value T) bool {
 	for iter := list.Head; iter != nil; iter = iter.Next {
 		v := iter.Value
 
@@ -96,8 +100,8 @@ func (list *LinkedList) Contains(value interface{}) bool {
 	return false
 }
 
-func (list *LinkedList) Values() []interface{} {
-	var values []interface{} = make([]interface{}, 0)
+func (list *LinkedList[T]) Values() []T {
+	var values []T = make([]T, 0)
 
 	for iter := list.Head; iter != nil; iter = iter.Next {
 		values = append(values, iter.Value)

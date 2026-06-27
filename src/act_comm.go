@@ -161,7 +161,7 @@ func (ch *Character) leaveGroup() {
 	ch.leaveGroupFrom(nil)
 }
 
-func (ch *Character) leaveGroupFrom(group *LinkedList) {
+func (ch *Character) leaveGroupFrom(group *LinkedList[interface{}]) {
 	if group != nil {
 		group.Remove(ch)
 	}
@@ -247,7 +247,7 @@ func do_group(ch *Character, arguments string) {
 	}
 
 	if ch.Group == nil {
-		ch.Group = NewLinkedList()
+		ch.Group = NewAnyLinkedList()
 		ch.Group.Insert(ch)
 		ch.Leader = ch
 	}

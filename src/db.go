@@ -14,8 +14,8 @@ import (
 )
 
 var TerrainTable map[int]*Terrain
-var Jobs *LinkedList
-var Races *LinkedList
+var Jobs *LinkedList[interface{}]
+var Races *LinkedList[interface{}]
 
 func (game *Game) LoadTerrain() error {
 	log.Printf("Loading terrain types.\r\n")
@@ -63,7 +63,7 @@ func (game *Game) LoadTerrain() error {
 func (game *Game) LoadRaceTable() error {
 	log.Printf("Loading races.\r\n")
 
-	Races = NewLinkedList()
+	Races = NewAnyLinkedList()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -108,7 +108,7 @@ func (game *Game) LoadRaceTable() error {
 func (game *Game) LoadJobTable() error {
 	log.Printf("Loading jobs.\r\n")
 
-	Jobs = NewLinkedList()
+	Jobs = NewAnyLinkedList()
 
 	rows, err := game.db.Query(`
 		SELECT
@@ -139,7 +139,7 @@ func (game *Game) LoadJobTable() error {
 			continue
 		}
 
-		job.Skills = NewLinkedList()
+		job.Skills = NewAnyLinkedList()
 		job.PrimaryAttribute = FindStatByName(primaryAttribute)
 		Jobs.Insert(job)
 	}

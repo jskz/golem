@@ -18,10 +18,10 @@ type QuadTree struct {
 	Southwest *QuadTree `json:"sw"`
 	Southeast *QuadTree `json:"se"`
 
-	Boundary *Rect       `json:"boundary"`
-	Nodes    *LinkedList `json:"data"`
-	Capacity int         `json:"capacity"`
-	Parent   *QuadTree   `json:"parent"`
+	Boundary *Rect                    `json:"boundary"`
+	Nodes    *LinkedList[interface{}] `json:"data"`
+	Capacity int                      `json:"capacity"`
+	Parent   *QuadTree                `json:"parent"`
 }
 
 const QuadTreeNodeMaxElements = 4
@@ -160,7 +160,7 @@ func (qt *QuadTree) Collapse() bool {
 		qt.Southwest = nil
 		qt.Southeast = nil
 
-		qt.Nodes = NewLinkedList()
+		qt.Nodes = NewAnyLinkedList()
 
 		for _, p := range results {
 			qt.Nodes.Insert(p)
@@ -244,7 +244,7 @@ func (qt *QuadTree) QueryRect(r *Rect) []*Point {
 func NewQuadTree(width float64, height float64) *QuadTree {
 	qt := &QuadTree{
 		Capacity: QuadTreeNodeMaxElements,
-		Nodes:    NewLinkedList(),
+		Nodes:    NewAnyLinkedList(),
 		Boundary: &Rect{X: 0, Y: 0, W: width, H: height},
 		Parent:   nil,
 	}

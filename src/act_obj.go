@@ -72,7 +72,7 @@ func objectListDescription(obj *ObjectInstance, viewer *Character, longDescripti
 	return buf.String()
 }
 
-func (ch *Character) listObjects(objects *LinkedList, longDescriptions bool, hideEquipped bool) {
+func (ch *Character) listObjects(objects *LinkedList[interface{}], longDescriptions bool, hideEquipped bool) {
 	var output strings.Builder
 	var inventory map[string]uint = make(map[string]uint)
 

@@ -36,11 +36,11 @@ type Object struct {
 }
 
 type ObjectInstance struct {
-	Game      *Game           `json:"game"`
-	Contents  *LinkedList     `json:"contents"`
-	Inside    *ObjectInstance `json:"inside"`
-	InRoom    *Room           `json:"inRoom"`
-	CarriedBy *Character      `json:"carriedBy"`
+	Game      *Game                    `json:"game"`
+	Contents  *LinkedList[interface{}] `json:"contents"`
+	Inside    *ObjectInstance          `json:"inside"`
+	InRoom    *Room                    `json:"inRoom"`
+	CarriedBy *Character               `json:"carriedBy"`
 
 	Id       uint   `json:"id"`
 	ParentId uint   `json:"parentId"`
@@ -256,7 +256,7 @@ func (game *Game) objectInstanceFromIndex(obj *Object) *ObjectInstance {
 	objectInstance := &ObjectInstance{
 		Game:             game,
 		ParentId:         obj.Id,
-		Contents:         NewLinkedList(),
+		Contents:         NewAnyLinkedList(),
 		Description:      obj.Description,
 		ShortDescription: obj.ShortDescription,
 		LongDescription:  obj.LongDescription,
@@ -810,9 +810,9 @@ func (obj *ObjectInstance) Finalize(container *ObjectInstance) error {
 	return nil
 }
 
-func (obj *ObjectInstance) ensureContents() *LinkedList {
+func (obj *ObjectInstance) ensureContents() *LinkedList[interface{}] {
 	if obj.Contents == nil {
-		obj.Contents = NewLinkedList()
+		obj.Contents = NewAnyLinkedList()
 	}
 
 	return obj.Contents
@@ -835,7 +835,7 @@ func (container *ObjectInstance) removeObject(obj *ObjectInstance) {
 	obj.InRoom = nil
 }
 
-func (ch *Character) showObjectList(objects *LinkedList) {
+func (ch *Character) showObjectList(objects *LinkedList[interface{}]) {
 	var output strings.Builder
 
 	if objects == nil || objects.Count < 1 {

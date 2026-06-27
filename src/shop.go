@@ -22,10 +22,10 @@ type ShopListing struct {
 }
 
 type Shop struct {
-	Game     *Game       `json:"game"`
-	Id       int         `json:"id"`
-	MobileId uint        `json:"mobileId"`
-	Listings *LinkedList `json:"listings"`
+	Game     *Game                    `json:"game"`
+	Id       int                      `json:"id"`
+	MobileId uint                     `json:"mobileId"`
+	Listings *LinkedList[interface{}] `json:"listings"`
 }
 
 func (game *Game) LoadShops() error {
@@ -49,7 +49,7 @@ func (game *Game) LoadShops() error {
 	defer rows.Close()
 
 	for rows.Next() {
-		shop := &Shop{Game: game, Listings: NewLinkedList()}
+		shop := &Shop{Game: game, Listings: NewAnyLinkedList()}
 		err := rows.Scan(&shop.Id, &shop.MobileId)
 		if err != nil {
 			log.Printf("Unable to scan shop: %v.\r\n", err)

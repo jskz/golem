@@ -49,13 +49,13 @@ func parseIndexedArgument(argument string) (int, string, bool) {
 }
 
 type Job struct {
-	Id                         uint        `json:"id"`
-	Name                       string      `json:"name"`
-	DisplayName                string      `json:"display_name"`
-	Playable                   bool        `json:"playable"`
-	ExperienceRequiredModifier float64     `json:"experience_required_modifier"`
-	Skills                     *LinkedList `json:"skills"`
-	PrimaryAttribute           int         `json:"primaryAttribute"`
+	Id                         uint                     `json:"id"`
+	Name                       string                   `json:"name"`
+	DisplayName                string                   `json:"display_name"`
+	Playable                   bool                     `json:"playable"`
+	ExperienceRequiredModifier float64                  `json:"experience_required_modifier"`
+	Skills                     *LinkedList[interface{}] `json:"skills"`
+	PrimaryAttribute           int                      `json:"primaryAttribute"`
 }
 
 type Race struct {
@@ -184,7 +184,7 @@ type Character struct {
 	Game   *Game   `json:"game"`
 	Client *Client `json:"client"`
 
-	Inventory *LinkedList `json:"inventory"`
+	Inventory *LinkedList[interface{}] `json:"inventory"`
 
 	output       []byte
 	outputCursor int
@@ -201,9 +201,9 @@ type Character struct {
 	Casting    *CastingContext `json:"casting"`
 	Furniture  *ObjectInstance `json:"furniture"`
 
-	Following *Character  `json:"following"`
-	Leader    *Character  `json:"leader"`
-	Group     *LinkedList `json:"group"`
+	Following *Character               `json:"following"`
+	Leader    *Character               `json:"leader"`
+	Group     *LinkedList[interface{}] `json:"group"`
 
 	Id int `json:"id"`
 
@@ -221,9 +221,9 @@ type Character struct {
 	Experience uint `json:"experience"`
 	Practices  int  `json:"practices"`
 
-	Affected int                   `json:"affected"`
-	Effects  *LinkedList           `json:"effects"`
-	Skills   map[uint]*Proficiency `json:"skills"`
+	Affected int                      `json:"affected"`
+	Effects  *LinkedList[interface{}] `json:"effects"`
+	Skills   map[uint]*Proficiency    `json:"skills"`
 
 	Gold  int               `json:"gold"`
 	Flags int               `json:"flags"`
@@ -1236,7 +1236,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 	for rows.Next() {
 		obj := &ObjectInstance{
 			Game:         game,
-			Contents:     NewLinkedList(),
+			Contents:     NewAnyLinkedList(),
 			Inside:       nil,
 			CarriedBy:    nil,
 			WearLocation: -1,
@@ -1291,7 +1291,7 @@ func (game *Game) LoadPlayerInventory(ch *Character) error {
 		for rows.Next() {
 			containedObj := &ObjectInstance{
 				Game:         game,
-				Contents:     NewLinkedList(),
+				Contents:     NewAnyLinkedList(),
 				Inside:       nil,
 				CarriedBy:    nil,
 				WearLocation: -1,
@@ -2092,8 +2092,8 @@ func NewCharacter() *Character {
 	character.Client = nil
 	character.Level = 0
 	character.Experience = 0
-	character.Inventory = NewLinkedList()
-	character.Effects = NewLinkedList()
+	character.Inventory = NewAnyLinkedList()
+	character.Effects = NewAnyLinkedList()
 	character.Skills = make(map[uint]*Proficiency)
 	character.Conditions[ConditionDrunk] = 0
 	character.Conditions[ConditionFull] = ConditionMaximum

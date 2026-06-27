@@ -233,7 +233,7 @@ func (game *Game) createCorpse(ch *Character) *ObjectInstance {
 	obj.Ttl = 20
 	obj.WearLocation = -1
 
-	obj.Contents = NewLinkedList()
+	obj.Contents = NewAnyLinkedList()
 	if ch.Inventory != nil {
 		carriedObjects := make([]*ObjectInstance, 0, ch.Inventory.Count)
 		for iter := ch.Inventory.Head; iter != nil; iter = iter.Next {
@@ -425,7 +425,7 @@ func (game *Game) Damage(ch *Character, target *Character, display bool, amount 
 
 				limbo.AddCharacter(target)
 
-				target.Effects = NewLinkedList()
+				target.Effects = NewAnyLinkedList()
 				target.refreshAffected()
 				target.Health = target.MaxHealth / 8
 				target.Mana = 1

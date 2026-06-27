@@ -86,8 +86,8 @@ func (grid *MazeGrid) cellAt(x int, y int) *MazeCell {
 	return grid.Grid[x][y]
 }
 
-func (cell *MazeCell) getAdjacentCells(wall bool, distance int, ordinals bool) *LinkedList {
-	list := NewLinkedList()
+func (cell *MazeCell) getAdjacentCells(wall bool, distance int, ordinals bool) *LinkedList[interface{}] {
+	list := NewAnyLinkedList()
 
 	if cell == nil || cell.Grid == nil {
 		return list
@@ -217,8 +217,8 @@ func (maze *MazeGrid) createRoom(x int, y int) *Room {
 	room.Name = "In the Underground"
 	room.Description = "You are deep within the dark dungeons of development."
 	room.Exit = make(map[uint]*Exit)
-	room.Characters = NewLinkedList()
-	room.Objects = NewLinkedList()
+	room.Characters = NewAnyLinkedList()
+	room.Objects = NewAnyLinkedList()
 
 	maze.Grid[x][y].Room = room
 	return room

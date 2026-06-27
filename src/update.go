@@ -238,7 +238,7 @@ func (game *Game) moveDecayedContainerContent(obj *ObjectInstance, location obje
 		game.moveDecayedContainerContentToCarrier(obj, location.carrier)
 	case location.container != nil:
 		if location.container.Contents == nil {
-			location.container.Contents = NewLinkedList()
+			location.container.Contents = NewAnyLinkedList()
 		}
 
 		location.container.AddObject(obj)

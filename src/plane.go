@@ -32,9 +32,9 @@ type Plane struct {
 	SourceType string   `json:"sourceType"`
 	Scripts    *Script  `json:"scripts"`
 
-	Map     *Map        `json:"map"`
-	Maze    *MazeGrid   `json:"maze"`
-	Portals *LinkedList `json:"portals"`
+	Map     *Map                     `json:"map"`
+	Maze    *MazeGrid                `json:"maze"`
+	Portals *LinkedList[interface{}] `json:"portals"`
 }
 
 type District struct {
@@ -54,8 +54,8 @@ type PlaneObserver struct {
 }
 
 type MapGrid struct {
-	Observers []*PlaneObserver `json:"observers"`
-	Districts *LinkedList      `json:"districts"`
+	Observers []*PlaneObserver         `json:"observers"`
+	Districts *LinkedList[interface{}] `json:"districts"`
 
 	Terrain [][]int `json:"terrain"`
 	Atlas   *Atlas  `json:"atlas"`
@@ -77,10 +77,10 @@ type Atlas struct {
 	Plane *Plane `json:"plane"`
 
 	// TODO: portals, scripts
-	Characters map[int]*LinkedList    `json:"characters"`
-	Objects    map[int]*LinkedList    `json:"objects"`
-	Rooms      map[int]*LinkedList    `json:"rooms"`
-	Exits      map[int]map[uint]*Exit `json:"exits"`
+	Characters map[int]*LinkedList[interface{}] `json:"characters"`
+	Objects    map[int]*LinkedList[interface{}] `json:"objects"`
+	Rooms      map[int]*LinkedList[interface{}] `json:"rooms"`
+	Exits      map[int]map[uint]*Exit           `json:"exits"`
 
 	CharacterTree *QuadTree `json:"characterTree"`
 	ObjectTree    *QuadTree `json:"objectTree"`
@@ -130,8 +130,8 @@ func (plane *Plane) SupportsPersistentCoordinates() bool {
 func (plane *Plane) NewAtlas() *Atlas {
 	return &Atlas{
 		Plane:      plane,
-		Characters: make(map[int]*LinkedList),
-		Objects:    make(map[int]*LinkedList),
+		Characters: make(map[int]*LinkedList[interface{}]),
+		Objects:    make(map[int]*LinkedList[interface{}]),
 		Exits:      make(map[int]map[uint]*Exit),
 
 		CharacterTree: NewQuadTree(float64(plane.Width), float64(plane.Height)),
@@ -158,7 +158,7 @@ func (plane *Plane) containsCoordinates(x int, y int, z int) bool {
 }
 
 func (plane *Plane) newMapGrid() *MapGrid {
-	grid := &MapGrid{Atlas: plane.NewAtlas(), Districts: NewLinkedList()}
+	grid := &MapGrid{Atlas: plane.NewAtlas(), Districts: NewAnyLinkedList()}
 	grid.Terrain = make([][]int, plane.Height)
 
 	for y := 0; y < plane.Height; y++ {
@@ -261,7 +261,7 @@ func (plane *Plane) districtLayer(z int) (*MapGrid, bool) {
 	}
 
 	if layer.Districts == nil {
-		layer.Districts = NewLinkedList()
+		layer.Districts = NewAnyLinkedList()
 	}
 
 	return layer, true
@@ -565,7 +565,7 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 
 	room.Characters, ok = plane.Map.Layers[z].Atlas.Characters[atlasKey]
 	if !ok {
-		list := NewLinkedList()
+		list := NewAnyLinkedList()
 
 		plane.Map.Layers[z].Atlas.Characters[atlasKey] = list
 		room.Characters = list
@@ -574,7 +574,7 @@ func (plane *Plane) MaterializeRoom(x int, y int, z int, src bool) *Room {
 	ok = false
 	room.Objects, ok = plane.Map.Layers[z].Atlas.Objects[atlasKey]
 	if !ok {
-		list := NewLinkedList()
+		list := NewAnyLinkedList()
 
 		plane.Map.Layers[z].Atlas.Objects[atlasKey] = list
 		room.Objects = list
@@ -725,7 +725,7 @@ func (game *Game) LoadPlanes() error {
 
 	for rows.Next() {
 		plane := &Plane{Game: game}
-		plane.Portals = NewLinkedList()
+		plane.Portals = NewAnyLinkedList()
 		plane.Flags = 0
 
 		var zoneId int = 0
