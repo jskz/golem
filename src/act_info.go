@@ -165,7 +165,7 @@ func do_scan(ch *Character, arguments string) {
 		nearbyCharacters := ch.Room.Plane.Map.Layers[ch.Room.Z].Atlas.CharacterTree.QueryRect(q)
 
 		for _, p := range nearbyCharacters {
-			pch := p.Value.(*Character)
+			pch := p.Value
 
 			if pch.IsEqual(ch) {
 				continue

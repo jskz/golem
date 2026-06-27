@@ -831,9 +831,9 @@ func (game *Game) InitScripting() error {
 
 	utilObj := game.vm.NewObject()
 	utilObj.Set("createLinkedList", game.vm.ToValue(NewAnyLinkedList))
-	utilObj.Set("createQuadTree", game.vm.ToValue(NewQuadTree))
+	utilObj.Set("createQuadTree", game.vm.ToValue(NewAnyQuadTree))
 	utilObj.Set("newRect2D", game.vm.ToValue(NewRect))
-	utilObj.Set("newPoint2D", game.vm.ToValue(NewPoint))
+	utilObj.Set("newPoint2D", game.vm.ToValue(NewAnyPoint))
 
 	utilObj.Set("angle2D", game.vm.ToValue(Angle2D))
 	utilObj.Set("distance2D", game.vm.ToValue(Distance2D))

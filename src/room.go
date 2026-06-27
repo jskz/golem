@@ -220,7 +220,7 @@ func (room *Room) AddCharacter(ch *Character) {
 	ch.Room = room
 
 	if layer, ok := room.planarLayer(); ok {
-		ch.PlaneIndex = &Point{X: float64(room.X), Y: float64(room.Y), Value: ch}
+		ch.PlaneIndex = NewPoint(float64(room.X), float64(room.Y), ch)
 		if layer.Atlas != nil && layer.Atlas.CharacterTree != nil {
 			layer.Atlas.CharacterTree.Insert(ch.PlaneIndex)
 		}

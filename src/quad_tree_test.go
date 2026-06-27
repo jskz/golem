@@ -10,7 +10,6 @@ package main
 import (
 	"math/rand"
 	"testing"
-	"time"
 )
 
 type ExampleStructure struct {
@@ -18,13 +17,13 @@ type ExampleStructure struct {
 }
 
 // Generate a set of n points that fall within dimensions w and h
-func CreateTestPoints(n int, w int, h int) []*Point {
-	points := []*Point{}
+func CreateTestPoints(n int, w int, h int) []*Point[*ExampleStructure] {
+	points := []*Point[*ExampleStructure]{}
 
-	r := rand.New(rand.NewSource(time.Now().Unix()))
+	r := rand.New(rand.NewSource(1))
 
 	for i := 0; i < n; i++ {
-		p := &Point{X: float64(r.Intn(w)), Y: float64(r.Intn(h)), Value: &ExampleStructure{Id: i}}
+		p := NewPoint(float64(r.Intn(w)), float64(r.Intn(h)), &ExampleStructure{Id: i})
 		points = append(points, p)
 	}
 
@@ -32,7 +31,7 @@ func CreateTestPoints(n int, w int, h int) []*Point {
 }
 
 func TestQuadTreeInsert(t *testing.T) {
-	qt := NewQuadTree(128, 128)
+	qt := NewQuadTree[*ExampleStructure](128, 128)
 	examplePoints := CreateTestPoints(32, 128, 128)
 
 	for _, p := range examplePoints {
@@ -44,7 +43,7 @@ func TestQuadTreeInsert(t *testing.T) {
 		t.Errorf("Root quadtree boundary contained %d points, expected %d.", len(results), len(examplePoints))
 	}
 
-	matches := make([]*Point, 0)
+	matches := make([]*Point[*ExampleStructure], 0)
 	for _, p := range examplePoints {
 		for _, match := range results {
 			if match == p {
@@ -59,7 +58,7 @@ func TestQuadTreeInsert(t *testing.T) {
 }
 
 func TestQuadTreeRemove(t *testing.T) {
-	qt := NewQuadTree(128, 128)
+	qt := NewQuadTree[*ExampleStructure](128, 128)
 	examplePoints := CreateTestPoints(32, 128, 128)
 
 	for _, p := range examplePoints {
@@ -67,7 +66,7 @@ func TestQuadTreeRemove(t *testing.T) {
 	}
 
 	// Remove a single point
-	var head *Point
+	var head *Point[*ExampleStructure]
 
 	head, examplePoints = examplePoints[0], examplePoints[1:]
 	qt.Remove(head)

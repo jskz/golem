@@ -12,16 +12,16 @@ package main
  * this data structure will be in the world map where we will lean on it for lookups instead of using the usual
  * room character/object/entity lists for a given room.
  */
-type QuadTree struct {
-	Northwest *QuadTree `json:"nw"`
-	Northeast *QuadTree `json:"ne"`
-	Southwest *QuadTree `json:"sw"`
-	Southeast *QuadTree `json:"se"`
+type QuadTree[T any] struct {
+	Northwest *QuadTree[T] `json:"nw"`
+	Northeast *QuadTree[T] `json:"ne"`
+	Southwest *QuadTree[T] `json:"sw"`
+	Southeast *QuadTree[T] `json:"se"`
 
-	Boundary *Rect               `json:"boundary"`
-	Nodes    *LinkedList[*Point] `json:"data"`
-	Capacity int                 `json:"capacity"`
-	Parent   *QuadTree           `json:"parent"`
+	Boundary *Rect                  `json:"boundary"`
+	Nodes    *LinkedList[*Point[T]] `json:"data"`
+	Capacity int                    `json:"capacity"`
+	Parent   *QuadTree[T]           `json:"parent"`
 }
 
 const QuadTreeNodeMaxElements = 4
@@ -33,27 +33,39 @@ type Rect struct {
 	H float64 `json:"h"`
 }
 
-type Point struct {
+type Point[T any] struct {
 	X float64 `json:"x"`
 	Y float64 `json:"y"`
 
-	Value interface{} `json:"value"`
+	Value T `json:"value"`
 }
 
-func NewPoint(x float64, y float64, value interface{}) *Point {
-	return &Point{X: x, Y: y, Value: value}
+type CoordinatePoint interface {
+	Coordinates() (float64, float64)
+}
+
+func NewPoint[T any](x float64, y float64, value T) *Point[T] {
+	return &Point[T]{X: x, Y: y, Value: value}
+}
+
+func NewAnyPoint(x float64, y float64, value any) *Point[any] {
+	return NewPoint[any](x, y, value)
+}
+
+func (p *Point[T]) Coordinates() (float64, float64) {
+	return p.X, p.Y
 }
 
 // Subdivide redistributes the nodes among four child trees for each subdivided rect
-func (qt *QuadTree) Subdivide() bool {
+func (qt *QuadTree[T]) Subdivide() bool {
 	if qt.Northwest != nil {
 		return false
 	}
 
-	qt.Northwest = NewQuadTree(qt.Boundary.W/2, qt.Boundary.H/2)
-	qt.Northeast = NewQuadTree(qt.Boundary.W/2, qt.Boundary.H/2)
-	qt.Southwest = NewQuadTree(qt.Boundary.W/2, qt.Boundary.H/2)
-	qt.Southeast = NewQuadTree(qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Northwest = NewQuadTree[T](qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Northeast = NewQuadTree[T](qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Southwest = NewQuadTree[T](qt.Boundary.W/2, qt.Boundary.H/2)
+	qt.Southeast = NewQuadTree[T](qt.Boundary.W/2, qt.Boundary.H/2)
 
 	qt.Northwest.Boundary = NewRect(qt.Boundary.X, qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
 	qt.Northeast.Boundary = NewRect(qt.Boundary.X+(qt.Boundary.W/2), qt.Boundary.Y, qt.Boundary.W/2, qt.Boundary.H/2)
@@ -111,12 +123,13 @@ func (r *Rect) ContainsRect(other *Rect) bool {
 	return (other.X+other.W) < r.X+r.W && other.X > r.X && other.Y > r.Y && other.Y+other.H < r.Y+r.H
 }
 
-func (r *Rect) ContainsPoint(p *Point) bool {
-	return r.Contains(p.X, p.Y)
+func (r *Rect) ContainsPoint(p CoordinatePoint) bool {
+	x, y := p.Coordinates()
+	return r.Contains(x, y)
 }
 
 // Insert adds a new value to the quadtree at point p
-func (qt *QuadTree) Insert(p *Point) bool {
+func (qt *QuadTree[T]) Insert(p *Point[T]) bool {
 	if !qt.Boundary.ContainsPoint(p) {
 		return false
 	}
@@ -144,7 +157,7 @@ func (qt *QuadTree) Insert(p *Point) bool {
 }
 
 // Recursively collapse quads
-func (qt *QuadTree) Collapse() bool {
+func (qt *QuadTree[T]) Collapse() bool {
 	// Retrieve all points within this quad
 	results := qt.QueryRect(qt.Boundary)
 
@@ -160,7 +173,7 @@ func (qt *QuadTree) Collapse() bool {
 		qt.Southwest = nil
 		qt.Southeast = nil
 
-		qt.Nodes = NewLinkedList[*Point]()
+		qt.Nodes = NewLinkedList[*Point[T]]()
 
 		for _, p := range results {
 			qt.Nodes.Insert(p)
@@ -174,7 +187,7 @@ func (qt *QuadTree) Collapse() bool {
 }
 
 // Remove removes a value from the quadtree, recursively removing nodes as necessary to "collapse" empty divisions
-func (qt *QuadTree) Remove(p *Point) bool {
+func (qt *QuadTree[T]) Remove(p *Point[T]) bool {
 	// If point not in our boundary, we can't remove it
 	if !qt.Boundary.ContainsPoint(p) {
 		return false
@@ -210,8 +223,8 @@ func (qt *QuadTree) Remove(p *Point) bool {
 }
 
 // QueryRect retrieves all data within the rect defined by r
-func (qt *QuadTree) QueryRect(r *Rect) []*Point {
-	results := make([]*Point, 0)
+func (qt *QuadTree[T]) QueryRect(r *Rect) []*Point[T] {
+	results := make([]*Point[T], 0)
 
 	// This quadtree's boundary rect does not intersect with the query rect
 	if !qt.Boundary.CollidesRect(r) {
@@ -239,13 +252,17 @@ func (qt *QuadTree) QueryRect(r *Rect) []*Point {
 }
 
 // NewQuadTree creates a new quadtree instance
-func NewQuadTree(width float64, height float64) *QuadTree {
-	qt := &QuadTree{
+func NewQuadTree[T any](width float64, height float64) *QuadTree[T] {
+	qt := &QuadTree[T]{
 		Capacity: QuadTreeNodeMaxElements,
-		Nodes:    NewLinkedList[*Point](),
+		Nodes:    NewLinkedList[*Point[T]](),
 		Boundary: &Rect{X: 0, Y: 0, W: width, H: height},
 		Parent:   nil,
 	}
 
 	return qt
+}
+
+func NewAnyQuadTree(width float64, height float64) *QuadTree[any] {
+	return NewQuadTree[any](width, height)
 }

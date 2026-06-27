@@ -82,8 +82,8 @@ type Atlas struct {
 	Rooms      map[int]*LinkedList[*Room]           `json:"rooms"`
 	Exits      map[int]map[uint]*Exit               `json:"exits"`
 
-	CharacterTree *QuadTree `json:"characterTree"`
-	ObjectTree    *QuadTree `json:"objectTree"`
+	CharacterTree *QuadTree[*Character]      `json:"characterTree"`
+	ObjectTree    *QuadTree[*ObjectInstance] `json:"objectTree"`
 }
 
 type Portal struct {
@@ -135,8 +135,8 @@ func (plane *Plane) NewAtlas() *Atlas {
 		Rooms:      make(map[int]*LinkedList[*Room]),
 		Exits:      make(map[int]map[uint]*Exit),
 
-		CharacterTree: NewQuadTree(float64(plane.Width), float64(plane.Height)),
-		ObjectTree:    NewQuadTree(float64(plane.Width), float64(plane.Height)),
+		CharacterTree: NewQuadTree[*Character](float64(plane.Width), float64(plane.Height)),
+		ObjectTree:    NewQuadTree[*ObjectInstance](float64(plane.Width), float64(plane.Height)),
 	}
 }
 

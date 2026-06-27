@@ -288,8 +288,8 @@ func (game *Game) buildWorldMapResponse() (*WorldMapResponse, error) {
 	response.Characters = make([]WorldMapCharacterPointData, 0, len(overworldCharacters))
 
 	for _, ochPoint := range overworldCharacters {
-		och, ok := ochPoint.Value.(*Character)
-		if !ok || och == nil {
+		och := ochPoint.Value
+		if och == nil {
 			continue
 		}
 
