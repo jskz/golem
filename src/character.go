@@ -28,6 +28,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type LevelResourceGains struct {
+	Health  int
+	Mana    int
+	Stamina int
+}
+
 var IndexedArgumentRegexp *regexp.Regexp = regexp.MustCompile(`^[0-9]+\.(.*)$`)
 
 func parseIndexedArgument(argument string) (int, string, bool) {
@@ -56,6 +62,12 @@ type Job struct {
 	ExperienceRequiredModifier float64                `json:"experience_required_modifier"`
 	Skills                     *LinkedList[*JobSkill] `json:"skills"`
 	PrimaryAttribute           int                    `json:"primaryAttribute"`
+	HealthGainMin              int                    `json:"healthGainMin"`
+	HealthGainMax              int                    `json:"healthGainMax"`
+	ManaGainDivisor            int                    `json:"manaGainDivisor"`
+	StaminaGainMin             int                    `json:"staminaGainMin"`
+	StaminaGainMax             int                    `json:"staminaGainMax"`
+	StaminaGainFloor           int                    `json:"staminaGainFloor"`
 }
 
 type Race struct {
@@ -252,6 +264,97 @@ type playerCharacterLocation struct {
 	PlaneX  sql.NullInt64
 	PlaneY  sql.NullInt64
 	PlaneZ  sql.NullInt64
+}
+
+func (ch *Character) rollLevelResourceGains(intn func(int) int) LevelResourceGains {
+	if intn == nil {
+		intn = rand.Intn
+	}
+
+	if ch.Job == nil {
+		return LevelResourceGains{Health: 2, Mana: 2, Stamina: 1}
+	}
+
+	constitution, _ := ch.GetStat(STAT_CONSTITUTION)
+	intelligence, _ := ch.GetStat(STAT_INTELLIGENCE)
+	wisdom, _ := ch.GetStat(STAT_WISDOM)
+	dexterity, _ := ch.GetStat(STAT_DEXTERITY)
+
+	healthRoll := rollInclusive(intn, ch.Job.HealthGainMin, ch.Job.HealthGainMax)
+	healthGain := maxInt(2, dampenResourceGain(constitutionHealthBonus(constitution)+healthRoll))
+
+	maxManaRoll := (2*intelligence + wisdom) / 5
+	if maxManaRoll < 2 {
+		maxManaRoll = 2
+	}
+
+	manaDivisor := ch.Job.ManaGainDivisor
+	if manaDivisor < 1 {
+		manaDivisor = 1
+	}
+
+	manaRoll := rollInclusive(intn, 2, maxManaRoll)
+	manaGain := maxInt(2, dampenResourceGain(manaRoll/manaDivisor))
+
+	staminaStatBonus := maxInt(0, (dexterity-14)/2) + maxInt(0, (constitution-14)/2)
+	staminaRoll := rollInclusive(intn, ch.Job.StaminaGainMin, ch.Job.StaminaGainMax)
+	staminaGain := maxInt(ch.Job.StaminaGainFloor, dampenResourceGain(staminaRoll+staminaStatBonus))
+
+	return LevelResourceGains{
+		Health:  healthGain,
+		Mana:    manaGain,
+		Stamina: staminaGain,
+	}
+}
+
+func (ch *Character) applyLevelResourceGains(gains LevelResourceGains) {
+	ch.MaxHealth += gains.Health
+	ch.Health += gains.Health
+	ch.MaxMana += gains.Mana
+	ch.Mana += gains.Mana
+	ch.MaxStamina += gains.Stamina
+	ch.Stamina += gains.Stamina
+}
+
+func rollInclusive(intn func(int) int, min int, max int) int {
+	if max < min {
+		max = min
+	}
+
+	return min + intn(max-min+1)
+}
+
+func constitutionHealthBonus(constitution int) int {
+	switch {
+	case constitution >= 24:
+		return 7
+	case constitution >= 23:
+		return 6
+	case constitution >= 22:
+		return 5
+	case constitution >= 20:
+		return 4
+	case constitution >= 18:
+		return 3
+	case constitution >= 16:
+		return 2
+	case constitution >= 15:
+		return 1
+	default:
+		return 0
+	}
+}
+
+func dampenResourceGain(value int) int {
+	return value * 9 / 10
+}
+
+func maxInt(a int, b int) int {
+	if a > b {
+		return a
+	}
+
+	return b
 }
 
 func validLocationInt(value int) sql.NullInt64 {
@@ -1560,21 +1663,14 @@ func (ch *Character) gainExperience(experience int) {
 				ch.Level = ch.Level + 1
 
 				/* Calculate stat gains, skill points, etc... */
-				healthGain := 20
-				manaGain := 20
-				staminaGain := 20
+				resourceGains := ch.rollLevelResourceGains(rand.Intn)
 				practicesGain := rand.Intn(10)
 
-				ch.MaxHealth += healthGain
-				ch.Health += healthGain
-				ch.MaxMana += manaGain
-				ch.Mana += manaGain
-				ch.MaxStamina += staminaGain
-				ch.Stamina += staminaGain
+				ch.applyLevelResourceGains(resourceGains)
 				ch.Practices += practicesGain
 
 				ch.Send(fmt.Sprintf("{YYou have advanced to level %d!\r\n{x", ch.Level))
-				ch.Send(fmt.Sprintf("{WOh yeah! You gained %d hp, %d mana, %d stamina, and %d practice sessions.{x\r\n", healthGain, manaGain, staminaGain, practicesGain))
+				ch.Send(fmt.Sprintf("{WOh yeah! You gained %d hp, %d mana, %d stamina, and %d practice sessions.{x\r\n", resourceGains.Health, resourceGains.Mana, resourceGains.Stamina, practicesGain))
 
 				err := ch.syncJobSkills()
 				if err != nil {

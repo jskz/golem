@@ -117,7 +117,13 @@ func (game *Game) LoadJobTable() error {
 			display_name,
 			experience_required_modifier,
 			playable,
-			primary_attribute
+			primary_attribute,
+			health_gain_min,
+			health_gain_max,
+			mana_gain_divisor,
+			stamina_gain_min,
+			stamina_gain_max,
+			stamina_gain_floor
 		FROM
 			jobs
 		WHERE
@@ -133,7 +139,20 @@ func (game *Game) LoadJobTable() error {
 		job := &Job{}
 		var primaryAttribute string = "none"
 
-		err := rows.Scan(&job.Id, &job.Name, &job.DisplayName, &job.ExperienceRequiredModifier, &job.Playable, &primaryAttribute)
+		err := rows.Scan(
+			&job.Id,
+			&job.Name,
+			&job.DisplayName,
+			&job.ExperienceRequiredModifier,
+			&job.Playable,
+			&primaryAttribute,
+			&job.HealthGainMin,
+			&job.HealthGainMax,
+			&job.ManaGainDivisor,
+			&job.StaminaGainMin,
+			&job.StaminaGainMax,
+			&job.StaminaGainFloor,
+		)
 		if err != nil {
 			log.Printf("Unable to scan job row: %v.\r\n", err)
 			continue
