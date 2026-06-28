@@ -316,6 +316,106 @@ func (ch *Character) applyLevelResourceGains(gains LevelResourceGains) {
 	ch.Stamina += gains.Stamina
 }
 
+func (ch *Character) SetMobileResourceDefaults() bool {
+	if ch == nil || ch.Flags&CHAR_IS_PLAYER != 0 {
+		return false
+	}
+
+	level := maxInt(1, int(ch.Level))
+	con := ch.mobileResourceStat(STAT_CONSTITUTION)
+
+	health := 20 + 14*level
+	health += constitutionHealthBonus(con) * level
+	health += mobileJobHealthAdjustment(ch.Job, level)
+	health = clampInt(health, 10+8*level, 120+55*level)
+
+	ch.MaxHealth = health
+	ch.Health = health
+	ch.MaxMana = maxInt(1, mobileExpectedMana(ch, level))
+	ch.Mana = ch.MaxMana
+	ch.MaxStamina = maxInt(1, mobileExpectedStamina(ch, level))
+	ch.Stamina = ch.MaxStamina
+
+	return true
+}
+
+func (ch *Character) mobileResourceStat(stat int) int {
+	value := 10
+	if stat >= 0 && stat < len(ch.Stats) {
+		value = ch.Stats[stat]
+	}
+
+	if ch.Job != nil && ch.Job.PrimaryAttribute == stat {
+		value += 2
+	}
+
+	if ch.Race != nil && ch.Race.PrimaryAttribute == stat {
+		value += 2
+	}
+
+	return value
+}
+
+func mobileJobHealthAdjustment(job *Job, level int) int {
+	if job == nil {
+		return 0
+	}
+
+	averageHealthRoll := (job.HealthGainMin + job.HealthGainMax) / 2
+	return (averageHealthRoll - 10) * level / 2
+}
+
+func mobileExpectedMana(ch *Character, level int) int {
+	if ch.Job == nil {
+		return 100 + 2*(level-1)
+	}
+
+	intelligence := ch.mobileResourceStat(STAT_INTELLIGENCE)
+	wisdom := ch.mobileResourceStat(STAT_WISDOM)
+	maxManaRoll := maxInt(2, (2*intelligence+wisdom)/5)
+
+	manaDivisor := ch.Job.ManaGainDivisor
+	if manaDivisor < 1 {
+		manaDivisor = 1
+	}
+
+	totalGain := 0
+	rolls := 0
+	for roll := 2; roll <= maxManaRoll; roll++ {
+		totalGain += maxInt(2, dampenResourceGain(roll/manaDivisor))
+		rolls++
+	}
+
+	return 100 + roundedAverage(totalGain, rolls)*(level-1)
+}
+
+func mobileExpectedStamina(ch *Character, level int) int {
+	if ch.Job == nil {
+		return 100 + level - 1
+	}
+
+	dexterity := ch.mobileResourceStat(STAT_DEXTERITY)
+	constitution := ch.mobileResourceStat(STAT_CONSTITUTION)
+	staminaStatBonus := maxInt(0, (dexterity-14)/2) + maxInt(0, (constitution-14)/2)
+
+	totalGain := 0
+	rolls := 0
+	for roll := ch.Job.StaminaGainMin; roll <= ch.Job.StaminaGainMax; roll++ {
+		totalGain += maxInt(ch.Job.StaminaGainFloor, dampenResourceGain(roll+staminaStatBonus))
+		rolls++
+	}
+
+	return 100 + roundedAverage(totalGain, rolls)*(level-1)
+}
+
+func roundedAverage(total int, count int) int {
+	if count <= 0 {
+		return 0
+	}
+
+	return (total + count/2) / count
+}
+
 func rollInclusive(intn func(int) int, min int, max int) int {
 	if max < min {
 		max = min
@@ -355,6 +455,18 @@ func maxInt(a int, b int) int {
 	}
 
 	return b
+}
+
+func clampInt(value int, min int, max int) int {
+	if value < min {
+		return min
+	}
+
+	if value > max {
+		return max
+	}
+
+	return value
 }
 
 func validLocationInt(value int) sql.NullInt64 {

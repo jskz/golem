@@ -846,6 +846,8 @@ func (game *Game) InitScripting() error {
 	utilObj.Set("findFurnitureFlag", game.vm.ToValue(FindFurnitureFlag))
 	utilObj.Set("findExitFlag", game.vm.ToValue(FindExitFlag))
 	utilObj.Set("findRoomFlag", game.vm.ToValue(FindRoomFlag))
+	utilObj.Set("findJobByName", game.vm.ToValue(FindJobByName))
+	utilObj.Set("findRaceByName", game.vm.ToValue(FindRaceByName))
 
 	levelConstantsObj := game.vm.NewObject()
 	levelConstantsObj.Set("LevelAdmin", LevelAdmin)

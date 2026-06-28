@@ -16,6 +16,14 @@ function do_medit(ch, args) {
         return maximum;
     }
 
+    function adjustMobileResources(target) {
+        if(target.flags & Golem.CharacterFlags.CHAR_IS_PLAYER) {
+            return;
+        }
+
+        target.setMobileResourceDefaults();
+    }
+
     function displayUsage() {
         ch.send(
             `{WMobile editor usage:
@@ -29,7 +37,7 @@ function do_medit(ch, args) {
 {Wto set the target character's specified attribute to the given value.
 
 {GThe following attributes are available:{g
-  name health max_health mana max_mana stamina max_stamina gold level
+  name health max_health mana max_mana stamina max_stamina gold level race job
   strength dexterity intelligence wisdom constitution charisma luck
   short_description long_description
 {x`);
@@ -143,6 +151,41 @@ function do_medit(ch, args) {
             }
 
             target.level = level;
+            adjustMobileResources(target);
+            ch.send("Ok.\r\n");
+            break;
+
+        case 'race':
+            if(target.flags & Golem.CharacterFlags.CHAR_IS_PLAYER) {
+                ch.send("Failed: not an NPC.\r\n");
+                return;
+            }
+
+            const race = Golem.util.findRaceByName(xxs);
+            if(!race) {
+                ch.send("No such race exists.\r\n");
+                return;
+            }
+
+            target.race = race;
+            adjustMobileResources(target);
+            ch.send("Ok.\r\n");
+            break;
+
+        case 'job':
+            if(target.flags & Golem.CharacterFlags.CHAR_IS_PLAYER) {
+                ch.send("Failed: not an NPC.\r\n");
+                return;
+            }
+
+            const job = Golem.util.findJobByName(xxs);
+            if(!job) {
+                ch.send("No such job exists.\r\n");
+                return;
+            }
+
+            target.job = job;
+            adjustMobileResources(target);
             ch.send("Ok.\r\n");
             break;
             
@@ -198,36 +241,43 @@ function do_medit(ch, args) {
     
         case 'strength':
             target.stats[Golem.StatTypes.STAT_STRENGTH] = parseInt(xxs);
+            adjustMobileResources(target);
             ch.send("Ok.\r\n");
             break;
 
         case 'dexterity':
             target.stats[Golem.StatTypes.STAT_DEXTERITY] = parseInt(xxs);
+            adjustMobileResources(target);
             ch.send("Ok.\r\n");
             break;
 
         case 'intelligence':
             target.stats[Golem.StatTypes.STAT_INTELLIGENCE] = parseInt(xxs);
+            adjustMobileResources(target);
             ch.send("Ok.\r\n");
             break;
 
         case 'wisdom':
             target.stats[Golem.StatTypes.STAT_WISDOM] = parseInt(xxs);
+            adjustMobileResources(target);
             ch.send("Ok.\r\n");
             break;
 
         case 'constitution':
             target.stats[Golem.StatTypes.STAT_CONSTITUTION] = parseInt(xxs);
+            adjustMobileResources(target);
             ch.send("Ok.\r\n");
             break;
 
         case 'charisma':
             target.stats[Golem.StatTypes.STAT_CHARISMA] = parseInt(xxs);
+            adjustMobileResources(target);
             ch.send("Ok.\r\n");
             break;
 
         case 'luck':
             target.stats[Golem.StatTypes.STAT_LUCK] = parseInt(xxs);
+            adjustMobileResources(target);
             ch.send("Ok.\r\n");
             break;
 
