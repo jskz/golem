@@ -29,6 +29,179 @@ type Flag struct {
 	Flag int    `json:"flag"`
 }
 
+type CharacterStatValue struct {
+	Modified int `json:"modified"`
+	Base     int `json:"base"`
+}
+
+func FlagNames(flags int, table []Flag) string {
+	var output strings.Builder
+	remaining := flags
+
+	if flags == 0 {
+		return "none"
+	}
+
+	for _, flag := range table {
+		if flags&flag.Flag == 0 {
+			continue
+		}
+
+		output.WriteString(fmt.Sprintf("%s ", flag.Name))
+		remaining &= ^flag.Flag
+	}
+
+	if remaining != 0 {
+		output.WriteString(fmt.Sprintf("unknown(%d) ", remaining))
+	}
+
+	if output.Len() == 0 {
+		return "none"
+	}
+
+	return strings.TrimRight(output.String(), " ")
+}
+
+func CharacterFlagNames(flags int) string {
+	return FlagNames(flags, CharacterFlagTable)
+}
+
+func AffectedFlagNames(flags int) string {
+	return FlagNames(flags, AffectedFlagTable)
+}
+
+func PositionName(position int) string {
+	switch position {
+	case PositionDead:
+		return "dead"
+	case PositionStunned:
+		return "stunned"
+	case PositionSleeping:
+		return "sleeping"
+	case PositionResting:
+		return "resting"
+	case PositionSitting:
+		return "sitting"
+	case PositionFighting:
+		return "fighting"
+	case PositionStanding:
+		return "standing"
+	default:
+		return fmt.Sprintf("unknown(%d)", position)
+	}
+}
+
+func StatName(stat int) string {
+	name, ok := StatNameTable[stat]
+	if !ok {
+		return "unknown"
+	}
+
+	return name
+}
+
+func CharacterStat(ch *Character, stat int) CharacterStatValue {
+	if ch == nil {
+		return CharacterStatValue{}
+	}
+
+	if stat < 0 || stat >= len(ch.Stats) {
+		return CharacterStatValue{}
+	}
+
+	modified, base := ch.GetStat(stat)
+	return CharacterStatValue{Modified: modified, Base: base}
+}
+
+func CharacterName(ch *Character) string {
+	if ch == nil {
+		return "none"
+	}
+
+	if ch.Name != "" {
+		return ch.Name
+	}
+
+	if ch.ShortDescription != "" {
+		return ch.ShortDescription
+	}
+
+	return "unnamed"
+}
+
+func CharacterTypeName(ch *Character) string {
+	if ch != nil && ch.Flags&CHAR_IS_PLAYER != 0 {
+		return "PC"
+	}
+
+	return "NPC"
+}
+
+func CharacterLocationName(ch *Character) string {
+	if ch == nil || ch.Room == nil {
+		return "none"
+	}
+
+	room := ch.Room
+	roomName := room.Name
+	if roomName == "" {
+		roomName = "unnamed room"
+	}
+
+	if room.Flags&ROOM_PLANAR != 0 && room.Plane != nil {
+		return fmt.Sprintf("%s (#%d, plane #%d @ %d,%d,%d)", roomName, room.Id, room.Plane.Id, room.X, room.Y, room.Z)
+	}
+
+	return fmt.Sprintf("%s (#%d)", roomName, room.Id)
+}
+
+func EffectDurationDescription(fx *Effect) string {
+	if fx == nil {
+		return "none"
+	}
+
+	if fx.Duration == EffectDurationPermanent {
+		return "permanent"
+	}
+
+	remaining := int(math.Max(0, time.Until(fx.CreatedAt.Add(time.Duration(fx.Duration)*time.Second)).Seconds()))
+	return fmt.Sprintf("%d seconds", remaining)
+}
+
+func EffectDescription(fx *Effect) string {
+	if fx == nil {
+		return "none"
+	}
+
+	switch fx.EffectType {
+	case EffectTypeStat:
+		return fmt.Sprintf("%s level %d modifies %s by %d for %s",
+			fx.Name,
+			fx.Level,
+			StatName(fx.Location),
+			fx.Modifier,
+			EffectDurationDescription(fx))
+	case EffectTypeAffected:
+		return fmt.Sprintf("%s level %d applies %s for %s",
+			fx.Name,
+			fx.Level,
+			AffectedFlagNames(fx.Bits),
+			EffectDurationDescription(fx))
+	case EffectTypeImmunity:
+		return fmt.Sprintf("%s level %d grants immunity bits %d for %s",
+			fx.Name,
+			fx.Level,
+			fx.Bits,
+			EffectDurationDescription(fx))
+	default:
+		return fmt.Sprintf("%s level %d type %d for %s",
+			fx.Name,
+			fx.Level,
+			fx.EffectType,
+			EffectDurationDescription(fx))
+	}
+}
+
 func SimpleGET(url string) (string, error) {
 	resp, err := simpleHTTPClient.Get(url)
 	if err != nil {

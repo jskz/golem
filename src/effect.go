@@ -64,6 +64,8 @@ type Effect struct {
 var AffectedFlagTable []Flag = []Flag{
 	{Name: "sanctuary", Flag: AFFECT_SANCTUARY},
 	{Name: "haste", Flag: AFFECT_HASTE},
+	{Name: "slow", Flag: AFFECT_SLOW},
+	{Name: "silence", Flag: AFFECT_SILENCE},
 	{Name: "detect_magic", Flag: AFFECT_DETECT_MAGIC},
 	{Name: "fireshield", Flag: AFFECT_FIRESHIELD},
 	{Name: "poison", Flag: AFFECT_POISON},

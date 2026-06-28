@@ -2157,15 +2157,49 @@ func (ch *Character) InSameGroup(other *Character) bool {
 }
 
 func (ch *Character) FindCharacterInRoom(argument string) *Character {
-	var desiredIndex int = 1
-	var i int = 1
-	var processed string = strings.ToLower(argument)
+	processed := strings.ToLower(strings.TrimSpace(argument))
 
 	if processed == "self" {
 		return ch
 	}
 
-	if ch.Room == nil || len(processed) < 1 {
+	if ch.Room == nil {
+		return nil
+	}
+
+	return findCharacterInList(ch.Room.Characters, processed)
+}
+
+func FindCharacterTarget(ch *Character, argument string) *Character {
+	if ch == nil {
+		return nil
+	}
+
+	if target := ch.FindCharacterInRoom(argument); target != nil {
+		return target
+	}
+
+	if ch.Game == nil {
+		return nil
+	}
+
+	return ch.Game.FindCharacterInWorld(argument)
+}
+
+func (game *Game) FindCharacterInWorld(argument string) *Character {
+	if game == nil {
+		return nil
+	}
+
+	return findCharacterInList(game.Characters, argument)
+}
+
+func findCharacterInList(characters *LinkedList[*Character], argument string) *Character {
+	var desiredIndex int = 1
+	var i int = 1
+	processed := strings.ToLower(strings.TrimSpace(argument))
+
+	if characters == nil || processed == "" {
 		return nil
 	}
 
@@ -2175,21 +2209,38 @@ func (ch *Character) FindCharacterInRoom(argument string) *Character {
 		return nil
 	}
 
-	for rch := range ch.Room.Characters.All() {
-		nameParts := strings.Split(rch.Name, " ")
-		for _, part := range nameParts {
-			if strings.EqualFold(part, processed) {
-				if i == desiredIndex {
-					return rch
-				} else {
-					i++
-					continue
-				}
-			}
+	for gch := range characters.All() {
+		if !characterNameMatches(gch, processed) {
+			continue
 		}
+
+		if i == desiredIndex {
+			return gch
+		}
+
+		i++
 	}
 
 	return nil
+}
+
+func characterNameMatches(ch *Character, argument string) bool {
+	if ch == nil {
+		return false
+	}
+
+	if strings.EqualFold(ch.Name, argument) {
+		return true
+	}
+
+	nameParts := strings.Split(ch.Name, " ")
+	for _, part := range nameParts {
+		if strings.EqualFold(part, argument) {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (game *Game) Broadcast(message string, filter goja.Callable) {
