@@ -28,9 +28,17 @@ function do_mstat(ch, args) {
         }
     }
 
+    function displayName(value, fallback) {
+        if (!value) {
+            return fallback;
+        }
+
+        return value.displayName || value.display_name || value.name || value.race || fallback;
+    }
+
     function formatOutput(target) {
-        const raceName = target.race && target.race.displayName ? target.race.displayName : 'unknown race';
-        const jobName = target.job && target.job.displayName ? target.job.displayName : 'unknown job';
+        const raceName = displayName(target.race, 'unknown race');
+        const jobName = displayName(target.job, 'unknown job');
         const inventoryCount = target.inventory ? target.inventory.count : 0;
         const effectCount = target.effects ? target.effects.count : 0;
         const output = [];
