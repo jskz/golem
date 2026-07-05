@@ -12,6 +12,7 @@ import (
 	"math"
 	"math/rand"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -127,6 +128,42 @@ func do_help(ch *Character, arguments string) {
 	}
 
 	ch.Send(buf.String())
+}
+
+func do_scroll(ch *Character, arguments string) {
+	args := strings.Fields(arguments)
+	if len(args) == 0 {
+		lines := ch.maxOutputLines()
+		if lines == 0 {
+			ch.Send("You aren't currently paging messages.\r\n")
+			return
+		}
+
+		ch.Send(fmt.Sprintf("You currently display %d lines per page.\r\n", lines))
+		return
+	}
+
+	lines, err := strconv.Atoi(args[0])
+	if err != nil {
+		ch.Send("Page line limit must be a number.\r\n")
+		return
+	}
+
+	if lines == 0 {
+		ch.Scroll = 0
+		ch.inputCursor = 0
+		ch.Send("Paging disabled.\r\n")
+		return
+	}
+
+	if lines < 10 || lines > 100 {
+		ch.Send("Paging line limits must be between 10 and 100.\r\n")
+		return
+	}
+
+	ch.Scroll = lines
+	ch.inputCursor = lines
+	ch.Send(fmt.Sprintf("Paging set to %d lines.\r\n", lines))
 }
 
 // TODO: do_scan

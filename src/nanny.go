@@ -36,7 +36,8 @@ func (client *Client) displayPrompt() {
 	}
 
 	var prompt bytes.Buffer
-	if client.Character.outputCursor >= DefaultMaxLines && client.Character.inputCursor >= DefaultMaxLines {
+	maxLines := client.Character.maxOutputLines()
+	if maxLines > 0 && client.Character.outputCursor >= maxLines && client.Character.inputCursor >= maxLines {
 		return
 	}
 

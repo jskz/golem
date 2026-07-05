@@ -49,6 +49,7 @@ func init() {
 	CommandTable["quit"] = Command{Name: "quit", CmdFunc: do_quit}
 	CommandTable["scan"] = Command{Name: "scan", CmdFunc: do_scan}
 	CommandTable["score"] = Command{Name: "score", CmdFunc: do_score}
+	CommandTable["scroll"] = Command{Name: "scroll", CmdFunc: do_scroll}
 	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}
 	CommandTable["time"] = Command{Name: "time", CmdFunc: do_time}
 
@@ -197,7 +198,7 @@ func (ch *Character) Interpret(input string) bool {
 			return true
 		}
 
-		ch.inputCursor += DefaultMaxLines
+		ch.inputCursor += ch.maxOutputLines()
 		return true
 	}
 

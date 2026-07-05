@@ -203,6 +203,7 @@ type Character struct {
 	outputHead   int
 	outputLines  int
 	inputCursor  int
+	Scroll       int `json:"scroll"`
 
 	PlaneIndex *Point[*Character] `json:"planeIndex"`
 	Trail      []*Room            `json:"trail"`
@@ -621,10 +622,10 @@ func (ch *Character) Finalize() error {
 
 	result, err := ch.Game.db.Exec(`
 		INSERT INTO
-			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, trains, health, max_health, mana, max_mana, stamina, max_stamina, condition_drunk, condition_full, condition_thirst, condition_hunger, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
+			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, trains, health, max_health, mana, max_mana, stamina, max_stamina, condition_drunk, condition_full, condition_thirst, condition_hunger, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck, scroll)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Trains, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Conditions[ConditionDrunk], ch.Conditions[ConditionFull], ch.Conditions[ConditionThirst], ch.Conditions[ConditionHunger], ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK])
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Trains, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Conditions[ConditionDrunk], ch.Conditions[ConditionFull], ch.Conditions[ConditionThirst], ch.Conditions[ConditionHunger], ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK], ch.Scroll)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -904,6 +905,7 @@ func (ch *Character) Save() bool {
 			stat_con = ?,
 			stat_cha = ?,
 			stat_lck = ?,
+			scroll = ?,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE
 			id = ?
@@ -938,6 +940,7 @@ func (ch *Character) Save() bool {
 		ch.Stats[STAT_CONSTITUTION],
 		ch.Stats[STAT_CHARISMA],
 		ch.Stats[STAT_LUCK],
+		ch.Scroll,
 		ch.Id,
 	)
 	if err != nil {
@@ -1573,7 +1576,8 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 			stat_wis,
 			stat_con,
 			stat_cha,
-			stat_lck
+			stat_lck,
+			scroll
 		FROM
 			player_characters
 		WHERE
@@ -1622,6 +1626,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 		&ch.Stats[STAT_CONSTITUTION],
 		&ch.Stats[STAT_CHARISMA],
 		&ch.Stats[STAT_LUCK],
+		&ch.Scroll,
 	)
 
 	if err != nil {
@@ -1682,7 +1687,15 @@ func (ch *Character) clearOutputBuffer() {
 	ch.output = make([]byte, 32768)
 	ch.outputHead = 0
 	ch.outputCursor = 0
-	ch.inputCursor = DefaultMaxLines
+	ch.inputCursor = ch.maxOutputLines()
+}
+
+func (ch *Character) maxOutputLines() int {
+	if ch.Scroll < 0 {
+		return DefaultMaxLines
+	}
+
+	return ch.Scroll
 }
 
 func (ch *Character) flushOutput() {
@@ -1692,7 +1705,7 @@ func (ch *Character) flushOutput() {
 
 	var page bytes.Buffer
 	var lines []string
-	var maxLines int = DefaultMaxLines
+	maxLines := ch.maxOutputLines()
 	output := ch.output[:ch.outputHead]
 
 	scan := bufio.NewScanner(bytes.NewReader(output))
@@ -1731,7 +1744,7 @@ func (ch *Character) flushOutput() {
 		return
 	}
 
-	if len(lines) <= maxLines {
+	if maxLines == 0 || len(lines) <= maxLines {
 		ch.Client.Send(output)
 		ch.clearOutputBuffer()
 		return
@@ -2325,7 +2338,8 @@ func NewCharacter() *Character {
 	character.Position = PositionStanding
 	character.output = make([]byte, 65536)
 	character.outputCursor = 0
-	character.inputCursor = DefaultMaxLines
+	character.Scroll = DefaultMaxLines
+	character.inputCursor = character.maxOutputLines()
 	character.outputHead = 0
 
 	character.Affected = 0
