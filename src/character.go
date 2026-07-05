@@ -232,6 +232,7 @@ type Character struct {
 	Level      uint `json:"level"`
 	Experience uint `json:"experience"`
 	Practices  int  `json:"practices"`
+	Trains     int  `json:"trains"`
 
 	Affected int                   `json:"affected"`
 	Effects  *LinkedList[*Effect]  `json:"effects"`
@@ -620,10 +621,10 @@ func (ch *Character) Finalize() error {
 
 	result, err := ch.Game.db.Exec(`
 		INSERT INTO
-			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, health, max_health, mana, max_mana, stamina, max_stamina, condition_drunk, condition_full, condition_thirst, condition_hunger, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
+			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, trains, health, max_health, mana, max_mana, stamina, max_stamina, condition_drunk, condition_full, condition_thirst, condition_hunger, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Conditions[ConditionDrunk], ch.Conditions[ConditionFull], ch.Conditions[ConditionThirst], ch.Conditions[ConditionHunger], ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK])
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Trains, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Conditions[ConditionDrunk], ch.Conditions[ConditionFull], ch.Conditions[ConditionThirst], ch.Conditions[ConditionHunger], ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK])
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -885,6 +886,7 @@ func (ch *Character) Save() bool {
 			gold = ?,
 			experience = ?,
 			practices = ?,
+			trains = ?,
 			health = ?,
 			max_health = ?,
 			mana = ?,
@@ -918,6 +920,7 @@ func (ch *Character) Save() bool {
 		ch.Gold,
 		ch.Experience,
 		ch.Practices,
+		ch.Trains,
 		ch.Health,
 		ch.MaxHealth,
 		ch.Mana,
@@ -1553,6 +1556,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 			gold,
 			experience,
 			practices,
+			trains,
 			health,
 			max_health,
 			mana,
@@ -1600,6 +1604,7 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 		&ch.Gold,
 		&ch.Experience,
 		&ch.Practices,
+		&ch.Trains,
 		&ch.Health,
 		&ch.MaxHealth,
 		&ch.Mana,
@@ -1777,12 +1782,14 @@ func (ch *Character) gainExperience(experience int) {
 				/* Calculate stat gains, skill points, etc... */
 				resourceGains := ch.rollLevelResourceGains(rand.Intn)
 				practicesGain := rand.Intn(10)
+				trainsGain := 1
 
 				ch.applyLevelResourceGains(resourceGains)
 				ch.Practices += practicesGain
+				ch.Trains += trainsGain
 
 				ch.Send(fmt.Sprintf("{YYou have advanced to level %d!\r\n{x", ch.Level))
-				ch.Send(fmt.Sprintf("{WOh yeah! You gained %d hp, %d mana, %d stamina, and %d practice sessions.{x\r\n", resourceGains.Health, resourceGains.Mana, resourceGains.Stamina, practicesGain))
+				ch.Send(fmt.Sprintf("{WOh yeah! You gained %d hp, %d mana, %d stamina, %d practice sessions, and %d training session.{x\r\n", resourceGains.Health, resourceGains.Mana, resourceGains.Stamina, practicesGain, trainsGain))
 
 				err := ch.syncJobSkills()
 				if err != nil {
@@ -2314,6 +2321,7 @@ func NewCharacter() *Character {
 	character.moveOrigin = nil
 	character.Wiznet = false
 	character.Practices = 0
+	character.Trains = 0
 	character.Position = PositionStanding
 	character.output = make([]byte, 65536)
 	character.outputCursor = 0

@@ -60,6 +60,15 @@ type Proficiency struct {
 }
 
 var SkillIntentColourTable map[string]string
+var trainableStats []int = []int{
+	STAT_STRENGTH,
+	STAT_DEXTERITY,
+	STAT_INTELLIGENCE,
+	STAT_WISDOM,
+	STAT_CONSTITUTION,
+	STAT_CHARISMA,
+	STAT_LUCK,
+}
 
 func init() {
 	SkillIntentColourTable = make(map[string]string)
@@ -177,6 +186,155 @@ func do_skills(ch *Character, arguments string) {
 	}
 
 	ch.Send(output.String())
+}
+
+func do_train(ch *Character, arguments string) {
+	firstArgument, _ := OneArgument(arguments)
+
+	if ch.Flags&CHAR_IS_PLAYER == 0 {
+		return
+	}
+
+	if !characterHasTrainer(ch, CHAR_TRAIN) {
+		ch.Send("You can't do that here.\r\n")
+		return
+	}
+
+	if firstArgument == "" {
+		ch.Send(fmt.Sprintf("You have %d training sessions.\r\n%s", ch.Trains, trainOptions(ch)))
+		return
+	}
+
+	switch firstArgument {
+	case "hp", "health":
+		trainResource(ch, "health")
+		return
+	case "mana":
+		trainResource(ch, "mana")
+		return
+	case "move", "stamina":
+		trainResource(ch, "stamina")
+		return
+	}
+
+	stat := trainStatByName(firstArgument)
+	if stat == STAT_NONE || stat >= len(ch.Stats) {
+		ch.Send(trainOptions(ch))
+		return
+	}
+
+	statName := StatName(stat)
+	if ch.Stats[stat] >= trainStatMaximum(ch, stat) {
+		ch.Send(fmt.Sprintf("Your %s is already at maximum.\r\n", statName))
+		return
+	}
+
+	if ch.Trains < 1 {
+		ch.Send("You don't have enough training sessions.\r\n")
+		return
+	}
+
+	ch.Trains--
+	ch.Stats[stat]++
+	ch.Send(fmt.Sprintf("{WYour %s increases!{x\r\n", statName))
+	for rch := range ch.Room.Characters.All() {
+		if rch != ch {
+			rch.Send(fmt.Sprintf("\r\n{W%s{W's %s increases!{x\r\n", ch.GetShortDescriptionUpper(rch), statName))
+		}
+	}
+}
+
+func characterHasTrainer(ch *Character, flag int) bool {
+	if ch == nil || ch.Room == nil || ch.Room.Characters == nil {
+		return false
+	}
+
+	for rch := range ch.Room.Characters.All() {
+		if rch != ch && rch.Flags&CHAR_IS_PLAYER == 0 && rch.Flags&flag != 0 {
+			return true
+		}
+	}
+
+	return false
+}
+
+func trainOptions(ch *Character) string {
+	var output strings.Builder
+
+	output.WriteString("You can train:")
+	for _, stat := range trainableStats {
+		if stat >= len(ch.Stats) || ch.Stats[stat] >= trainStatMaximum(ch, stat) {
+			continue
+		}
+
+		output.WriteString(fmt.Sprintf(" %s", StatName(stat)))
+	}
+
+	output.WriteString(" health mana stamina.\r\n")
+	return output.String()
+}
+
+func trainStatByName(name string) int {
+	switch name {
+	case "str", "strength":
+		return STAT_STRENGTH
+	case "dex", "dexterity":
+		return STAT_DEXTERITY
+	case "int", "intelligence":
+		return STAT_INTELLIGENCE
+	case "wis", "wisdom":
+		return STAT_WISDOM
+	case "con", "constitution":
+		return STAT_CONSTITUTION
+	case "cha", "charisma":
+		return STAT_CHARISMA
+	case "lck", "luck":
+		return STAT_LUCK
+	default:
+		return STAT_NONE
+	}
+}
+
+func trainStatMaximum(ch *Character, stat int) int {
+	maximum := 20
+
+	if ch.Job != nil && ch.Job.PrimaryAttribute == stat {
+		maximum += 2
+	}
+
+	if ch.Race != nil && ch.Race.PrimaryAttribute == stat {
+		maximum += 2
+	}
+
+	return maximum
+}
+
+func trainResource(ch *Character, resource string) {
+	if ch.Trains < 1 {
+		ch.Send("You don't have enough training sessions.\r\n")
+		return
+	}
+
+	ch.Trains--
+
+	switch resource {
+	case "health":
+		ch.MaxHealth += 10
+		ch.Health += 10
+	case "mana":
+		ch.MaxMana += 10
+		ch.Mana += 10
+	case "stamina":
+		ch.MaxStamina += 10
+		ch.Stamina += 10
+	}
+
+	ch.Send(fmt.Sprintf("{WYour %s increases!{x\r\n", resource))
+	for rch := range ch.Room.Characters.All() {
+		if rch != ch {
+			rch.Send(fmt.Sprintf("\r\n{W%s{W's %s increases!{x\r\n", ch.GetShortDescriptionUpper(rch), resource))
+		}
+	}
 }
 
 func do_practice(ch *Character, arguments string) {

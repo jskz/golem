@@ -118,6 +118,7 @@ func init() {
 	/* skills.go */
 	CommandTable["practice"] = Command{Name: "practice", CmdFunc: do_practice}
 	CommandTable["skills"] = Command{Name: "skills", CmdFunc: do_skills}
+	CommandTable["train"] = Command{Name: "train", CmdFunc: do_train}
 
 	/* Aliases */
 	CommandTable["eq"] = Command{Name: "equipment", CmdFunc: do_equipment, Hidden: true}
@@ -148,7 +149,7 @@ func init() {
 		"follow", "open", "close",
 		"wear", "remove", "give", "take", "drop", "put", "use", "fill",
 		"flee", "kill", "cast",
-		"buy", "practice",
+		"buy", "practice", "train",
 		"n", "e", "s", "w", "ne", "se", "sw", "nw", "u", "d",
 		"k", "get",
 	)

@@ -154,6 +154,7 @@ func (game *Game) nanny(client *Client, message string) {
 		client.ConnectionState = ConnectionStateConfirmName
 
 		client.Character.Practices = 100
+		client.Character.Trains = 3
 
 		for index := range client.Character.Stats {
 			client.Character.Stats[index] = 10
