@@ -18,6 +18,8 @@ type AwayFromKeyboard struct {
 	message   string
 }
 
+const tellReplayBufferSize = 20
+
 func do_afk(ch *Character, arguments string) {
 	var reason string = "currently away"
 
@@ -26,7 +28,7 @@ func do_afk(ch *Character, arguments string) {
 	}
 
 	if ch.Afk != nil {
-		ch.Send("{GYou have returned from AFK.{x\r\n")
+		ch.Send("{GYou have returned from AFK. Type 'replay' to see tells.{x\r\n")
 		ch.Afk = nil
 		return
 	}
@@ -60,6 +62,97 @@ func do_say(ch *Character, arguments string) {
 			}
 		}
 	}
+}
+
+func do_tell(ch *Character, arguments string) {
+	arg, message := OneArgument(arguments)
+
+	if arg == "" || message == "" {
+		ch.Send("{RTell whom what?{x\r\n")
+		return
+	}
+
+	if ch.Game == nil {
+		ch.Send("They aren't here.\r\n")
+		return
+	}
+
+	victim := ch.Game.FindCharacterInWorld(arg)
+	if victim == nil {
+		ch.Send("They aren't here.\r\n")
+		return
+	}
+
+	if victim.Flags&CHAR_IS_PLAYER == 0 && (ch.Room == nil || victim.Room != ch.Room) {
+		ch.Send("They aren't here.\r\n")
+		return
+	}
+
+	sendTell(ch, victim, message)
+}
+
+func do_reply(ch *Character, arguments string) {
+	message := strings.TrimSpace(arguments)
+	if message == "" {
+		ch.Send("{RReply what?{x\r\n")
+		return
+	}
+
+	victim := ch.lastTell
+	if victim == nil || ch.Game == nil || ch.Game.Characters == nil || !ch.Game.Characters.Contains(victim) {
+		ch.Send("They aren't here.\r\n")
+		return
+	}
+
+	if victim.Flags&CHAR_IS_PLAYER == 0 && (ch.Room == nil || victim.Room != ch.Room) {
+		ch.Send("They aren't here.\r\n")
+		return
+	}
+
+	sendTell(ch, victim, message)
+}
+
+func sendTell(ch *Character, victim *Character, message string) {
+	victim.lastTell = ch
+
+	if victim.Flags&CHAR_IS_PLAYER != 0 && victim.Client == nil {
+		ch.Send(fmt.Sprintf("{R%s has lost their connection, try again later.{x\r\n", victim.GetShortDescriptionUpper(ch)))
+		victim.addTellReplay(formatTellToVictim(ch, victim, message))
+		return
+	}
+
+	if victim.Afk != nil {
+		ch.Send(fmt.Sprintf("{R%s is AFK, but your tell will go through when they return.{x\r\n", victim.GetShortDescriptionUpper(ch)))
+		victim.addTellReplay(formatTellToVictim(ch, victim, message))
+		return
+	}
+
+	ch.Send(fmt.Sprintf("{RYou tell %s '{R%s{R'{x\r\n", victim.GetShortDescription(ch), message))
+	victim.Send("\r\n" + formatTellToVictim(ch, victim, message))
+}
+
+func formatTellToVictim(ch *Character, victim *Character, message string) string {
+	return fmt.Sprintf("{R%s tells you '{R%s{R'{x\r\n", ch.GetShortDescriptionUpper(victim), message)
+}
+
+func (ch *Character) addTellReplay(message string) {
+	ch.tellReplay = append(ch.tellReplay, message)
+	if len(ch.tellReplay) > tellReplayBufferSize {
+		ch.tellReplay = ch.tellReplay[len(ch.tellReplay)-tellReplayBufferSize:]
+	}
+}
+
+func do_replay(ch *Character, arguments string) {
+	if len(ch.tellReplay) == 0 {
+		ch.Send("You have no tells to replay.\r\n")
+		return
+	}
+
+	for _, message := range ch.tellReplay {
+		ch.Send(message)
+	}
+
+	ch.tellReplay = nil
 }
 
 func do_ooc(ch *Character, arguments string) {

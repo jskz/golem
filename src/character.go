@@ -243,6 +243,9 @@ type Character struct {
 	Flags int               `json:"flags"`
 	Afk   *AwayFromKeyboard `json:"afk"`
 
+	lastTell   *Character
+	tellReplay []string
+
 	Health     int `json:"health"`
 	MaxHealth  int `json:"maxHealth"`
 	Mana       int `json:"mana"`

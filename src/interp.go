@@ -36,8 +36,11 @@ func init() {
 	CommandTable["afk"] = Command{Name: "afk", CmdFunc: do_afk}
 	CommandTable["group"] = Command{Name: "group", CmdFunc: do_group}
 	CommandTable["ooc"] = Command{Name: "ooc", CmdFunc: do_ooc}
+	CommandTable["reply"] = Command{Name: "reply", CmdFunc: do_reply}
+	CommandTable["replay"] = Command{Name: "replay", CmdFunc: do_replay}
 	CommandTable["say"] = Command{Name: "say", CmdFunc: do_say}
 	CommandTable["save"] = Command{Name: "save", CmdFunc: do_save}
+	CommandTable["tell"] = Command{Name: "tell", CmdFunc: do_tell}
 
 	/* act_social.go */
 	CommandTable["socials"] = Command{Name: "socials", CmdFunc: do_socials}
