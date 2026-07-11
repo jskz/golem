@@ -232,15 +232,76 @@ func do_scroll(ch *Character, arguments string) {
 	ch.Send(fmt.Sprintf("Paging set to %d lines.\r\n", lines))
 }
 
-// TODO: do_scan
 func do_scan(ch *Character, arguments string) {
 	if ch.Room == nil {
 		ch.Send("{DYou can't do that here.{x\r\n")
 		return
 	}
 
-	// TODO: implement a path for 'scan' if in a traditional area: show some depth
-	// of adjacent characters in nearby rooms, text hint as to the # of rooms away
+	if ch.Room.Flags&ROOM_PLANAR == 0 {
+		var directions []uint
+		args := strings.Fields(arguments)
+
+		if len(args) == 0 {
+			for direction := uint(0); direction < DirectionMax; direction++ {
+				directions = append(directions, direction)
+			}
+
+			ch.Send("{CYou squint intently and scan the area in all directions:{x\r\n")
+		} else {
+			direction, ok := DirectionFromString(args[0])
+			if !ok {
+				ch.Send("Which way do you want to scan?\r\n")
+				return
+			}
+
+			directions = append(directions, direction)
+			ch.Send(fmt.Sprintf("{CYou squint intently and scan %s:{x\r\n", ExitName[direction]))
+		}
+
+		var output strings.Builder
+		for _, direction := range directions {
+			room := ch.Room
+
+			for distance := 1; distance <= 3; distance++ {
+				exit := room.Exit[direction]
+				if exit == nil || exit.To == nil || exit.Flags&EXIT_CLOSED != 0 || !exit.Visible(ch) {
+					break
+				}
+
+				room = exit.To
+				if !room.Visible(ch) {
+					break
+				}
+
+				if room.Characters == nil {
+					continue
+				}
+
+				for rch := range room.Characters.All() {
+					if rch.IsEqual(ch) || !rch.Visible(ch) {
+						continue
+					}
+
+					distancePlural := "s"
+					if distance == 1 {
+						distancePlural = ""
+					}
+
+					output.WriteString(fmt.Sprintf(
+						"%s is %d room%s away to the %s.\r\n",
+						rch.GetShortDescriptionUpper(ch),
+						distance,
+						distancePlural,
+						ExitName[direction],
+					))
+				}
+			}
+		}
+
+		ch.Send(output.String())
+		return
+	}
 
 	// TODO: implement a path for 'scan' if in a room flagged ROOM_PLANAR: query the atlas
 	// for characters within the some range, determine the angle between ch's position
