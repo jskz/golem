@@ -221,6 +221,7 @@ type Character struct {
 	Id int `json:"id"`
 
 	Name             string `json:"name"`
+	Title            string `json:"title"`
 	ShortDescription string `json:"shortDescription"`
 	LongDescription  string `json:"longDescription"`
 	Description      string `json:"description"`
@@ -625,10 +626,10 @@ func (ch *Character) Finalize() error {
 
 	result, err := ch.Game.db.Exec(`
 		INSERT INTO
-			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, trains, health, max_health, mana, max_mana, stamina, max_stamina, condition_drunk, condition_full, condition_thirst, condition_hunger, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck, scroll)
+			player_characters(username, password_hash, wizard, room_id, race_id, job_id, level, gold, experience, practices, trains, health, max_health, mana, max_mana, stamina, max_stamina, condition_drunk, condition_full, condition_thirst, condition_hunger, stat_str, stat_dex, stat_int, stat_wis, stat_con, stat_cha, stat_lck, scroll, description, title)
 		VALUES
-			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Trains, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Conditions[ConditionDrunk], ch.Conditions[ConditionFull], ch.Conditions[ConditionThirst], ch.Conditions[ConditionHunger], ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK], ch.Scroll)
+			(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	`, ch.Name, ch.temporaryHash, 0, RoomLimbo, ch.Race.Id, ch.Job.Id, ch.Level, ch.Gold, ch.Experience, ch.Practices, ch.Trains, ch.Health, ch.MaxHealth, ch.Mana, ch.MaxMana, ch.Stamina, ch.MaxStamina, ch.Conditions[ConditionDrunk], ch.Conditions[ConditionFull], ch.Conditions[ConditionThirst], ch.Conditions[ConditionHunger], ch.Stats[STAT_STRENGTH], ch.Stats[STAT_DEXTERITY], ch.Stats[STAT_INTELLIGENCE], ch.Stats[STAT_WISDOM], ch.Stats[STAT_CONSTITUTION], ch.Stats[STAT_CHARISMA], ch.Stats[STAT_LUCK], ch.Scroll, ch.Description, ch.Title)
 	ch.temporaryHash = ""
 	if err != nil {
 		log.Printf("Failed to finalize new character: %v.\r\n", err)
@@ -909,6 +910,8 @@ func (ch *Character) Save() bool {
 			stat_cha = ?,
 			stat_lck = ?,
 			scroll = ?,
+			description = ?,
+			title = ?,
 			updated_at = CURRENT_TIMESTAMP
 		WHERE
 			id = ?
@@ -944,6 +947,8 @@ func (ch *Character) Save() bool {
 		ch.Stats[STAT_CHARISMA],
 		ch.Stats[STAT_LUCK],
 		ch.Scroll,
+		ch.Description,
+		ch.Title,
 		ch.Id,
 	)
 	if err != nil {
@@ -1580,7 +1585,9 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 			stat_con,
 			stat_cha,
 			stat_lck,
-			scroll
+			scroll,
+			description,
+			title
 		FROM
 			player_characters
 		WHERE
@@ -1630,6 +1637,8 @@ func (game *Game) FindPlayerByName(username string) (*Character, *Room, error) {
 		&ch.Stats[STAT_CHARISMA],
 		&ch.Stats[STAT_LUCK],
 		&ch.Scroll,
+		&ch.Description,
+		&ch.Title,
 	)
 
 	if err != nil {
@@ -2004,7 +2013,7 @@ func (ch *Character) getLongDescription(viewer *Character) string {
 	}
 
 	if ch.Flags&CHAR_IS_PLAYER != 0 {
-		return fmt.Sprintf("%s is here.", ch.Name)
+		return fmt.Sprintf("%s%s is here.", ch.Name, ch.Title)
 	}
 
 	return ch.LongDescription

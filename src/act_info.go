@@ -38,7 +38,7 @@ func (ch *Character) getHealthFeedback(viewer *Character) string {
 }
 
 func (ch *Character) examineCharacter(other *Character) {
-	if other.Flags&CHAR_IS_PLAYER == 0 {
+	if other.Description != "" {
 		ch.Send(fmt.Sprintf("{G%s{x\r\n", other.Description))
 	}
 
@@ -86,6 +86,72 @@ func (ch *Character) examineCharacter(other *Character) {
 			return
 		}
 	}
+}
+
+func do_description(ch *Character, arguments string) {
+	if arguments == "" {
+		ch.Send("Your description is:\r\n")
+		if ch.Description == "" {
+			ch.Send("(None).\r\n")
+		} else {
+			ch.Send(ch.Description)
+		}
+		return
+	}
+
+	if strings.HasPrefix(arguments, "-") {
+		if ch.Description == "" {
+			ch.Send("No lines left to remove.\r\n")
+			return
+		}
+
+		lines := strings.Split(strings.TrimSuffix(ch.Description, "\r\n"), "\r\n")
+		ch.Description = strings.Join(lines[:len(lines)-1], "\r\n")
+		if ch.Description != "" {
+			ch.Description += "\r\n"
+		}
+	} else {
+		description := ch.Description
+		line := arguments
+		if strings.HasPrefix(line, "+") {
+			line = strings.TrimSpace(strings.TrimPrefix(line, "+"))
+		} else {
+			description = ""
+		}
+
+		if len(description)+len(line)+2 > 1024 {
+			ch.Send("Description too long.\r\n")
+			return
+		}
+
+		ch.Description = description + line + "\r\n"
+	}
+
+	ch.Send("Your description is:\r\n")
+	if ch.Description == "" {
+		ch.Send("(None).\r\n")
+	} else {
+		ch.Send(ch.Description)
+	}
+}
+
+func do_title(ch *Character, arguments string) {
+	if arguments == "" {
+		ch.Send("Change your title to what?\r\n")
+		return
+	}
+
+	title := []rune(arguments)
+	if len(title) > 45 {
+		title = title[:45]
+	}
+
+	ch.Title = string(title)
+	if !strings.ContainsRune(".,!?", title[0]) {
+		ch.Title = " " + ch.Title
+	}
+
+	ch.Send("Ok.\r\n")
 }
 
 /* List all commands available to the player in rows of 7 items. */
@@ -391,7 +457,7 @@ func do_who(ch *Character, arguments string) {
 			buf.WriteString(fmt.Sprintf("[%-15s][%-7s] %s %s(%s) %s\r\n",
 				jobDisplay,
 				locationString,
-				character.Name,
+				character.Name+character.Title,
 				flagsString.String(),
 				character.Race.DisplayName,
 				extrasString.String()))
@@ -400,7 +466,7 @@ func do_who(ch *Character, arguments string) {
 				character.Level,
 				jobDisplay,
 				locationString,
-				character.Name,
+				character.Name+character.Title,
 				flagsString.String(),
 				character.Race.DisplayName,
 				extrasString.String()))

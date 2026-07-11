@@ -47,6 +47,7 @@ func init() {
 
 	/* act_info.go */
 	CommandTable["affect"] = Command{Name: "affect", CmdFunc: do_affect}
+	CommandTable["description"] = Command{Name: "description", CmdFunc: do_description}
 	CommandTable["help"] = Command{Name: "help", CmdFunc: do_help}
 	CommandTable["look"] = Command{Name: "look", CmdFunc: do_look}
 	CommandTable["quit"] = Command{Name: "quit", CmdFunc: do_quit}
@@ -55,6 +56,7 @@ func init() {
 	CommandTable["scroll"] = Command{Name: "scroll", CmdFunc: do_scroll}
 	CommandTable["who"] = Command{Name: "who", CmdFunc: do_who}
 	CommandTable["time"] = Command{Name: "time", CmdFunc: do_time}
+	CommandTable["title"] = Command{Name: "title", CmdFunc: do_title}
 
 	/* act_move.go */
 	CommandTable["north"] = Command{Name: "north", CmdFunc: do_north}
